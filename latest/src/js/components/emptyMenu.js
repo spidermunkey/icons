@@ -1,0 +1,1 @@
+export const emptyMenu = () => `<div>No items here</div>`

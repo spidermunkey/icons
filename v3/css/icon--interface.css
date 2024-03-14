@@ -1,0 +1,813 @@
+*, *::after, *::before {
+  box-sizing: border-box;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+.placeholder {
+  position: relative;
+  border: 1px solid rgba(20, 20, 20, 0.05);
+  padding: 10px 20px;
+  margin: 10px;
+  border-radius: 10px;
+  max-width: 300px;
+}
+
+.interface.passive .interface--preview,
+.interface.passive .interface--description,
+.interface.passive .interface--tab-bar {
+  pointer-events: none;
+  opacity: 0;
+}
+.interface.passive .interface--window-pane {
+  transform: translateY(-300px);
+}
+
+.interface--preview {
+  position: relative;
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+.interface--preview .display {
+  background: inherit;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.interface--preview .display svg {
+  position: relative;
+  height: 102px;
+  width: 102px;
+  z-index: 4;
+}
+.interface--preview .next,
+.interface--preview .prev {
+  position: absolute;
+  height: 100%;
+  /* min-width: 40px; */
+  top: 0;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.interface--preview .next svg,
+.interface--preview .prev svg {
+  height: 34px;
+  width: 34px;
+  stroke: currentColor;
+}
+.interface--preview .next {
+  right: 10px;
+}
+.interface--preview .prev {
+  left: 10px;
+}
+
+.interface--description {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 16px 20px;
+}
+.interface--description .column {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.interface--description .column .name {
+  color: rgba(20, 20, 20, 0.78);
+  font-size: 24px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.interface--description .column .category {
+  color: rgba(50, 50, 50, 0.87);
+  margin-top: 4px;
+  font-size: 16px;
+}
+.interface--description .quick-toggles {
+  position: absolute;
+  right: 20px;
+  padding-bottom: 2px;
+  display: flex;
+}
+.interface--description .quick-toggles .btn {
+  width: fit-content;
+  opacity: 0.67;
+  margin-right: 8px;
+  cursor: pointer;
+}
+.interface--description .quick-toggles .btn:last-of-type {
+  margin-right: 0;
+}
+.interface--description .quick-toggles .btn.fix svg {
+  fill: #000;
+}
+.interface--description .quick-toggles svg {
+  height: 16px;
+  width: 16px;
+}
+
+.interface--tab-bar {
+  position: relative;
+  font-size: 14px;
+  letter-spacing: 0.075em;
+  margin: 4px 0 8px 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 20px;
+  padding-bottom: 14px;
+  border-top: 1px solid rgba(20, 20, 20, 0.05);
+  color: rgba(20, 20, 20, 0.543);
+}
+.interface--tab-bar span {
+  position: relative;
+  background: white;
+  cursor: pointer;
+  z-index: 1;
+}
+.interface--tab-bar span::after {
+  content: "";
+  background: inherit;
+  position: absolute;
+  z-index: -1;
+  bottom: 0;
+  left: 50%;
+  height: 5px;
+  width: 5px;
+  border-radius: 100%;
+  opacity: 0;
+  background-color: rgba(0, 0, 0, 0.843);
+  transform: translateY(0);
+  transition: 200ms ease-in-out;
+}
+.interface--tab-bar span.active::after {
+  opacity: 0.7;
+  transform: translateY(8px);
+}
+.interface--tab-bar span:hover::after {
+  transform: translateY(12px);
+}
+.interface--window-pane {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  margin-bottom: 70px;
+  overflow: hidden;
+  transition: all 350ms ease;
+}
+.interface--window-pane .bench--wrapper {
+  position: absolute;
+  left: 5px;
+  bottom: 72px;
+  display: flex;
+  flex-direction: column;
+  margin: auto;
+  height: 200px;
+  width: 350px;
+  border: 1px solid rgba(20, 20, 20, 0.05);
+  border-radius: 10px;
+  padding: 10px;
+  background-color: white;
+  box-shadow: 0px 2px 4px 1px rgba(126, 126, 126, 0.139);
+  z-index: 100;
+  box-shadow: 0px 2px 4px 1px rgba(126, 126, 126, 0.139);
+  transition: transform 200ms ease, opacity 150ms ease-in-out;
+  transform: translateY(100px);
+  pointer-events: none;
+  opacity: 0;
+  overflow: scroll;
+}
+.interface--window-pane .bench--wrapper .fab--vert {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  height: 100%;
+  min-width: 40px;
+  padding: 10px 20px;
+  right: 0;
+  top: 0;
+  z-index: 10;
+}
+.interface--window-pane .bench--wrapper .fab--vert .btn {
+  margin: 8px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.interface--window-pane .bench--wrapper .fab--vert .btn.btn-alternate {
+  transform: rotate(45deg);
+  transition: 200ms ease-in-out;
+}
+.interface--window-pane .bench--wrapper .fab--vert .btn svg {
+  transition: 150ms ease;
+  stroke: rgba(190, 190, 190, 0.675);
+  height: 16px;
+  width: 16px;
+  fill: rgba(80, 80, 80, 0.97);
+}
+.interface--window-pane .bench--wrapper .fab--vert .btn.btn-export svg {
+  fill: rgba(80, 80, 80, 0.67);
+}
+.interface--window-pane .bench--wrapper .fab--vert .btn:hover svg {
+  stroke: rgba(80, 80, 80, 0.67);
+}
+.interface--window-pane .bench--wrapper .fab--vert .options {
+  transform: translateX(100px);
+  transition: 150ms ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  overflow: hidden;
+}
+.interface--window-pane .bench--wrapper .fab--vert .options .btn {
+  margin: 10px 0;
+  transition: 200ms cubic-bezier(0.05, 0.1, 0.6, 1.05);
+  transition-delay: 170ms;
+  transform: translateX(100px);
+}
+.interface--window-pane .bench--wrapper .fab--vert .options .btn.stg-1 {
+  transition-delay: 175ms;
+  transform: translateX(200px);
+}
+.interface--window-pane .bench--wrapper .fab--vert .options .btn.stg-2 {
+  transition-delay: 185ms;
+  transform: translateX(300px);
+}
+.interface--window-pane .bench--wrapper .fab--vert .options .btn.stg-3 {
+  transition-delay: 200ms;
+  transform: translateX(400px);
+}
+.interface--window-pane .bench--wrapper .fab--vert:hover .options, .interface--window-pane .bench--wrapper .fab--vert.active .options {
+  transform: translateX(0);
+}
+.interface--window-pane .bench--wrapper .fab--vert:hover .options .js-btn.btn, .interface--window-pane .bench--wrapper .fab--vert.active .options .js-btn.btn {
+  transform: translateX(0);
+}
+.interface--window-pane .bench--wrapper .fab--vert:hover .btn-alternate {
+  transform: rotate(0);
+}
+.interface--window-pane .bench--wrapper .bench--header {
+  padding: 10px 20px;
+  display: flex;
+  width: 100%;
+}
+.interface--window-pane .bench--wrapper .bench--component-wrapper {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 10px;
+  overflow: scroll;
+}
+.interface--window-pane .bench--wrapper .bench {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+}
+.interface--window-pane .bench--wrapper .bench .comp--bench {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid rgba(20, 20, 20, 0.05);
+  border-radius: 8px;
+  margin: 8px;
+}
+.interface--window-pane .bench--wrapper .bench .comp--bench.selected {
+  border: 1px solid rgba(80, 80, 80, 0.47);
+}
+.interface--window-pane .bench--wrapper.active {
+  pointer-events: all;
+  transform: translateY(0);
+  opacity: 1;
+}
+.interface--window-pane .bench--wrapper:hover {
+  transform: translateY(2px);
+}
+
+.bench .comp--bench.selected {
+  border: 1px solid green;
+}
+
+.interface--window-pane .js-tabber--window-interface.tab-window {
+  display: flex;
+  padding: 0 20px;
+  visibility: hidden;
+  pointer-events: none;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  overflow: scroll;
+}
+
+.interface--window-pane .js-tabber--window-interface.tab-window.active {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: all;
+}
+
+.interface--actions {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 20px;
+}
+.interface--actions .row {
+  display: flex;
+  width: 100%;
+}
+.interface--actions .row.row-1 {
+  justify-content: space-between;
+  margin: 8px 0;
+}
+.interface--actions .row.row-2 {
+  margin: 4px 0;
+}
+.interface--actions .row .btn {
+  display: flex;
+  flex-direction: column;
+  padding: 10px;
+  min-width: 75px;
+  margin-right: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 1px 1px rgba(52, 52, 52, 0.09), 0 0 6px 1px rgba(26, 26, 26, 0.013);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+.interface--actions .row .btn:last-of-type {
+  margin-right: 0;
+}
+.interface--actions .row .btn svg {
+  fill: rgba(80, 80, 80, 0.67);
+  stroke: rgba(80, 80, 80, 0.67);
+  height: 20px;
+  width: 20px;
+}
+.interface--actions .row .btn .label {
+  margin-top: 2px;
+  color: rgba(80, 80, 80, 0.67);
+  opacity: 0.8;
+  font-size: 14px;
+}
+.interface--actions .row .btn.toCollection {
+  padding: 4px 1.5rem;
+  margin-bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 54px;
+  width: 100%;
+  font-size: 18px;
+  letter-spacing: 0.05em;
+  color: rgba(80, 80, 80, 0.67);
+}
+.interface--actions .row .btn.toCollection svg {
+  height: 16px;
+  width: 16px;
+  margin-right: 10px;
+}
+
+.interface--inputs {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.position--inputs .input-field {
+  position: relative;
+  flex: 1;
+  color: rgba(80, 80, 80, 0.67);
+  border: 1px solid rgba(20, 20, 20, 0.05);
+  border-radius: 8px;
+  padding: 8px;
+}
+.position--inputs .input-field:last-of-type {
+  margin-right: 0;
+}
+.position--inputs .input-field .label {
+  user-select: none;
+}
+.position--inputs .inp {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  outline: 0;
+  border: 0;
+  padding-left: 8px;
+  color: rgba(51, 51, 51, 0.687);
+  letter-spacing: 0.075em;
+  border-radius: 4px;
+}
+.position--inputs .inp::placeholder {
+  color: rgba(80, 80, 80, 0.67);
+}
+.position--inputs .input-field .label:hover {
+  cursor: ew-resize;
+}
+.position--inputs .input-field.v .label:hover {
+  cursor: pointer;
+}
+.position--inputs .input-field.x .inp:hover,
+.position--inputs .input-field .inp:focus {
+  background-color: rgba(204, 204, 204, 0.433);
+}
+
+.transform--inputs .input-field {
+  font-size: 14px;
+}
+.transform--inputs .input-group {
+  display: flex;
+  padding: 4px 0;
+  flex-wrap: wrap;
+  justify-content: flex-start;
+}
+.transform--inputs .input-group.sliding-group {
+  width: 100%;
+}
+.transform--inputs .input-group.sliding-group .input-field {
+  margin-right: 0;
+  max-width: none;
+  width: 100%;
+  flex-direction: row;
+  justify-content: flex-start;
+}
+.transform--inputs .input-group.sliding-group .slider {
+  flex: 1;
+}
+.transform--inputs .input-group .tab-header {
+  color: rgba(0, 0, 0, 0.6743);
+  width: 100%;
+  margin: 4px 0;
+}
+.transform--inputs .input-group .input-field {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 8px;
+  font-size: 14px;
+  width: fit-content;
+}
+.transform--inputs .input-group .input-field .label {
+  padding: 0.65rem;
+  width: fit-content;
+  margin-bottom: 4px;
+}
+.transform--inputs .input-group .input-field svg {
+  height: 20px;
+  width: 20px;
+  stroke: rgba(80, 80, 80, 0.67);
+}
+
+.input-group {
+  display: flex;
+  flex-wrap: nowrap;
+}
+
+.input-field {
+  display: flex;
+  margin-right: 20px;
+  margin-bottom: 10px;
+  max-width: 50%;
+}
+.input-field .label, .input-field .input {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+.input-field .label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  font-size: 20px;
+  width: 20px;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  margin-right: 4px;
+  box-shadow: 0 0 2px 1px rgba(20, 20, 20, 0.0727);
+}
+.input-field .input {
+  flex: 1;
+  font-size: 14px;
+  color: rgba(80, 80, 90, 0.67);
+}
+.input-field.v {
+  margin-bottom: 10px;
+  max-width: none;
+  width: 100%;
+}
+
+.interface--menu {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  z-index: 100;
+  border-bottom-right-radius: inherit;
+  border-bottom-left-radius: inherit;
+  width: 100%;
+  background: transparent;
+  border-top: 1px solid rgba(20, 20, 20, 0.05);
+}
+.interface--menu.active {
+  border-top: none;
+}
+.interface--menu.active .interface--menu-buttons {
+  transform: translateY(2000px);
+}
+.interface--menu.active .interface--menu-panel {
+  transform: translateY(-410px);
+}
+.interface--menu .interface--menu-buttons {
+  position: relative;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  height: 64px;
+  width: 100%;
+}
+.interface--menu .interface--menu-buttons .btn {
+  display: flex;
+  flex-direction: column;
+  margin-right: 10px;
+  border-radius: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+}
+.interface--menu .interface--menu-buttons .btn:last-of-type {
+  margin-right: 0;
+}
+.interface--menu .interface--menu-buttons .btn svg {
+  height: 20px;
+  width: 20px;
+}
+.interface--menu .interface--menu-buttons .btn .label {
+  margin-top: 2px;
+  color: rgba(80, 80, 80, 0.67);
+  opacity: 0.8;
+  font-size: 14px;
+}
+.interface--menu .interface--menu-buttons .btn.toRefs {
+  fill: rgba(80, 80, 80, 0.67);
+}
+.interface--menu .interface--menu-buttons .btn.toBench {
+  fill: rgba(80, 80, 80, 0.67);
+}
+.interface--menu .interface--menu-buttons .btn.toCollection {
+  fill: rgba(80, 80, 80, 0.67);
+  stroke: white;
+}
+.interface--menu .interface--menu-panel {
+  transition: all 400ms ease-in-out;
+  position: absolute;
+  top: 64px;
+  height: 370px;
+  border: 1px solid rgba(20, 20, 20, 0.05);
+  width: calc(100% - 20px);
+  margin: 10px;
+  border-radius: 10px;
+  box-shadow: 0 0 1px 1px rgba(52, 52, 52, 0.09), 0 0 6px 1px rgba(26, 26, 26, 0.013);
+}
+
+.test-interface {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  top: 10px;
+  right: 65px;
+  height: calc(100% - 20px);
+  border: 1px solid rgba(20, 20, 20, 0.05);
+  min-width: 300px;
+  border-radius: 10px;
+}
+.test-interface .interface--inputs {
+  overflow-y: scroll;
+  flex: 1;
+  margin-bottom: 64px;
+}
+.test-interface .interface--inputs > div {
+  padding: 10px 20px;
+  border: 0;
+  margin: 0;
+}
+.test-interface .interface--inputs .transform--inputs {
+  display: none;
+}
+.interface {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  padding-top: 20px;
+  border: 1px solid rgba(20, 20, 20, 0.05);
+  border-radius: 10px;
+  min-width: 365px;
+  max-width: 365px;
+  overflow: hidden;
+}
+.interface .interface--inputs {
+  overflow-y: scroll;
+  flex: 1;
+}
+.interface .interface--inputs > div {
+  border: 0;
+  margin: 0;
+}
+
+.slider {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 20px;
+  height: 100%;
+  border-radius: 10px;
+  border: 1px solid rgba(20, 20, 20, 0.05);
+}
+.slider .slider-track {
+  position: relative;
+  border-radius: 32px;
+  height: 16px;
+  width: 100%;
+  background: #f4f4f4;
+  box-shadow: inset -1px 1px 4px 2px rgba(107, 107, 107, 0.1238);
+}
+.slider .slider-track .slider-handle {
+  position: absolute;
+  border-radius: 100%;
+  will-change: transform;
+  transition: ease;
+  top: -4px;
+  left: 0;
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.137), 0px 1px 8px -1px rgba(0, 0, 0, 0.0837);
+  height: 24px;
+  width: 24px;
+  background: #888888;
+}
+
+.tab-window.preview {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.preview-group {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 1;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid rgba(20, 20, 20, 0.05);
+  border-radius: 10px;
+}
+.preview-group .label {
+  margin: 0 0 10px 10px;
+  font-size: 24px;
+  transition: opacity 300ms ease-in-out;
+}
+.preview-group .preview-components {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  position: relative;
+}
+.preview-group .preview-components .pb-component {
+  margin-left: 10px;
+  z-index: 2;
+}
+
+.comp {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo--xs svg {
+  height: 14px;
+  width: 14px;
+}
+.logo--sm svg {
+  height: 18px;
+  width: 18px;
+}
+.logo--md svg {
+  height: 24px;
+  width: 24px;
+}
+.logo--lg svg {
+  height: 40px;
+  width: 40px;
+}
+
+.squared .comp,
+.squared-rounded .comp,
+.round .comp {
+  border: 1px solid rgba(20, 20, 20, 0.05);
+  padding: 4px 6px;
+}
+.squared--xs svg,
+.squared-rounded--xs svg,
+.round--xs svg {
+  height: 16px;
+  width: 16px;
+}
+.squared--sm svg,
+.squared-rounded--sm svg,
+.round--sm svg {
+  height: 24px;
+  width: 24px;
+}
+.squared--md svg,
+.squared-rounded--md svg,
+.round--md svg {
+  height: 34px;
+  width: 34px;
+}
+.squared--lg svg,
+.squared-rounded--lg svg,
+.round--lg svg {
+  height: 40px;
+  width: 40px;
+}
+
+.squared-rounded .comp {
+  border-radius: 8px;
+}
+
+.round .comp {
+  border-radius: 50%;
+}
+
+.round--xs.comp {
+  padding: 8px;
+}
+.round--sm.comp {
+  padding: 10px;
+}
+.round--md.comp {
+  padding: 12px;
+}
+.round--lg.comp {
+  padding: 16px;
+}
+
+.button .comp {
+  border: 1px solid rgba(20, 20, 20, 0.05);
+  border-radius: 8px;
+}
+.button--sm {
+  height: 44px;
+  width: 44px;
+}
+.button--sm svg {
+  height: 24px;
+  width: 24px;
+}
+.button--md {
+  height: 56px;
+  width: 56px;
+}
+.button--md svg {
+  height: 24px;
+  width: 24px;
+}
+.button--lg {
+  height: 64px;
+  width: 64px;
+}
+.button--lg svg {
+  height: 24px;
+  width: 24px;
+}
+
+.nested .comp {
+  border: 1px solid rgba(20, 20, 20, 0.05);
+  width: 64px;
+  height: 40px;
+}
+.nested .comp svg {
+  height: 24px;
+  width: 24px;
+}
+.nested--left {
+  border-radius: 0 40px 40px 0;
+}
+.nested--right {
+  border-radius: 40px 0 0 40px;
+}/*# sourceMappingURL=icon--interface.css.map */
