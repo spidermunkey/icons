@@ -24,11 +24,15 @@
         padding-top: 20px;
         border: 1px solid rgba(20, 20, 20, 0.05);
         border-radius: 10px;
-        min-width: 365px;
+        // min-width: 365px;
+        width: 305px;
         height: 100%;
         // max-width: 365px;
         overflow: hidden;
         font-family: Arial, Helvetica, sans-serif;
+        .preview__tabber {
+            padding: 0px 16px;
+        }
         .row {
             display: flex;
         }
@@ -44,17 +48,19 @@
             padding: 16px 20px;
 
             &--display {
+
                 background: inherit;
                 position: relative;
                 display: flex;
                 justify-content: center;
                 align-items: center;
-
                 &-current,
                 &-current svg {
+                border: 1px dotted transparent;
+
                     position: relative;
-                    height: 102px;
-                    width: 102px;
+                    height: 80px;
+                    width: 80px;
                     z-index: 4;
                 }
             }
@@ -77,8 +83,8 @@
                     left: 10px;
                 }
                 svg {
-                    height: 34px;
-                    width: 34px;
+                    height: 28px;
+                    width: 28px;
                     stroke: currentColor;
                 }
             }
@@ -86,12 +92,11 @@
         // DESCRIPTION
         &__description {
             position: relative;
-            margin-top: 4px;
             display: flex;
             justify-content: space-between;
             align-items: flex-end;
             padding: 16px 20px;
-
+            padding-top: 4px;
             // general styles
             .group {
                 height: 100%;
@@ -104,7 +109,7 @@
                 // name container
                 .title-group__name {
                     color: rgba(20, 20, 20, 0.78);
-                    font-size: 24px;
+                    font-size: 20px;
                     font-weight: 700;
                     white-space: nowrap;
                     padding-bottom: 4px;
@@ -128,15 +133,15 @@
                 &-button {
                     cursor: pointer;
                     opacity: .67;
-                    margin-right: 8px;
+                    margin-right: 10px;
                     &:last-of-type {
                         margin-right: 0;
                     }
 
                     svg {
                         transition: all 200ms ease;
-                        height: 20px;
-                        width: 20px;
+                        height: 18px;
+                        width: 18px;
                     }
                 }
                 & .btn-favit.icon-is-favorite {
@@ -156,7 +161,7 @@
 
             .tab {
                 font-family: Arial, Helvetica, sans-serif;
-                font-size: 16px;
+                font-size: 14px;
                 letter-spacing: 0.075em;
                 margin: 4px 0 8px 0;
                 padding: 16px 20px;

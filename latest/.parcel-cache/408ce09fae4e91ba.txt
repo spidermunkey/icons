@@ -40,7 +40,7 @@
 90C:\Users\justi\dev\projects\icons\latest\node_modules\caniuse-lite\data\features\tls1-1.js133270860200000000 0
 69C:\Users\justi\dev\projects\icons\latest\src\scss\shapes\_modals.scss133277036360000000 0
 85C:\Users\justi\dev\projects\icons\latest\node_modules\which-typed-array\test\index.js133284200480000000 0
-52C:\Users\justi\dev\projects\icons\latest\development133562219148928211 1
+52C:\Users\justi\dev\projects\icons\latest\development133562471666547730 1
 108C:\Users\justi\dev\projects\icons\latest\node_modules\csso\node_modules\css-tree\cjs\syntax\config\lexer.cjs133270860220000000 0
 58C:\Users\justi\dev\projects\icons\latest\package-lock.json133548550768568206 0
 103C:\Users\justi\dev\projects\icons\latest\node_modules\@babel\highlight\node_modules\color-name\index.js133270860220000000 0
@@ -66,7 +66,7 @@
 86C:\Users\justi\dev\projects\icons\latest\node_modules\node-gyp-build-optional-packages133548550743369447 1
 79C:\Users\justi\dev\projects\icons\latest\node_modules\parcel\src\.eslintrc.json133548550743359465 0
 71C:\Users\justi\dev\projects\icons\latest\node_modules\sass\types\logger133548550754240352 1
-74C:\Users\justi\dev\projects\icons\latest\src\scss\components\_sidebar.scss133562219817459360 0
+74C:\Users\justi\dev\projects\icons\latest\src\scss\components\_sidebar.scss133562462242012558 0
 82C:\Users\justi\dev\projects\icons\latest\node_modules\@parcel\resolver-default\src133548549895515189 1
 97C:\Users\justi\dev\projects\icons\latest\node_modules\@babel\types\lib\asserts\generated\index.js133270865980000000 0
 71C:\Users\justi\dev\projects\icons\latest\node_modules\has\test\index.js133270865980000000 0
@@ -256,7 +256,7 @@
 71C:\Users\justi\dev\projects\icons\latest\node_modules\ramda\es\index.js133270865980000000 0
 94C:\Users\justi\dev\projects\icons\latest\node_modules\csso\node_modules\css-tree\dist\data.cjs133270860220000000 0
 78C:\Users\justi\dev\projects\icons\latest\node_modules\ramda\src\intersperse.js133270865980000000 0
-71C:\Users\justi\dev\projects\icons\latest\src\scss\components\_icon.scss133562215666188589 0
+71C:\Users\justi\dev\projects\icons\latest\src\scss\components\_icon.scss133562464530001281 0
 101C:\Users\justi\dev\projects\icons\latest\node_modules\core-js\library\fn\typed\uint8-clamped-array.js133270865980000000 0
 78C:\Users\justi\dev\projects\icons\latest\node_modules\css-tree\lib\syntax\node133548550014718645 1
 85C:\Users\justi\dev\projects\icons\latest\node_modules\pstree.remy\tests\fixtures\out1133270865980000000 0
@@ -270,7 +270,7 @@
 101C:\Users\justi\dev\projects\icons\latest\node_modules\csso\node_modules\css-tree\cjs\parser\index.cjs133270860220000000 0
 78C:\Users\justi\dev\projects\icons\latest\node_modules\util-deprecate\README.md133284200540000000 0
 91C:\Users\justi\dev\projects\icons\latest\node_modules\caniuse-lite\dist\unpacker\feature.js133270860200000000 0
-74C:\Users\justi\dev\projects\icons\latest\src\scss\components\_preview.scss133300291220200000 0
+74C:\Users\justi\dev\projects\icons\latest\src\scss\components\_preview.scss133562470911239513 0
 86C:\Users\justi\dev\projects\icons\latest\node_modules\core-js\library\fn\math\atanh.js133270865980000000 0
 74C:\Users\justi\dev\projects\icons\latest\node_modules\postcss-value-parser133548549975938384 1
 81C:\Users\justi\dev\projects\icons\latest\src\scss\components\modals\_actions.scss133285957420000000 0
@@ -309,7 +309,7 @@
 78C:\Users\justi\dev\projects\icons\latest\node_modules\function-bind\.npmignore133270865980000000 0
 91C:\Users\justi\dev\projects\icons\latest\src\scss\components\modals\_component-preview.scss133281518620000000 0
 71C:\Users\justi\dev\projects\icons\latest\node_modules\ramda\src\pipe.js133270865980000000 0
-82C:\Users\justi\dev\projects\icons\latest\src\scss\components\modals\_position.scss133281523260000000 0
+82C:\Users\justi\dev\projects\icons\latest\src\scss\components\modals\_position.scss133562471716112391 0
 86C:\Users\justi\dev\projects\icons\latest\node_modules\core-js\modules\_redefine-all.js133270865980000000 0
 73C:\Users\justi\dev\projects\icons\latest\node_modules\css-tree\lib\parser133548550015610445 1
 106C:\Users\justi\dev\projects\icons\latest\node_modules\simple-update-notifier\node_modules\semver\functions133548550741067153 1
@@ -562,7 +562,7 @@
 72C:\Users\justi\dev\projects\icons\latest\node_modules\path-parse\LICENSE133270865980000000 0
 74C:\Users\justi\dev\projects\icons\latest\node_modules\msgpackr\index.d.cts133270860200000000 0
 97C:\Users\justi\dev\projects\icons\latest\node_modules\csso\node_modules\css-tree\dist\version.cjs133270860220000000 0
-58C:\Users\justi\dev\projects\icons\latest\public\index.html133561205638384280 0
+58C:\Users\justi\dev\projects\icons\latest\public\index.html133562459612631479 0
 78C:\Users\justi\dev\projects\icons\latest\node_modules\core-js\fn\math\hypot.js133270865980000000 0
 90C:\Users\justi\dev\projects\icons\latest\node_modules\core-js\modules\es7.weak-set.from.js133270865980000000 0
 74C:\Users\justi\dev\projects\icons\latest\node_modules\terser\lib\minify.js133548550744460109 0
@@ -936,7 +936,7 @@
 77C:\Users\justi\dev\projects\icons\latest\node_modules\toidentifier\HISTORY.md133270865980000000 0
 98C:\Users\justi\dev\projects\icons\latest\node_modules\core-js\library\modules\es6.array.species.js133270865980000000 0
 102C:\Users\justi\dev\projects\icons\latest\node_modules\core-js\library\fn\string\virtual\escape-html.js133270865980000000 0
-63C:\Users\justi\dev\projects\icons\latest\development\index.html133562214791482301 0
+63C:\Users\justi\dev\projects\icons\latest\development\index.html133562459629925995 0
 87C:\Users\justi\dev\projects\icons\latest\node_modules\htmlnano\lib\modules\minifySvg.js133270860200000000 0
 68C:\Users\justi\dev\projects\icons\latest\node_modules\node-gyp-build133548550745280524 1
 95C:\Users\justi\dev\projects\icons\latest\node_modules\supports-preserve-symlinks-flag\README.md133270865980000000 0
@@ -5580,7 +5580,7 @@
 87C:\Users\justi\dev\projects\icons\latest\node_modules\has-symbols\test\shams\core-js.js133270865980000000 0
 104C:\Users\justi\dev\projects\icons\latest\node_modules\express\node_modules\body-parser\lib\types\text.js133270865980000000 0
 104C:\Users\justi\dev\projects\icons\latest\node_modules\has-symbols\test\shams\get-own-property-symbols.js133270865980000000 0
-70C:\Users\justi\dev\projects\icons\latest\development\index.ffc03c4e.js133562214790877210 0
+70C:\Users\justi\dev\projects\icons\latest\development\index.ffc03c4e.js133562459629609195 0
 85C:\Users\justi\dev\projects\icons\latest\node_modules\has-symbols\.github\FUNDING.yml133270865980000000 0
 71C:\Users\justi\dev\projects\icons\latest\node_modules\has-flag\index.js133270865980000000 0
 70C:\Users\justi\dev\projects\icons\latest\node_modules\has-flag\license133270865980000000 0
@@ -7073,7 +7073,7 @@
 88C:\Users\justi\dev\projects\icons\latest\node_modules\core-js\modules\_array-includes.js133270865980000000 0
 86C:\Users\justi\dev\projects\icons\latest\node_modules\core-js\modules\_array-reduce.js133270865980000000 0
 99C:\Users\justi\dev\projects\icons\latest\node_modules\core-js\modules\_array-species-constructor.js133270865980000000 0
-70C:\Users\justi\dev\projects\icons\latest\development\index.cfe461c5.js133562214791117160 0
+70C:\Users\justi\dev\projects\icons\latest\development\index.cfe461c5.js133562459630171105 0
 78C:\Users\justi\dev\projects\icons\latest\node_modules\core-js\modules\_bind.js133270865980000000 0
 66C:\Users\justi\dev\projects\icons\latest\node_modules\asynckit\lib133548550079258503 1
 81C:\Users\justi\dev\projects\icons\latest\node_modules\core-js\modules\_classof.js133270865980000000 0
@@ -9837,9 +9837,9 @@
 101C:\Users\justi\dev\projects\icons\latest\node_modules\@babel\runtime-corejs2\core-js\symbol\search.js133270865980000000 0
 108C:\Users\justi\dev\projects\icons\latest\node_modules\@parcel\optimizer-htmlnano\node_modules\css-select\lib133548549882057476 1
 117C:\Users\justi\dev\projects\icons\latest\node_modules\@parcel\optimizer-htmlnano\node_modules\css-select\package.json133270860220000000 0
-71C:\Users\justi\dev\projects\icons\latest\development\index.bb652c76.css133562219148908216 0
+71C:\Users\justi\dev\projects\icons\latest\development\index.bb652c76.css133562471666517867 0
 124C:\Users\justi\dev\projects\icons\latest\node_modules\@parcel\optimizer-htmlnano\node_modules\css-select\lib\attributes.d.ts133270860220000000 0
-75C:\Users\justi\dev\projects\icons\latest\development\index.bb652c76.css.map133562219148928211 0
+75C:\Users\justi\dev\projects\icons\latest\development\index.bb652c76.css.map133562471666537749 0
 128C:\Users\justi\dev\projects\icons\latest\node_modules\@parcel\optimizer-htmlnano\node_modules\css-select\lib\attributes.d.ts.map133270860220000000 0
 122C:\Users\justi\dev\projects\icons\latest\node_modules\@parcel\optimizer-htmlnano\node_modules\css-select\lib\attributes.js133270860220000000 0
 113C:\Users\justi\dev\projects\icons\latest\node_modules\@babel\runtime-corejs2\helpers\esm\interopRequireDefault.js133270865980000000 0
@@ -9873,7 +9873,7 @@
 95C:\Users\justi\dev\projects\icons\latest\node_modules\@parcel\optimizer-css\src\CSSOptimizer.js133270860220000000 0
 95C:\Users\justi\dev\projects\icons\latest\node_modules\@parcel\optimizer-css\lib\CSSOptimizer.js133270860220000000 0
 84C:\Users\justi\dev\projects\icons\latest\node_modules\@parcel\node-resolver-core\src133548549921195082 1
-74C:\Users\justi\dev\projects\icons\latest\development\index.b82e4322.js.map133562214791357178 0
+74C:\Users\justi\dev\projects\icons\latest\development\index.b82e4322.js.map133562459629769145 0
 85C:\Users\justi\dev\projects\icons\latest\node_modules\@parcel\node-resolver-core\test133548549921250236 1
 93C:\Users\justi\dev\projects\icons\latest\node_modules\@parcel\node-resolver-core\test\fixture133548549923278375 1
 93C:\Users\justi\dev\projects\icons\latest\node_modules\@babel\helper-hoist-variables\README.md133270865980000000 0
@@ -11035,7 +11035,7 @@
 63C:\Users\justi\dev\projects\icons\latest\dist\index.da4458d9.js133271734560000000 0
 64C:\Users\justi\dev\projects\icons\latest\dist\index.ea41dce0.css133274423140000000 0
 68C:\Users\justi\dev\projects\icons\latest\dist\index.ea41dce0.css.map133274423140000000 0
-70C:\Users\justi\dev\projects\icons\latest\development\index.b82e4322.js133562214791337187 0
-74C:\Users\justi\dev\projects\icons\latest\development\index.cfe461c5.js.map133562214791147157 0
+70C:\Users\justi\dev\projects\icons\latest\development\index.b82e4322.js133562459629739151 0
+74C:\Users\justi\dev\projects\icons\latest\development\index.cfe461c5.js.map133562459630211144 0
 70C:\Users\justi\dev\projects\icons\latest\development\index.e4996a4b.js133561205226210356 0
-74C:\Users\justi\dev\projects\icons\latest\development\index.ffc03c4e.js.map133562214790907169 0
+74C:\Users\justi\dev\projects\icons\latest\development\index.ffc03c4e.js.map133562459629649137 0

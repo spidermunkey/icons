@@ -8,8 +8,7 @@
 
     flex-direction: column;
     flex:1;
-    scale: .98;
-    margin-left: 64px;
+    margin-left: 72px;
     margin-top: 120px;
 
     &__header {
@@ -60,7 +59,7 @@
         pointer-events: none;
         overflow-y: scroll;
 
-        padding-left: 2em;
+        // padding-left: 2em;
         margin-bottom: 64px;
         padding-bottom: 112px;
 
