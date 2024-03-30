@@ -18,6 +18,16 @@ export class IconNode {
             values: this.values,
             versions: this.versions,
         })
+        // give specific height and width if none;
+        this.element = document.createElement('div');
+        this.element.innerHTML = this.markup;
+        if (!this.element.querySelector('svg').getAttribute('height')) {
+            // console.log('has no height');
+            // console.log('setting default height');
+            this.element.setAttribute('height','24px');
+            this.element.setAttribute('width','24px');
+            this.markup = this.element.innerHTML
+        }
     }
     get props() {
         return this.observer

@@ -559,6 +559,7 @@ function hmrAccept(bundle, id) {
 },{}],"gLLPy":[function(require,module,exports) {
 var _domHelpersJs = require("./js/utils/DOM-helpers.js");
 var _ramda = require("ramda");
+// debugger
 var _storeJs = require("./store.js");
 var _structsJs = require("./js/utils//Structs.js");
 var _previewJs = require("./js/components/preview.js");
@@ -601,7 +602,7 @@ const app = {
         bench: new (0, _structsJs.Bucket)(),
         mode: "click"
     },
-    "updatePreview": ({ event , type , key: key1 , tabName: tabName1  })=>{
+    updatePreview: ({ event , type , key: key1 , tabName: tabName1  })=>{
         let collection;
         let node;
         console.dir("updating preview with", {
@@ -624,7 +625,7 @@ const app = {
             updateFavoriteIcons();
         }
     },
-    "updateContext": ({ event , type , key: key1 , tabName: tabName1  })=>{
+    updateContext: ({ event , type , key: key1 , tabName: tabName1  })=>{
         let collection, node, isFavorite;
         console.dir("updating context with", {
             event,
@@ -645,7 +646,7 @@ const app = {
         app.state.context = node;
         console.log(node, "isFavorite:", isFavorite);
     },
-    "toggleFavorite": async ()=>{
+    toggleFavorite: async ()=>{
         if (!undefined.state.context) return;
         let node = undefined.state.context, isFav = node.isFavorite;
         node.isFavorite = !isFav;
@@ -657,7 +658,7 @@ const app = {
         await app.save("favorites");
         updateFavoriteIcons();
     },
-    "save": async (destination, node = (0, _previewJs.preview).currentIcon)=>{
+    save: async (destination, node = (0, _previewJs.preview).currentIcon)=>{
         console.log("saving to", destination, store.collections[destination]);
         let savingToFavorites = destination === "favorites";
         if (savingToFavorites) node.isFavorite = true;
@@ -679,7 +680,7 @@ const app = {
         }
         return message;
     },
-    "handleClick": (event)=>{
+    handleClick: (event)=>{
         let wrapper = event.target.closest(".svg-wrapper");
         if (!wrapper) return;
         let { name , rebased  } = wrapper.dataset;
@@ -695,7 +696,7 @@ const app = {
             tabName
         });
     },
-    "createCollection": async (name)=>{
+    createCollection: async (name)=>{
         $(".cc-button").innerHTML = `<div class="cc-loader--container"><span>waiting for server</span><div class="cc-loader"></div></div>`;
         await modelReady;
         await menuReady;
@@ -796,11 +797,17 @@ $$(".preview-action__window").map((modal)=>{
 });
 async function createCategoryLinksThenPopulate() {
     // get list of names from db
-    const cNames = await store.getCategoryNames(), sorted = cNames.sort(), categoryMenuComponent = new (0, _menuListItemJs.MenuList)(cNames);
+    console.log("populating categories");
+    const cNames = await store.getCategoryNames();
+    console.log(cNames);
+    const sorted = cNames.sort(), categoryMenuComponent = new (0, _menuListItemJs.MenuList)(cNames);
     categoryMenuComponent.appendTo(categoryMenu);
     categoryMenuComponent.links.forEach((link)=>{
         // Create Dynamic Modal For Newly created links inside menu
-        const panel = _domHelpersJs.divit(), tabName1 = link.dataset.tab, modal = new (0, _domJs.DynamicModal)(panel, {
+        const panel = _domHelpersJs.divit(), tabName1 = link.dataset.tab, endpoint = resolveCategoryEndpoint(tabName1);
+        console.log("creating modal for endpoint", endpoint);
+        console.log(tabName1, link);
+        const modal = new (0, _domJs.DynamicModal)(panel, {
             type: "eager",
             endpoint: resolveCategoryEndpoint(tabName1),
             dataHandler: (0, _panelJs.DashboardPanel)
@@ -1048,7 +1055,7 @@ class SvgModel {
     // Populating Collections with deep copies
     async createCollection(name) {
         console.log("creating collection", name);
-        if (typeof name != "string") {
+        if (typeof name !== "string") {
             console.error("type of collection name must be a string... got:" + typeof name);
             return "name must be a string";
         }
@@ -1148,7 +1155,10 @@ class SvgModel {
         return (0, _apiJsDefault.default).getCollectionNames();
     }
     async init() {
+        console.log("initializing store...");
+        console.log("fetching all icons");
         const { data  } = await (0, _apiJsDefault.default).getCategory("all");
+        console.log("icons incoming", data);
         // setting static properties
         // and building the dataset
         for(let i = 0; i < data.length; i++){
@@ -1208,12 +1218,16 @@ class SvgModel {
             // console.log('here they are', this.duplicates);
             }
         }
+        console.log("fetching collection names");
         const userCollections = await this.getCollectionNames();
+        console.log("collections: ", userCollections);
         for (const name of userCollections){
             this.collectionSet.add(name);
             const collection = new (0, _collectionDefault.default)();
             this.collections[name] = collection;
+            console.log("fetching data for collections");
             const { data  } = await (0, _apiJsDefault.default).getCollection(name);
+            console.log("response: ", data);
             this.addManyToCollection(name, data);
         }
         this.ready = true;
@@ -1481,9 +1495,67 @@ var _axiosDefault = parcelHelpers.interopDefault(_axios);
 var _ramda = require("ramda");
 var _ramdaDefault = parcelHelpers.interopDefault(_ramda);
 const PORT = 1279;
+const endpoint = `http://localhost:${PORT}/icons`;
 // FETCH
-function resolveEP(ep) {
-    return `http://localhost:${PORT}/icons/${ep}`;
+class api {
+    constructor(){
+        this.endpoint = `http://localhost:${PORT}/icons`;
+        this.PORT = 1279;
+    }
+    async getCategoryNames() {
+        const categoriesResponse = await (0, _axiosDefault.default).get(`${endpoint}/meta/categories`);
+        const filterAllCategory = (val)=>val !== "all";
+        const categoryData = [
+            ...categoriesResponse.data
+        ];
+        // log(categoryData)
+        return categoryData.filter(filterAllCategory);
+    }
+    async getCollectionNames() {
+        const collections = await (0, _axiosDefault.default).get(`http://localhost:${PORT}/icons/meta/collections`);
+        console.log(collections.data);
+        return [
+            ...collections.data
+        ].filter((name)=>name !== "test");
+    }
+    async createCollection(title) {
+        const response = await (0, _axiosDefault.default).post(resolveEP(`/collections/create`), {
+            payload: {
+                name: title
+            }
+        });
+        return response;
+    }
+    async getCollection(title) {
+        const response = await (0, _axiosDefault.default).get(resolveCollectionEndpoint(`${title}`));
+        return response;
+    }
+    async getCategory(title) {
+        console.log(title);
+        const endpoint = resolveCategoryEndpoint(title);
+        console.log(endpoint);
+        const response = await (0, _axiosDefault.default).get(endpoint);
+        console.log(response);
+        console.log(responseOk);
+        if (responseOk(response)) return response;
+        else console.error("somthing went wrong fetching category: ", title);
+        console.log("endpoint: ", endpoint);
+        return response;
+    }
+    async addToCollection(title, props, original) {
+        const { data  } = await (0, _axiosDefault.default).post(resolveCollectionEndpoint(title), {
+            payload: {
+                props,
+                original
+            }
+        });
+    // log(data)
+    }
+    static resolveEP = resolveEP;
+    static resolveCategoryEndpoint = resolveCategoryEndpoint;
+}
+function resolveEP(endpoint) {
+    return `http://localhost:${PORT}/icons/${endpoint}`;
 }
 function resolveCategoryEndpoint(categoryName) {
     return resolveEP(`categories/${categoryName}`);
@@ -1492,18 +1564,26 @@ function resolveCollectionEndpoint(collectionName) {
     return resolveEP(`collections/${collectionName}`);
 }
 async function getCategoryNames() {
-    const categories = await (0, _axiosDefault.default).get(`http://localhost:${PORT}/icons/meta/categories`);
-    // console.log(categories.data)
-    return [
-        ...categories.data
-    ].filter((val)=>val !== "all");
+    console.log("fetching category names");
+    console.log("this endpoint", endpoint);
+    const categoriesResponse = await (0, _axiosDefault.default).get(`${endpoint}/meta/categories`);
+    console.log(categoriesResponse);
+    const filterAllCategory = (categoryName)=>categoryName !== "all";
+    const categoryData = [
+        ...categoriesResponse.data
+    ];
+    console.log(categoryData);
+    // log(categoryData)
+    return categoryData.filter(filterAllCategory);
 }
 async function getCollectionNames() {
     const collections = await (0, _axiosDefault.default).get(`http://localhost:${PORT}/icons/meta/collections`);
-    console.log(collections.data);
-    return [
+    const collectionData = [
         ...collections.data
-    ].filter((name)=>name !== "test");
+    ];
+    const filterTestCollection = (collectionName)=>collectionName !== "test";
+    // log(collections.data)
+    return collectionData.filter(filterTestCollection);
 }
 async function createCollection(title) {
     const response = await (0, _axiosDefault.default).post(resolveEP(`/collections/create`), {
@@ -1514,11 +1594,13 @@ async function createCollection(title) {
     return response;
 }
 async function getCollection(title) {
-    const response = await (0, _axiosDefault.default).get(resolveCollectionEndpoint(`${title}`));
+    const response = await (0, _axiosDefault.default).get(resolveCollectionEndpoint(title));
     return response;
 }
 async function getCategory(title) {
-    const response = await (0, _axiosDefault.default).get(resolveCategoryEndpoint(`${title}`));
+    const endpoint = resolveCategoryEndpoint(title);
+    console.log(endpoint);
+    const response = await (0, _axiosDefault.default).get(endpoint);
     return response;
 }
 async function addToCollection(title, props, original) {
@@ -5686,6 +5768,16 @@ class IconNode {
             values: this.values,
             versions: this.versions
         });
+        // give specific height and width if none;
+        this.element = document.createElement("div");
+        this.element.innerHTML = this.markup;
+        if (!this.element.querySelector("svg").getAttribute("height")) {
+            // console.log('has no height');
+            // console.log('setting default height');
+            this.element.setAttribute("height", "24px");
+            this.element.setAttribute("width", "24px");
+            this.markup = this.element.innerHTML;
+        }
     }
     get props() {
         return this.observer;
@@ -6376,6 +6468,10 @@ const preview = {
     vbwInput: $(".input-field.w .input"),
     vbhLabel: $(".input-field.h .label"),
     vbwLabel: $(".input-field.w .label"),
+    defaultHeight: "24px",
+    defaultWidth: "24px",
+    width: "",
+    height: "",
     get display () {
         return $(".current-icon", this.element);
     },
@@ -6798,6 +6894,8 @@ var _domHelpersJs = require("../utils/DOM-helpers.js");
 function MenuList(listOfNames) {
     this.element = (0, _domHelpers.ulit)();
     this.element.classList.add("menu-items");
+    console.log("creating menu list from list of names");
+    console.log(listOfNames);
     this.addItem = (name)=>{
         const newLink = MenuListItem(name);
         (0, _domHelpers.appendit)(this.element, newLink);
@@ -7327,6 +7425,7 @@ class DynamicModal extends Modal {
         return;
     }
     async update() {
+        // debugger
         // console.log('triggering update')
         // set flags && result/value for getData to "bounce"
         this.value = this.suspense;
@@ -7336,6 +7435,7 @@ class DynamicModal extends Modal {
         // if (handleRequest) handleRequest(this.suspense);
         // fetch resources from predefined endpoint
         // console.log(this.endpoint)
+        console.log(this.endpoint);
         const res = await (0, _axiosDefault.default).get(this.endpoint);
         // console.log(res.data)
         if (res) {

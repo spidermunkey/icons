@@ -27,7 +27,7 @@ export class SvgModel {
 
         console.log('creating collection',name);
 
-        if (typeof name != 'string') {
+        if (typeof name !== 'string') {
             console.error('type of collection name must be a string... got:' + typeof name)
             return 'name must be a string';
         }
@@ -36,7 +36,6 @@ export class SvgModel {
             console.error('tried to create collection by the name of',name,'but it already exists');
             return 'name already exist, choose a different collection name';
         }
-
 
         this.collectionSet.add(name);
         const collection = new Collection();
@@ -135,8 +134,10 @@ export class SvgModel {
     }
 
     async init() {
+        console.log('initializing store...')
+        console.log('fetching all icons')
         const {data} = await API.getCategory('all')
-
+        console.log('icons incoming',data)
         // setting static properties
         // and building the dataset
         for (let i = 0; i < data.length; i++) {
@@ -213,14 +214,17 @@ export class SvgModel {
             }
         }
 
+        console.log('fetching collection names')
         const userCollections = await this.getCollectionNames();
-        
+        console.log('collections: ', userCollections)
+
         for (const name of userCollections){
             this.collectionSet.add(name);
             const collection = new Collection();
             this.collections[name] = collection;
-
+            console.log('fetching data for collections')
             const {data} = await API.getCollection(name);
+            console.log('response: ',data)
             this.addManyToCollection(name,data);
 
         }

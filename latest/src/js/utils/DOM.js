@@ -222,6 +222,7 @@ export class DynamicModal extends Modal {
     }
 
     async update() {
+        // debugger
         // console.log('triggering update')
         // set flags && result/value for getData to "bounce"
         this.value = this.suspense;
@@ -234,6 +235,7 @@ export class DynamicModal extends Modal {
         
         // fetch resources from predefined endpoint
         // console.log(this.endpoint)
+        console.log(this.endpoint)
         const res = await axios.get(this.endpoint)
         // console.log(res.data)
         if (res){

@@ -6,7 +6,8 @@ export function MenuList(listOfNames) {
 
     this.element = ulit();
     this.element.classList.add('menu-items');
-    
+    console.log('creating menu list from list of names')
+    console.log(listOfNames)
     this.addItem = (name) => {
         const newLink = MenuListItem(name);
         appendit( this.element, newLink );

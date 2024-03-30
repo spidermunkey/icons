@@ -21,6 +21,10 @@ export const preview = {
 
     vbhLabel: $('.input-field.h .label'),
     vbwLabel: $('.input-field.w .label'),
+    defaultHeight: '24px',
+    defaultWidth: '24px',
+    width: '',
+    height: '',
 
     get display() {
         return $('.current-icon',this.element);

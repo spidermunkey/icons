@@ -1,6 +1,6 @@
 import * as _ from './js/utils/DOM-helpers.js'
 import * as R from 'ramda'
-
+// debugger
 import { SvgModel } from './store.js'
 import { Bucket } from './js/utils//Structs.js'
 import { preview } from './js/components/preview.js'
@@ -47,6 +47,7 @@ const
                          .onClose(hideModal)
     
     createCollectionOverlay.addEventListener('click', closeOnClickOutside)
+
     $('form',createCollectionOverlay).onsubmit = async (e) => {
         e.preventDefault()
         let name = String(document.getElementById('cc-name').value)
@@ -55,6 +56,7 @@ const
         await app.createCollection(name);
         document.getElementById('cc-name').value = '';
     }
+
 // components
 let categoryMenuComponent,
     collectionMenuComponent,
@@ -79,7 +81,7 @@ const app = {
 
         },
 
-        'updatePreview': ( { event, type, key, tabName} ) => {
+        updatePreview: ( { event, type, key, tabName} ) => {
             let collection;
             let node;
 
@@ -102,7 +104,7 @@ const app = {
     
         },
 
-        'updateContext': ( { event, type, key, tabName } ) => {
+        updateContext: ( { event, type, key, tabName } ) => {
             let collection,
                 node,
                 isFavorite;
@@ -123,7 +125,7 @@ const app = {
 
         },
 
-        'toggleFavorite': async () => {
+        toggleFavorite: async () => {
             if (!this.state.context) return
             
                 let node = this.state.context,
@@ -141,7 +143,7 @@ const app = {
                 
         },
 
-        'save': async ( destination, node = preview.currentIcon ) => {
+        save: async ( destination, node = preview.currentIcon ) => {
             console.log('saving to',destination,store.collections[destination])
             let savingToFavorites = destination === 'favorites';
             if (savingToFavorites) node.isFavorite = true;
@@ -175,7 +177,7 @@ const app = {
 
         },
 
-        'handleClick': (event) => {
+        handleClick: (event) => {
 
             let wrapper = event.target.closest('.svg-wrapper');
             if (!wrapper) return 
@@ -193,7 +195,7 @@ const app = {
 
         },
 
-        'createCollection': async (name) => {
+        createCollection: async (name) => {
             $('.cc-button').innerHTML = `<div class="cc-loader--container"><span>waiting for server</span><div class="cc-loader"></div></div>`;
             await modelReady;
             await menuReady;
@@ -351,16 +353,22 @@ $$('.preview-action__window').map(modal => {
 async function createCategoryLinksThenPopulate() {
 
     // get list of names from db
-    const cNames = await store.getCategoryNames(),
+    console.log('populating categories')
+    const cNames = await store.getCategoryNames();
+    console.log(cNames)
+    const
     sorted = cNames.sort(),
     categoryMenuComponent = new MenuList(cNames);
     categoryMenuComponent.appendTo(categoryMenu);
     categoryMenuComponent.links.forEach( link => {
-
         // Create Dynamic Modal For Newly created links inside menu
         const panel = _.divit(),
               tabName = link.dataset.tab,
-              modal = new DynamicModal(panel,{ 
+                endpoint = resolveCategoryEndpoint(tabName);
+                console.log('creating modal for endpoint', endpoint)
+                console.log(tabName,link)
+
+              const modal = new DynamicModal(panel,{ 
                     type:'eager', 
                     endpoint: resolveCategoryEndpoint(tabName), 
                     dataHandler: createDashboard 
@@ -393,7 +401,7 @@ async function createCollectionLinksThenPopulate() {
     collectionMenuComponent.cloneTo(chooseCollectionPanel.element);
     collectionMenuComponent.links.forEach(link => {
         // Create Dynamic Modal For Newly created links inside menu
-            const panel = document.createElement('div')
+                const panel = document.createElement('div')
             const tabName = link.dataset.tab;
 
             panel.classList.add('dashboard__modal')
