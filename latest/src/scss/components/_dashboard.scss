@@ -2,6 +2,8 @@
 @import './icon';
 
 .dashboard {
+
+
     position: relative;
     display: flex;
     flex-wrap: wrap;
@@ -9,7 +11,14 @@
     flex-direction: column;
     flex:1;
     margin-left: 72px;
-    margin-top: 120px;
+    margin-right: 8px;
+    margin-right: 30px;
+
+
+    // padding-top: 120px;
+
+
+    // z-index: 1000;
 
     &__header {
         display: none;
@@ -22,7 +31,7 @@
         padding-left: 64px;
         padding-right: 64px;
         padding-bottom: 12px;
-
+        border-bottom: 1px solid #8080802d; 
         .title,
         .page-navigator {
             position: relative;
@@ -39,6 +48,7 @@
             margin-bottom: 16px;
             font-size: 18px;
         }
+
     }
 
     // DYNAMIC SVG MODALS
@@ -52,18 +62,21 @@
         align-content: flex-start;
 
         height: 100%;
-        width: 100%;
+        // max-width: 1024px;
 
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
         overflow-y: scroll;
 
+        top: 120px;
         // padding-left: 2em;
         margin-bottom: 64px;
         padding-bottom: 112px;
-
-
+        padding-top: 12px;
+        // transform: translateX(-72px);
+        padding-left:72px;
+        // padding-right: 30px;
         transition: transform 200ms ease-in-out, opacity 150ms cubic-bezier(0.075, 0.82, 0.165, 1);
 
 
@@ -71,7 +84,7 @@
         height: 100%;
         width: 100%;
         margin: 0;
-        padding: 0;
+        // padding: 0;
         /* overflow-y: scroll; */
         
         &.active {
@@ -84,4 +97,16 @@
     .content-wrapper {
         padding: 24px;
     }
+}
+
+.db-overlay {
+    margin: 10px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 100;
+    background-color: rgba(255, 255, 255, 0.7);
+    height: 700px;
+    border: 1px dotted #0000ff;
+
 }

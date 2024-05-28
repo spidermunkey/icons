@@ -1,11 +1,14 @@
-
 @import 'components/sidebar';
 @import 'components/dashboard';
 @import 'components/buttons/create-from-menu';
 @import 'components/snackbar';
 @import 'components/preview';
 @import 'components/loaders/default-loader';
+@import 'components/search.scss';
 
+@import 'components/sidebar-query.scss';
+
+@import 'components/modals/context.scss';
 
 :root {
     --sidebar_width: 64px;
@@ -21,9 +24,26 @@
     --main-clr__light: #333;
     --sub-clr__light: #333;
     --font-clr__light: rgba(20, 20, 21, .9);
+
+    --current-sat: 0%;
+    --current-light: 100%;
+    --current-opac: 1;
+    --current-huePCT: 0;
+    --current-hue: 216deg;
+    --current-hex: #fff;
+    --current-color: hsla(var(--current-hue),var(--current-sat),var(--current-light),var(--current-opac));
+    --cp--width: 180px;
+    --cp-pointer--width: calc(var(--cp--width) * .1);
+    --cp-pointer--pos: calc(0deg + var(--current-hue));
+    --context-y: 0;
+    --context-x: 0;
+    --success-green: #70f09f;
 }
 
 $main-border-trim-color:  #333;
+$red: #cb4848;
+$accent-blue: #87e1fe;
+
 
 *,*:before,*::after {
     box-sizing: border-box;
@@ -43,6 +63,7 @@ body{
     align-items: center;
     background-color:$main-border-trim-color;
 }
+
 #app {
     display: flex;
     box-sizing: border-box;
@@ -61,6 +82,31 @@ body{
     }
     &[data-state="live"] .intro {
         opacity: 0;
+    }
+}
+
+.dashboard-cosm {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    // border: 1px solid red;
+    background-color: transparent;
+    top: 0;
+    left: 0;
+}
+.cosm-search {
+    background-color: rgba(0, 0, 0, 0.24);
+    height: 100%;
+    width: 100%;
+    position: absolute;
+    z-index: 999;
+    pointer-events: none;
+    opacity: 0;
+    backdrop-filter: blur(3px);
+
+    &.active {
+        pointer-events: all;
+        opacity: 1;
     }
 }
 

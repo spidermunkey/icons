@@ -51,7 +51,7 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
         display: flex;
         z-index: 1000;
 
-        width: $sidebar_width;
+        // width: $sidebar_width;
         height: 100%;
 
 
@@ -77,7 +77,7 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
         position: relative;
         display: flex;
         height: 100%;
-        width: $sidebar_width;
+        width: 72px;
         z-index: 10000;
 
 
@@ -115,7 +115,7 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
             justify-content: center;
             align-items: center;
             padding: 2px;
-            height: 40px;
+            // height: 40px;
             margin: 15px 0;
             &:first-of-type {
                 margin-top: 12px;
@@ -135,8 +135,8 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
         
 
             svg {
-                height: 36px;
-                width: 36px
+                height: 46px;
+                width: 46px
             }
             cursor: pointer;
 

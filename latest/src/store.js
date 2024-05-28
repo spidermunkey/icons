@@ -1,24 +1,19 @@
-import * as _ from './js/utils/DOM-helpers.js';
-import Collection from './js/utils/structs/Collection';
-import { default as API } from './API.js';
-import { IconNode } from './js/utils/structs/Icon.js';
+import { API } from './API.js';
+import { IconNode } from './components/Icon.js';
 
 export class SvgModel {
     constructor() {
 
-        this.duplicates = {};
-        this.dupeCount = 0;
+        this.all = {}
 
-        this.all = new Collection();
+        this.categorySet = []
+        this.categories = {}
 
-        this.categorySet = new Set();
-        this.categories = {};
-
-        this.collectionSet = new Set(),
-        this.collections = {};
+        this.collectionSet = []
+        this.collections = {}
         
-        this.state = {};
-        this.ready = false;
+        this.state = {}
+        this.ready = false
 
     }
 
@@ -32,31 +27,27 @@ export class SvgModel {
             return 'name must be a string';
         }
 
-        if (this.collectionSet.has(name)){
+        if (this.collectionSet.includes(name)){
             console.error('tried to create collection by the name of',name,'but it already exists');
             return 'name already exist, choose a different collection name';
         }
 
-        this.collectionSet.add(name);
-        const collection = new Collection();
-        this.collections[name] = collection;
+        this.collectionSet.push(name);
+        this.collections[name] = {};
 
-        console.log('collection optimistically created... communicating with server',collection,this.collections[name]);
+        console.log('collection optimistically created... communicating with server',this.collections[name]);
         const res = await API.createCollection(name);
         console.log(res);
 
-        return collection;
+        return this.collections[name];
     }
 
     removeCollection(name) {
-        delete this.collections[name]
+        delete this.collections[name];
+        API.dropColletion(name);
     }
 
-    checkCollection(dest,key) {
-        return this.collections[dest].has(key)
-    }
-
-    async addToCollection({ destination, name, meta, onSuccess, onFailure }) {
+    async addToCollection({ destination, id, meta, onSuccess, onFailure }) {
 
         let collection = this.collections[destination];
 
@@ -71,10 +62,8 @@ export class SvgModel {
                 return message;
             }
 
-        }
-
-        else if (this.collections[destination].has(name)) {
-            const message = { message: "this name already exists", success:false, reason:"duplicate name",from:'VM'}
+        } else if (this.collections[destination][id] !== undefined) {
+            const message = { message: "this id already exists", success:false, reason:"duplicate id",from:'VM'}
             if (onFailure) onFailure(message);
             return message;
         }
@@ -91,18 +80,10 @@ export class SvgModel {
         copy.category = destination;
         copy.observer.category = destination;
         
-
-        const addedToViewModel = collection.add(name,copy);
-
-        if (!addedToViewModel) {
-            const message = {message:'something went wrong with optimistic update', success:false,reason:'could not be added to viewModel',from:'VM'};
-            if (onFailure) onFailure(message);
-            return message
-        }
+        collection[id] = meta
 
         console.log('optimistic update successful... asynchronously adding to database now');
         const res = API.addToCollection( destination, copy, meta );
-        console.log(res)
         
         const message = {message:'optimistic update successful... asynchronously adding to database now',success:true ,promise:res,size: collection.size}
         if (onSuccess) onSuccess(message);
@@ -112,157 +93,88 @@ export class SvgModel {
 
     addManyToCollection(collection,array) {
         array.forEach(obj => {
-            const {name,rebased} = obj
-            // console.log('adding',collection,'as a known collection to',name)
+            const {cid} = obj
             const node = new IconNode(obj)
-            node.knownCollections.push(collection)
-            this.collections[collection].add(rebased ? rebased : name, node)
+            this.collections[collection][cid] = node;
         })
         console.log('finished adding',array,'to',collection)
     }
 
-    removeFromCollection(name, collection) {
-        this.collections[collection].remove(name);
+    removeFromCollection(id, collection) {
+        delete this.collections[collection][id]
     }
 
     // calls to api
     async getCategoryNames() {
         return API.getCategoryNames();
     }
+    
     async getCollectionNames() {
         return API.getCollectionNames();
     }
 
-    async init() {
-        console.log('initializing store...')
-        console.log('fetching all icons')
-        const {data} = await API.getCategory('all')
-        console.log('icons incoming',data)
-        // setting static properties
-        // and building the dataset
+    async getIcons() {
+        return API.getCategory('all');
+    }
+
+    async populateCategoryData() {
+
+        const { data } = await this.getIcons();
+
         for (let i = 0; i < data.length; i++) {
-            let backpack = data[i];
             
-            // element props
-            let key = backpack.name;
-            // let obj = Object.create(IconProto)
+            let backpack = data[i];
             let meta = new IconNode(backpack);
-            // let meta = Object.assign(obj,props);
+            let {id,cid,category} = meta;
 
-            // Populate Categories with orignal references
-            if (!this.categorySet.has(meta.category)){
-                // keeping track of different categories
-                this.categorySet.add(meta.category);
-                this.categories[meta.category] = new Collection();
+            if (!this.categorySet.includes(category)){
+                this.categorySet.push(category);
+                this.categories[category] = {}
             }
 
-            // handling duplicate names
-            if (this.all.has(key))
-            {
-                // if known duplicate doesn't exist create an object for it
-                if (!this.duplicates.hasOwnProperty(key)) {
-                    this.duplicates[key] = {
-                        count: 1,
-                        categoryCount: 0,
-                        dupes: new Map(),
-                    }
-                    // setting the existing element first
-                    this.duplicates[key].dupes.set(key,this.all.use(key));
-                }
-
-                // then the new element with a modified name
-                let newKey = `${key}--${meta.category}`;
-                
-                // handling duplicates withing categories
-                if (this.duplicates[key].dupes.has(newKey)) {
-                    // console.log('category dupe found!')
-                    newKey = `${newKey}--${++this.duplicates[key].categoryCount + 1}`;
-                }
-
-                // add a property showing that the name has been modified
-                meta.rebased = newKey;
-
-                // proceed mapping operations
-                this.duplicates[key].dupes.set(newKey,meta);
-                this.all.add(newKey,meta);
-                this.categories[meta.category].add(newKey,meta);
-                
-                // update count
-                this.duplicates[key].count = this.duplicates[key].count + 1;
-                this.dupeCount++;
-            } else {
-                // ...otherwise
-                this.all.add(key,meta);
-                this.categories[meta.category].add(key,meta);
-            }
+            this.all[id] = meta;
+            this.categories[category][cid] = meta;
+            
         }
 
-        // set property indicating if svgs of the same name exist
-        if (this.dupeCount > 0) {
-            for (let name in this.duplicates) {
-                this.duplicates[name].dupes.forEach(value => {
-                    // setting a reference back to all the icons of the same name
-                    value.others = this.duplicates[name]
-                    if (this.duplicates[name].categoryCount > 0)
-                        value.othersInSameCategory = this.duplicates[name].categoryCount;
-                })
-            }
-            function log_duplicates()
-            { 
-                // console.log('found',this.dupeCount,'duplicates');
-                // console.log('here they are', this.duplicates);
-            }
-        }
+    }
+
+    async populateCollectionData() {
 
         console.log('fetching collection names')
-        const userCollections = await this.getCollectionNames();
+        const userCollections = await this.getCollectionNames()
         console.log('collections: ', userCollections)
 
         for (const name of userCollections){
-            this.collectionSet.add(name);
-            const collection = new Collection();
-            this.collections[name] = collection;
+            this.collectionSet.push(name);
+            this.collections[name] = {};
             console.log('fetching data for collections')
             const {data} = await API.getCollection(name);
-            console.log('response: ',data)
+            // console.log('response: ',data)
             this.addManyToCollection(name,data);
-
         }
 
-        this.ready = true;
-        return this;
     }
-    async update() {
-        const {data} = await API.getCategory('all')
+
+    async init() {
+        console.log('initializing store...')
+        await this.populateCategoryData()
+        await this.populateCollectionData()
+
+        this.ready = true
+        console.log('model ready')
+        console.log(this)
+        return this
     }
+
     async updateCollection(name) {
 
         if (store.collections[name]) {
             const {data} = await API.getCollection(name)
             const collection = store.collections[name]
-            collection.drop();
-            addManyToCollection(collection,data)
+            if (data) {
+                collection = addManyToCollection(collection,data)
+            }
         }
-    
     }
 }
-
-
-
-
-// function deepClone(obj, hash = new WeakMap()) {
-//     if (Object(obj) !== obj) return obj; // primitives
-//     if (hash.has(obj)) return hash.get(obj); // cyclic reference
-//     const result = obj instanceof Set ? new Set(obj) // See note about this!
-//                  : obj instanceof Map ? new Map(Array.from(obj, ([key, val]) => 
-//                                         [key, deepClone(val, hash)])) 
-//                  : obj instanceof Date ? new Date(obj)
-//                  : obj instanceof RegExp ? new RegExp(obj.source, obj.flags)
-//                  // ... add here any specific treatment for other classes ...
-//                  // and finally a catch-all:
-//                  : obj.constructor ? new obj.constructor() 
-//                  : Object.create(null);
-//     hash.set(obj, result);
-//     return Object.assign(result, ...Object.keys(obj).map(
-//         key => ({ [key]: deepClone(obj[key], hash) }) ));
-// }

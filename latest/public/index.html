@@ -5,20 +5,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Icons v5</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <link rel="stylesheet" href="../src/scss/app.scss">
+    <script type="module" src="../src/main.js"></script>
 
-    <script>
-        // HELPER FUNCTIONS
-        var $ = (arg,element = document) => element.querySelector(arg)
-        var $$ = (arg,element = document) => Array.from(element.querySelectorAll(arg));
-        var log = (...args) => console.log.apply(this,args);
-        var err = (...args) => console.log.call(this,args);
-    </script>
-    <script src="../../mojo/script.js"></script>
+    <script src="../src/script.js" ></script>
+    <script src="../src/app.js"></script>
 </head>
 
 <body>
     <div class="main" id="app">
+        <div class="cosm-search"></div>
         
         <div class="modal create-collection">
             <div class="close">close</div>
@@ -28,6 +25,7 @@
                     <div class="input-field">
                         <div class="label">Name</div>
                         <div class="input">
+                            
                             <input type="text" class="inp name" id="cc-name">
                         </div>
                     </div>
@@ -123,7 +121,6 @@
             copy group to clipboard
             save group as file -->
         </div>
-        
         
         <!-- SIDEBAR -->
         <div class="menu" id="MENU">
@@ -291,6 +288,60 @@
                             
                             <!-- TOGGLER -->
                             <div class="tab__button" data-role="tabButton" data-tab="docs">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 - 40 40" height="46px" width="46px" pid="lwmex52r-01CABYMHD6YR" stroke="#372a2a">
+                                    <path d="M4 3h16a2 2 0 0 1 2 2v6a10 10 0 0 1-10 10A10 10 0 0 1 2 11V5a2 2 0 0 1 2-2z" pid="lwmex52s-00FSEU7SJ6N8" fill="#f7f7f7"></path><polyline points="8 10 12 14 16 10" pid="lwmex52s-00CX9AD11VFD" fill="#ffffff"></polyline></svg>
+                            </div>
+
+                            <!-- MODAL -->
+                            <div class="modal tab__modal center-aligned" data-role="tabModal" data-tab="docs">
+                                <!-- MENU/WRAPPER -->
+                                <div class="modal__menu vert lg">
+                                    <!-- HEADER -->
+                                    <div class="modal__menu--header">
+                                        <!-- LABEL -->
+                                        <div class="modal__menu--header-label">
+                                            <span class="label">DOCS</span>
+                                        </div>
+                                        <!-- CLOSE BUTTON -->
+                                        <div class="modal__menu--header-close btn close-modal">
+                                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="-1 -1 24 24" height="24px" width="24px">
+                                                <path d="M10.707 10.5l5.646-5.646c0.195-0.195 0.195-0.512 0-0.707s-0.512-0.195-0.707 0l-5.646 5.646-5.646-5.646c-0.195-0.195-0.512-0.195-0.707 0s-0.195 0.512 0 0.707l5.646 5.646-5.646 5.646c-0.195 0.195-0.195 0.512 0 0.707 0.098 0.098 0.226 0.146 0.354 0.146s0.256-0.049 0.354-0.146l5.646-5.646 5.646 5.646c0.098 0.098 0.226 0.146 0.354 0.146s0.256-0.049 0.354-0.146c0.195-0.195 0.195-0.512 0-0.707l-5.646-5.646z">
+                                                </path>
+                                            </svg>
+                                        </div>
+                                    </div>
+                                    <!-- MENU LIST ITEMS-->
+                                    <div class="modal__menu--items">
+                                        <!-- LINKS -->
+                                        <!-- <ul class="menu-items">
+                                            DASHBOARD TOGGLERS
+                                            <li class="js-tabber-dashboard-menu-item list-item" data-tab="favorites">
+                                                    Favorites
+                                            </li>
+                                            <li class="js-tabber-dashboard-menu-item list-item" data-tab="recent">
+                                                    Recently Added
+                                            </li>
+                                            <li class="js-tabber-dashboard-menu-item list-item" data-tab="frequent">
+                                                    Frequently Used
+                                            </li>
+                                            <li class="js-tabber-dashboard-menu-item list-item" data-tab="tbi">
+                                                    Tab Bar Icons
+                                            </li>
+                                            <li class="js-tabber-dashboard-menu-item list-item" data-tab="tbi2">
+                                                    Tab Bar Icons V2
+                                            </li>
+                                        </ul>
+                                        -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- TAB NESTED -->
+                        <div class="tab docs icon sidebar__tab" data-type="nested" id="DOCS">
+                            
+                            <!-- TOGGLER -->
+                            <div class="tab__button" data-role="tabButton" data-tab="docs">
                                 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewbox="-10 -10 40 40" height="40px" width="40px" xmlns:xlink="http://www.w3.org/1999/xlink">
                                     <path fill="#000000" d="M5 15c-0.128 0-0.256-0.049-0.354-0.146l-4-4c-0.195-0.195-0.195-0.512 0-0.707l4-4c0.195-0.195 0.512-0.195 0.707 0s0.195 0.512 0 0.707l-3.646 3.646 3.646 3.646c0.195 0.195 0.195 0.512 0 0.707-0.098 0.098-0.226 0.146-0.354 0.146z">
                                     </path>
@@ -449,17 +500,142 @@
 
         <!-- DASHBOARD -->
         <div class="dashboard" id="DASHBOARD">
+            <div class="dashboard-cosm">
+                <div class="db-context">
+                    <div class="alert"></div>
+                    <div class="info">
+                        <div class="current-icon context-card">
+                            <div class="card-icon"></div>
+                            <div class="icon-info">
+                                <div class="icon-title">name</div>
+                                <div class="icon-category"><span class="label">category</span></div>
+                                <!-- <div class="icon-tone"><span class="label"></span></div> -->
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="quick-toggles">
+                        <div class="btn info">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="1 1 22 22" height="24px" width="24px">
+                                <path d="M13 7.5a1 1 0 11-2 0 1 1 0 012 0zm-3 3.75a.75.75 0 01.75-.75h1.5a.75.75 0 01.75.75v4.25h.75a.75.75 0 010 1.5h-3a.75.75 0 010-1.5h.75V12h-.75a.75.75 0 01-.75-.75z"></path><path fill-rule="evenodd" d="M12 1C5.925 1 1 5.925 1 12s4.925 11 11 11 11-4.925 11-11S18.075 1 12 1zM2.5 12a9.5 9.5 0 1119 0 9.5 9.5 0 01-19 0z"></path></svg>
+                        </div>
+
+                        <div class="btn copy">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="24px" width="24px">
+                                <!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M502.6 198.6l-61.25-61.25C435.4 131.4 427.3 128 418.8 128H256C220.7 128 191.1 156.7 192 192l.0065 255.1C192 483.3 220.7 512 256 512h192c35.2 0 64-28.8 64-64l.0098-226.7C512 212.8 508.6 204.6 502.6 198.6zM464 448c0 8.836-7.164 16-16 16h-192c-8.838 0-16-7.164-16-16L240 192.1c0-8.836 7.164-16 16-16h128L384 224c0 17.67 14.33 32 32 32h48.01V448zM317.7 96C310.6 68.45 285.8 48 256 48H215.2C211.3 20.93 188.1 0 160 0C131.9 0 108.7 20.93 104.8 48H64c-35.35 0-64 28.65-64 64V384c0 35.34 28.65 64 64 64h96v-48H64c-8.836 0-16-7.164-16-16V112C48 103.2 55.18 96 64 96h16v16c0 17.67 14.33 32 32 32h61.35C190 115.4 220.6 96 256 96H317.7zM160 72c-8.822 0-16-7.176-16-16s7.178-16 16-16s16 7.176 16 16S168.8 72 160 72z"></path></svg>
+                        </div>
+                        <div class="btn favit">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" height="24px" width="24px">
+                                <path d="M381.2 150.3L524.9 171.5C536.8 173.2 546.8 181.6 550.6 193.1C554.4 204.7 551.3 217.3 542.7 225.9L438.5 328.1L463.1 474.7C465.1 486.7 460.2 498.9 450.2 506C440.3 513.1 427.2 514 416.5 508.3L288.1 439.8L159.8 508.3C149 514 135.9 513.1 126 506C116.1 498.9 111.1 486.7 113.2 474.7L137.8 328.1L33.58 225.9C24.97 217.3 21.91 204.7 25.69 193.1C29.46 181.6 39.43 173.2 51.42 171.5L195 150.3L259.4 17.97C264.7 6.954 275.9-.0391 288.1-.0391C300.4-.0391 311.6 6.954 316.9 17.97L381.2 150.3z"></path>
+                            </svg>
+                        </div>
+                        <div class="btn delete">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="-3 -7 474 542" height="24px" width="24px">
+                                <!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M160 400C160 408.8 152.8 416 144 416C135.2 416 128 408.8 128 400V192C128 183.2 135.2 176 144 176C152.8 176 160 183.2 160 192V400zM240 400C240 408.8 232.8 416 224 416C215.2 416 208 408.8 208 400V192C208 183.2 215.2 176 224 176C232.8 176 240 183.2 240 192V400zM320 400C320 408.8 312.8 416 304 416C295.2 416 288 408.8 288 400V192C288 183.2 295.2 176 304 176C312.8 176 320 183.2 320 192V400zM317.5 24.94L354.2 80H424C437.3 80 448 90.75 448 104C448 117.3 437.3 128 424 128H416V432C416 476.2 380.2 512 336 512H112C67.82 512 32 476.2 32 432V128H24C10.75 128 0 117.3 0 104C0 90.75 10.75 80 24 80H93.82L130.5 24.94C140.9 9.357 158.4 0 177.1 0H270.9C289.6 0 307.1 9.358 317.5 24.94H317.5zM151.5 80H296.5L277.5 51.56C276 49.34 273.5 48 270.9 48H177.1C174.5 48 171.1 49.34 170.5 51.56L151.5 80zM80 432C80 449.7 94.33 464 112 464H336C353.7 464 368 449.7 368 432V128H80V432z"></path></svg>
+                        </div>
+            
+                    </div>
+                    <div class="quick-save">
+                        <ul>
+                            <div class="list-section center-1">
+                                <li>Save To Collection</li>
+                            </div>
+                            <div class="list-section">
+                                <li>Copy DEF</li>
+                                <li>Copy SVG</li>
+                                <li>Copy MARKUP</li>
+                            </div>
+            
+                            <div class="list-section center-1">
+                                <li>Add / Remove From Pocket</li>
+                            </div>
+            
+                            <div class="list-section">
+                                <li>Open Color View</li>
+                                <li>Open Position View</li>
+                                <li>Open Component View</li>
+                            </div>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="dashboard__header">
+                <div class="search passive-search active">
+                    <div class="search-icon">
+
+                        <svg xmlns="http://www.w3.org/2000/svg" height="64px" width="64px">
+                            <path fill-rule="evenodd" d="M14.53 15.59a8.25 8.25 0 111.06-1.06l5.69 5.69a.75.75 0 11-1.06 1.06l-5.69-5.69zM2.5 9.25a6.75 6.75 0 1111.74 4.547.746.746 0 00-.443.442A6.75 6.75 0 012.5 9.25z"></path></svg>
+                            
+ 
+                    </div>
+                    <input class="active" type="text" placeholder="search">
+                </div>
+                <div class="search-modal">
+                    <div class="search-input">
+                        <input type="text">
+                        <!-- <div class="btn-search">go</div> -->
+                    </div>
+                    <div class="result-wrapper">
+
+                        <div class="search-header">
+                            <div class="results"></div>
+                            <div class="advanced">advanced search</div>
+                            <div class="close">close</div>
+                        </div>
+                        <div class="content">
+                            <div class="bg-image">
+                                <img src="./img/no-result-icon-thin-linear-260nw-2088679690.webp" alt="">
+                            </div>
+                            <div class="mini-preview">
+                                <div class="icon-prev"></div>
+                                <div class="icon-controls">
+                                    <div class="btn-copy-icon">copy</div>
+                                    <div class="btn-edit-icon">edit</div>
+                                </div>
+
+                                <div class="preview-meta">
+                                    <div class="icon-name">
+                                        <div class="label">Name</div>
+                                        <div class="title">...</div>
+                                    </div>
+                                    <div class="icon-category">
+                                        <div class="label">Category</div>
+                                        <div class="title">...</div>
+                                    </div>
+                                </div>
+                                <div class="notification-banner">
+                                    <div class="notification notification-copy success">
+                                        <span>Element Copied!</span></div>
+                                </div>
+                            </div>
+                            <div class="content-wrapper"></div>
+                        </div>
+    
+                        <div class="search-footer"></div>
+                    </div>
+                    <div class="history-wrapper">
+
+                    </div>
+                </div>
+            </div>
             <!-- ICONS -->
         </div>
 
         <!-- INTERACTIVE INTERFACE -->
         <div class="interface" id="INTERFACE">
+
+            <div class="notification-bar">
+
+                <div class="notification notification-copy success">
+                    <span>Element Copied!</span>
+                </div>
+
+            </div>
             <!-- INTERFACE PREVIEW -->
             <div class="preview" id="PREVIEW">
 
                 <!-- WINDOW -->
                 <div class="preview__window">
-
                     <!-- WRAPPER -->
                     <div class="preview__window--display current-icon-display" data-role="iconDisplay">
                         <!-- ICON -->
@@ -516,21 +692,22 @@
                             </span>
                         </div>
 
-                        <!-- ADD TO BENCH -->
-                        <div class="btn-bench preview__description--snackbar-button toggler">
-                            <span class="icon bench">
-                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" height="20px" width="20px">
-                                    <path d="M160 48C160 21.49 181.5 0 208 0H256V80C256 88.84 263.2 96 272 96H304C312.8 96 320 88.84 320 80V0H368C394.5 0 416 21.49 416 48V176C416 202.5 394.5 224 368 224H208C181.5 224 160 202.5 160 176V48zM96 288V368C96 376.8 103.2 384 112 384H144C152.8 384 160 376.8 160 368V288H208C234.5 288 256 309.5 256 336V464C256 490.5 234.5 512 208 512H48C21.49 512 0 490.5 0 464V336C0 309.5 21.49 288 48 288H96zM416 288V368C416 376.8 423.2 384 432 384H464C472.8 384 480 376.8 480 368V288H528C554.5 288 576 309.5 576 336V464C576 490.5 554.5 512 528 512H368C341.5 512 320 490.5 320 464V336C320 309.5 341.5 288 368 288H416z"></path>
-                                </svg>
-                            </span>
-                        </div>
-
                         <!-- COPY -->
                         <div class="btn-copy preview__description--snackbar-button toggler">
                             <span class="icon copy">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="20px" width="20px">
                                     <path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"></path>
                                 </svg>
+                            </span>
+                        </div>
+
+                                                <!-- ADD TO BENCH -->
+                        <div class="btn-bench preview__description--snackbar-button toggler">
+                            <span class="icon bench">
+
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" height="64px" width="64px">
+                                    <!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M407.6 64h-367C18.5 64 0 82.5 0 104.6v135.2C0 364.5 99.7 464 224.2 464c124 0 223.8-99.5 223.8-224.2V104.6c0-22.4-17.7-40.6-40.4-40.6zm-162 268.5c-12.4 11.8-31.4 11.1-42.4 0C89.5 223.6 88.3 227.4 88.3 209.3c0-16.9 13.8-30.7 30.7-30.7 17 0 16.1 3.8 105.2 89.3 90.6-86.9 88.6-89.3 105.5-89.3 16.9 0 30.7 13.8 30.7 30.7 0 17.8-2.9 15.7-114.8 123.2z"></path></svg>
+                                    
                             </span>
                         </div>
 
@@ -561,7 +738,7 @@
                     </div>
                     
                     <!-- POCKET -->
-                    <div class="preview__tabber--tab tab" data-role="tab" data-tab="pocket">
+                    <div class="preview__tabber--tab tab" data-role="tab" data-tab="actions">
                         <span class="preview__tabber--tab-label label">Pocket</span>
                     </div>
 
@@ -571,10 +748,94 @@
                 <div class="preview__modals modals">
 
                     <!-- MODAL WRAPPER / POSITION -->
+                    <div class="preview__modals--modal modals__modal color" data-role="tab" data-tab="color">
+                        <div class="color-picker">
+                            <div class="cp-canvas">
+                                <div class="canvas">
+                                    <div class="cp-canvas--pointer canvas-pointer"></div>
+                                </div>
+                                <div class="hue-bar input-bar slider-track">
+                                    <div class="hue-thumb input-thumb slider-handle"></div>
+                                </div>
+                            </div>
+                            <div class="preview-color"></div>
+                            <div class="hex-input">
+                                <div class="input">
+                                    <input type="text">
+                                </div>
+                                <div class="canvas-redo">
+                                    <div class="icon">
+                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 24 24" height="18px" width="18px">
+
+                                            <path fill="#000000" d="M17.51 4.49c-1.605-1.605-3.74-2.49-6.010-2.49s-4.405 0.884-6.010 2.49-2.49 3.74-2.49 6.010v1.293l-2.146-2.146c-0.195-0.195-0.512-0.195-0.707 0s-0.195 0.512 0 0.707l3 3c0.098 0.098 0.226 0.146 0.354 0.146s0.256-0.049 0.354-0.146l3-3c0.195-0.195 0.195-0.512 0-0.707s-0.512-0.195-0.707 0l-2.146 2.146v-1.293c0-4.136 3.364-7.5 7.5-7.5s7.5 3.364 7.5 7.5-3.364 7.5-7.5 7.5c-0.276 0-0.5 0.224-0.5 0.5s0.224 0.5 0.5 0.5c2.27 0 4.405-0.884 6.010-2.49s2.49-3.74 2.49-6.010c0-2.27-0.884-4.405-2.49-6.010z" pid="lv9nrlsb-013BU8TJ50HS">
+                                            </path>
+                                            </svg>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="updater">
+                                <div class="btn-update">Update</div>
+                                <div class="btn-reset">Reset</div>
+                            </div>
+
+
+                        </div>
+                        <div class="path-extractor">
+                            <div class="pv-preview-color"></div>
+                            <div class="hex-input">
+                                <div class="pv-inp">
+                                    <input type="text" placeholder="#hexvalue" value="">
+                                </div>
+                                <span class="open-palette icon-label">
+                                    <!-- <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="10 9 33 33" enable-background="new 0 0 50 50" xml:space="preserve">
+            
+                                        <path d="M15.243,19.194c0.553,0,1-0.447,1-1s-0.447-1-1-1h-3.77c-0.553,0-1,0.447-1,1v21.951c0,0.553,0.447,1,1,1h21.951
+                                            c0.553,0,1-0.447,1-1v-3.765c0-0.553-0.447-1-1-1s-1,0.447-1,1v2.765H12.474V19.194H15.243z"></path>
+                                        
+                                        <path d="M41.474,9.146H19.522c-0.553,0-1,0.447-1,1v21.951c0,0.553,0.447,1,1,1h21.951c0.553,0,1-0.447,1-1V10.146
+                                            C42.474,9.593,42.026,9.146,41.474,9.146z M40.474,31.097H20.522V11.146h19.951V31.097z"></path>
+                                        
+                                    </svg> -->
+                                    <svg version="1.1" id="pall" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve" height="24px" width="24px">
+                                        <g id="Icon_12_">
+                                            <g>
+                                                <path d="M256,64C150.401,64,64,150.401,64,256c0,105.604,86.401,192,192,192c18.136,0,32-13.864,32-32
+                                                    c0-8.531-3.198-16-8.531-21.333c-5.333-5.334-8.531-12.803-8.531-21.334c0-18.135,13.864-32,32-32h38.396
+                                                    c58.667,0,106.667-48,106.667-106.666C448,140.802,361.604,64,256,64z M138.667,256c-18.136,0-32-13.864-32-32s13.864-32,32-32
+                                                    c18.135,0,32,13.864,32,32S156.802,256,138.667,256z M202.667,170.667c-18.136,0-32-13.865-32-32c0-18.136,13.864-32,32-32
+                                                    c18.135,0,32,13.864,32,32C234.667,156.802,220.802,170.667,202.667,170.667z M309.333,170.667c-18.135,0-32-13.865-32-32
+                                                    c0-18.136,13.865-32,32-32c18.136,0,32,13.864,32,32C341.333,156.802,327.469,170.667,309.333,170.667z M373.333,256
+                                                    c-18.135,0-32-13.864-32-32s13.865-32,32-32c18.136,0,32,13.864,32,32S391.469,256,373.333,256z"></path>
+                                            </g>
+                                        </g>
+                                    </svg>
+                                </span>
+                                <div class="canvas-undo">
+                                    <div class="icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px" width="16px" transform="rotate(-15)" data-rotation="undefined">
+                                            <!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M480 256c0 123.4-100.5 223.9-223.9 223.9c-48.86 0-95.19-15.58-134.2-44.86c-14.14-10.59-17-30.66-6.391-44.81c10.61-14.09 30.69-16.97 44.8-6.375c27.84 20.91 61 31.94 95.89 31.94C344.3 415.8 416 344.1 416 256s-71.67-159.8-159.8-159.8C205.9 96.22 158.6 120.3 128.6 160H192c17.67 0 32 14.31 32 32S209.7 224 192 224H48c-17.67 0-32-14.31-32-32V48c0-17.69 14.33-32 32-32s32 14.31 32 32v70.23C122.1 64.58 186.1 32.11 256.1 32.11C379.5 32.11 480 132.6 480 256z"></path></svg>
+                                    </div>
+                                </div>
+                                <div class="canvas-redo">
+                                    <div class="icon">
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px" width="16px" transform="rotate(15)">
+                                            <!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M496 48V192c0 17.69-14.31 32-32 32H320c-17.69 0-32-14.31-32-32s14.31-32 32-32h63.39c-29.97-39.7-77.25-63.78-127.6-63.78C167.7 96.22 96 167.9 96 256s71.69 159.8 159.8 159.8c34.88 0 68.03-11.03 95.88-31.94c14.22-10.53 34.22-7.75 44.81 6.375c10.59 14.16 7.75 34.22-6.375 44.81c-39.03 29.28-85.36 44.86-134.2 44.86C132.5 479.9 32 379.4 32 256s100.5-223.9 223.9-223.9c69.15 0 134 32.47 176.1 86.12V48c0-17.69 14.31-32 32-32S496 30.31 496 48z"></path></svg>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div class="pv-updater">
+                                <div class="btn-update btn">Update</div>
+                                <div class="btn-reset btn">Reset</div>
+                            </div>
+                        </div>
+
+                    </div>
                     <div class="preview__modals--modal modals__modal position" data-role="tab" data-tab="position">
 
                         <!-- VIEWBOX INPUTS -->
                         <div class="position__inputs viewbox">
+                            <div class="input-header"><span class="label">View Box</span></div>
 
                                 <!-- X/Y INPUTS -->
                                 <div class="row position__inputs--group input-group">
@@ -594,7 +855,7 @@
                                 <div class="row position__inputs--group input-group">
                                     <div class="input-field h">
                                             <span class="label">h</span>
-                                            <input class="input input-height" type="text" placeholder="height" >
+                                            <input class="input inp-height" type="text" placeholder="height" >
                                     </div>
                                     <div class="input-field w">
                                             <span class="label">w</span>
@@ -612,7 +873,45 @@
                                 </div> -->
 
                         </div>
+                        <div class="input-group">
+                            <div class="input-header"><span class="label">Dimensions</span></div>
+                            
+                        <div class="dimension__inputs inputs row">
 
+                            <div class="row">
+                                <div class="dimension__inputs-group input-field height">
+                                    <span class="label">Height</span>
+                                    <input class="input input-height" type="text" value="40">
+                                </div>
+                                <div class="dimension__inputs-group input-field width">
+                                    <span class="label">Width</span>
+                                    <input class="input input-width" type="text" value="40">
+                                </div>
+                            </div>
+
+                    </div>
+                        </div>
+
+                        <!-- <div class="input-group">
+                            <div class="input-header"><span class="label">Color</span></div> -->
+
+                        <!-- <div class="color__inputs inputs row">
+                            <div class="row">
+                                <div class="input-col--color input-field field-stroke">
+                                    <span class="label">Line</span>
+                                    <div class="inp">
+                                        <input type="text" class="input inp-stroke">
+                                    </div>
+                                </div>
+                                <div class="input-col--color input-field field-fill">
+                                    <span class="label">Fill</span>
+                                    <div class="inp">
+                                        <input type="text" class="input inp-fill">
+                                    </div>
+                                </div>
+                            </div>
+                        </div> -->
+                        <!-- </div> -->
                         <!-- SLIDING INPUTS -->
                         <div class="position__sliders transform">
 
@@ -828,44 +1127,29 @@
                     </div>
 
                     <!-- MODAL WRAPPER / POCKET -->
-                    <div class="preview__modals--modal pocket" data-role="tab" data-tab="pocket">
+                    <!-- <div class="preview__modals--modal pocket" data-role="tab" data-tab="pocket">
                         POCKETS
-                    </div>
+                    </div> -->
 
                     <!-- MODAL WRAPPER / BENCH -->
                     <div class="preview__modals--modal actions" data-role="tab" data-tab="actions">
                         <!-- INNER MODAL WRAPPER -->
-                        <div class="preview-action inner-modal">
+                        <div class="bench--wrapper">
+                            <div class="bench--toggle-menu fab fab--vert preview-action__window--snackbar">
+                                <div class="toggle open">
+                                    <div class="btn js-btn btn-alternate">
+                                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="6,7,36,36" enable-background="new 0 0 50 50" xml:space="preserve" transform="rotate(0)" height="18px" width="18px">
+                                            <path fill="#231F20" d="M9.016,40.837c0.195,0.195,0.451,0.292,0.707,0.292c0.256,0,0.512-0.098,0.708-0.293l14.292-14.309
+                                                l14.292,14.309c0.195,0.196,0.451,0.293,0.708,0.293c0.256,0,0.512-0.098,0.707-0.292c0.391-0.39,0.391-1.023,0.001-1.414
+                                                L26.153,25.129L40.43,10.836c0.39-0.391,0.39-1.024-0.001-1.414c-0.392-0.391-1.024-0.391-1.414,0.001L24.722,23.732L10.43,9.423
+                                                c-0.391-0.391-1.024-0.391-1.414-0.001c-0.391,0.39-0.391,1.023-0.001,1.414l14.276,14.293L9.015,39.423
+                                                C8.625,39.813,8.625,40.447,9.016,40.837z">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </div>
 
-                            <!-- BENCH PANEL -->
-                            <div class="preview-action__window" data-role="tab" data-tab="bench">
-                                <!-- <div class="bench--header">
-                                    <div class="current-name">Current</div>
-                                    <div class="current-type">
-                                        <span class="label">Type</span>
-                                        <div class="dropdown">
-                        
-                                        </div>
-                                    </div>
-                                    <div class="btn js-btn btn-edit">
-                        
-                                    </div>
-                                </div> -->
-                                <div class="bench"></div>
-                                <div class="bench--toggle-menu fab fab--vert preview-action__window--snackbar">
-                                    <div class="toggle open">
-                                        <div class="btn js-btn btn-alternate">
-                                            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="6,7,36,36" enable-background="new 0 0 50 50" xml:space="preserve" transform="rotate(0)" height="18px" width="18px">
-                                                <path fill="#231F20" d="M9.016,40.837c0.195,0.195,0.451,0.292,0.707,0.292c0.256,0,0.512-0.098,0.708-0.293l14.292-14.309
-                                                    l14.292,14.309c0.195,0.196,0.451,0.293,0.708,0.293c0.256,0,0.512-0.098,0.707-0.292c0.391-0.39,0.391-1.023,0.001-1.414
-                                                    L26.153,25.129L40.43,10.836c0.39-0.391,0.39-1.024-0.001-1.414c-0.392-0.391-1.024-0.391-1.414,0.001L24.722,23.732L10.43,9.423
-                                                    c-0.391-0.391-1.024-0.391-1.414-0.001c-0.391,0.39-0.391,1.023-0.001,1.414l14.276,14.293L9.015,39.423
-                                                    C8.625,39.813,8.625,40.447,9.016,40.837z">
-                                                </path>
-                                            </svg>
-                                        </div>
-                                    </div>
-                                    <div class="options">
+                                                                    <div class="options">
                                         <div class="export">
                                             <div class="btn js-btn btn-export">
                                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="1,0,24,24" transform="rotate(0)" height="20px" width="18px" fill="currentcolor">
@@ -910,90 +1194,16 @@
                                     </div>
                                 </div>
                             </div>
-                            <!-- EXPORT PANEL /=> COLLECTION LIST -->
-                            <div class="preview-action__window " data-role="tab" data-tab="export">
-                                <h2 class="label">Export Icon</h2>
-                                <span class="options">
-                                    <span class="option selected">Clipboard</span>
-                                    <span class="option">File Format</span>
-                                </span>
-                                <span class="options">
-                                    <span class="selected">RAW SVG</span>
-                                    <span class="context">Component</span>
-                                </span>
-                            </div>
-                            <!-- SAVE PANEL /=> CHOOSE PREVIEWS VS RAW MARKUP VS CSS -->
-                            <div class="preview-action__window" data-role="tab" data-tab="save">
-                                <div class="list-of-collections add-to-collection">
-                                    <div class="flex-container">
-                                        <h2 class="label">Save to Collection</h2>
-                                        <div class="list-of-names">
-
-                                            <div class="collection-wrapper">
-                                                <span class="name">Favorites</span>
-                                                <span class="numberOfIcons">
-                                                    <span class="num">108</span>
-                                                    <span>Icons</span>
-                                                </span>
-                                                <span class="timestamp">
-                                                    <span class="text">Updated</span>
-                                                    <span class="stamp">{ago Hours}</span>
-                                                    <span class="text">ago</span>
-                                                </span>
-                                            </div>
-                                    
-                                            <div class="collection-wrapper selected">
-                                                <span class="name">Recently Added</span>
-                                                <span class="numberOfIcons">
-                                                    <span class="num">24</span>
-                                                    <span>Icons</span>
-                                                </span>
-                                                <span class="timestamp">
-                                                    <span class="text">Updated</span>
-                                                    <span class="stamp">{ago Minutes}</span>
-                                                    <span class="text">ago</span>
-                                                </span>
-                                            </div>
-                                    
-                                            <div class="collection-wrapper selected">
-                                                <span class="name">Project X</span>
-                                                <span class="numberOfIcons">
-                                                    <span class="num">39</span>
-                                                    <span>Icons</span>
-                                                </span>
-                                                <span class="timestamp">
-                                                    <span class="text">Updated</span>
-                                                    <span class="stamp">{ago Days}</span>
-                                                    <span class="text">ago</span>
-                                                </span>
-                                            </div>
-                                    
-                                            <div class="collection-wrapper selected">
-                                                <span class="name">Project Comp</span>
-                                                <span class="numberOfIcons">
-                                                    <span class="num">12</span>
-                                                    <span>Icons</span>
-                                                </span>
-                                                <span class="timestamp">
-                                                    <span class="text">Updated</span>
-                                                    <span class="stamp">{ago Weeks}</span>
-                                                    <span class="text">ago</span>
-                                                </span>
-                                            </div>
-            
-                
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
+
                     </div>
 
                 </div>
 
                 <!-- BUTTONS -->
-                <div class="preview__actions">
-                     <!-- WRAPPER FOR BUTTONS  -->
+               
+                <!-- <div class="preview__actions">
+                     WRAPPER FOR BUTTONS 
                     <div class="preview__actions--buttons row preview__tabber--tab" data-role="tab" data-tab="actions">
                         <div data-role="tab" data-tab="export" class="preview-action__button preview__actions--buttons-btn btn saveit column">
                             <span class="icon export">
@@ -1007,7 +1217,7 @@
                         <div data-role="tab" data-tab="bench" class="preview-action__button preview__actions--buttons-btn btn benchit column">
                             <span class="icon bench">
                                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" height="20px" width="20px">
-                                    <!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. -->
+                                    ! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.
                                     <path d="M160 48C160 21.49 181.5 0 208 0H256V80C256 88.84 263.2 96 272 96H304C312.8 96 320 88.84 320 80V0H368C394.5 0 416 21.49 416 48V176C416 202.5 394.5 224 368 224H208C181.5 224 160 202.5 160 176V48zM96 288V368C96 376.8 103.2 384 112 384H144C152.8 384 160 376.8 160 368V288H208C234.5 288 256 309.5 256 336V464C256 490.5 234.5 512 208 512H48C21.49 512 0 490.5 0 464V336C0 309.5 21.49 288 48 288H96zM416 288V368C416 376.8 423.2 384 432 384H464C472.8 384 480 376.8 480 368V288H528C554.5 288 576 309.5 576 336V464C576 490.5 554.5 512 528 512H368C341.5 512 320 490.5 320 464V336C320 309.5 341.5 288 368 288H416z"></path>
                                 </svg>
                             </span>
@@ -1024,7 +1234,7 @@
                             <span class="label">save</span>
                         </div>
                     </div>
-                </div>
+                </div> -->
 
             </div> 
         </div>
@@ -1033,6 +1243,4 @@
     </div>
 </body>
 
-<script type ="module" src="../src/js/utils/DOM-helpers.js"></script>
-<script type="module" src="../src/main.js"></script>
 </html>
