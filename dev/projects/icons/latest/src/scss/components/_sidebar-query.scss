@@ -1,0 +1,40 @@
+$laptop: 1920px;
+
+// @media screen and (max-width:$laptop)
+// {
+//   #DASHBOARD.dashboard {
+//     margin-left:120px;
+//     margin-right: 30px;
+
+//     .svg-wrapper {
+//       scale: 1;
+//       margin: 12px;
+//     }
+//   }
+
+//   #PREVIEW {
+//     width: 340px;
+//   }
+
+//   .menu .menu__wrapper, #SIDEBAR {
+//     width: 94px;
+//     // border: 1px solid red;
+
+//     .sidebar__tab-set {
+//       padding-bottom: 40px;
+//       height: 60%;
+//     }
+
+//     .sidebar__tab-set .tab__button svg{
+//       height: 48px;
+//       width: 48px;
+//     }
+
+//     .tab__button:hover {
+//       box-shadow:  0px 0px 7px -4px rgba(27,31,35, 0.512),
+//         0px 0px 0px 1px rgba(27,31,35, 0.125),
+//         0 2px 10px 0 rgba(27,31,35,.1128),
+//         0 1px 2px 0 rgba(27,31,35,.2);
+//       }
+//   }
+// }
