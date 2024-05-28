@@ -1,0 +1,95 @@
+*,*::after,*::before {
+    box-sizing: border-box;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+html,body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+}
+
+$font-color: rgb(80,80,80,.67);
+
+$border--placeholder: 1px solid rgba(20,20,20,.05);
+// $border--placeholder: 0;
+$padding--placeholder: 10px 20px;
+$margin--placeholder: 10px;
+// $margin--placeholder: 0;
+
+$color--header: rgba(0, 0, 0, 0.6743);
+$border--default: 1px solid rgba(20,20,20,.05);
+$padding-default: 10px 20px;
+
+$wrapper-width: 300px;
+$padding: 20px;
+
+$track-height: 16px;
+$track-width: 300px;
+
+$handle-size: 24px;
+$handle-top: calc(($handle-size - $track-height)/-2);
+$handle-color: #888888;
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.slider {
+    
+    $border: 1px solid rgba(20,20,20,.05);
+    $bdr-radius: 10px;
+
+    $padding: 10px 20px;
+    $height: 100%;
+
+    $track-height: 16px;
+    $track-width: 300px;
+    $track-color: #f4f4f4;
+    $track-shadow: inset -1px 1px 4px 2px rgba(107, 107, 107, 0.1238);
+
+    $handle-size: 24px;
+    $handle-top: calc(($handle-size - $track-height)/-2);
+    $handle-color: #888888;
+    $handle-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.137), 0px 1px 8px -1px rgba(0, 0, 0, 0.0837);
+    $handle-pos: 0;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 20px;
+    padding: $padding;
+    height: $height;
+
+    border-radius: $bdr-radius;
+    border: $border;
+
+    .slider-track {
+        position: relative;
+        border-radius: 32px;
+
+        height: $track-height;
+        width: $track-width;
+        background: $track-color;
+        box-shadow: $track-shadow;
+
+        .slider-handle {
+            position: absolute;
+            border-radius: 100%;
+            cursor: pointer;
+            will-change: transform;
+            transition: ease;
+
+            top: $handle-top;
+            left: $handle-pos;
+            box-shadow: $handle-shadow;
+            height: $handle-size;
+            width: $handle-size;
+            background: $handle-color;
+        }
+    }
+}

@@ -1,0 +1,35 @@
+.modal-md {
+    width: 350px;
+    height: 375px;
+}
+  
+.modal-menu.modal-sm {
+    width: 350px;
+    height: 200px;
+}
+
+.modal-xl {
+    height: 400px;
+    width: 600px;
+}
+
+.modal-menu.modal-sm.settings {
+    height: 250px;
+}
+
+.modal-menu.modal-lg {
+    width: 350px;
+    height: 375px;
+}
+
+.modal-vert {
+    height: 350px;
+    width: 250px;
+}
+.modal-vert--lg, .modal-vert.docs {
+    width: 275px;
+}
+.modal-vert--sm, .modal-vert.categories, .modal-vert.collections {
+    height: 300px;
+    width: 240px;
+}

@@ -1,0 +1,117 @@
+[data-tab="bench"].preview-action__window {
+    background-color: white;
+    padding: 10px;
+    // BENCH HEADER 
+    &--header {
+      padding: 10px 20px;
+      display: flex;
+      width: 100%;
+    }
+
+    &--bench {
+      position: relative;
+      display: flex;
+      flex-wrap: wrap;
+      align-content: flex-start;
+      max-height: 100%;
+      overflow-y: scroll;
+      padding: 10px;
+
+
+      &-component {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border: 1px solid rgba(20, 20, 20, 0.05);
+        border-radius: 8px;
+        margin: 8px;
+
+        &.selected {
+          border: 1px solid rgba(80, 80, 80, 0.47);
+        }
+      }
+
+    }
+}
+
+.preview-action__window--snackbar {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+    min-width: 40px;
+    padding: 10px 20px;
+    right: 0;
+    top: 0;
+    z-index: 10;
+
+    .btn {
+      margin: 8px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .btn-alternate {
+      transform: rotate(45deg);
+      transition: 200ms ease-in-out;
+    }
+    .btn svg {
+      transition: 150ms ease;
+      stroke: rgba(190, 190, 190, 0.675);
+      height: 16px;
+      width: 16px;
+      fill: rgba(80, 80, 80, 0.97);
+    }
+    .btn-export svg {
+      fill: rgba(80, 80, 80, 0.67);
+    }
+    .btn:hover svg {
+      stroke: rgba(80, 80, 80, 0.67);
+    }
+
+    .options {
+      transform: translateX(100px);
+      transition: 150ms ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex: 1;
+      overflow: hidden;
+
+      .btn {
+        margin: 10px 0;
+        transition: 200ms cubic-bezier(0.05, 0.1, 0.6, 1.05);
+        transition-delay: 170ms;
+        transform: translateX(100px);
+      }
+      .stg-1 {
+        transition-delay: 175ms;
+        transform: translateX(200px);
+      }
+      .stg-2 {
+        transition-delay: 185ms;
+        transform: translateX(300px);
+      }
+      .stg-3 {
+        transition-delay: 200ms;
+        transform: translateX(400px);
+      }
+
+    }
+
+    &:hover {
+      .options {
+        transform: translateX(0);
+
+        .js-btn.btn {
+          transform: translateX(0);
+        }
+      }
+
+      .btn-alternate {
+        transform: rotate(0);
+      }
+
+    }
+}

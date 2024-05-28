@@ -1,0 +1,43 @@
+// export as file or clipboard
+
+.preview-action__window[data-tab="export"] {
+    // background: black;
+    background-color: #fff;
+
+    padding: 32px 10px;
+    padding-bottom: 0;
+    width: 100%;
+    // border-radius: 12px;
+    overflow-y: scroll;
+    // min-height: 480px;
+    height: 100%;
+    h2.label {
+        text-align: center;
+        border-bottom: 1px solid #ddd;
+        position: sticky;
+        margin: 0 0 10px;
+        overflow: visible;
+        font-size: 16px;
+        line-height: 1;
+        padding: 0 0 10px;
+        color: #0d0c22;
+        font-weight: 500;
+        letter-spacing: 0.085em;
+    }
+
+    .options {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        .option {
+            border: 1px solid #ddd;
+            padding: 6px 12px;
+            font-size: 18px;
+            border-radius: 4px;
+            line-height: 1.75;
+            &.selected {
+                background: rgba(119, 198, 255, 0.532);
+            }
+        }
+    }
+}

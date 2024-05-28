@@ -1,0 +1,6 @@
+node_modules
+env
+.env
+mojo
+development
+.parcel-cache
