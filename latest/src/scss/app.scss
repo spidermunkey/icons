@@ -96,21 +96,6 @@ body{
     top: 0;
     left: 0;
 }
-.cosm-search {
-    background-color: rgba(0, 0, 0, 0.24);
-    height: 100%;
-    width: 100%;
-    position: absolute;
-    z-index: 999;
-    pointer-events: none;
-    opacity: 0;
-    backdrop-filter: blur(3px);
-
-    &.active {
-        pointer-events: all;
-        opacity: 1;
-    }
-}
 
 .modal.create-collection {
 
