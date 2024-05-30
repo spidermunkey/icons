@@ -21,33 +21,7 @@
     // z-index: 1000;
 
     &__header {
-        display: none;
-        position: relative;
 
-        height: 112px;
-        width: 100%;
-
-        padding-top: 12px;
-        padding-left: 40px;
-        padding-right: 64px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid #8080802d; 
-        .title,
-        .page-navigator {
-            position: relative;
-            display: flex;
-            font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-            font-size: 32px;
-            margin-bottom: 12px;
-            /* font-style: italic; */
-            color: rgba(20, 20, 21, .67);
-            letter-spacing: 1px;
-        }
-
-        .page-navigator {
-            margin-bottom: 16px;
-            font-size: 18px;
-        }
 
     }
 
