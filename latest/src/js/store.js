@@ -30,15 +30,13 @@ export class SvgModel {
         console.log(res);
         return this.collections[name];
     }
-
+    async getPinned(collection = 'favorites') {
+        const {data} = await API.getCollection(collection);
+        return data.map(value => value.markup)
+    }
     async getRandom(n=20){
         const ids = [];
-        let icons;
-        if (this.ready) 
-            icons = this.all
-        else 
-            icons = await API.getRandom();
-        console.log(this.all,icons)
+        let icons = await API.getRandom();
         for (let i = 0; i < n; i++){
             ids.push(Math.floor(Math.random() * icons.length))
         }

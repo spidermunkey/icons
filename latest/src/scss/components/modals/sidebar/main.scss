@@ -20,7 +20,27 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
 .tab.theme {
     display: none;
 }
+.logo {
+  
+  border: 1px solid #9999994f;
+  position: absolute;
+  height: 42px;
+  width: 42px;
+  border-radius: 42px;
+  @include flex-center();
+  top: 40px;
+  left:48px;
+  cursor: pointer;
+  z-index: 10000;
+  opacity: 0;
+  svg {
+    height: 28px;
+    width: 28px;
+    fill: #888888ad;
+  }
+}
 .menu {
+    transform: translateX(-200px);
     position: absolute;
     left: 0;
     top: 0;
@@ -31,6 +51,7 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
     transition: opacity 400ms ease-in-out;
     border-top-left-radius: $border-radius__default;
     border-bottom-left-radius: $border-radius__default;
+
     &__wrapper {
         position: relative;
         display: flex;
@@ -47,6 +68,7 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
         }
     }
     .sidebar {
+
         position: relative;
         display: flex;
         height: 100%;
@@ -57,6 +79,7 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
         align-items: center;
     }
     .sidebar__tab-set {
+        z-index: -1;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -71,7 +94,6 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
         0px 1px 4px 0px rgba(27,31,35,.0125);
         padding: 12px 6px;
         border-radius: 12px;
-        margin-top: 140px;
         .tab {
             position: relative;
             display: flex;

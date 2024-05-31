@@ -1,5 +1,6 @@
 .widget-pre {
   padding-right: 20px;
+  padding-top: 40px;
 }
   .widget {
       position: relative;
@@ -24,15 +25,16 @@
 
         .widget-header {
           border-bottom: 1px solid $border-super-light;
-          background: radial-gradient(#cacaca10 50%,#e2e2e207);
-
+          background: linear-gradient(to left,transparent,#c9c9c907);
+          background: #ededed19;
+          border-top-right-radius: inherit;
+          border-top-left-radius: inherit;
             .widget-title {
               transform: translateY(0);
               opacity: 1;
             }
           }
         .widget-content {
-          transform: translateY(0);
           .tggle-open,.tggle {
             background: radial-gradient(#cacaca06 50%,#e2e2e205);
             border: 1px solid rgba(182, 182, 182, 0.177);
@@ -47,6 +49,7 @@
         }
       }
       .widget-header {
+        transition: background 200ms ease;
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -73,17 +76,14 @@
           letter-spacing: 0.06em;
           font-size: 12px;
           color: $font-clr-light;
-          transform: translateY(-100px);
+          transform: translateY(-20px);
           opacity: 0;
-          transition: 250ms ease;
+          transition: transform 250ms ease, opacity 120ms ease;
           @include flex-center();
         }
     
       }
-      .widget-content {
-        transform: translateY(-14px);
-        transition: 200ms ease;
-      }
+
       .widget-toggles {
         display: flex;
         align-items: center;
@@ -124,21 +124,26 @@
   
     }
 
-  .widget.pinned-collection {
-      height: 200px;
+  .widget.pinned-widget {
+      height: 180px;
   }
 
   .widget.activity-widget {
-      height: 150px;
+      // height: 150px;
   }
 
 
 .preview-widget {
   height: 120px;
+  &:hover .widget-content {
+    transform: translateY(-4px);
+  }
   .widget-content {
     display: flex;
     padding-left: 10px;
     margin-top: 18px;
+      transform: translateY(-14px);
+      transition: 200ms ease;
   }
   .wp-info {
     display: flex;
@@ -164,6 +169,9 @@
       white-space: nowrap;
       color: #555;
       transition: border-color 80ms ease, color 120ms ease;
+      > div {
+        scale: .9;
+      }
       .icon-label {
         position: absolute;
         margin-top: 1px;
@@ -195,7 +203,10 @@
     }
 
   }
-
+  .info-label > div {
+    letter-spacing: 0.08em;
+    transform: translateX(-10px) scale(.9);
+  }
   .widget-preview-icon {
     height: 64px;
     width: 64px;
@@ -232,24 +243,28 @@
 }
 
 .bench-widget {
-  height: 80px;
+  height: 85px;
 
   &:hover {
+    .widget-content {
+      transform: translateY(-4px) scale(.95);
+    }
     .bench-preview-count {
       opacity: .9;
     }
     .widget-toggles {
-      transform: translateY(-4px);
+      transform: translateY(-2px);
       scale: .95;
     }
     .bench-preview-icons {
       opacity: 1;
     }
+
 }
   .widget-content {
     transition: transform 200ms ease;
-    transform: translate(-40px,-16px);
-    scale: .95;
+    transform: translate(-40px,-16px) scale(.95);
+    
     display: flex;
     
   }
@@ -258,7 +273,7 @@
     opacity: 0;
     border-right: 1px solid $border-light;
     border-radius: 80px;
-    transform: translateX(-12px);
+    transform: translateX(-12px) translateY(8px);
     scale: .9;
     &:after {
       content: "";
@@ -315,5 +330,64 @@
   .divider {
     fill: #8c8c8c;
     margin: 0px 4px;
+  }
+}
+
+.pinned-widget{
+  &:hover .widget-content {
+    transform: translateY(16px);
+  }
+  .widget-content {
+    transition: 200ms ease;
+  }
+  .content-header {
+    margin-left: 24px;
+    display: flex;
+  }
+  div.pinned-icon {
+    transform: scale(.8);
+    opacity: .9;
+    stroke: #777;
+  }
+  .pinned-preview {
+    opacity: .6;
+    display: flex;
+    flex-wrap: wrap;
+    width: 200px;
+    margin-left: 24px;
+    margin-top: 18px;
+    .bp-icon {
+      height: 20px;
+      width: 20px;
+      margin: 4px;
+    }
+    svg {
+      height: 16px;
+      width: 16px;
+    }
+  }
+}
+
+.activity-widget {
+  height: 80px;
+  .divider svg {
+      fill: $font-clr-light;
+  }
+  .widget-content {
+    margin-top: 12px;
+    padding-left: 24px;
+    color: $font-clr-light;
+    scale: .9;
+    display: flex;
+    align-items: center;
+  }
+  .btn-scan {
+    margin-left:48px;
+    width: 80px;
+    text-align: center;
+    padding: 4px 20px;
+    border-radius: 8px;
+    border: 1px solid $border-light;
+    @include flex-center();
   }
 }

@@ -10,7 +10,7 @@
   padding-top: 24px;
   padding-left: 40px;
   padding-right: 64px;
-  padding-bottom: 12px;
+  margin-left: 72px;
 
   .btn-filter {
     border: 1px solid rgba(128, 128, 128, 0.1771);
@@ -19,10 +19,13 @@
     border-radius: 8px;
     letter-spacing: 0.035em;
     opacity: .8;
+    opacity: 0;
     color: rgba(20, 20, 21, .67);
     display: inline-flex;
     align-items: center;
     transition: color 400ms ease;
+    margin-right:80px;
+
     &:hover {
         box-shadow: -1px 0px 3px 0px rgba(128, 128, 128, 0.092), -1px 0px 3px 0px rgba(128, 128, 128, 0.0392);
         color: rgba(20,20,20,.82);
@@ -72,6 +75,7 @@
       justify-content: space-between;
   }
   .info-bar {
+    opacity: 0;
       font-family: Arial, Helvetica, sans-serif;
       letter-spacing: 0.035em;
       color: rgba(20, 20, 21, .3);

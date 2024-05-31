@@ -51,6 +51,8 @@ const
             random = await store.getRandom();
             localStorage.setItem('random',JSON.stringify(random.map(index => index.markup)))
         };
+       $('.pinned-preview').innerHTML = random.map(value => `<div class="bp-icon">${value}</div>`).join('')
+
         $('.bench-preview-icons .bp-icon-wrapper').innerHTML = random.slice(-8).map((node => `<div class="bp-icon">${node}</div>`)).join('')
             createAllTab();
             listen(document, handleClickOutside.bind(context));
