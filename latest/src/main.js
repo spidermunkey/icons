@@ -92,7 +92,7 @@ const
                             .bindTabber(previewTabber)
                             .onOpen(() => tabber.classList.add('active'))
                             .onClose(() => tabber.classList.remove('active'));
-                if (tabName == initialPreviewModalOnAppOpen) modal.open();
+                // if (tabName == initialPreviewModalOnAppOpen) modal.open();
                 return modal;
             });
     }())
