@@ -1,0 +1,233 @@
+@import './component-preview.scss';
+@import './color-picker.scss';
+@import './position-preview.scss';
+
+.preview {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  user-select: none;
+  padding-top: 20px;
+  border: 1px solid rgba(20, 20, 20, 0.05);
+  border-radius: 10px;
+  width: 305px;
+  height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  // WINDOW
+  &__window {
+      position: relative;
+      border-radius: 10px;
+      padding: 16px 20px;
+
+      &--display {
+
+          background: inherit;
+          position: relative;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          &-current,
+          &-current svg {
+          border: 1px dotted transparent;
+
+              position: relative;
+              height: 80px;
+              width: 80px;
+              z-index: 4;
+          }
+      }
+
+      &--navigator {
+          position: absolute;
+          height: 100%;
+          /* min-width: 40px; */
+          top: 0;
+          background: transparent;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          
+          &.btn-next {
+              right: 10px;
+          }
+          &.btn-prev {
+              left: 10px;
+          }
+          svg {
+              height: 28px;
+              width: 28px;
+              stroke: currentColor;
+          }
+      }
+  }
+  // DESCRIPTION
+  &__description {
+      position: relative;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      padding: 16px 20px;
+      padding-top: 8px;
+      // general styles
+      .group {
+          height: 100%;
+      }
+
+      // name/category fields -> column
+      &--meta {
+          font-family: Arial, Helvetica, sans-serif;
+
+          // name container
+          .title-group__name {
+              color: rgba(20, 20, 20, 0.78);
+              font-size: 20px;
+              font-weight: 700;
+              white-space: nowrap;
+              padding-bottom: 4px;
+          }
+          // category container
+          .title-group__category {
+              color: rgba(50, 50, 50, 0.87);
+              font-size: 16px;
+              line-height: 20px;
+              padding-bottom: 4px;
+              // transform: translateY(-6px);
+          }
+      }
+
+      // quick toggles -> row
+      &--snackbar {
+          position: absolute;
+          right: 20px;
+          align-items: flex-end;
+          line-height: 20px;
+          &-button {
+              cursor: pointer;
+              opacity: .67;
+              margin-right: 10px;
+              &:last-of-type {
+                  margin-right: 0;
+              }
+
+              svg {
+                  transition: all 200ms ease;
+                  height: 18px;
+                  width: 18px;
+              }
+          }
+          & .btn-favit.icon-is-favorite {
+
+              svg {
+                  transform: scale(1.1);
+                  fill: rgb(255, 217, 4);
+              }
+          }
+
+      }
+  }
+  // TABS
+  &__tabber {
+      padding: 0px 16px;
+      position: relative;
+      justify-content: space-between;
+
+      .tab {
+          font-family: Arial, Helvetica, sans-serif;
+          font-size: 14px;
+          letter-spacing: 0.075em;
+          margin: 4px 0 8px 0;
+          padding: 16px 20px;
+          // padding-bottom: 14px;
+          border-top: 1px solid rgba(20, 20, 20, 0.05);
+          color: rgba(20, 20, 20, 0.543);
+          
+          &.active .label {
+              // show active pointer on click
+              &::after {
+                  opacity: 0.7;
+                  transform: translateY(8px);
+              }
+              // animate active pointer on hover
+              &::after {
+                  transform: translateY(12px);
+              }
+          }
+          .label {
+              position: relative;
+              background: white;
+              cursor: pointer;
+              z-index: 1;
+              // active pointer
+              &::after {
+                  content: "";
+                  background: inherit;
+                  position: absolute;
+                  z-index: -1;
+                  bottom: 0;
+                  left: 50%;
+                  height: 5px;
+                  width: 5px;
+                  border-radius: 100%;
+                  opacity: 0;
+                  background-color: rgba(0, 0, 0, 0.843);
+                  transform: translateY(0);
+                  transition: 200ms ease-in-out;
+              }
+          }
+      }
+
+  }
+  // MODALS
+  &__modals {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+      overflow-y: scroll;
+      width: 100%;
+      height: 100%;
+      flex: 1;
+      margin-bottom: 20px;
+      overflow: visible;
+      transition: all 350ms ease;
+      &--modal {
+          padding: 0 20px;
+          visibility: hidden;
+          pointer-events: none;
+          opacity: 0;
+          position: absolute;
+          top: 0;
+          left: 0;
+          height: 100%;
+          width: 100%;
+          overflow: scroll;
+          overflow-x: visible;
+          transition: 80ms linear;
+
+          // stops nested "hidden" && "active" tabs from interupting top level pointer
+          [data-role="tab"] {
+              pointer-events: none;
+          }
+
+          &.active {
+              visibility: visible;
+              opacity: 1;
+              pointer-events: all;
+              // left: 0;
+          // reactivate nested tabs
+              [data-role="tab"] {
+                  pointer-events: all;
+              }
+          }
+
+          &.color {
+              background-color: white;
+              overflow: visible;
+              display: flex;
+              flex-direction: column;
+          }
+      }
+  }
+}
+

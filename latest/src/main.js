@@ -1,14 +1,12 @@
-import { SvgModel } from './store.js'
-import { Tracker } from './Tracker.js'
-import { Preview } from './components/Preview.js'
-import { SearchModal } from './components/Search.js'
-import { ContextMenu } from './components/Context.js'
-
+import { SvgModel } from './js/store.js'
+import { Tracker }  from './js/Tracker.js'
+import { Preview } from './js/components/Preview.js'
+import { SearchModal } from './js/components/Search.js'
+import { ContextMenu } from './js/components/Context.js'
 const
-
     API_PORT = 1279,
     store = new SvgModel(),
-    tracker = new Tracker(),
+    tracker = Tracker,
     preview = new Preview(),
     search = new SearchModal(),
     context = new ContextMenu(),
@@ -39,241 +37,152 @@ const
     btnCopy = $('.btn-copy'),
     btnBorder = $('.btn-border'),
     btnFavorite = $('.btn-favit'),
-    btnFavoriteContext = $('.btn-snack.favit'),
-
     // get data
     modelReady = store.init(),
     categoriesReady = createCategoryPanels(),
     menuReady = createCollectionPanels(),
     initialPreviewModalOnAppOpen = 'position';
-
-    console.log(previewModals)
     // build app
     (async function init() {
-
-        
-        createAllTab();
-
-        listen(document, handleClickOutside.bind(context));
-        listen(document, handleRightClick.bind(context), 'contextmenu');
-        // modal togglers
-        createCollectionModal
-            .bindToggler($('.menu__actions-button.create-collection'))
-            .bindCloser( $('.close',createCollectionOverlay), $('.cc-cancel',createCollectionOverlay))
-            .bindTabber( menuTabber )
-            .onOpen(showModal)
-            .onClose(hideModal)
-
-        createCollectionOverlay.onclick = () => closeOnClickOutside()
-
-
-        // preview.init
-        btnBorder.onclick = () => preview.toggleBorder();
-        $('.search-modal .btn-copy-icon').onclick = () => search.copyToClipboard();
-        $('.search-modal .btn-edit-icon').addEventListener('click',async () => {
-            await modelReady
-            preview.update(getIconById( $('.icon-prev').dataset.id));
-            preview.toggleBorder();
-            search.close();
-        })
-        btnCopy.onclick = () => preview.copyToClipboard();
-        btnFavorite.onclick = () => save('favorites');
-        btnFavoriteContext.onclick = () => toggleFavorite();
-        createCollectionForm.onsubmit = () => handleCreateCollectionForm()
-
-        dashboard.onmousedown = (e) => handleClick(e);
-        document.addEventListener('keydown',handleKeys);
-
-
-        // init sidebar tab functionality
-        menuIcons.map(group => {
-
-            let tabIcon = $('.tab__button',group),
-                correspondingModal = $('.tab__modal',group),
-                tabCloser = $('.btn.close-modal',correspondingModal),
-                modal = new Modal(correspondingModal);
-
-            modal
-                .bindOpener(tabIcon)
-                .bindTabber(menuTabber)
+            createAllTab();
+            listen(document, handleClickOutside.bind(context));
+            listen(document, handleRightClick.bind(context), 'contextmenu');
+            // modal togglers
+            createCollectionModal
+                .bindToggler($('.menu__actions-button.create-collection'))
+                .bindCloser( $('.close',createCollectionOverlay), $('.cc-cancel',createCollectionOverlay))
+                .bindTabber( menuTabber )
                 .onOpen(showModal)
                 .onClose(hideModal);
-                if (tabCloser) modal.bindCloser(tabCloser);
-
-        });
-
-
-        // init preview tab functionality // ['positions', 'preview', 'color']
-        previewModals.map(element => {
-
-            let tabName = element.dataset.tab,
-                modal = new Modal(element),
-                tabber = $(`.preview__tabber--tab[data-tab="${tabName}"]`);
-
-            // console.log(tabName,modal,tabber)
-            if (tabber)
+            createCollectionOverlay.onclick = () => closeOnClickOutside();
+            // preview.init
+            btnBorder.onclick = () => preview.toggleBorder();
+            $('.search-modal .btn-copy-icon').onclick = () => search.copyToClipboard();
+            $('.search-modal .btn-edit-icon').addEventListener('click', async () => {
+                await modelReady;
+                preview.update(getIconById( $('.icon-prev').dataset.id));
+                preview.toggleBorder();
+                search.close();
+            })
+            btnCopy.onclick = () => preview.copyToClipboard();
+            btnFavorite.onclick = () => save('favorites');
+            createCollectionForm.onsubmit = () => handleCreateCollectionForm();
+            dashboard.onmousedown = (e) => handleClick(e);
+            document.addEventListener('keydown',handleKeys);
+            // init sidebar tab functionality
+            menuIcons.map(group => {
+                let tabIcon = $('.tab__button',group),
+                    correspondingModal = $('.tab__modal',group),
+                    tabCloser = $('.btn.close-modal',correspondingModal),
+                    modal = new Modal(correspondingModal);
                 modal
-                    .bindOpener(tabber)
-                    .bindTabber(previewTabber)
-                    .onOpen(() => tabber.classList.add('active'))
-                    .onClose(() => tabber.classList.remove('active'));
+                    .bindOpener(tabIcon)
+                    .bindTabber(menuTabber)
+                    .onOpen(showModal)
+                    .onClose(hideModal);
+                if (tabCloser) modal.bindCloser(tabCloser);
+            });
+            // init preview tab functionality // ['positions', 'preview', 'color']
+            previewModals.map(element => {
+                let tabName = element.dataset.tab,
+                    modal = new Modal(element),
+                    tabber = $(`.preview__tabber--tab[data-tab="${tabName}"]`);
+                if (tabber) modal
+                            .bindOpener(tabber)
+                            .bindTabber(previewTabber)
+                            .onOpen(() => tabber.classList.add('active'))
+                            .onClose(() => tabber.classList.remove('active'));
+                if (tabName == initialPreviewModalOnAppOpen) modal.open();
+                return modal;
+            });
+    }())
 
-            if (tabName == initialPreviewModalOnAppOpen) 
-                modal.open();
-
-            return modal
-        });
-
-
-        // init preview action "sub-tabs" // [ export menu, save menu, benched icons ]
-        // previewSubModals.map(element => {
-
-        //     let tabName = element.dataset.tab,
-        //         modal = new Modal(element),
-        //         tabber = $(`.preview-action__button[data-tab="${tabName}"]`);
-
-        //     modal
-        //         .bindOpener(tabber)
-        //         .bindTabber(previewActionTabber)
-        //         .onOpen(() => tabber.classList.add('active'))
-        //         .onClose(() => tabber.classList.remove('active'))
-
-        //     return modal
-        // });
-
-}())
-
-function createDashboardPanel(tabButton,type) {
-    // Create Dynamic Modal For Newly created links inside menu
+function createDashboardPanel(tabButton,type) { // Create Dynamic Modal For Newly created links inside menu
     let panel = div(),
-          tabName = tabButton.dataset.tab,
-          endpoint = type == 'collection' ? resolveCollectionEndpoint(tabName) : resolveCategoryEndpoint(tabName)
-            console.log('creating modal for endpoint', endpoint)
-            console.log(tabName,tabButton)
-
-          const modal = new DynamicModal(panel,{ 
-                type:'eager', 
-                endpoint, 
-                dataHandler: createDashboard 
-          });
-
+        tabName = tabButton.dataset.tab,
+        endpoint = type == 'collection' ? resolveCollectionEndpoint(tabName) : resolveCategoryEndpoint(tabName);
+        const modal = new DynamicModal(panel, { type:'eager', endpoint, dataHandler: createDashboard });
         dashboard.appendChild(panel);
-
         panel.classList.add('dashboard__modal');
         panel.dataset.tab = tabName;
         panel.dataset.type = 'category';
-
         modal.bindOpener(tabButton)
-        .bindTabber(dashBoardTabber)
-        .onOpen(showModal)
-        .onClose(hideModal)
-
+            .bindTabber(dashBoardTabber)
+            .onOpen(showModal)
+            .onClose(hideModal);
 }
 
-async function createCategoryLinks() {
-    // get list of names from db
-    console.log('populating categories')
+async function createCategoryLinks() { // get list of names from db
     const cNames = await store.getCategoryNames();
-    cNames.sort().forEach(name => categoryMenuComponent.addItem(name))
-
+    cNames.sort().forEach(name => categoryMenuComponent.addItem(name));
     categoryMenuComponent.appendTo(categoryMenu);
     return categoryMenuComponent.links;
 }
 
-async function createCollectionLinks() {
-    // get list of names from db
+async function createCollectionLinks() { // get list of names from db
     const names = await store.getCollectionNames();
-    names.forEach(name => collectionMenuComponent.addItem(name))
+    names.forEach(name => collectionMenuComponent.addItem(name));
     collectionMenuComponent.appendTo(collectionMenu);
     return collectionMenuComponent.links;
 }
 
-async function createCategoryPanels() {
-    (await createCategoryLinks()).forEach( link => createDashboardPanel(link,'category') )
-}
+async function createCategoryPanels() { (await createCategoryLinks()).forEach( link => createDashboardPanel(link,'category') )}
 
-async function createCollectionPanels() {
-    (await createCollectionLinks()).forEach( link => createDashboardPanel(link,'collection') )
-}
+async function createCollectionPanels() {(await createCollectionLinks()).forEach( link => createDashboardPanel(link,'collection') )}
 
 async function createAllTab() {
-
     const tabName = 'all',
-        fragment = frag(),
-        dash = div();
-        fragment.appendChild(dash);
-
+          fragment = frag(),
+          dash = div();
+    fragment.appendChild(dash);
     dash.classList.add('dashboard__modal');
-
-    dash.dataset.tab = 'all';
-    dash.dataset.type = 'all';
-
-
-    // dash.addEventListener('mousedown', handleModalClick);
-
-    const modal = new DynamicModal(dash, {
-        type:'eager',
-        endpoint: resolveCategoryEndpoint('all'),
-        dataHandler: createDashboard,
-    });
-
-    // add event listener to link button
+    dash.dataset.tab = tabName;
+    dash.dataset.type = tabName;
+    const modal = new DynamicModal(dash, { type:'eager', endpoint: resolveCategoryEndpoint('all'), dataHandler: createDashboard } );
     modal.bindOpener(document.getElementById('HOME'))
         .bindTabber(dashBoardTabber)
         .onOpen(showModal)
         .onClose(hideModal)
         .open();
-
-    dashboard.append(fragment)
-    
+    dashboard.append(fragment);
 };
 
 function updateFavoriteIcons() {
-
-    if (app.state.context && app.state.context.isFavorite) 
-        $('.btn-snack.favit').classList.add('icon-is-favorite');
-    else 
-        $('.btn-snack.favit').classList.remove('icon-is-favorite');
-
-    if (preview.currentIcon.isFavorite) 
-        $('.btn-favit').classList.add('icon-is-favorite');
-    else 
-        $('.btn-favit').classList.remove('icon-is-favorite');
+    preview.currentIcon.isFavorite
+        ? $('.btn-favit').classList.add('icon-is-favorite')
+        : $('.btn-favit').classList.remove('icon-is-favorite');
 }
 
 function showModal() {
     this.element.classList.add('active');
-    // app.emit('Tab Open)
     app.state.tab = this.element.dataset.tab;
     app.state.type = this.element.type;
 }
 
 function hideModal() {
     this.element.classList.remove('active');
-    // app.emit('Tab Closed')
     app.state.tab = undefined;
     app.state.type = undefined;
 }
 
 function MenuList(listOfNames) {
-
     this.element = ul();
     this.element.classList.add('menu-items');
-    this.addItem = (name) => {
+    this.addItem = name => {
         const newLink = MenuListItem(name);
         appendElement( this.element, newLink );
-        return newLink
+        return newLink;
     }
     this.appendTo = parent => appendElement( parent, this.element);
     this.cloneTo = parent => appendElement( parent, this.element.cloneNode(true));
     this.replaceItems = listOfNames => {
         this.innerHTML = ''; 
-        listOfNames.forEach(this.addItem)
+        listOfNames.forEach(this.addItem);
     }
 
     Object.defineProperty(this, 'links', {
         get() {
-            return $$('.modal__menu--items-item', this.element)
+            return $$('.modal__menu--items-item', this.element);
         }
     })
     
@@ -285,7 +194,7 @@ function MenuListItem(name) {
     li.classList.add('modal__menu--items-item');
     li.dataset.tab = name;
     li.textContent = capitalize(name);
-    return li
+    return li;
 }
 
 function createIconElement(props) {
@@ -303,10 +212,10 @@ function createIconElement(props) {
 };
 
 function createDashboard(list) {
-    const wrapper = document.createElement('div')
-    wrapper.classList.add('content-wrapper')
-    list.forEach(prop => wrapper.appendChild(createIconElement(prop)))
-    return wrapper.innerHTML
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('content-wrapper');
+    list.forEach(prop => wrapper.appendChild(createIconElement(prop)));
+    return wrapper.innerHTML;
 };
 
 async function handleCreateCollectionForm(e) {
@@ -317,20 +226,19 @@ async function handleCreateCollectionForm(e) {
 }
 
 function closeOnClickOutside(e) {
-    console.log(e.target.closest('.create-collection__form'))
     if (!e.target.closest('.create-collection__form')) createCollectionModal.close();
 }
 
 function resolveEP(ep) {
-    return `http://localhost:${API_PORT}/icons/${ep}`
+    return `http://localhost:${API_PORT}/icons/${ep}`;
 };
 
 function resolveCategoryEndpoint(categoryName) {
-    return resolveEP(`categories/${categoryName}`)
+    return resolveEP(`categories/${categoryName}`);
 };
 
 function resolveCollectionEndpoint(collectionName) {
-    return resolveEP(`collections/${collectionName}`)
+    return resolveEP(`collections/${collectionName}`);
 };
 
 
@@ -344,174 +252,102 @@ function updatePreview(id) {
 async function toggleFavorite() {
 
     if (!this.state.context) return
-    
-        let node = this.state.context,
-            isFav = node.isFavorite;
-
+    let node = this.state.context,
+        isFav = node.isFavorite;
         node.isFavorite = !isFav;
-        
-        await save('favorites');
-        updateFavoriteIcons();       
+    await save('favorites');
+    updateFavoriteIcons();       
 }
 
 
 async function save( destination, node = preview.currentIcon ) {
-    
-    console.log('saving to',destination,store.collections[destination]);
-
     // should be a put req
     if (destination === 'favorites') 
         node.isFavorite = true;
-
     node = node.save();
-
-    let { id } = node;
-
-    let message = await store.addToCollection({
-
+    let { id } = node,
+        message = await store.addToCollection({
         destination,
         id,
         onFailure:(message) => console.error(message),
         onSuccess:(message) => console.log(message),
     });
-
     if (message.success === true && destination === 'favorites')
             updateFavoriteIcons();
-
     return message;
-
 }
 
 async function copyFromSearch() {
-
+    //...
 }
 
 async function handleClick(event) {
-
         console.log('model status: ',modelReady);
         await modelReady;
-
-        if (event.target.closest('.search-modal')){
-            handleSearchClick(event);
-            return;
-        }
-
+        if (event.target.closest('.search-modal')) return handleSearchClick(event);
         let wrapper = event.target.closest('.svg-wrapper');
-        if (!wrapper) {
-            console.log('no click on wrapper');
-            return 
-        }
-
-        let { id } = wrapper.dataset;
-        console.log(id)
-        if (!id) {
-            console.error('this element doesnt have an id');
-            return;
-        }
-
-
-
-        const ctrlClick = event.ctrlKey;
-        const rightClick = event.buttons === 2;
-        const leftClick = event.buttons === 1;
-
-        if (leftClick && ctrlClick) {
-            console.log('control click');
-            toggleBench(id);
-            return
-        }
-        else if (rightClick) {
-            console.log('right click');
-            // updateContext(meta);
-            return
-        }
+        if (!wrapper) return console.log('no click on wrapper');
+        let id = wrapper.dataset.id;
+        if (!id) return console.error('this element doesnt have an id');
+        const ctrlClick = event.ctrlKey,
+              rightClick = event.buttons === 2,
+              leftClick = event.buttons === 1;
+        if (leftClick && ctrlClick) return toggleBench(id);
+        else if (rightClick) return  console.log('right click');
         else if (leftClick) {
-            console.log('left click');
             updatePreview(id);
             tracker.logClickedIcon(getIconById(id));
             return;
         }
-
-
 }
 
 function handleKeys(event) {
-    const escape = event.key === 'escape' || event.key === 'Escape'
-
-    const exitSearch = escape && search.state === 'active'
-    if (exitSearch) {
-        search.close();
-    }
-    console.log(exitSearch)
+    const escape = event.key === 'escape' || event.key === 'Escape';
+    const exitSearch = escape && search.state === 'active';
+    if (exitSearch) search.close();
 }
 function handleSearchClick(event) {
-    const ctrlClick = event.ctrlKey;
-    const rightClick = event.buttons === 2;
-    const leftClick = event.buttons === 1;
-    if (leftClick) {
-        console.log('left-click')
-    }
+    const ctrlClick = event.ctrlKey,
+          rightClick = event.buttons === 2,
+          leftClick = event.buttons === 1;
+    if (leftClick) console.log('left-click');
 }
 
 function toggleBench(id) {
-    console.log('opening benched icons')
+    console.log('adding ',id,' to benched icons');
 }
 
 async function createCollection(name){
     $('.cc-button').innerHTML = `<div class="cc-loader--container"><span>waiting for server</span><div class="cc-loader"></div></div>`;
-    await modelReady;
-    await menuReady;
-    await categoriesReady;
-
+    await modelReady , menuReady , categoriesReady;
     const success = await store.createCollection(name);
+    if (success) { // Create Dynamic Modal For Newly created links inside menu
+        const cLink = collectionMenuComponent.addItem(name),
+              a2cLink = addToCollectionComponent.addItem(name,0),
+              panel = document.createElement('div'),
+              tabName = cLink.dataset.tab;
 
-    if (success) { 
-        console.log('collection successfully created... creating links')
-        console.log(menuReady,collectionMenuComponent)
-
-        
-        const cLink = collectionMenuComponent.addItem(name);
-        const a2cLink = addToCollectionComponent.addItem(name,0);
-        console.log('added',cLink,'to',collectionMenuComponent);
-        console.log('added',a2cLink.element,'to',addToCollectionComponent);
-
-        // Create Dynamic Modal For Newly created links inside menu
-        const panel = document.createElement('div')
-        const tabName = cLink.dataset.tab;
-
-        panel.classList.add('dashboard__modal')
+        panel.classList.add('dashboard__modal');
         panel.dataset.tab = tabName;
         dashboard.appendChild(panel);
         panel.addEventListener('mousedown', (event) => {
-
-            let wrapper = event.target.closest('.svg-wrapper')
-            if (!wrapper) return 
-
-                let { name , rebased } = wrapper.dataset
-                    key = rebased ? rebased : name;
-
-            updatePreview({ event: e, type:'collection', key, tabName })
-
-        })
-
+            let wrapper = event.target.closest('.svg-wrapper');
+            if (!wrapper) return;
+            let key = wrapper.dataset.rebased ? wrapper.dataset.rebased : wrapper.dataset.name;
+            updatePreview({ event: e, type:'collection', key, tabName });
+        });
         const modal = new DynamicModal(panel, {
             type: 'lazy', 
             endpoint: resolveCollectionEndpoint(tabName),
             dataHandler: createDashboard 
-        })
-
+        });
         modal.bindOpener(cLink)
             .bindTabber(dashBoardTabber)
             .onOpen(showModal)
-            .onClose(hideModal)
-
-        a2cLink.element.addEventListener('click', () => save(name))
-
-        // COLLECTION_MODALS.set(tabName,modal);
-        console.log('closing',createCollectionModal)
+            .onClose(hideModal);
+        a2cLink.element.addEventListener('click', () => save(name));
         $('.cc-button').innerHTML = `Create Collection`;
         createCollectionModal.close();
-        
     }
 }
 
@@ -521,12 +357,6 @@ function getIconById(id) {
 
 
 function handleContextMenuEvent(event) {
-
-    // const clickedIcon = elementClicked('.dashboard .svg-wrapper',event);
-
-    // if (clickedIcon && clickedIcon.dataset.isFavorite === 'true') highlightFavoriteIcon() 
-    // else hideFavoriteIcon();
-        
     context.handleRightClick(event);
 }
 
@@ -538,44 +368,30 @@ function handleClickOutside(event) {
 }
 
 function handleRightClick(event) {
-    console.log('here')
     const clickedContextMenu = elementClicked('.db-context',event);
     const clickedIcon = elementClicked('.dashboard .svg-wrapper',event);
-    console.log(clickedContextMenu,clickedIcon)
-    // console.log(clickedIcon)
     // handle right click outside
-    console.log(context.state)
     if ( this.state === 'active' && !clickedContextMenu ) {
         event.preventDefault();
-
         if (clickedIcon) {
             const { id } = clickedIcon.dataset;
-            const icon = getIconById(id)
-            console.log('here now')
-            console.log(icon)
+            const icon = getIconById(id);
             this.updateMouseBasedPosition(event);
-            this.update(icon)
-            return
+            this.update(icon);
+            return;
         }
-        context.close()
-        return;
+        return context.close();
     }
     
     if (context.state === 'inactive' && clickedIcon) {
-        const {id} = clickedIcon.dataset
-        const icon = getIconById(id)
+        const {id} = clickedIcon.dataset;
+        const icon = getIconById(id);
         event.preventDefault();
-        console.log('down here now')
-
         // position menu
         this.updateMouseBasedPosition(event);
-        this.update(icon)
+        this.update(icon);
         // show menu
-        this.open();
-        return
+        return this.open();
     }
-
-    this.close();
-
-    return;
+    return this.close();
 }

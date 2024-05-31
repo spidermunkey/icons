@@ -1,0 +1,126 @@
+.dashboard__header {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  display: flex;     
+  align-items: flex-end;
+  justify-content: space-between;
+  height: 112px;
+  width: 100%;
+  padding-top: 24px;
+  padding-left: 40px;
+  padding-right: 64px;
+  padding-bottom: 12px;
+
+  .btn-filter {
+    border: 1px solid rgba(128, 128, 128, 0.1771);
+    font-family: Arial, Helvetica, sans-serif;
+    padding: 4px 8px;
+    border-radius: 8px;
+    letter-spacing: 0.035em;
+    opacity: .8;
+    color: rgba(20, 20, 21, .67);
+    display: inline-flex;
+    align-items: center;
+    transition: color 400ms ease;
+    &:hover {
+        box-shadow: -1px 0px 3px 0px rgba(128, 128, 128, 0.092), -1px 0px 3px 0px rgba(128, 128, 128, 0.0392);
+        color: rgba(20,20,20,.82);
+        svg {
+            fill: rgba(20,20,20,.82);
+        }
+    }
+    cursor: pointer;
+    .label {
+        display: inline-flex;
+        height: 100%;
+        line-height: 100%;
+        align-items: center;
+        border-left: 1px solid rgba(128, 128, 128, 0.1771);
+        padding-left: 8px;
+        margin-left: 6px;
+    }
+  
+    svg {
+        height: 20px;
+        width: 20px;
+        fill: rgba(20, 20, 21, .67);
+        transition: fill 400ms ease;
+    }
+  }
+  
+  .title,
+  .page-navigator {
+      position: relative;
+      display: flex;
+      font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+      font-size: 32px;
+      margin-bottom: 12px;
+      color: rgba(20, 20, 21, .67);
+      letter-spacing: 1px;
+  }
+  .page-navigator {
+      margin-bottom: 16px;
+      font-size: 18px;
+  }
+  .tool-bar,
+  .info-bar {
+      display: flex;
+      width: 100%;
+  }
+  .tool-bar {
+      justify-content: space-between;
+  }
+  .info-bar {
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: 0.035em;
+      color: rgba(20, 20, 21, .3);
+      cursor: default;
+      .project {
+          font-size: 14px;
+          margin-left: 8px;
+          margin-right: 16px;
+      }
+      .headers {  
+          display: flex;
+          align-items: center;
+          &:hover {
+              .p-counter{
+                  fill: rgba(20, 20, 21, .57)
+              }.divider svg {
+                  stroke: rgba(20, 20, 21, .57)
+              }
+          }
+          .p-counter {
+              height: 14px;
+          }
+          .current-tab {
+              margin: 0px 6px;
+              padding: 4px 8px;
+              background: white;
+              border-radius: 8px;
+              border: 1px solid rgba(128, 128, 128, 0.1771);
+              color: rgba(20,20,20,.52);
+              cursor: pointer;
+              &:hover {
+                  color: rgba(20,20,20,.62);
+                  box-shadow: -1px 0px 3px 0px rgba(128, 128, 128, 0.092), -1px 0px 3px 0px rgba(128, 128, 128, 0.0392);
+              }
+          }
+          .divider {
+              display: flex;
+              align-items: center;
+              cursor: pointer;
+              svg {
+                  height: 14px;
+                  width: 14px;
+                  stroke: rgba(20, 20, 21, .47)
+              }
+          }
+          .p-counter {
+              fill: rgba(20, 20, 21, .47)
+          }
+      }
+  }
+}
+

@@ -4,7 +4,7 @@
   "description": "",
   "scripts": {
     "linux": "rm -rf ./development && rm -rf ./.parcel-cache && parcel public/index.html --dist-dir development -p 5851",
-    "windows": "parcel public/index.html --dist-dir ./development -p 2222",
+    "windows": "parcel public/index.html --dist-dir ./development -p 4444",
     "build": "parcel build public/index.html --dist-dir dist --public-url ./"
   },
   "author": "",
