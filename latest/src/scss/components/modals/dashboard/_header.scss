@@ -48,7 +48,7 @@
         transition: fill 400ms ease;
     }
   }
-  
+
   .title,
   .page-navigator {
       position: relative;
@@ -104,7 +104,7 @@
               cursor: pointer;
               &:hover {
                   color: rgba(20,20,20,.62);
-                  box-shadow: -1px 0px 3px 0px rgba(128, 128, 128, 0.092), -1px 0px 3px 0px rgba(128, 128, 128, 0.0392);
+                  box-shadow: 1px 0px 2px 0px rgba(128, 128, 128, 0.082);
               }
           }
           .divider {
@@ -123,4 +123,3 @@
       }
   }
 }
-
