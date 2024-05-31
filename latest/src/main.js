@@ -44,6 +44,14 @@ const
     initialPreviewModalOnAppOpen = 'position';
     // build app
     (async function init() {
+        let random;
+        if (localStorage.getItem('random'))
+            random = JSON.parse(localStorage.getItem('random'))
+        else { 
+            random = await store.getRandom();
+            localStorage.setItem('random',JSON.stringify(random.map(index => index.markup)))
+        };
+        $('.bench-preview-icons .bp-icon-wrapper').innerHTML = random.slice(-8).map((node => `<div class="bp-icon">${node}</div>`)).join('')
             createAllTab();
             listen(document, handleClickOutside.bind(context));
             listen(document, handleRightClick.bind(context), 'contextmenu');
@@ -95,7 +103,9 @@ const
                 // if (tabName == initialPreviewModalOnAppOpen) modal.open();
                 return modal;
             });
-    }())
+
+
+        }())
 
 function createDashboardPanel(tabButton,type) { // Create Dynamic Modal For Newly created links inside menu
     let panel = div(),

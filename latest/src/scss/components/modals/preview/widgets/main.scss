@@ -240,28 +240,68 @@
     }
     .widget-toggles {
       transform: translateY(-4px);
+      scale: .95;
+    }
+    .bench-preview-icons {
+      opacity: 1;
     }
 }
   .widget-content {
     transition: transform 200ms ease;
-    
-    transform: translate(-40px,-16px) scale(.95);
+    transform: translate(-40px,-16px);
+    scale: .95;
+    display: flex;
     
   }
   .bench-preview-icons {
     width: 80px;
+    opacity: 0;
+    border-right: 1px solid $border-light;
+    border-radius: 80px;
+    transform: translateX(-12px);
+    scale: .9;
+    &:after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(-45deg,rgba(255, 255, 255, 0.15) 10%,transparent);
+      z-index: 100;
+      border-radius: inherit;
+    }
+    .bp-icon-wrapper {
+      transform: translateX(8px);
+      margin-top: 8px;
+      margin-left: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      width: 40px;
+      height: 40px;
+      overflow: hidden;
+      .bp-icon {
+        height: 20px;
+        width: 20px;
+        opacity: .5;
+        @include flex-center();
+      }
+    }
+
+    svg {
+      height: 10px;
+      width: 10px;
+    }
   }
   .bench-preview-count {
     opacity: .7;
     font-size: 14px;
     color: $font-clr-light;
     margin-top: 8px;
-    margin-left: 24px;
     @include flex-center();
 
   }
   .widget-toggles {
-    margin-left: 30px;
+    margin-left: 6px;
     @include flex-center();
     transform: translateY(2px);
     transition: 200ms ease;

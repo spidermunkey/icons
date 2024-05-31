@@ -89,6 +89,7 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
             justify-content: center;
             align-items: center;
             border-radius: $tab-button-radius;
+            opacity: .9;
             svg {
                 height: 32px;
                 width: 32px

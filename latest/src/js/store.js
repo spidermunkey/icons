@@ -31,6 +31,19 @@ export class SvgModel {
         return this.collections[name];
     }
 
+    async getRandom(n=20){
+        const ids = [];
+        let icons;
+        if (this.ready) 
+            icons = this.all
+        else 
+            icons = await API.getRandom();
+        console.log(this.all,icons)
+        for (let i = 0; i < n; i++){
+            ids.push(Math.floor(Math.random() * icons.length))
+        }
+        return icons
+    }
     removeCollection(name) {
         delete this.collections[name];
         API.dropColletion(name);
@@ -107,6 +120,7 @@ export class SvgModel {
             }
             this.all[id] = meta;
             this.categories[category][cid] = meta;
+            this.all.length = i;
         }
     }
 

@@ -48,5 +48,14 @@ export const API = {
         const { data } = await axios.post( this.resolveCollectionEndpoint(title), { payload: { props, original } })
         return data;
     },
+    async getRandom(n=20) {
+        try {
+            const { data } = await axios.get( this.resolveEP(`random`))
+            return data
+        } catch(e) {
+            console.log(e)
+        }
+
+    },
     dropCollection:() => 'no'
 }
