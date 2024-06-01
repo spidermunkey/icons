@@ -20,22 +20,14 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
 .tab.theme {
     display: none;
 }
-.logo {
-  // border: 1px solid #9999994f;
-  // position: absolute;
-  height: 36px;
-  width: 48px;
-  border-radius: 42px;
-  @include flex-center();
-  // top: 10px;
-  // left:8px;
-  cursor: pointer;
-  z-index: 10000;
-  svg {
-    height: 28px;
-    width: 28px;
-    fill: #5b5b5bad;
-  }
+.menu-cosm {
+    height: 100%;
+    width: 100%;
+    background-color: white;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10000;
 }
 .menu {
     transform: translateX(-200px);

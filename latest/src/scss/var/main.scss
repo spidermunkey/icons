@@ -1,7 +1,5 @@
-.row {
-  display: flex;
-}
-.column {
-  display: flex;
-  flex-direction: column;
+@import 'local.scss';
+
+:root {
+  --menucolor: #000;
 }

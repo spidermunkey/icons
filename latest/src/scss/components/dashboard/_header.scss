@@ -23,7 +23,7 @@
     color: rgba(20, 20, 21, .67);
     display: inline-flex;
     align-items: center;
-    transition: color 400ms ease;
+    transition: color 400ms;
     margin-right:80px;
 
     &:hover {
@@ -85,10 +85,50 @@
       .logo {
         margin-right: 4px;
         path:first-of-type {
+          transition: 200ms ease;
           transform: translateX(-4px);
         }
         path:nth-of-type(2) {
+          transition: 200ms ease;
           transform: translateX(-4px);
+        }
+        &:hover {
+          // animation: 3s infinite alternate dancingMenu; 
+          path:first-of-type {
+            animation: staggerSlide 1000ms infinite alternate;
+          }
+          path:last-of-type {
+            animation: staggerSlide 850ms infinite alternate;
+            
+          }
+          path:nth-of-type(2) {
+            animation: staggerSlide2 900ms ease infinite alternate;
+          }
+          @keyframes staggerSlide {
+            0% {
+                transform: translateX(-4px);
+            }
+            50% {
+                transform: translateX(4px);
+            }
+            100% {
+                transform: translateX(-4px);
+            }
+          }
+          @keyframes staggerSlide2 {
+            0% {
+                transform: translateX(-4px);
+            }
+            25% {
+                transform: translateX(-2px);
+            }
+            50% {
+                transform: translateX(-4px);
+            }
+            100% {
+                transform: translateX(4px);
+            }
+          }
         }
       }
   }
