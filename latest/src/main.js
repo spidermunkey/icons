@@ -44,6 +44,15 @@ const
     initialPreviewModalOnAppOpen = 'position';
     // build app
     (async function init() {
+        let [effect,count] = signal(0);
+
+        dashboard.addEventListener('click',() => {
+            if (count.value >= 5)
+                return count.value = 8
+            count.value++;
+            console.log(count.value)
+        })
+        console.log(count.value)
         let random;
         if (localStorage.getItem('random'))
             random = JSON.parse(localStorage.getItem('random'))

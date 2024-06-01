@@ -285,7 +285,41 @@ class Cursor {
   // -------------------------
   // OBSERVABLES
   // -----------------------------------------
-  
+  function signal(value) {
+    let subcriptions = new Set();
+    let subscriber = null;
+    let Signal = {
+      get value() {
+        if(subscriber) {
+          subcriptions.add(subscriber);
+        }
+        return value
+      },
+      set value(updated) {
+        console.log('setter triggered')
+        value = updated;
+        subcriptions.forEach(fn=>fn())
+      }
+    }
+    let useEffect = function(fn) {
+      console.log('setting subsciber')
+      subscriber = fn;
+      fn();
+      subscriber = null;
+    }
+    useEffect(() => {
+      console.log('effect triggered current value', Signal.value)
+    })
+    return [ useEffect, Signal ]
+  }
+
+  function derivedSignal(fn) {
+    const [effect,derived] = signal();
+    effect(() => {
+      derived.value = fn();
+    })
+    return derived;
+  }
    class Observer {
     constructor(target) {
       this.Target = target;
@@ -338,6 +372,12 @@ class Cursor {
    class Observable {
     constructor(target) {
       this.observer = new Observer(target);
+    }
+
+
+    set() {
+      this.notify();
+      console.log('observer triggered',console.log(this))
     }
   
     subscribe(...fns) {
@@ -2580,4 +2620,10 @@ function debounce(fn,interval = 60) {
   randy = randy.toString(36).slice(0, 12).padStart(12, "0").toLocaleUpperCase();
   // coerce into a string
   return "".concat(timmy, "-", randy);
+}
+
+function clickedOutSide(parentTagName) {
+  return function(event) {
+    event.target.closest(parentTagName)
+  }
 }

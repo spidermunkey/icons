@@ -22,9 +22,9 @@ export class SearchModal {
         this.btnEdit = $('.btn-edit-icon',this.content)
         this.btnClose.addEventListener('click',this.close)
         this.cosm.addEventListener('click',this.close)
-        this.input.addEventListener('input', this.handleRequest())
-        this.pInput.addEventListener('focus',this.handleInput)
-        this.content.addEventListener('click',this.handleClick)
+        // this.input.addEventListener('input', this.handleRequest())
+        // this.pInput.addEventListener('focus',this.handleInput)
+        // this.content.addEventListener('click',this.handleClick)
         this.currentElement = null;
     }
 

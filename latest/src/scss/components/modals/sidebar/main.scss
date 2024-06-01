@@ -21,22 +21,20 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
     display: none;
 }
 .logo {
-  
-  border: 1px solid #9999994f;
-  position: absolute;
-  height: 42px;
-  width: 42px;
+  // border: 1px solid #9999994f;
+  // position: absolute;
+  height: 36px;
+  width: 48px;
   border-radius: 42px;
   @include flex-center();
-  top: 40px;
-  left:48px;
+  // top: 10px;
+  // left:8px;
   cursor: pointer;
   z-index: 10000;
-  opacity: 0;
   svg {
     height: 28px;
     width: 28px;
-    fill: #888888ad;
+    fill: #5b5b5bad;
   }
 }
 .menu {
