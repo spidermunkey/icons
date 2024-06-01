@@ -1,0 +1,67 @@
+
+.menu-cosm {
+  height: 100%;
+  width: 100%;
+
+  // background: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10000;
+
+  background-color: white;
+  background: linear-gradient(180deg,white,transparent);
+  pointer-events: none;
+
+  // @include hide();
+  opacity: 0;
+    transition: opacity 600ms ease;
+  
+  &.active {
+    @include show();
+    transition: opacity 300ms ease;
+    &:after {
+      opacity: 1;
+      animation-name: rollin;
+      animation-duration: 1.5s;
+      animation-timing-function: ease;
+      animation-iteration-count: 1;
+      animation-fill-mode: forwards;
+    }
+  }
+  &::after {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    // inset: -100%;
+    inset: 0;
+    z-index: 2;
+    background: linear-gradient(90deg,white,transparent);
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.895) 20%,transparent);
+    opacity: 0;
+    scale:2;
+    transform: translateX(50%) translateY(25%) scale(2);
+    transition: opacity 300ms ease, transform 3s ease;
+    @keyframes rollin {
+      0% {
+        transform: translateX(50%) translateY(25%) scale(2);
+      }
+
+      100% {
+        transform: translateX(-25%) translateY(-5%) scale(2);
+
+      }
+      
+    };
+  }
+  &::before {
+    content: "";
+    position: absolute;
+    pointer-events: none;
+    inset: 0;
+    z-index: 1;
+    background-color: rgba(225, 230, 156, 0.051);
+    backdrop-filter: blur(3px);
+
+  }
+}
