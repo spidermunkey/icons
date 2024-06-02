@@ -79,8 +79,12 @@
           fill: #5b5b5bad;
         }
       }
-      .home {
-        // margin-right: 4px;
+      .passive-search {
+        z-index: 10000;
+        transition: transform 350ms ease;
+        // &.m-state {
+        //   transform: translateX(108px);
+        // }
       }
       .logo {
         margin-right: 4px;

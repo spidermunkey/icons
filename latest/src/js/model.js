@@ -1,8 +1,8 @@
-export const Tracker = {
+export const IDB = {
     
     async initializeDB() {
         return new Promise((resolve, reject) => {
-            var request = indexedDB.open("icons", 1);
+            var request = indexedDB.open("user", 1);
             request.onupgradeneeded = event => this.buildSchema(event)
             request.onsuccess = event => resolve(event.target.result);
             request.onerror = event => reject(event.target.error);
@@ -35,27 +35,27 @@ export const Tracker = {
     async logClickedIcon({name,id,cid}) {
         return new Promise(async (resolve,reject) => {
             const db = await this.initializeDB(), // Initialize the database
-                 transaction = db.transaction('clicked', 'readwrite'), // Start a transaction with read-write mode
-                 objectStore = transaction.objectStore('clicked'),
-                 getRequest = objectStore.get(id); // Attempt to retrieve the item by ID
-            getRequest.onerror = (event) => reject(event.target.error); // Reject the Promise if there's an error retrieving the item
-            getRequest.onsuccess = function(event) {
-                const item = event.target.result;
-                if (!item) {
-                    const newItem = { uuid: uuid(), name, id, cid, count: 1 };
-                    const addRequest = objectStore.add(newItem);
-                    addRequest.onsuccess = function(event) {
-                        console.log('new item added to the object store:', newItem);
-                        resolve(newItem); // Resolve the Promise with the newly added item
-                    };
-                    addRequest.onerror = (event) => reject(event.target.error); // Reject the Promise if there's an error adding the item
-                } else {    // Update the count property of the existing item
-                    ++item.count
-                    const putRequest = objectStore.put(item);
-                    putRequest.onsuccess = (event) => resolve(item); // Resolve the Promise with the updated item
-                    putRequest.onerror = (event) => reject(event.target.error); // Reject the Promise if there's an error updating the item
-                }
-        }})
+                transaction = db.transaction('clicked', 'readwrite'), // Start a transaction with read-write mode
+                objectStore = transaction.objectStore('clicked'),
+                getRequest = objectStore.get(id); // Attempt to retrieve the item by ID
+                getRequest.onerror = (event) => reject(event.target.error); // Reject the Promise if there's an error retrieving the item
+                getRequest.onsuccess = function(event) {
+                    const item = event.target.result;
+                    if (!item) {
+                        const newItem = { uuid: uuid(), name, id, cid, count: 1 };
+                        const addRequest = objectStore.add(newItem);
+                        addRequest.onsuccess = function(event) {
+                            console.log('new item added to the object store:', newItem);
+                            resolve(newItem); // Resolve the Promise with the newly added item
+                        };
+                        addRequest.onerror = (event) => reject(event.target.error); // Reject the Promise if there's an error adding the item
+                    } else {    // Update the count property of the existing item
+                        ++item.count
+                        const putRequest = objectStore.put(item);
+                        putRequest.onsuccess = (event) => resolve(item); // Resolve the Promise with the updated item
+                        putRequest.onerror = (event) => reject(event.target.error); // Reject the Promise if there's an error updating the item
+                    }
+            }})
     },
 
     async logCopiedIcon({name,id,cid}) {
@@ -96,6 +96,13 @@ export const Tracker = {
                 }}});
     },
 
+    async getAll(store) {
+        const db = await this.initializeDB(); // Initialize the database
+        const transaction = db.transaction(store, 'readwrite') // Start a transaction with read-write mode
+        const objectStore = transaction.objectStore(store)
+        return objectStore.getAll(); // Attempt to retrieve the item by ID
+    },
+
     buildSchema(event) {
             var db = event.target.result;
             if (!db.objectStoreNames.contains("copied")) 
@@ -107,7 +114,20 @@ export const Tracker = {
             if (!db.objectStoreNames.contains('moved')) 
                 db.createObjectStore('moved',{keyPath:'id'});
             if(!db.objectStoreNames.contains('added')) 
-                db.createObjectStore('added',{keyPath:'id'})
+                db.createObjectStore('added',{keyPath:'id'});
+            if (!db.objectStoreName.contains('icons'))
+                db.createObjectStore('data',{keyPath:'id'});
+            if (!db.objectStoreName.contains('meta'))
+                db.createObjectStore('meta',{keyPath: "id"});
+    },
+
+    compileData() {
+        objectStore.createIndex("hours", "hours", { unique: false });
+        objectStore.createIndex("minutes", "minutes", { unique: false });
+        objectStore.createIndex("day", "day", { unique: false });
+        objectStore.createIndex("month", "month", { unique: false });
+        objectStore.createIndex("year", "year", { unique: false });
+        objectStore.createIndex("notified", "notified", { unique: false });
     },
 
     sortByTime(data) {
@@ -119,3 +139,4 @@ export const Tracker = {
     },
     
 }
+

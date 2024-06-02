@@ -4,9 +4,9 @@ import { IconNode } from './components/Icon.js';
 export class SvgModel {
     constructor() {
         this.all = {}
-        this.categorySet = []
+        this.categoryNames = []
         this.categories = {}
-        this.collectionSet = []
+        this.collectionNames = []
         this.collections = {}
         this.state = {}
         this.ready = false
@@ -19,11 +19,11 @@ export class SvgModel {
             return 'name must be a string';
         }
 
-        if (this.collectionSet.includes(name)){
+        if (this.collectionNames.includes(name)){
             console.error('tried to create collection by the name of',name,'but it already exists');
             return 'name already exist, choose a different collection name';
         }
-        this.collectionSet.push(name);
+        this.collectionNames.push(name);
         this.collections[name] = {};
         console.log('collection optimistically created... communicating with server',this.collections[name]);
         const res = await API.createCollection(name);
@@ -95,10 +95,14 @@ export class SvgModel {
 
     // calls to api
     async getCategoryNames() {
+        if (this.categoryNames)
+            return this.categoryNames;
         return API.getCategoryNames();
     }
     
     async getCollectionNames() {
+        if (this.collectionNames)
+            return this.collectionNames
         return API.getCollectionNames();
     }
 
@@ -112,8 +116,8 @@ export class SvgModel {
             let backpack = data[i],
                 meta = new IconNode(backpack),
                 {id,cid,category} = meta;
-            if (!this.categorySet.includes(category)){
-                this.categorySet.push(category);
+            if (!this.categoryNames.includes(category)){
+                this.categoryNames.push(category);
                 this.categories[category] = {}
             }
             this.all[id] = meta;
@@ -128,7 +132,7 @@ export class SvgModel {
         const userCollections = await this.getCollectionNames()
         console.log('collections: ', userCollections)
         for (const name of userCollections){
-            this.collectionSet.push(name);
+            this.collectionNames.push(name);
             this.collections[name] = {};
             console.log('fetching data for collections')
             const {data} = await API.getCollection(name);

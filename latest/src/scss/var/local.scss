@@ -1,0 +1,29 @@
+:root {
+  --sidebar_width: 64px;
+  --sidebar_background: white;
+  --sidebar_shadow:  -2px 4px 8px 2px rgba(128, 128, 128, 0.0392);
+
+  --interface_width: 363px;
+  --interface_background: white;
+  --interface_shadow: 2px 4px 8px 2px rgba(128, 128, 128, 0.192);
+  
+  --margin: 8px;
+  --border-radius__default: 8px;
+  --main-clr__light: #333;
+  --sub-clr__light: #333;
+  --font-clr__light: rgba(20, 20, 21, .9);
+
+  --current-sat: 0%;
+  --current-light: 100%;
+  --current-opac: 1;
+  --current-huePCT: 0;
+  --current-hue: 216deg;
+  --current-hex: #fff;
+  --current-color: hsla(var(--current-hue),var(--current-sat),var(--current-light),var(--current-opac));
+  --cp--width: 180px;
+  --cp-pointer--width: calc(var(--cp--width) * .1);
+  --cp-pointer--pos: calc(0deg + var(--current-hue));
+  --context-y: 0;
+  --context-x: 0;
+  --success-green: #70f09f;
+}

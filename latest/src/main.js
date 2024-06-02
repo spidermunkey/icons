@@ -1,12 +1,12 @@
 import { SvgModel } from './js/store.js'
-import { Tracker }  from './js/Tracker.js'
+import { IDB }  from './js/idb.js'
 import { Preview } from './js/components/Preview.js'
 import { SearchModal } from './js/components/Search.js'
 import { ContextMenu } from './js/components/Context.js'
 const
     API_PORT = 1279,
     store = new SvgModel(),
-    tracker = Tracker,
+    idb = IDB,
     preview = new Preview(),
     search = new SearchModal(),
     context = new ContextMenu(),
@@ -26,7 +26,7 @@ const
     // menu-list containers
     categoryMenu = $('#CATEGORIES .modal__menu--items'),
     collectionMenu = $('#COLLECTIONS .modal__menu--items'),
-    menuIcons = $$(".sidebar .tab[data-type='nested']"), 
+    // menuIcons = $$(".sidebar .tab[data-type='nested']"), 
     createCollectionOverlay = $('.modal.create-collection'),
     createCollectionForm = $('form',createCollectionOverlay),  
     // modals
@@ -39,11 +39,12 @@ const
     btnFavorite = $('.btn-favit'),
     // get data
     modelReady = store.init(),
-    categoriesReady = createCategoryPanels(),
-    menuReady = createCollectionPanels(),
+    // categoriesReady = createCategoryPanels(),
+    // menuReady = createCollectionPanels(),
     initialPreviewModalOnAppOpen = 'position';
     // build app
     (async function init() {
+
         let [effect,count] = signal(0);
 
         dashboard.addEventListener('click',() => {
@@ -54,21 +55,53 @@ const
         })
         console.log(count.value)
         let random;
-        if (localStorage.getItem('random'))
-            random = JSON.parse(localStorage.getItem('random'))
-        else { 
-            random = await store.getRandom();
-            localStorage.setItem('random',JSON.stringify(random.map(index => index.markup)))
-        };
-       $('.pinned-preview').innerHTML = random.map(value => `<div class="bp-icon">${value}</div>`).join('')
+        // if (localStorage.getItem('random'))
+            // random = JSON.parse(localStorage.getItem('random'))
+        // else { 
+            random = await store.getRandom(20);
+            console.log(random)
+            // localStorage.setItem('random',JSON.stringify(random.map(index => index.markup)))
+        // };
 
-        $('.bench-preview-icons .bp-icon-wrapper').innerHTML = random.slice(-8).map((node => `<div class="bp-icon">${node}</div>`)).join('')
+        const navtabs =  $$('.menu-label[role="tab"][type="nav"]')
+        const navmodals = $$('.menu-modals .menu-modal[type="modal"]')
+        const menuTabber = $('.logo')
+        const menu = $('.menu')
+        const search = $('.search.passive-search')
+        const closeAllTabs = () => navmodals.forEach(modal => modal.classList.remove('active'))
+
+        listen(menuTabber,() => {
+            $('.menu-cosm').classList.toggle('active')
+            menu.classList.toggle('active')
+            if (!menu.classList.contains('active')) {
+                search.classList.remove('m-state')
+                    closeAllTabs();
+                }
+            else if (menu.classList.contains('active')) {
+                search.classList.add('m-state')
+            }
+            
+        })
+
+
+        navtabs.forEach(tab => listen(tab, () => {
+            const modal = $(`.menu-modal[modal='${tab.getAttribute('modal')}']`)
+            closeAllTabs();
+            modal.classList.add('active');
+
+        },'mouseenter'));
+
+
+       $('.pinned-preview').innerHTML = random.map(value => `<div class="bp-icon">${value.markup}</div>`).join('')
+       $('.bench-preview-icons .bp-icon-wrapper').innerHTML = random.slice(-8).map((node => `<div class="bp-icon">${node.markup}</div>`)).join('')
+
+       
             createAllTab();
             listen(document, handleClickOutside.bind(context));
             listen(document, handleRightClick.bind(context), 'contextmenu');
             // modal togglers
             createCollectionModal
-                .bindToggler($('.menu__actions-button.create-collection'))
+                // .bindToggler($('.menu__actions-button.create-collection'))
                 .bindCloser( $('.close',createCollectionOverlay), $('.cc-cancel',createCollectionOverlay))
                 .bindTabber( menuTabber )
                 .onOpen(showModal)
@@ -89,18 +122,18 @@ const
             dashboard.onmousedown = (e) => handleClick(e);
             document.addEventListener('keydown',handleKeys);
             // init sidebar tab functionality
-            menuIcons.map(group => {
-                let tabIcon = $('.tab__button',group),
-                    correspondingModal = $('.tab__modal',group),
-                    tabCloser = $('.btn.close-modal',correspondingModal),
-                    modal = new Modal(correspondingModal);
-                modal
-                    .bindOpener(tabIcon)
-                    .bindTabber(menuTabber)
-                    .onOpen(showModal)
-                    .onClose(hideModal);
-                if (tabCloser) modal.bindCloser(tabCloser);
-            });
+            // menuIcons.map(group => {
+            //     let tabIcon = $('.tab__button',group),
+            //         correspondingModal = $('.tab__modal',group),
+            //         tabCloser = $('.btn.close-modal',correspondingModal),
+            //         modal = new Modal(correspondingModal);
+            //     modal
+            //         .bindOpener(tabIcon)
+            //         .bindTabber(menuTabber)
+            //         .onOpen(showModal)
+            //         .onClose(hideModal);
+            //     if (tabCloser) modal.bindCloser(tabCloser);
+            // });
             // init preview tab functionality // ['positions', 'preview', 'color']
             previewModals.map(element => {
                 let tabName = element.dataset.tab,
@@ -160,7 +193,7 @@ async function createAllTab() {
     dash.dataset.tab = tabName;
     dash.dataset.type = tabName;
     const modal = new DynamicModal(dash, { type:'eager', endpoint: resolveCategoryEndpoint('all'), dataHandler: createDashboard } );
-    modal.bindOpener(document.getElementById('HOME'))
+    modal.bindOpener($('.home'))
         .bindTabber(dashBoardTabber)
         .onOpen(showModal)
         .onClose(hideModal)
@@ -317,7 +350,7 @@ async function handleClick(event) {
         else if (rightClick) return  console.log('right click');
         else if (leftClick) {
             updatePreview(id);
-            tracker.logClickedIcon(getIconById(id));
+            idb.logClickedIcon(getIconById(id));
             return;
         }
 }

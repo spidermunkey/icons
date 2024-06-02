@@ -316,6 +316,7 @@ class Cursor {
   function derivedSignal(fn) {
     const [effect,derived] = signal();
     effect(() => {
+
       derived.value = fn();
     })
     return derived;
