@@ -1,4 +1,5 @@
 import { API } from './api.js';
+import { Model } from './model.js';
 import { IconNode } from './components/Icon.js';
 
 export class SvgModel {
@@ -35,12 +36,14 @@ export class SvgModel {
         return data.map(value => value.markup)
     }
     async getRandom(n=20){
-        const ids = [];
         let icons = await API.getRandom();
-        for (let i = 0; i < n; i++){
-            ids.push(Math.floor(Math.random() * icons.length))
-        }
         return icons
+    }
+
+    async sync() {
+        return new Promise(() => {
+            const db = indexedDB.open('icons')
+        })
     }
     removeCollection(name) {
         delete this.collections[name];
@@ -93,6 +96,9 @@ export class SvgModel {
         delete this.collections[collection][id]
     }
 
+    async getRandomIcons() {
+
+    }
     // calls to api
     async getCategoryNames() {
         if (this.categoryNames)
@@ -101,8 +107,8 @@ export class SvgModel {
     }
     
     async getCollectionNames() {
-        if (this.collectionNames)
-            return this.collectionNames
+        // if (this.collectionNames)
+        //     return this.collectionNames
         return API.getCollectionNames();
     }
 
@@ -111,7 +117,10 @@ export class SvgModel {
     }
 
     async populateCategoryData() {
-        const { data } = await this.getIcons();
+        const data = await this.getIcons();
+        // console.log('here',data)
+
+        
         for (let i = 0; i < data.length; i++) {
             let backpack = data[i],
                 meta = new IconNode(backpack),
@@ -123,7 +132,10 @@ export class SvgModel {
             this.all[id] = meta;
             this.categories[category][cid] = meta;
             this.all.length = i;
+            // Model.add(backpack);
         }
+
+        console.log('storing category data in indexed db')
     }
 
     async populateCollectionData() {

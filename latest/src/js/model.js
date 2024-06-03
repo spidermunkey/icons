@@ -1,4 +1,4 @@
-export const IDB = {
+export const Tracker = {
     
     async initializeDB() {
         return new Promise((resolve, reject) => {
@@ -140,3 +140,60 @@ export const IDB = {
     
 }
 
+export const Model = {
+    async initializeDB() {
+        return new Promise((resolve, reject) => {
+            var request = indexedDB.open("meta", 3);
+            request.onupgradeneeded = event => this.buildSchema(event)
+            request.onsuccess = event => resolve(event.target.result);
+            request.onerror = event => reject(event.target.error);
+        });
+    },
+
+    buildSchema(event) {
+        var db = event.target.result;
+        if (!db.objectStoreNames.contains('data'))
+            db.createObjectStore('data',{keyPath:'id'});
+        if (!db.objectStoreNames.contains('meta'))
+            db.createObjectStore('meta',{keyPath: "id"});
+    },
+
+    async add(data) {
+        const db = await this.initializeDB();
+        console.log(db)
+        return new Promise((resolve, reject) => {
+            console.log('adding one',data)
+
+            var transaction = db.transaction('data', "readwrite"),
+                objectStore = transaction.objectStore('data'),
+                request = objectStore.add(data);
+                request.onsuccess = event => {
+                    console.log('added')
+                    resolve(db)
+                };
+            request.onerror = event => reject(event.target.error);
+        });
+    },
+
+    async addMany(storeName,data) {
+        const db = await this.initializeDB();
+        return new Promise((resolve, reject) => {
+
+            var transaction = db.transaction('data', "readwrite"),
+                objectStore = transaction.objectStore('data'),
+                count = 0;
+                for (let i = 0; i < data.length; i++) {
+                    request = objectStore.add(data);
+                    request.onsuccess = event => {
+                        console.log('added one')
+                        ++count
+                        if (count == data.length){
+                            console.log('finished adding many')
+                            resolve(db);
+                        }
+                    };
+                    request.onerror = event => reject(event.target.error);
+                }
+        });
+    }
+}

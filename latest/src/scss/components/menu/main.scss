@@ -39,9 +39,12 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
             &:hover,
             &.active {
                color: white;
-               color: $border-super-light;
-        
+               color: $border-light;
+    
             }
+            .menu-label.active {
+                color: $font-clr-light;   
+            }   
           }
 
     }
@@ -87,6 +90,11 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
         position: absolute;
         height: 300px;
         width: 200px;
+        pointer-events: none;
+
+        &.active {
+            pointer-events: all;
+        }
         // border: 1px solid black;
     }
     .menu-list {
@@ -95,6 +103,8 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
         font-size: 18px;
         font-family: Arial, Helvetica, sans-serif;
         color: $font-clr-light;
+        color: #b4b4b4;
+
         letter-spacing: 0.05em;
         transform: translateY(80px);
         border: 1px solid $border-light;
@@ -110,12 +120,20 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
 
             transform: translateY(40px) translateX(-20px);
         }
+
+        .menu-label {
+            border-bottom: 1px solid $border-light;
+            padding-bottom: 4px;
+            // border-radius: 10%;
+        }
         .menu-list-item {
             margin-top: 20px;
             cursor: pointer;
             transition: color 200ms ease;
+            text-transform: capitalize;
+            
             &:hover {
-                color: $border-super-light;
+                color: $font-clr-light;
             }
         }
         .menu-list-item:first-of-type {

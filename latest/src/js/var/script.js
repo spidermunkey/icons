@@ -321,6 +321,7 @@ class Cursor {
     })
     return derived;
   }
+
    class Observer {
     constructor(target) {
       this.Target = target;
@@ -769,48 +770,31 @@ class Cursor {
       if (config.type === "eager") this.update();
     }
   
-    // set flags for next call to getData()
     setReady() {
-      // console.log(`setting state to ready for ${this.element}`)
       this.pending = false;
       this.ready = true;
       if (this.initial) this.inital = false;
       return;
     }
   
-    // set flags for next call to getData()
     setPending() {
-      // console.log(`setting state to pending for ${this.element}`)
-  
       this.pending = true;
       this.ready = false;
       return;
     }
   
     async update() {
-      // console.log('triggering update')
-      // set flags && result/value for getData to "bounce"
       this.value = this.suspense;
       this.setPending();
       this.renderSuspense();
   
-      // call predefined request handler callback (DOM method) with suspense HTML string
-      // if (handleRequest) handleRequest(this.suspense);
-  
-      // fetch resources from predefined endpoint
-      // console.log(this.endpoint)
-      const res = await axios.get(this.endpoint);
-      // console.log(res.data)
+      const res = await this.handleRequest();
+
       if (res) {
-        // if res.ok call predifined request handler (DOM methods/tranformer) with the data and a flag
-        // this.value = handleResponse('success', data)
-  
-        this.renderComponent(res.data);
+        console.log(res)
+        this.renderComponent(res);
         this.setReady();
       } else {
-        // if !res.ok handle call response with an error flag
-        // this.value = handleResponse('error', data)
-  
         this.renderError();
         this.setReady();
       }
@@ -818,13 +802,8 @@ class Cursor {
     }
   
     getData() {
-      // if data is ready and hasn't changed || data is pending result will be an html string
-      // return the html string
       if ((this.ready && !this.hasChanged) || this.pending) return this.value;
-      // if not it means the data has changed or has never been fetched
-      // so start the process of fetching data then return the loader
-  
-      this.update(); // sets result to `<loading>` then returns a thenable
+      this.update();
       return this.value;
     }
   
