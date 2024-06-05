@@ -33,6 +33,15 @@
         }
 }
 
+.pk-icon {
+    height: 40px;
+    width: 40px;
+    svg {
+        height: 20px;
+        width: 20px;
+    }
+}
+
 .svg-wrapper, 
 .search-modal .svg-wrapper {
     position: relative;

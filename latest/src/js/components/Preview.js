@@ -3,16 +3,10 @@ import { ColorPicker } from "./ColorPicker";
 export class Preview {
 
     constructor() {
-        this.currentIcon = undefined;
-        this.currentProps = undefined;
-    
+        this.icon = undefined;
         this.viewBoxScale = [];
         this.startingViewbox = [0,0,20,20];
-        this.observer = {};
-
         this.colorPicker = new ColorPicker({});
-
-        this.selection = [];
 
         this.element = $('#PREVIEW');
         this.components = $('.preview__modals--modal[data-tab="preview"]');
@@ -63,7 +57,7 @@ export class Preview {
             onMouseMove: ({deg}) => {
                 this.updateRotation(deg);
                 this.targetElement.dataset.rotation = deg.deg;
-                this.currentIcon.rotation = deg.deg;
+                this.icon.rotation = deg.deg;
             },
             onMouseUp: () => this.updatePreviews()
             
@@ -76,15 +70,13 @@ export class Preview {
             const height = handleHeightWidthInput(e)
             this.height = height;
             // this.targetElement.setAttribute('height',`${height}px`)
-            // if (this.currentIcon) this.currentIcon.height = height
+            // if (this.icon) this.icon.height = height
         })
-
         this.svgHeightInput.addEventListener('select',(e) => {
             const selection = e.target.value.substring(
                 e.target.selectionStart,
                 e.target.selectionEnd,
               );
-
             this.svgHeightInput.setAttribute('selected','true')
         })
 
@@ -96,7 +88,7 @@ export class Preview {
         this.svgWidthInput.addEventListener('keydown',(e) => {
             const width = handleHeightWidthInput(e)
             this.width = width;
-            // if (this.currentIcon) this.currentIcon.width = width
+            // if (this.icon) this.icon.width = width
         })
 
 
@@ -195,21 +187,16 @@ export class Preview {
         return this.targetElement.outerHTML;
     }
     set markup(html) {
-        if (this.currentProps) this.currentProps.markup = this.markup;
-        return;
+        this.icon.markup = this.markup;
     }
     get previews() {
-        return this.currentIcon.previews;
-    }
-    set previews(html) {
-        this.components.innerHTML = this.previews.all;
+        return this.icon.previews;
     }
     get viewBox() {
-        return this.currentIcon.viewBox;
+        return this.icon.viewBox;
     }
     set viewBox(string) {
-        this.currentIcon.viewBox = string;
-        return;
+        this.icon.viewBox = string;
     }
 
     get VBX() {
@@ -231,7 +218,7 @@ export class Preview {
     
     set height(number) {
         this.targetElement.setAttribute('height',`${number}px`)
-        if (this.currentIcon) this.currentIcon.height = number
+        if (this.icon) this.icon.height = number
         this.svgHeightInput.value = number
     }
 
@@ -241,7 +228,7 @@ export class Preview {
 
     set width(number) {
         this.targetElement.setAttribute('width',`${number}px`)
-        if (this.currentIcon) this.currentIcon.width = number
+        if (this.icon) this.icon.width = number
         this.svgWidthInput.value = number
     }
 
@@ -314,63 +301,53 @@ export class Preview {
 
     setViewboxValues(array) {
 
-        if (!this.currentIcon) return
+        if (!this.icon) return
         let stringValue = array.join(' ')
         this.vbxInput.value = `${array[0]}`;
-        this.currentIcon.vbx = Number(array[0]);
+        this.icon.vbx = Number(array[0]);
 
         this.vbyInput.value = `${array[1]}`;
-        this.currentIcon.vby = Number(array[1]);
+        this.icon.vby = Number(array[1]);
 
         this.vbhInput.value = `${array[2]}`;
-        this.currentIcon.vbh = Number(array[2]);
+        this.icon.vbh = Number(array[2]);
 
         this.vbwInput.value = `${array[3]}`;
-        this.currentIcon.vbw = Number(array[3]);
+        this.icon.vbw = Number(array[3]);
         
         this.targetElement.setAttribute('viewBox',stringValue);
-
-        this.currentIcon.viewBox = stringValue;
-        this.currentProps.markup = this.markup;
+        this.icon.viewBox = stringValue;
+        this.icon.markup = this.markup;
 
         return this;
     }
 
     resetMouseTrackingSlider(index) {
-        let values = [...this.startingViewbox];
+        let values = this.startingViewbox.slice();
         values[index] = 0;
-        this.setViewboxValues(values)
-        this.startingViewbox = this.viewBox;
-
-        return this
+        this.setViewboxValues(values);
+        this.startingViewbox = values;
     }
 
     updateWithMouseTracker(index,value) {
-        console.log('here')
-        let values = [...this.startingViewbox];
+        let values = this.startingViewbox.slice();
         let x = values[index];
-
         let xi = Number(x);
-
         let adjusted = Math.min(xi + value, 999);
         console.log(value,xi,adjusted)
         values[index] = adjusted;
         this.setViewboxValues(values);
-        return this
     }
 
     updateWithInput(index,value) {
         console.log('updating with input',value)
-        let values = [...this.startingViewbox];
+        let values = this.startingViewbox.slice();
         let x = values[index];
         let xi = Number(x);
         let adjusted = Math.min(value,999);
         values[index] = adjusted;
         this.setViewboxValues(values);
         this.startingViewbox = this.viewBox;
-        console.log(values)
-
-        return this;
     }
 
     updateWithSlider(pct) {
@@ -380,8 +357,8 @@ export class Preview {
             return
         }
         
-        let valuesToScaleFrom = [...this.viewBoxScale],
-            values = [...this.startingViewbox],
+        let valuesToScaleFrom = this.viewBoxScale.slice(),
+            values = this.startingViewbox.slice(),
         
             x = valuesToScaleFrom[2],
             y = valuesToScaleFrom[3],
@@ -420,50 +397,39 @@ export class Preview {
             console.error('invalid percent value, skipping unset')
         
         this.setViewboxValues(values)
-        return this;
-
     }
 
     updateRotation(deg) {
-        // let degrees = values.deg;
         if (deg || deg === 0) {
-            this.targetElement.setAttribute('transform',`rotate(${deg})`);
-            this.targetElement.dataset.rotation = deg;
-            this.currentIcon.rotation = deg;
-            if (this.currentProps) this.currentProps.markup = this.markup;
+            this.icon.rotation = deg;
+            this.element.setAttribute('transform',`rotate(${deg})`);
+            this.element.dataset.rotation = deg;
         }
-
-        return this;
     }
 
     updatePreviews() {
-        this.previews = 'updated';
-        return this;
+        this.components.innerHTML = this.previews.all;
     }
 
     getComponent(type,size) {
-        if (!this.currentIcon) return
-        return this.currentIcon.getComponent(type,size)
+        if (!this.icon) return
+        return this.icon.getComponent(type,size)
     }
 
     save() {
-        let node = this.currentIcon.save();
+        let node = this.icon.save();
         return node;
     }
 
     update(icon) {
-
-        this.currentIcon = icon;
-        this.currentProps = icon.observer;
-        let { name , category , markup , viewBox , rotation, isFavorite, height, width, stroke, fill, children} = icon;
+        this.icon = icon;
+        let { name , category , markup , viewBox , rotation, isFavorite, height, width, stroke, fill } = icon;
         // pathExtractor(markup)      
-
         if (isFavorite) $('.btn-favit').classList.add('icon-is-favorite');
         else $('.btn-favit').classList.remove('icon-is-favorite');
         
-
-        this.startingViewbox = viewBox;
-        this.viewBoxScale = viewBox;
+        this.startingViewbox = viewBox.slice();
+        this.viewBoxScale = viewBox.slice();
 
         if (height) this.height = height;
         else this.height = this.defaultHeight

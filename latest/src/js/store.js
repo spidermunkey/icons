@@ -1,15 +1,17 @@
 import { API } from './api.js';
 import { Model } from './model.js';
-import { IconNode } from './components/Icon.js';
+import { Icon } from './components/Icon.js';
 
 export class SvgModel {
     constructor() {
+        // this.model = new Model();
         this.all = {}
         this.categoryNames = []
         this.categories = {}
         this.collectionNames = []
         this.collections = {}
         this.state = {}
+        this.meta = {}
         this.ready = false
     }
 
@@ -31,12 +33,14 @@ export class SvgModel {
         console.log(res);
         return this.collections[name];
     }
+
     async getPinned(collection = 'favorites') {
         const {data} = await API.getCollection(collection);
         return data.map(value => value.markup)
     }
-    async getRandom(n=20){
-        let icons = await API.getRandom();
+
+    async getRandom(n=20,collection){
+        let icons = await API.getRandom(n,collection);
         return icons
     }
 
@@ -45,48 +49,43 @@ export class SvgModel {
             const db = indexedDB.open('icons')
         })
     }
+
     removeCollection(name) {
         delete this.collections[name];
         API.dropColletion(name);
     }
 
-    async addToCollection({ destination, id, meta, onSuccess, onFailure }) {
-        let collection = this.collections[destination];
-        if (!collection) {
-            console.log('collection doesnt exist... creating it now');
-            collection = await this.createCollection(destination);
-            if (typeof collection == 'string') {
-                const message = { message: `error creating collection: ${collection}`, success: false, reason: "unknown", from: 'VM'}
-                if (onFailure) onFailure(message);
-                return message;
-            }
-       } else if (this.collections[destination][id] !== undefined) {
-            const message = { message: "this id already exists", success:false, reason:"duplicate id",from:'VM'}
-            if (onFailure) onFailure(message);
-            return message;
-        }
+    async addToCollection({ destination, icon }) {
         
-        let copy = meta.save();
+        console.log(`adding ${icon} to ${destination}`)
+        const id = uuid();
+        let collection = this.collections[destination];
+        if (!collection) collection = await this.createCollection(destination);
+        else if (collection[id] !== undefined) 
+            return console.warn('this id already exists')
+        
+        let copy = icon.save();
+
         if (destination === 'favorites'){
-            meta.isFavorite = true;
+            icon.isFavorite = true;
+            API.addFavorite(icon.props) // markup current icon;
             copy.isFavorite = true;
-            copy.observer.isFavorite = true;
         }
-        meta.knownCollections.push(destination);
-        copy.category = destination;
-        copy.observer.category = destination;
-        collection[id] = meta
+
+        copy.collection = destination;
+        copy.trace = icon.id;
+        copy.id = id;
+        collection[id] = icon;
+
         console.log('optimistic update successful... asynchronously adding to database now');
-        const res = API.addToCollection( destination, copy, meta );
-        const message = {message:'optimistic update successful... asynchronously adding to database now',success:true ,promise:res,size: collection.size}
-        if (onSuccess) onSuccess(message);
-        return message
+        const res = API.addToCollection( destination, copy.props );
+        return  {message:'optimistic update successful... asynchronously adding to database now',success:true ,promise:res,size: collection.size}
     }
 
     addManyToCollection(collection,array) {
         array.forEach(obj => {
             const {cid} = obj
-            const node = new IconNode(obj)
+            const node = new Icon(obj)
             this.collections[collection][cid] = node;
         })
         console.log('finished adding',array,'to',collection)
@@ -96,34 +95,34 @@ export class SvgModel {
         delete this.collections[collection][id]
     }
 
-    async getRandomIcons() {
-
-    }
     // calls to api
     async getCategoryNames() {
-        if (this.categoryNames)
-            return this.categoryNames;
         return API.getCategoryNames();
     }
     
     async getCollectionNames() {
-        // if (this.collectionNames)
-        //     return this.collectionNames
         return API.getCollectionNames();
     }
 
-    async getIcons() {
-        return API.getCategory('all');
+    async getMeta() {
+        const meta = await API.getCollectionData();
+        for (const document of meta) {
+            this.meta[document.name] = document;
+        }
+        return this.meta;
+    }
+
+    async getAll() {
+        const {icons} = await API.getCategory('all');
+        return icons;
     }
 
     async populateCategoryData() {
-        const data = await this.getIcons();
-        // console.log('here',data)
+        const {icons} = await API.getCategory('all');
 
-        
-        for (let i = 0; i < data.length; i++) {
-            let backpack = data[i],
-                meta = new IconNode(backpack),
+        for (let i = 0; i < icons.length; i++) {
+            let backpack = icons[i],
+                meta = new Icon(backpack),
                 {id,cid,category} = meta;
             if (!this.categoryNames.includes(category)){
                 this.categoryNames.push(category);
@@ -132,23 +131,19 @@ export class SvgModel {
             this.all[id] = meta;
             this.categories[category][cid] = meta;
             this.all.length = i;
-            // Model.add(backpack);
         }
 
-        console.log('storing category data in indexed db')
     }
 
     async populateCollectionData() {
 
-        console.log('fetching collection names')
         const userCollections = await this.getCollectionNames()
-        console.log('collections: ', userCollections)
+        console.log('here',userCollections)
         for (const name of userCollections){
             this.collectionNames.push(name);
             this.collections[name] = {};
-            console.log('fetching data for collections')
-            const {data} = await API.getCollection(name);
-            this.addManyToCollection(name,data);
+            const {icons} = await API.getCollection(name);
+            this.addManyToCollection(name,icons);
         }
     }
 
@@ -156,6 +151,7 @@ export class SvgModel {
         console.log('initializing store...')
         await this.populateCategoryData()
         await this.populateCollectionData()
+        await this.getMeta()
         this.ready = true
         console.log('model ready')
         console.log(this)
@@ -170,3 +166,5 @@ export class SvgModel {
         }
     }
 }
+
+

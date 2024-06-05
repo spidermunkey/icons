@@ -3,16 +3,7 @@ const PORT = 1279;
 const endpoint =`http://localhost:${PORT}/icons`;
 export const API = {
 
-    resolveEP(endpoint) {
-        return `http://localhost:${PORT}/icons/${endpoint}`
-    },
-    resolveCategoryEndpoint(categoryName) {
-        
-        return this.resolveEP(`categories/${categoryName}`)
-    },
-    resolveCollectionEndpoint(collectionName) {
-        return this.resolveEP(`collections/${collectionName}`)
-    },
+
     async getCategoryNames() {
         const url = `${endpoint}/meta/categories`
         return [...(await axios.get(url).data)].filter(
@@ -21,45 +12,45 @@ export const API = {
     },
     async getCollectionNames() {
         let url = `http://localhost:${PORT}/icons/meta/collections`
-        return [...(await axios.get(url)).data].filter(
-            collectionName => collectionName !== 'test'
-        );
+        const res = await axios.get(url)
+        console.log(res)
+        const names = res.data.map(
+            collection => collection.name
+        )
+        return names;
+    },
+    async getCollectionData() {
+        let url = `http://localhost:${PORT}/icons/meta/collections`
+        const collections = (await axios.get(url)).data.filter(
+            collectionName => collectionName.name !== '{{meta}}'
+        )
+        return collections;
     },
     async createCollection(title) {
-        const response = await axios.post( this.resolveEP(`/collections/create`),{payload:{name:title}});
+        const response = await axios.post( resolveEP(`/collections/create`),{payload:{name:title}});
         return response;
     },
     async getCollection(title) {
-        const response = await axios.get( this.resolveCollectionEndpoint(title) );
-        return response
+        const response = await axios.get( resolveCollectionEndpoint(title) );
+        console.log(response.data)
+        return response.data
     },
     async getCategory(title) {
-        
-        const endpoint = this.resolveCategoryEndpoint(title);
-        return caches.match(endpoint).then(async cacheRespone => {
-            if(cacheRespone){
-                let data = await cacheRespone.json();
-                console.log('found cache',data)
-                return data;
-            } else {
-                console.log('no cache records... populating from scratch')
-                const response = await axios.get( endpoint );
-                await caches.open('icons').then(cache => {
-                    console.log(cache);
-                    cache.add(endpoint);
-                    console.log(endpoint);
-                })
-                return response.data;
-            }
-        })
+        const endpoint = resolveCategoryEndpoint(title);
+        console.log('no cache records... populating from scratch')
+        const response = await axios.get( endpoint );
+        console.log(response.data)
+        return response.data;
+    },
+    async addFavorite(props) {
 
     },
-    async addToCollection(title, props, original) {
-        const { data } = await axios.post( this.resolveCollectionEndpoint(title), { payload: { props, original } })
+    async addToCollection(title, props) {
+        const { data } = await axios.post( resolveCollectionEndpoint(title), { payload: { props } })
         return data;
     },
-    async getRandom(n=20) {
-        const url = this.resolveEP('random');
+    async getRandom(n=20,collection="all") {
+        const url = resolveEP(`random/${collection}?n=${n}`);
         const data = await this.cache(url);
         return data;
     },
@@ -81,4 +72,16 @@ export const API = {
             )
     },
     dropCollection:() => 'no'
+}
+
+function resolveEP(endpoint) {
+    return `http://localhost:${PORT}/icons/${endpoint}`
+}
+
+function resolveCategoryEndpoint(categoryName) {
+    return resolveEP(`categories/${categoryName}`)
+}
+
+function resolveCollectionEndpoint(collectionName) {
+    return resolveEP(`collections/${collectionName}`)
 }

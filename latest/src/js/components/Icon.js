@@ -1,49 +1,252 @@
-export class IconNode {
+export class Icon {
 
     constructor(props) {
         this.name = props.name;
         this.category = props.category;
         this.markup = props.markup;
-        this.isFavorite = props.isFavorite || false;
-        this.knownCollections = props.knownCollections || [];
-        this.id = props.id || undefined;
-        this.cid = props.cid || undefined;
-        this.values = this.parseElement(this.createWrapper(props));
-        this.versions = new Map();
-        this.observer = structuredClone({
-            ...props,
-            isFavorite: this.isFavorite,
-            knownCollections: Array.from(this.knownCollections),
-            id: this.id,
-            cid: this.cid,
-            values: this.values,
-            versions: this.versions,
-        })
+        
+        this.id = uuid();
+        this.trace = props.id;
+        this.vid = props.vid;
+        this.cid = props.cid;
+        
+        this.isFavorite = props.isFavorite;
+        this.isBenched = props.isBenched;
+
+        this.rebased = props.rebased;
+        this.type = props.type || 'default';
+        this.colors = props.colors;
+        this.styles = props.styles;
+        this.created_at = props.created_at;
+
+        this.element = this.createWrapper(props)
+        this.values = Icon.parse(this.element);
     }
 
     get props() {
-        return this.observer
-    }
+        return {
+            name: this.name,
+            category: this.category,
+            markup: this.markup,
+            rebased: this.rebased,
 
-    set props(value) {
-        this.observer = {
-            ...this.observer,
-            ...value,
+            isFavorite: this.isFavorite,
+            isBenched: this.isBenched,
+
+            type: this.type,
+            colors: this.colors,
+            styles: this.styles,
+
+            id: this.id,
+            vid: this.vid,
+            cid: this.cid,
+            trace: this.trace,
+            values: this.values,
+            created_at: this.created_at,
         }
     }
+
+    get html() {
+        return this.observer.markup;
+    }
+
+    get header() {
+        return {
+            name: this.observer.name,
+            category: this.observer.category,
+            markup: this.markup,
+        }
+    }
+
+    get viewBox() {
+        if (this.values.viewBox)
+            return this.parseViewBoxString(this.values['viewBox'])
+        else return false;
+
+    }
+
+    set viewBox(string) {
+        if (Array.isArray(string))
+            string = this.formatViewBoxArray(string);
+        this.values['viewBox'] = string;
+        this.element.setAttribute('viewBox',stringValue);
+
+    }
+
+    set pos(args) {
+        let [index,val] = args;
+        let vb = this.parseViewBoxString(this.values['viewBox']);
+        vb[index] = val;
+        this.viewBox = this.formatViewBoxArray(vb);
+    }
+
+    set vbx(x) {
+        this.pos = [0,x]
+    }
+    set vby(y) {
+        this.pos = [1,y]
+    }
+    set vbw(w) {
+        this.pos = [2,w]
+    }
+    set vbh(h) {
+        this.pos = [3,h]
+    }
+
+    get height() {
+        if (this.values['height'])
+            return this.values.get('height').split('p')[0]
+        return null;
+    }
+    set height(value) {
+        this.values.height = value;
+    }
+    get width() {
+        if (this.values['width'])
+            return this.values['width'].split('p')[0];
+        return null;
+    }
+
+    set width(value) {
+        this.values.width = value;
+    }
+
+    get stroke() {
+        return this.values['stroke'];
+    }
+
+    get fill() {
+        return this.values['fill'];
+    }
+
+    set rotation(deg) {
+
+        this.values['rotation'] = deg
+        return deg;
+    }
+
+    get rotation() {
+        return this.values.rotation
+    }
+
+    save() {
+        let cpy = new IconNode(this.use())
+        cpy.created_at = DateTime.stamp();
+        return cpy;
+    }
+
+    copy() {
+        window.navigator.clipboard.writeText(this.markup)
+        console.log('copied');
+        return true;
+    }
+
+    use() {
+        return structuredClone(this.props);
+    }
+
+    mark(children) {
+        children.forEach(child => {
+            child.setAttribute('pid',uuid())
+        })
+    }
+
+    clearMark() {
+        children.forEach(child => {
+            child.removeAttribute('pid');
+        })
+    }
+
+    static parse(element) {
+        let icon = element.querySelector('svg');
+        return {
+            'height':icon.getAttribute('height'),
+            'width': icon.getAttribute('width'),
+            'stroke': icon.getAttribute('stroke'),
+            'fill': icon.getAttribute('fill'),
+            'x': icon.getAttribute('x'),
+            'y': icon.getAttribute('y'),
+            'viewBox': icon.getAttribute('viewBox'),
+            'rotation': icon.dataset.rotation,
+            // 'children': this.crawl(icon)
+        }
+    }
+
+    static crawl(element) {
+        let children = [];
+        for (let child of element.childNodes) {
+            if (child.nodeType === Node.TEXT_NODE)
+                continue;
+            if (child.tagName === 'g' || child.tagName === 'G') 
+                children = children.concat(this.crawl(child))
+            else
+                children.push(child);
+        }
+        return children;
+    }
+
+    parseViewBoxString(string) {
+        if (Array.isArray(string)) 
+            return console.error('I think you trying to parse an array... try a string next time')
+
+        return string.split(/\s+|,/).map(value => Number(value));
+    }
+
+    formatViewBoxArray(array) {
+        if (!Array.isArray(array))
+            return console.log('I think your trying to format a string... try an array next time');
+    
+        return array.join(' ');
+    }
+
+    createWrapper(props,opts = {useValues: false}){
+        let {name,category,markup,values} = props || this;
+
+        let el = document.createElement('div');
+        el.dataset.category = category;
+        el.dataset.name = name;
+        el.dataset.cid = this.cid;
+        el.dataset.id = this.id;
+        el.innerHTML = markup;
+
+        // console.log(el)
+        let icon = el.querySelector('svg');
+
+        if (!icon) 
+            return console.log(`${props._id} : ${props.name} is an invalid object`)
+
+        if (!icon.getAttribute('viewBox')) {
+            console.warn('setting default viewbox in',category);
+            icon.setAttribute('viewBox','0 0 24 24');
+            this.markup = icon.outerHTML;
+        }
+        return el;
+    }
+
+    getComponent(type,size) {
+        if ( !this.previews[type] || type == 'all' ) 
+            return `type ${type} not found`;
+        if ( !this.previews[type][size] || size == 'all' ) 
+            return `type ${type} found but not component ${size}`;
+
+        return this.previews[type][size]
+        
+    }
+
     get showcase(){
         let element = this.createWrapper();
         element.dataset.role = 'svg_wrapper';
         element.classList.add('svg-wrapper');
         return element
     }
+
     get bench(){
         let element = this.createWrapper(this.observer);
         element.dataset.role = 'bench_preview';
         element.classList.add('comp--bench', 'button--sm');
         return element;
     }
-    get previews(){
+    get previews(){ // name html
         let markup = this.observer.markup;
         let components = {
             all:`<div class="preview-group">
@@ -261,282 +464,6 @@ export class IconNode {
             }
         }
         return components;
-    }
-    get html() {
-        return this.observer.markup;
-    }
-    get header() {
-        return {
-            name: this.observer.name,
-            category: this.observer.category,
-            markup: this.markup,
-        }
-    }
-
-    get viewBox() {
-        if (this.observer.values.has('viewBox'))
-            return this.parseViewBoxString(this.observer.values.get('viewBox'))
-        else {
-            console.log('no viewbox property')
-            return false;
-        }
-    }
-
-    set viewBox(string) {
-        if (Array.isArray(string))
-            string = this.formatViewBoxArray(string);
-        // make sure its a string
-        this.observer.values.set('viewBox',string);
-        // console.log('viewbox set to',string, this.observer.values.get('viewBox'));
-    }
-
-    set pos(args) {
-        let [index,val] = args;
-        let viewbox = this.observer.values.get('viewBox');
-        // convert to array
-        let vb = this.parseViewBoxString(viewbox);
-        // swap values
-        vb[index] = val;
-        // convert back to a string
-        viewbox = this.formatViewBoxArray(vb);
-        return
-    }
-    set vbx(x) {
-        this.pos = [0,x]
-    }
-    set vby(y) {
-        this.pos = [1,y]
-    }
-    set vbw(w) {
-        this.pos = [2,w]
-    }
-    set vbh(h) {
-        this.pos = [3,h]
-    }
-
-    get attributes() {
-        const svgRegex = /<svg[^>]*>/i;
-        const attributes = this.markup.match(svgRegex);
-        return attributes;  
-    }
-
-    get pathData() {
-            let markup = this.markup;
-            const extractors = {
-                'head': /<svg[^>]*>/i,
-                'content': /<svg[^>]*>([\s\S]*?)<\/svg>/i,
-                'path':/<path[^>]*>/g,
-                'line':/<line[^>]*>/g,
-                'polyline':/<polyline[^>]*>/g,
-                'circle':/<circle[^>]*>/g,
-                'polygon':/<polygon[^>]*>/g,
-                'rect':/<rect[^>]*>/g,
-                'ellispe':/<ellipse[^>]*>/g,
-                'pattern':/<pattern[^>]*>/g,
-            }
-    
-            const results = {
-                'head':[],
-                'content': [],
-                'path':[],
-                'line':[],
-                'polyline':[],
-                'circle':[],
-                'polygon':[],
-                'rect':[],
-                'ellispe':[],
-                'pattern':[]
-            }
-    
-            for (const type in extractors) {
-                let match = markup.match(extractors[type])
-                if (match)
-                    results[type] = match
-            }
-        
-            return results
-    }
-
-    get height() {
-        if (this.values.get('height'))
-            return this.values.get('height').split('p')[0]
-        return null;
-    }
-
-    set height(value) {
-        const element = document.createElement('div');
-        element.innerHTML = this.markup;
-        const icon = element.querySelector('svg');
-        if (value != undefined)
-            icon.setAttribute('height',`${value}px`);
-        this.markup = element.innerHTML
-
-    }
-
-    get width() {
-        if (this.values.get('width'))
-            return this.values.get('width').split('p')[0];
-        return null;
-    }
-
-    set width(value) {
-        const element = document.createElement('div');
-        element.innerHTML = this.markup;
-        const icon = element.querySelector('svg');
-        if (value != undefined)
-            icon.setAttribute('width',`${value}px`);
-        this.markup = element.innerHTML
-    }
-
-    get stroke() {
-        return this.values.get('stroke');
-    }
-
-    get fill() {
-        return this.values.get('fill');
-    }
-
-    set rotation(deg) {
-        this.observer.values.set('rotation',deg)
-        return deg;
-    }
-
-    get rotation() {
-        return this.observer.values.rotation
-    }
-
-    save(value) {
-        // this.props = value;
-        // this.versions.push(value);
-        // console.dir('saving current observer as a new icon',this.observer,this.props)
-
-        let cpy = new IconNode(this.observer)
-        // console.dir('heres the copy',cpy)
-        // return new IconNode(props)
-        return cpy;
-    }
-
-    copy() {
-        window.navigator.clipboard.writeText(this.svg)
-        console.log('copied');
-        return true;
-    }
-
-    use() {
-        return structuredClone(this.props);
-    }
-
-    crawl(element) {
-
-        let children = [];
-
-            for (var i = 0; i < element.childNodes.length; i++) {
-                var child = element.childNodes[i];
-                console.log(child)
-                // Skip text nodes
-                if (child.nodeType === Node.TEXT_NODE) {
-                    continue;
-                }
-
-            if (child.tagName === 'g' || child.tagName === 'G') {
-                var groupChildren = this.crawl(child);
-                children = children.concat(groupChildren)
-            } else {
-                children.push(child);
-            }
-        }
-        return children;
-    }
-
-    mark(children) {
-        children.forEach(child => {
-            child.setAttribute('pid',uuid())
-        })
-    }
-
-    clearMark() {
-        children.forEach(child => {
-            child.removeAttribute('pid');
-        })
-    }
-
-    parseElement(element) {
-        if (!element) {
-            console.log('invalid operation')
-            return;
-        }
-        let icon = element.querySelector('svg');
-
-        let values = new Map([
-            ['height',icon.getAttribute('height')],
-            ['width',icon.getAttribute('width')],
-            ['stroke',icon.getAttribute('stroke')],
-            ['fill',icon.getAttribute('fill')],
-            ['x',icon.getAttribute('x')],
-            ['y',icon.getAttribute('y')],
-            ['viewBox',icon.getAttribute('viewBox')],
-            ['transform',{value: icon.getAttribute('transform')}],
-            ['rotation',icon.dataset.rotation],
-            // ['children',this.crawl(icon)]
-        ]);
-
-        return values;
-    }
-
-    parseViewBoxString(string) {
-        if (Array.isArray(string)) {
-            console.log('I think you trying to parse an array... try a string next time')
-            return string
-        }
-    
-        return string.split(/\s+|,/).map(value => Number(value));
-    }
-
-    formatViewBoxArray(array) {
-        if (!Array.isArray(array)) {
-            console.log('I think your trying to format a string... try an array next time')
-            return array;
-        }
-    
-        return array.join(' ');
-    }
-
-    createWrapper(props,opts = {useValues: false}){
-        let {name,category,markup,values} = props || this;
-        // console.log(props)
-            
-        let el = document.createElement('div');
-        el.dataset.category = category;
-        el.dataset.name = name;
-        el.dataset.cid = this.cid;
-        el.dataset.id = this.id;
-        el.innerHTML = markup;
-
-        // console.log(el)
-        let icon = el.querySelector('svg');
-        if (!icon) {
-            console.log(props._id,'is an invalid object')
-            return undefined
-        }
-        if (!icon.getAttribute('viewBox')) {
-            console.warn('setting default viewbox in',category)
-            icon.setAttribute('viewBox','0 0 24 24');
-            this.markup = icon.outerHTML
-        }
-        else if (values && opts.useValues) {
-            return this.getUpdatedClone(el,values);
-        }
-        return el;
-    }
-
-    getComponent(type,size) {
-        if ( !this.previews[type] || type == 'all' ) 
-            return `type ${type} not found`;
-        if ( !this.previews[type][size] || size == 'all' ) 
-            return `type ${type} found but not component ${size}`;
-
-        return this.previews[type][size]
-        
     }
 
     getLogo(type) {

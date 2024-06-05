@@ -3,6 +3,7 @@ import { Tracker }  from './js/model.js'
 import { Preview } from './js/components/Preview.js'
 import { SearchModal } from './js/components/Search.js'
 import { ContextMenu } from './js/components/Context.js'
+import axios from 'axios'
 const
     API_PORT = 1279,
     store = new SvgModel(),
@@ -10,10 +11,6 @@ const
     preview = new Preview(),
     search = new SearchModal(),
     context = new ContextMenu(),
-    // modalGroups
-    CATEGORY_MODALS = {},
-    COLLECTION_MODALS = {},
-    // tabs
     menuTabber = new Tabber(),
     dashBoardTabber = new Tabber(),
     previewTabber = new Tabber(),
@@ -42,29 +39,77 @@ const
     // categoriesReady = createCategoryPanels(),
     // menuReady = createCollectionPanels(),
     initialPreviewModalOnAppOpen = 'position';
+    // modalGroups
+    CATEGORY_MODALS = {},
+    COLLECTION_MODALS = {},
+    // tabs
     // build app
-    (async function init() {
-        let [effect,count] = signal(0);
-        // await caches.delete('icons')
-        dashboard.addEventListener('click',() => {
-            if (count.value >= 5)
-                return count.value = 8
-            count.value++;
-            console.log(count.value)
-        })
+(async function test() {
+    let [effect,count] = signal(0);
+    // await caches.delete('icons')
+    dashboard.addEventListener('click',() => {
+        if (count.value >= 5)
+            return count.value = 8
+        count.value++;
         console.log(count.value)
-        let random= await store.getRandom(20);
-            console.log(random)
-            // localStorage.setItem('random',JSON.stringify(random.map(index => index.markup)))
-        // };
+    })
+    console.log(count.value)
+    let random= await store.getRandom(20);
+    let randomEach = async () => {
+        let cats = await store.getRandom(30,'all');
+        const dogs = await store.getCollectionNames();
+        // for (cat of cats) {
+        //     console.log('fetching random',cat)
+        //     const res = await fetch(`http://localhost:1279/icons/random/${cat}?n=30`)
+        //     console.log('found this',await res.json())
+        // }
+        for (const dog of dogs) {
+            console.log('fetching random',dog)
+            const collection = await store.getMeta();
+            const meta = collection[dog];
+            const updated_at = meta.updated_at;
+            const size = meta.size;
+            console.log('METRICS',collection[dog])
+            const data = meta.sample
+            // console.log('found this',await res.json())
+            const dogPrevTab = $(`.menu-list-item[modal="${dog}"]`)
+            console.log(dogPrevTab)
+            const dogModal = $('.peek-modal[modal="icons"]')
+            dogPrevTab.addEventListener('mouseenter', () => {
+                const modal = dogModal;
+                const labels = $('.peek-modal-labels',modal);
+                const prev = $('.peek-modal-icons',modal);
+                labels.innerHTML = `
+                    <div class="peek-label-title">${dog}</div>
+                    <div class="peek-label count">saved icons: ${size}</div>
+                    <div class="peek-label updated_on"> last updated: ${updated_at ? updated_at : 'never'}</div>
+                `
+                prev.innerHTML = data.map(value => `<div class="pk-icon">${value.markup}</div>`).join('')
+            })
+
+        }
+        console.log(cats)
+    }
+    randomEach();
+        console.log(random)
+        // localStorage.setItem('random',JSON.stringify(random.map(index => index.markup)))
+    // };
+    $('.pinned-preview').innerHTML = random.map(value => `<div class="bp-icon">${value.markup}</div>`).join('')
+    $('.bench-preview-icons .bp-icon-wrapper').innerHTML = random.slice(-8).map((node => `<div class="bp-icon">${node.markup}</div>`)).join('')
+    
+}())
+
+(async function init() {
 
         const navtabs =  $$('.menu-label[role="tab"][type="nav"]')
         const navmodals = $$('.menu-modals .menu-modal[type="modal"]')
         const menuTabber = $('.logo')
         const menu = $('.menu')
         const search = $('.search.passive-search')
+        
         const closeAllTabs = () => navmodals.forEach(modal => modal.classList.remove('active'))
         const removeAllTags = () => navtabs.forEach(tab => tab.classList.remove('active'));
+        
         listen(menuTabber,() => {
             $('.menu-cosm').classList.toggle('active')
             menu.classList.toggle('active')
@@ -89,64 +134,60 @@ const
 
         },'mouseenter'));
 
+        createAllTab();
+        listen(document, handleClickOutside.bind(context));
+        listen(document, handleRightClick.bind(context), 'contextmenu');
+        // modal togglers
+        createCollectionModal
+            // .bindToggler($('.menu__actions-button.create-collection'))
+            .bindCloser( $('.close',createCollectionOverlay), $('.cc-cancel',createCollectionOverlay))
+            .bindTabber( menuTabber )
+            .onOpen(showModal)
+            .onClose(hideModal);
+        createCollectionOverlay.onclick = () => closeOnClickOutside();
+        // preview.init
+        btnBorder.onclick = () => preview.toggleBorder();
+        $('.search-modal .btn-copy-icon').onclick = () => search.copyToClipboard();
+        $('.search-modal .btn-edit-icon').addEventListener('click', async () => {
+            await modelReady;
+            preview.update(getIconById( $('.icon-prev').dataset.id));
+            preview.toggleBorder();
+            search.close();
+        })
+        btnCopy.onclick = () => preview.copyToClipboard();
+        btnFavorite.onclick = () => save('favorites');
+        createCollectionForm.onsubmit = () => handleCreateCollectionForm();
+        dashboard.onmousedown = (e) => handleClick(e);
+        document.addEventListener('keydown',handleKeys);
+        // init sidebar tab functionality
+        // menuIcons.map(group => {
+        //     let tabIcon = $('.tab__button',group),
+        //         correspondingModal = $('.tab__modal',group),
+        //         tabCloser = $('.btn.close-modal',correspondingModal),
+        //         modal = new Modal(correspondingModal);
+        //     modal
+        //         .bindOpener(tabIcon)
+        //         .bindTabber(menuTabber)
+        //         .onOpen(showModal)
+        //         .onClose(hideModal);
+        //     if (tabCloser) modal.bindCloser(tabCloser);
+        // });
+        // init preview tab functionality // ['positions', 'preview', 'color']
+        previewModals.map(element => {
+            let tabName = element.dataset.tab,
+                modal = new Modal(element),
+                tabber = $(`.preview__tabber--tab[data-tab="${tabName}"]`);
+            if (tabber) modal
+                        .bindOpener(tabber)
+                        .bindTabber(previewTabber)
+                        .onOpen(() => tabber.classList.add('active'))
+                        .onClose(() => tabber.classList.remove('active'));
+            // if (tabName == initialPreviewModalOnAppOpen) modal.open();
+            return modal;
+        });
+        createCollectionLinks();
 
-       $('.pinned-preview').innerHTML = random.map(value => `<div class="bp-icon">${value.markup}</div>`).join('')
-       $('.bench-preview-icons .bp-icon-wrapper').innerHTML = random.slice(-8).map((node => `<div class="bp-icon">${node.markup}</div>`)).join('')
-       
-            createAllTab();
-            listen(document, handleClickOutside.bind(context));
-            listen(document, handleRightClick.bind(context), 'contextmenu');
-            // modal togglers
-            createCollectionModal
-                // .bindToggler($('.menu__actions-button.create-collection'))
-                .bindCloser( $('.close',createCollectionOverlay), $('.cc-cancel',createCollectionOverlay))
-                .bindTabber( menuTabber )
-                .onOpen(showModal)
-                .onClose(hideModal);
-            createCollectionOverlay.onclick = () => closeOnClickOutside();
-            // preview.init
-            btnBorder.onclick = () => preview.toggleBorder();
-            $('.search-modal .btn-copy-icon').onclick = () => search.copyToClipboard();
-            $('.search-modal .btn-edit-icon').addEventListener('click', async () => {
-                await modelReady;
-                preview.update(getIconById( $('.icon-prev').dataset.id));
-                preview.toggleBorder();
-                search.close();
-            })
-            btnCopy.onclick = () => preview.copyToClipboard();
-            btnFavorite.onclick = () => save('favorites');
-            createCollectionForm.onsubmit = () => handleCreateCollectionForm();
-            dashboard.onmousedown = (e) => handleClick(e);
-            document.addEventListener('keydown',handleKeys);
-            // init sidebar tab functionality
-            // menuIcons.map(group => {
-            //     let tabIcon = $('.tab__button',group),
-            //         correspondingModal = $('.tab__modal',group),
-            //         tabCloser = $('.btn.close-modal',correspondingModal),
-            //         modal = new Modal(correspondingModal);
-            //     modal
-            //         .bindOpener(tabIcon)
-            //         .bindTabber(menuTabber)
-            //         .onOpen(showModal)
-            //         .onClose(hideModal);
-            //     if (tabCloser) modal.bindCloser(tabCloser);
-            // });
-            // init preview tab functionality // ['positions', 'preview', 'color']
-            previewModals.map(element => {
-                let tabName = element.dataset.tab,
-                    modal = new Modal(element),
-                    tabber = $(`.preview__tabber--tab[data-tab="${tabName}"]`);
-                if (tabber) modal
-                            .bindOpener(tabber)
-                            .bindTabber(previewTabber)
-                            .onOpen(() => tabber.classList.add('active'))
-                            .onClose(() => tabber.classList.remove('active'));
-                // if (tabName == initialPreviewModalOnAppOpen) modal.open();
-                return modal;
-            });
-            createCollectionLinks();
-
-        }())
+}())
 
 function createDashboardPanel(tabButton,type) { // Create Dynamic Modal For Newly created links inside menu
     let panel = div(),
@@ -171,7 +212,7 @@ async function createCategoryLinks() { // get list of names from db
 async function createCollectionLinks() { // get list of names from db
     const names = await store.getCollectionNames();
     console.log(names)
-    $('.collections-list').innerHTML = names.sort().map(name => `<div class="menu-list-item">${name}</div>`).join('')
+    $('.collections-list').innerHTML = names.sort().map(name => `<div class="menu-list-item" type="preview" modal="${name}">${name}</div>`).join('')
     
 
 }
@@ -188,7 +229,7 @@ async function createAllTab() {
     dash.classList.add('dashboard__modal');
     dash.dataset.tab = tabName;
     dash.dataset.type = tabName;
-    const modal = new DynamicModal(dash, { type:'eager', requestHandler:store.getIcons , dataHandler: createDashboard } );
+    const modal = new DynamicModal(dash, { type:'eager', requestHandler:store.getAll , dataHandler: createDashboard } );
     
     modal.bindOpener($('.home'))
         .bindTabber(dashBoardTabber)

@@ -140,25 +140,33 @@ export const Tracker = {
     
 }
 
-export const Model = {
-    async initializeDB() {
+export function Model() {
+    this.all = {}
+    this.categoryNames = []
+    this.categories = {}
+    this.collectionNames = []
+    this.collections = {}
+    this.state = {}
+    this.ready = false
+    
+    this.initializeDB  = async function() {
         return new Promise((resolve, reject) => {
             var request = indexedDB.open("meta", 3);
             request.onupgradeneeded = event => this.buildSchema(event)
             request.onsuccess = event => resolve(event.target.result);
             request.onerror = event => reject(event.target.error);
         });
-    },
+    }
 
-    buildSchema(event) {
+    this.buildSchema = function(event) {
         var db = event.target.result;
         if (!db.objectStoreNames.contains('data'))
             db.createObjectStore('data',{keyPath:'id'});
         if (!db.objectStoreNames.contains('meta'))
             db.createObjectStore('meta',{keyPath: "id"});
-    },
+    }
 
-    async add(data) {
+    this.add = async function(data) {
         const db = await this.initializeDB();
         console.log(db)
         return new Promise((resolve, reject) => {
@@ -173,9 +181,9 @@ export const Model = {
                 };
             request.onerror = event => reject(event.target.error);
         });
-    },
+    }
 
-    async addMany(storeName,data) {
+    this.addMany = async function(storeName,data) {
         const db = await this.initializeDB();
         return new Promise((resolve, reject) => {
 

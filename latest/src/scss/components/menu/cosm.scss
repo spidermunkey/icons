@@ -19,6 +19,7 @@
   &.active {
     @include show();
     transition: opacity 300ms ease;
+    border-image: fill 0 linear-gradient(rgba(0, 0, 0, 0.02),#00000010); 
     &:after {
       opacity: 1;
       animation-name: rollin;
