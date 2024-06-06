@@ -5,6 +5,8 @@ export class ContextMenu {
       this.element = $('.db-context');
       this.overlay = $('.dashboard-cosm');
       this.infoElement = $('.context-card',this.element);
+      listen(document, this.handleClickOutside.bind(this));
+      listen(document, this.handleRightClick.bind(this), 'contextmenu');
   }
 
   handleClickOutside(event) {

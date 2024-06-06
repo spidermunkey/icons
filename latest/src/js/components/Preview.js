@@ -12,7 +12,10 @@ export class Preview {
         this.components = $('.preview__modals--modal[data-tab="preview"]');
         this.nameField = $('.title-group__name .label.name');
         this.categoryField = $('.title-group__category .label.category');
-    
+        this.btnCopy = $('.btn-copy'),
+        this.btnBorder = $('.btn-border'),
+        this.btnFavorite = $('.btn-favit');
+
         this.vbxInput = $('.input-field.x .input');
         this.vbyInput = $('.input-field.y .input');
         this.vbhInput = $('.input-field.h .input');
@@ -65,7 +68,6 @@ export class Preview {
 
         this.vbxInput.addEventListener('keydown',handleViewBoxInput(0))
         this.vbyInput.addEventListener('keydown',handleViewBoxInput(1))
-
         this.svgHeightInput.addEventListener('keydown',(e) => {
             const height = handleHeightWidthInput(e)
             this.height = height;
@@ -79,18 +81,16 @@ export class Preview {
               );
             this.svgHeightInput.setAttribute('selected','true')
         })
-
-        this.svgHeightInput.addEventListener('blur',onBlur.bind(this));
-        function onBlur() {
-            console.log('blur')
+        this.svgHeightInput.addEventListener('blur',(e) => {
             this.svgHeightInput.setAttribute('selected','')
-        }
+        });
         this.svgWidthInput.addEventListener('keydown',(e) => {
             const width = handleHeightWidthInput(e)
             this.width = width;
             // if (this.icon) this.icon.width = width
         })
-
+        this.btnBorder.onclick = () => this.toggleBorder();
+        this.btnCopy.onclick = () => this.copyToClipboard();
 
         function handleHeightWidthInput(e) {
 
@@ -129,7 +129,6 @@ export class Preview {
     
                 return e.target.value;
         }
-
         function handleViewBoxInput(index) {
             return function(e) {
                 e.preventDefault();
@@ -198,7 +197,6 @@ export class Preview {
     set viewBox(string) {
         this.icon.viewBox = string;
     }
-
     get VBX() {
         return Number(this.viewBox[0]);
     }
@@ -211,45 +209,36 @@ export class Preview {
     get VBW() {
         return Number(this.viewBox[3]);
     }
-
     get height() {
         return this.targetElement.getAttribute('height');
     }
-    
     set height(number) {
         this.targetElement.setAttribute('height',`${number}px`)
         if (this.icon) this.icon.height = number
         this.svgHeightInput.value = number
     }
-
     get width() {
         return this.targetElement.getAttribute('width');
     }
-
     set width(number) {
         this.targetElement.setAttribute('width',`${number}px`)
         if (this.icon) this.icon.width = number
         this.svgWidthInput.value = number
     }
-
     showBorder() {
         this.display.style.border = '1px dotted red';
         return this;
     }
-
     hideBorder() {
         this.display.style.border = '';
         return this;
     }
-
     toggleBorder() {
         if (!this.display.style.border) this.showBorder();
         else this.hideBorder();
         return this;
     }
-
     async copyToClipboard() {
-
         if(this.targetElement) {
             const element = this.targetElement.cloneNode(true);
             this.colorPicker.clearMarkAll([element,...this.colorPicker.crawl(element)])
@@ -261,9 +250,7 @@ export class Preview {
             this.showCopyError();
 
         }
-    }
-
-    
+    }    
     showCopySuccess() {
         const notification = $('#INTERFACE .notification-copy.success');
         console.log(notification)
@@ -300,7 +287,6 @@ export class Preview {
     }
 
     setViewboxValues(array) {
-
         if (!this.icon) return
         let stringValue = array.join(' ')
         this.vbxInput.value = `${array[0]}`;
@@ -422,7 +408,7 @@ export class Preview {
     }
 
     update(icon) {
-        this.icon = icon;
+        this.icon = icon.save();
         let { name , category , markup , viewBox , rotation, isFavorite, height, width, stroke, fill } = icon;
         // pathExtractor(markup)      
         if (isFavorite) $('.btn-favit').classList.add('icon-is-favorite');

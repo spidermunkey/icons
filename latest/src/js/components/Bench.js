@@ -99,6 +99,12 @@ export class Bench {
   }
 
 }
+function BenchPreview(icons) {
+  return icons
+          .slice(-8)
+          .map((node => `<div class="bp-icon">${node.markup}</div>`))
+          .join('')
+}
 
 
 // export const bench = {

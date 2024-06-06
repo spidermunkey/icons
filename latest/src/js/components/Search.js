@@ -1,13 +1,4 @@
-import axios from "axios";
-
-class SearchPreview {
-    constructor() {
-        this.element = $('.mini-preview')
-    }
-}
-
-export class SearchModal {
-
+export class Search {
     constructor() {
         this.state = null;
         this.modal = $('.search-modal')
@@ -18,7 +9,6 @@ export class SearchModal {
         this.cosm = $('.cosm-search')
         this.content = $('.result-wrapper');
         this.history = $('.history-wrapper');
-        this.preview = new SearchPreview()
         this.btnEdit = $('.btn-edit-icon',this.content)
         this.btnClose.addEventListener('click',this.close)
         this.cosm.addEventListener('click',this.close)
@@ -27,65 +17,36 @@ export class SearchModal {
         // this.content.addEventListener('click',this.handleClick)
         this.currentElement = null;
     }
-
     open = async(e) => {
         this.cosm.classList.add('active')
         this.modal.classList.add('active')
         $('.search').classList.remove('active')
         this.state = 'active'
     }
-
     close = () => {
         this.modal.classList.remove('active')
         this.cosm.classList.remove('active')
         $('.search').classList.add('active')
         this.state = 'inactive'
     }
-
     toggle = () => {
         this.modal.classList.contains('active') ? closeSearch() : openSearch()
     }
-
     highlightQuery(name){
-
             const query = lowercase(this.query)
-            // Find the index of the query in name
-            var index = name.indexOf(query);
-        
-            if (index !== -1) {
-              // Split the name into three parts: before, matched, after
-              var beforeText = name.substring(0, index);
-              var matchedText = name.substring(index, index + query.length);
-              var afterText = name.substring(index + query.length);
-        
+            const index = name.indexOf(query);
+            if (index == -1) 
+                return name
 
-              return `<span>${beforeText}<span class="highlighted">${matchedText}</span>${afterText}</span>`
-            }
-            else return name
-          
+            const beforeText = name.substring(0, index),
+                  matchedText = name.substring(index, index + query.length),
+                  afterText = name.substring(index + query.length);
+            return `<span>${beforeText}<span class="highlighted">${matchedText}</span>${afterText}</span>`
     }
-    
     async copyToClipboard() {
-        const notification = $('.mini-preview .notification-copy.success');
-        console.log(notification)
-        const showNote = [
-            { transform: "translateY(30px)"},
-            { transform: "translateY(0)", offset: 0.03},
-            { transform: "translateY(0)", offset:0.9},
-            { transform: "translateY(30px)",easing: "ease-out",offset: 1}
-        ]
-        
-        const timing = {
-            duration: 3500,
-        }
-
         const status = await app.copy(this.currentElement.innerHTML)
-        console.log(status)
-        if(status) notification.animate(showNote,timing)
-
-
+        if (status) this.showSuccess()
     }
-
     updatePreview = (props) => {
         // const svg = document.createElement('div')
         // svg.innerHTML = props.markup;
@@ -98,7 +59,6 @@ export class SearchModal {
         $('.mini-preview .icon-category .title').textContent = props.category;
         this.currentElement = $('.icon-prev')
     }
-
     handleClick = async (e) => {
         const icon = e.target.closest('.showcase.svg-wrapper');
         if (icon) {
@@ -111,7 +71,6 @@ export class SearchModal {
                 this.updatePreview(data,this.query)
         }
     }
-
     handleSearch = async (inpvalue) => {
 
         if (inpvalue === ''){
@@ -133,7 +92,6 @@ export class SearchModal {
             this.handleResponse(query,data)
     
     }
-
     handleInput = async (e) => {
 
         console.log(this.session)
@@ -148,7 +106,6 @@ export class SearchModal {
         // if (this.query == "") this.showHistory();
         // else await this.handleSearch(e.target.value);
     }
-
     handleRequest = (e) => {
 
         let timeoutId;
@@ -168,35 +125,25 @@ export class SearchModal {
 
 
     }
-
     handleResponse = (query,data) => {
         const length = data.length;
         const noResult = length == 0;
-
         if (noResult) $('.bg-image').classList.add('active')
         else $('.bg-image').classList.remove('active');
-
         this.showSearchStatus(length,query)
         // $('.results').innerHTML = ` <span>${length == 0 ? 'No Results' : `${length} ${length == 1 ? 'Result' : 'Results'}`} Found For "${query}" </span>`
-
         this.render(data);
-
         if (noResult){
             this.handle
         }
-
         this.updatePreview(data[0])
-
     }
-
     handleNull() {
         this.handleResponse("",[]);
     }
-
     showSearchStatus(length,query){
         $('.results').innerHTML = ` <span>${length == 0 ? 'No Results' : `${length} ${length == 1 ? 'Result' : 'Results'}`} Found For "${query}" </span>`
     }
-
     showSearchPending() {
         $('.results').innerHTML = 'searching....'
     }
@@ -213,23 +160,37 @@ export class SearchModal {
             if (rebased) el.dataset.rebased = rebased
             return el
     }
-
     render(data) {
         console.log('showing results')
         const wrapper = $('.content-wrapper');
         wrapper.innerHTML = '';
         data.forEach(prop => wrapper.appendChild(this.createIcon(prop)))
     }
-
     showResults(data) {
         this.content.classList.add('active');
         this.history.classList.remove('active');
         return data
     }
-
     showHistory() {
         console.log('showing history')
         this.content.classList.remove('active');
         this.history.classList.add('active');
+    }
+    showSuccess() {
+        const notification = $('.mini-preview .notification-copy.success');
+
+        const showNote = [
+            { transform: "translateY(30px)"},
+            { transform: "translateY(0)", offset: 0.03},
+            { transform: "translateY(0)", offset:0.9},
+            { transform: "translateY(30px)",easing: "ease-out",offset: 1}
+        ]
+        
+        const timing = {
+            duration: 3500,
+        }
+
+        notification.animate(showNote,timing)
+
     }
 }

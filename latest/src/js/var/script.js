@@ -676,8 +676,6 @@ class Cursor {
           return `${element} is already bound as a toggler`;
   
         this.togglers.add(element);
-        console.log(elements)
-        console.log(element)
         element.addEventListener("click", (e) => this.toggle.call(this, e));
       });
   
@@ -853,21 +851,15 @@ class Cursor {
   
   class Tabber {
       contructor() {
-
           this.current = undefined
           this.previous = undefined
-          
       }
       setActive = (value,event) => {
-
           if (this.current != value) {
-
               if (this.current !== undefined) 
                   this.current.close(event)
-
               this.previous = this.current;
               this.current = value
-              
           }
       }
 

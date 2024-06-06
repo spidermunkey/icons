@@ -3,7 +3,6 @@ const PORT = 1279;
 const endpoint =`http://localhost:${PORT}/icons`;
 export const API = {
 
-
     async getCategoryNames() {
         const url = `${endpoint}/meta/categories`
         return [...(await axios.get(url).data)].filter(

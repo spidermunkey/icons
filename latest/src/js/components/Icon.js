@@ -1,10 +1,11 @@
 export class Icon {
 
     constructor(props) {
+
         this.name = props.name;
         this.category = props.category;
         this.markup = props.markup;
-        
+
         this.id = uuid();
         this.trace = props.id;
         this.vid = props.vid;
@@ -19,7 +20,7 @@ export class Icon {
         this.styles = props.styles;
         this.created_at = props.created_at;
 
-        this.element = this.createWrapper(props)
+        this.element = this.createWrapper(props);
         this.values = Icon.parse(this.element);
     }
 
@@ -45,11 +46,9 @@ export class Icon {
             created_at: this.created_at,
         }
     }
-
     get html() {
         return this.observer.markup;
     }
-
     get header() {
         return {
             name: this.observer.name,
@@ -57,22 +56,17 @@ export class Icon {
             markup: this.markup,
         }
     }
-
     get viewBox() {
         if (this.values.viewBox)
             return this.parseViewBoxString(this.values['viewBox'])
         else return false;
-
     }
-
     set viewBox(string) {
         if (Array.isArray(string))
             string = this.formatViewBoxArray(string);
         this.values['viewBox'] = string;
         this.element.setAttribute('viewBox',stringValue);
-
     }
-
     set pos(args) {
         let [index,val] = args;
         let vb = this.parseViewBoxString(this.values['viewBox']);
@@ -222,7 +216,6 @@ export class Icon {
         }
         return el;
     }
-
     getComponent(type,size) {
         if ( !this.previews[type] || type == 'all' ) 
             return `type ${type} not found`;
@@ -232,14 +225,12 @@ export class Icon {
         return this.previews[type][size]
         
     }
-
     get showcase(){
         let element = this.createWrapper();
         element.dataset.role = 'svg_wrapper';
         element.classList.add('svg-wrapper');
         return element
     }
-
     get bench(){
         let element = this.createWrapper(this.observer);
         element.dataset.role = 'bench_preview';
@@ -465,7 +456,6 @@ export class Icon {
         }
         return components;
     }
-
     getLogo(type) {
         let component = this.previews.logos[type]
         if (!component) {

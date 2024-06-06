@@ -21,7 +21,6 @@ export class SvgModel {
             console.error('type of collection name must be a string... got:' + typeof name)
             return 'name must be a string';
         }
-
         if (this.collectionNames.includes(name)){
             console.error('tried to create collection by the name of',name,'but it already exists');
             return 'name already exist, choose a different collection name';
@@ -45,6 +44,7 @@ export class SvgModel {
     }
 
     async sync() {
+        API.sync(this.model)
         return new Promise(() => {
             const db = indexedDB.open('icons')
         })
@@ -105,11 +105,15 @@ export class SvgModel {
     }
 
     async getMeta() {
-        const meta = await API.getCollectionData();
-        for (const document of meta) {
-            this.meta[document.name] = document;
+        const data = await API.getCollectionData();
+        let meta = {
+            collectionNames: await this.getCollectionNames(),
+            random: await this.getRandom(20),
+            documents: {},
         }
-        return this.meta;
+        for (const document of data) 
+            meta.documents[document.name] = document;
+        return meta
     }
 
     async getAll() {
@@ -119,7 +123,6 @@ export class SvgModel {
 
     async populateCategoryData() {
         const {icons} = await API.getCategory('all');
-
         for (let i = 0; i < icons.length; i++) {
             let backpack = icons[i],
                 meta = new Icon(backpack),
@@ -132,11 +135,9 @@ export class SvgModel {
             this.categories[category][cid] = meta;
             this.all.length = i;
         }
-
     }
 
     async populateCollectionData() {
-
         const userCollections = await this.getCollectionNames()
         console.log('here',userCollections)
         for (const name of userCollections){
@@ -151,7 +152,7 @@ export class SvgModel {
         console.log('initializing store...')
         await this.populateCategoryData()
         await this.populateCollectionData()
-        await this.getMeta()
+        this.meta = await this.getMeta()
         this.ready = true
         console.log('model ready')
         console.log(this)
@@ -166,5 +167,3 @@ export class SvgModel {
         }
     }
 }
-
-
