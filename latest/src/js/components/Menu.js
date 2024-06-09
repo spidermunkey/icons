@@ -8,24 +8,56 @@ export class Menu {
     this.cosm = $('.menu-cosm')
     this.navtabs =  $$('.menu-label[role="tab"][type="nav"]')
     this.navmodals = $$('.menu-modals .menu-modal[type="modal"]')
-
-    listen(this.menuTabber,this.open.bind(this))
-    this.navtabs.forEach(tab => listen(tab, this.openMenu.bind(this,tab) ,'mouseenter'));
+    this.state = 'inactive'
+    listen(this.menuTabber,this.toggle.bind(this))
+    this.navtabs.forEach(tab => listen(tab, this.toggleMenu.bind(this,tab) ,'click'))
     this.ready = this.init()
+    this.current = null
   }
+
   openMenu(tab) {
-    const modal = $(`.menu-modal[modal='${tab.getAttribute('modal')}']`)
+    const modal = $(`.menu-modal[modal='${tab.getAttribute('modal')}']`);
     this.closeAll();
     // removeAllTags();
     modal.classList.add('active');
     tab.classList.add('active');
   }
+
+  toggleMenu(tab) {
+    const modal = $(`.menu-modal[modal='${tab.getAttribute('modal')}']`);
+    if (this.current === modal) {
+      modal.classList.remove('active');
+      tab.classList.remove('active');
+      this.current = null;
+      return;
+    }
+    this.current = modal;
+    this.closeAll();
+    // removeAllTags();
+    modal.classList.add('active');
+    tab.classList.add('active');
+  }
+
+  toggle() {
+    if (this.state === 'active') this.close();
+    else if (this.state === 'inactive') this.open();
+  }
+
   open() {
-      this.cosm.classList.toggle('active')
-      this.menu.classList.toggle('active')
+      this.state = 'active';
+      this.cosm.classList.add('active');
+      this.menu.classList.add('active');
       if (!this.menu.classList.contains('active')) 
               this.closeAll();
   }
+
+  close() {
+    this.state = 'inactive';
+    this.cosm.classList.remove('active');
+    this.menu.classList.remove('active');
+    this.closeAll();
+  }
+
   async getMeta() {
     const data = await API.getCollectionData();
     let meta = {
@@ -36,12 +68,15 @@ export class Menu {
         meta.documents[document.name] = document;
     return meta
   }
+
   async getCollectionNames() {
     return API.getCollectionNames();
   }
+
   closeAll() {
     this.navmodals.forEach(modal => modal.classList.remove('active'));
   }
+
   async init() {
     this.meta = await this.getMeta();
     const { collectionNames , documents } = this.meta
@@ -55,12 +90,13 @@ export class Menu {
     this.ready = true;
 
   }
+  
 }
 
 function CollectionMenu(names) { // get list of names from db
   return names
       .sort()
-      .map(name => `<div class="menu-list-item" type="preview" modal="${name}">${name}</div>`)
+      .map(name => `<div class="menu-list-item" role="tab" modal="${name}">${name}</div>`)
       .join('')
 }
 

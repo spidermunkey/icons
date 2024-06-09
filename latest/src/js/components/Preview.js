@@ -7,9 +7,12 @@ export class Preview {
         this.viewBoxScale = [];
         this.startingViewbox = [0,0,20,20];
         this.colorPicker = new ColorPicker({});
-
+        this.currentTab = 'position';
+        this.miniPreviewElement = $('.widget-preview-icon__wrapper');
+        this.miniPreviewElementName = $('.widget-preview-info .widget--icon-title > div');
+        this.miniPreviewElementCollection = $('.widget-preview-info .widget--icon-category > div');
         this.element = $('#PREVIEW');
-        this.components = $('.preview__modals--modal[data-tab="preview"]');
+        this.components = $('.preview__modals--modal[data-tab="components"]');
         this.nameField = $('.title-group__name .label.name');
         this.categoryField = $('.title-group__category .label.category');
         this.btnCopy = $('.btn-copy'),
@@ -36,7 +39,8 @@ export class Preview {
         this.defaultWidth = '24';
         this.width = '';
         this.height = '';
-
+        this.openTab(this.currentTab)
+        $(`.preview__tabber--tab[data-tab="${this.currentTab}"]`).classList.add('active')
         this.vbxLabel = new MouseTrackingSlider( $('.input-field.x .label') , {
             onMouseMove:({x}) => this.updateWithMouseTracker(0,x),
             onMouseUp:() => this.startingViewbox = this.viewBox,
@@ -91,7 +95,13 @@ export class Preview {
         })
         this.btnBorder.onclick = () => this.toggleBorder();
         this.btnCopy.onclick = () => this.copyToClipboard();
-
+        $$('.preview__tabber--tab').forEach(tab => {
+            tab.addEventListener('click',(e) => {
+                $$('.preview__tabber--tab').forEach(tab => tab.classList.remove('active'))
+                tab.classList.add('active');
+                this.openTab(tab.dataset.tab)
+            })
+        })
         function handleHeightWidthInput(e) {
 
             e.preventDefault()
@@ -239,15 +249,12 @@ export class Preview {
         return this;
     }
     async copyToClipboard() {
+        console.log(this.targetElement)
         if(this.targetElement) {
             const element = this.targetElement.cloneNode(true);
             this.colorPicker.clearMarkAll([element,...this.colorPicker.crawl(element)])
-            const status = await app.copy(element.outerHTML)
-            if (status) {
+            const status = await window.navigator.clipboard.writeText(this.targetElement.innerHTML);
                 this.showCopySuccess()
-                return;
-            }
-            this.showCopyError();
 
         }
     }    
@@ -273,16 +280,20 @@ export class Preview {
 
     updateNameField(string) {
         this.nameField.textContent = string;
+        this.miniPreviewElementName.textContent = string;
         return this;
     }
 
     updateCategoryField(string) {
         this.categoryField.textContent = string;
+        this.miniPreviewElementCollection.textContent = string;
         return this;
     }
 
     updateDisplayElement(html) {
         this.display.innerHTML = html;
+        this.miniPreviewElement.innerHTML = html;
+        console.log(html)
         return this;
     }
 
@@ -407,9 +418,45 @@ export class Preview {
         return node;
     }
 
+    setLoading() {
+        this.element.classList.add('loading');
+    }
+    setReady() {
+        this.element.classList.remove('loading');
+    }
+
+    setCursor(icons,index) {
+        
+    }
+
+    openTab(name){
+        this.currentModal = $(`.preview__modals--modal[data-tab="${name}"]`)
+        console.log(this.currentModal)
+        $$('.preview__modals--modal').forEach(modal => modal.classList.remove('active'))
+        this.currentModal.classList.add('active')
+    }
+
+    open(){
+        if (this.currentModal)
+            this.currentModal.classList.add('active');
+        $('.widget-pre').classList.remove('active');
+        $('.widget-main').classList.add('active');
+    }
+
+    close(){
+        // close active modal or disable pointer events
+        console.log(this.currentModal)
+        $('.widget-main').classList.remove('active');
+        $('.widget-pre').classList.add('active');
+        if (this.currentModal)
+            this.currentModal.classList.remove('active');
+        console.log('close')
+    }
+
     update(icon) {
         this.icon = icon.save();
         let { name , category , markup , viewBox , rotation, isFavorite, height, width, stroke, fill } = icon;
+        console.log('updating',name,category)
         // pathExtractor(markup)      
         if (isFavorite) $('.btn-favit').classList.add('icon-is-favorite');
         else $('.btn-favit').classList.remove('icon-is-favorite');

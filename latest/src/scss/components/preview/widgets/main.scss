@@ -119,19 +119,17 @@
           // transition: 80ms ease;
           // transform: translateY(20px);
           opacity: .7;
+          svg {
+            height: 20px;
+            width: 20px;
+          }
         }
       }
   
 }
-
-  .widget.pinned-widget {
+.widget.pinned-widget {
       height: 180px;
   }
-
-  .widget.activity-widget {
-      // height: 150px;
-  }
-
 .preview-widget {
   height: 120px;
   &:hover .widget-content {
@@ -240,7 +238,6 @@
     }
   }
 }
-
 .bench-widget {
   height: 85px;
 
@@ -331,7 +328,6 @@
     margin: 0px 4px;
   }
 }
-
 .pinned-widget{
   &:hover .widget-content {
     transform: translateY(16px);
@@ -366,7 +362,6 @@
     }
   }
 }
-
 .activity-widget {
   height: 80px;
   .divider svg {

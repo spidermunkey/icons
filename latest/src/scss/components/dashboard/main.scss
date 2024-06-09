@@ -1,5 +1,6 @@
 // MAIN CONTAINER
 @import './header';
+@import './search';
 
 .dashboard {
 
@@ -18,36 +19,40 @@
 
 .dashboard__modal {
         position: absolute;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-start;
-        align-content: flex-start;
-        height: 540px;
-        // max-width: 1024px;
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-        overflow-y: scroll;
+        height: 520px;
         top: 120px;
-        // padding-left: 2em;
         margin-bottom: 64px;
         padding-bottom: 112px;
-        // transform: translateX(-72px);
-        padding-left: 32px;
-        margin-top: 18px;
-        padding-top: 18px;
-        // padding-right: 30px;
         transition: transform 200ms ease-in-out, opacity 150ms cubic-bezier(0.075, 0.82, 0.165, 1);
-        /* flex-direction: column; */
         width: 100%;
         margin: 0;
-        // padding: 0;
-        /* overflow-y: scroll; */
         &.active {
             visibility: visible;
             pointer-events: all;
             opacity: 1;
         }
+}
+
+.db-res,.search-cosm {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    align-content: flex-start;
+    overflow-y: scroll;
+    padding-left: 24px;
+
+    background-color: white;
+    opacity: 0;
+    pointer-events: none;
+  
+    &.active {
+      opacity: 1;
+      pointer-events: all
+    }
+  
+
 }
 
 .db-overlay {

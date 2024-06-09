@@ -6,8 +6,8 @@ export class Icon {
         this.category = props.category;
         this.markup = props.markup;
 
-        this.id = uuid();
-        this.trace = props.id;
+        this.id = props.id;
+        // this.trace = props.id;
         this.vid = props.vid;
         this.cid = props.cid;
         
@@ -65,7 +65,7 @@ export class Icon {
         if (Array.isArray(string))
             string = this.formatViewBoxArray(string);
         this.values['viewBox'] = string;
-        this.element.setAttribute('viewBox',stringValue);
+        this.element.setAttribute('viewBox',string);
     }
     set pos(args) {
         let [index,val] = args;
@@ -89,7 +89,7 @@ export class Icon {
 
     get height() {
         if (this.values['height'])
-            return this.values.get('height').split('p')[0]
+            return this.values['height'].split('p')[0]
         return null;
     }
     set height(value) {
@@ -124,7 +124,7 @@ export class Icon {
     }
 
     save() {
-        let cpy = new IconNode(this.use())
+        let cpy = new Icon(this.use())
         cpy.created_at = DateTime.stamp();
         return cpy;
     }
@@ -195,7 +195,6 @@ export class Icon {
 
     createWrapper(props,opts = {useValues: false}){
         let {name,category,markup,values} = props || this;
-
         let el = document.createElement('div');
         el.dataset.category = category;
         el.dataset.name = name;
@@ -238,7 +237,7 @@ export class Icon {
         return element;
     }
     get previews(){ // name html
-        let markup = this.observer.markup;
+        let markup = this.markup;
         let components = {
             all:`<div class="preview-group">
                     <div class="label">

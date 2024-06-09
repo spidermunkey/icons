@@ -1,7 +1,6 @@
 import { API } from './api.js';
-import { Model } from './model.js';
 import { Icon } from './components/Icon.js';
-
+import { Cursor } from './var/cursor.js';
 export class SvgModel {
     constructor() {
         // this.model = new Model();
@@ -12,10 +11,35 @@ export class SvgModel {
         this.collections = {}
         this.state = {}
         this.meta = {}
+        this.bench = {
+            name: 'bench',
+            icons:null,
+            updated_on:null,
+            size:0,
+        }
         this.ready = false
     }
+    createCollection({icons,meta,state}) {
+            const i = icons.map(icon => new Icon(icon));
+            return {
+                icons: i,
+                cursor: new Cursor(i),
+                meta: {
+                    ready: true,
+                },
+                state: {},
+                getIcon(id) {
+                    return (this.icons.filter(icon => icon.id == id))[0]
+                },
+                get ready() {
 
-    async createCollection(name) {
+                },
+                set ready(val){
+
+                }
+            }
+    }
+    async addCollection(name) {
         console.log('creating collection',name);
         if (typeof name !== 'string') {
             console.error('type of collection name must be a string... got:' + typeof name)
@@ -101,7 +125,11 @@ export class SvgModel {
     }
     
     async getCollectionNames() {
-        return API.getCollectionNames();
+        if (this.ready && this.collectionNames)
+            return this.collectionNames
+        const names = API.getCollectionNames();
+        this.collectionNames = names;
+        return this.collectionNames
     }
 
     async getMeta() {
@@ -121,36 +149,35 @@ export class SvgModel {
         return icons;
     }
 
-    async populateCategoryData() {
-        const {icons} = await API.getCategory('all');
-        for (let i = 0; i < icons.length; i++) {
-            let backpack = icons[i],
-                meta = new Icon(backpack),
-                {id,cid,category} = meta;
-            if (!this.categoryNames.includes(category)){
-                this.categoryNames.push(category);
-                this.categories[category] = {}
-            }
-            this.all[id] = meta;
-            this.categories[category][cid] = meta;
-            this.all.length = i;
-        }
+    async populateAllIcons() {
+        const response = await API.getCategory('all');
+        this.all = this.createCollection(response)
+    }
+
+    async getCollection(name) {
+
+        if (name == 'all' && this.ready == true)
+            return this.all;
+
+        if (this.collections[name] && this.collections[name].meta.ready == true)
+            return this.collections[name];
+
+        const collection = await API.getCollection(name);
+        return collection;
+
     }
 
     async populateCollectionData() {
         const userCollections = await this.getCollectionNames()
-        console.log('here',userCollections)
         for (const name of userCollections){
-            this.collectionNames.push(name);
-            this.collections[name] = {};
-            const {icons} = await API.getCollection(name);
-            this.addManyToCollection(name,icons);
+            const response = await this.getCollection(name);
+            this.collections[name] = this.createCollection(response);
         }
     }
 
     async init() {
         console.log('initializing store...')
-        await this.populateCategoryData()
+        await this.populateAllIcons()
         await this.populateCollectionData()
         this.meta = await this.getMeta()
         this.ready = true

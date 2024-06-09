@@ -9,7 +9,7 @@
   z-index: 10000;
 
   background-color: white;
-  background: linear-gradient(180deg,white,transparent);
+  background: linear-gradient(180deg,rgba(255, 255, 255, 0.703),transparent);
   pointer-events: none;
 
   // @include hide();
@@ -37,8 +37,8 @@
     // inset: -100%;
     inset: 0;
     z-index: 2;
-    background: linear-gradient(90deg,white,transparent);
-    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.895) 20%,transparent);
+    background: linear-gradient(90deg,rgba(255, 255, 255, 0.697),transparent);
+    background: radial-gradient(circle at center, rgba(255, 255, 255, 0.59) 20%,transparent);
     opacity: 0;
     scale:2;
     transform: translateX(50%) translateY(25%) scale(2);

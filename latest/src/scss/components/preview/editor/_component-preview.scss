@@ -1,7 +1,7 @@
-.tab-window.preview {
-    display: flex;
-    flex-direction: column;
-    width: 100%;
+.preview__modals--modal.components {
+    height: 100%;
+    padding-right: 18px;
+
 }
   
 .preview-group {
@@ -16,8 +16,10 @@
 }
 .preview-group .label {
     margin: 0 0 10px 10px;
-    font-size: 24px;
+    font-size: 20px;
     transition: opacity 300ms ease-in-out;
+    color: rgba(20, 20, 20, 0.743);
+
 }
 .preview-group .preview-components {
     display: flex;

@@ -93,7 +93,6 @@ export class Search {
     
     }
     handleInput = async (e) => {
-
         console.log(this.session)
         this.open();
         this.query = e.target.value;
@@ -107,9 +106,7 @@ export class Search {
         // else await this.handleSearch(e.target.value);
     }
     handleRequest = (e) => {
-
         let timeoutId;
-
         // debounced
         return (e) => {
 
