@@ -230,7 +230,7 @@ export class Icon {
         element.classList.add('svg-wrapper');
         return element
     }
-    get bench(){
+    get pocket(){
         let element = this.createWrapper(this.observer);
         element.dataset.role = 'bench_preview';
         element.classList.add('comp--bench', 'button--sm');

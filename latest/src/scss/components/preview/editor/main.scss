@@ -168,6 +168,10 @@
               }
           }
 
+          & .btn-bench.icon-is-benched svg {
+            fill: blue;
+          }
+
       }
   }
   // TABS

@@ -104,13 +104,16 @@ export class Dashboard {
     console.log(icons)
     const frag = document.createDocumentFragment();
     if (icons) icons.forEach(prop => {
-      let {name,category,markup,id,cid} = prop || this;
+      let {name,category,markup,id,cid,isBenched} = prop || this;
       let el = document.createElement('div');
       el.dataset.category = category;
       el.dataset.name = name;
       el.dataset.cid = cid;
       el.dataset.id = id;
-      el.classList.add('svg-wrapper')
+      el.classList.add('svg-wrapper');
+      if (isBenched) {
+        el.classList.add('benched')
+      }
       el.innerHTML = markup;
       frag.append(el);
     })

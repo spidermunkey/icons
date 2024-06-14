@@ -1,6 +1,7 @@
 import { API } from './api.js';
 import { Icon } from './components/Icon.js';
 import { Cursor } from './var/cursor.js';
+import { Pocket } from './components/Pocket.js';
 export class SvgModel {
     constructor() {
         // this.model = new Model();
@@ -13,12 +14,23 @@ export class SvgModel {
         this.meta = {}
         this.bench = {
             name: 'bench',
-            icons:null,
             updated_on:null,
-            size:0,
+            pocket: new Pocket(),
+            meta: {
+                ready: true,
+            },
+            state: {},
+            get icons() {
+                return this.pocket.icons;
+            },
+            getIcon(id) {
+                return (this.icons.filter(icon => icon.id == id))[0]
+            },
         }
+        this.pocket = this.bench.pocket;
         this.ready = false
     }
+
     createCollection({icons,meta,state}) {
             const i = icons.map(icon => new Icon(icon));
             return {
@@ -39,6 +51,7 @@ export class SvgModel {
                 }
             }
     }
+    
     async addCollection(name) {
         console.log('creating collection',name);
         if (typeof name !== 'string') {

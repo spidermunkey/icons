@@ -436,14 +436,14 @@ export class Preview {
         this.currentModal.classList.add('active')
     }
 
-    open(){
+    open = () => {
         if (this.currentModal)
             this.currentModal.classList.add('active');
         $('.widget-pre').classList.remove('active');
         $('.widget-main').classList.add('active');
     }
 
-    close(){
+    close = () => {
         // close active modal or disable pointer events
         console.log(this.currentModal)
         $('.widget-main').classList.remove('active');
@@ -454,12 +454,18 @@ export class Preview {
     }
 
     update(icon) {
+        if (!icon) {
+          this.setLoading();
+          return;
+        }
         this.icon = icon.save();
-        let { name , category , markup , viewBox , rotation, isFavorite, height, width, stroke, fill } = icon;
+        let { name , category , markup , viewBox , rotation,isBenched, isFavorite, height, width, stroke, fill } = icon;
         console.log('updating',name,category)
         // pathExtractor(markup)      
         if (isFavorite) $('.btn-favit').classList.add('icon-is-favorite');
         else $('.btn-favit').classList.remove('icon-is-favorite');
+        if (isBenched) $('.btn-bench').classList.add('icon-is-benched');
+        else $('.btn-bench').classList.remove('icon-is-benched');
         
         this.startingViewbox = viewBox.slice();
         this.viewBoxScale = viewBox.slice();
