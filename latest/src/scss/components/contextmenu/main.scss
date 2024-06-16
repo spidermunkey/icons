@@ -5,11 +5,16 @@
   display: inline-block;
   box-shadow: 0 2px 10px 0 rgba(27, 31, 35, 0.18), 0 1px 2px 0 #1b1f2346, 1px 0px 30px -4px rgba(0, 0, 0, 0.145);
   /* box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, 0.1), 0px 1px 3px 0px rgba(0, 0, 0, 0.08); */
-  min-height: 128px;
-  min-width: 262px;
+  box-shadow:  0px 0px 7px -4px rgba(27,31,35, 0.012),
+  0px 0px 0px 0px rgba(27,31,35, 0.025),
+  // 0 2px 10px -4px rgba(27,31,35,.0128),
+  inset -2px 0px 1px 1px rgba(171, 171, 171, 0.012), inset -1px 0px 2px 0px rgba(189, 189, 189, 0.01),
+  0px 1px 4px 0px rgba(27,31,35,.0125),
+  0 2px 10px 0 rgba(204, 204, 204, 0.18), 0 1px 2px 0 #e4e4e446, 1px 0px 30px -4px rgba(206, 205, 205, 0.145);
+
   border-radius: 8px;
   border: 1px solid #dddddda1;
-
+    padding: 8px;
   opacity: 0;
   pointer-events: none;
   transition: opacity 80ms ease;
@@ -37,7 +42,8 @@
   }
 
   & > .info {
-      height: 100px;
+    //   height: 100px;
+      left: 0;
       width: 100%;
       position: absolute;
       border: 1px solid #dddddda1;
@@ -51,18 +57,34 @@
           width: 100%;
           display: flex;
           align-items: center;
-          padding: 4px 12px;
-          box-shadow: 0 2px 10px 0 rgba(27, 31, 35, 0.08), 0 1px 2px 0 #1b1f2328, 1px 0px 30px -4px rgba(0, 0, 0, 0.145);
-
+          padding: 12px 0px;
+          box-shadow: 0 -2px 10px 0 rgba(27, 31, 35, 0.08), 0 -1px 2px 0 #1b1f2328, 1px 0px 30px -4px rgba(0, 0, 0, 0.145);
+          box-shadow:  0px 0px 7px -4px rgba(27,31,35, 0.012),
+          0px 0px 0px 0px rgba(27,31,35, 0.025),
+          // 0 2px 10px -4px rgba(27,31,35,.0128),
+          inset -2px 0px 1px 1px rgba(171, 171, 171, 0.012), inset -1px 0px 2px 0px rgba(189, 189, 189, 0.01),
+          0px 1px 4px 0px rgba(27,31,35,.0125),
+          0 -2px 10px 0 rgba(255, 255, 255, 0.08), 0 -1px 2px 0 #97989828, 1px 0px 30px -4px rgba(221, 221, 221, 0.145);
               .card-icon {
                   border-radius: 6px;
                   background-color: var(--currentContext);
+                  border: 1px solid $border-light;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
                   width: 60px;
                   height: 60px;
                   margin-left: 12px;
+                  opacity: .8;
+                  cursor: pointer;
+
+                  &:active svg {
+                    border: 1px dotted red;
+                  }
                   svg {
-                    height: 56px;
-                    width: 56px;
+                    border: 1px dotted transparent;
+                    height: 32px;
+                    width: 32px;
                   }
                   // box-shadow: 0px 0px 18px -8px rgba(0, 0, 0, 0.064),
                   //             0px 1px 4px 0px rgba(0, 0, 0, 0.418);
@@ -70,7 +92,7 @@
               .icon-info {
                   display: flex;
                   flex-direction: column;
-                  padding-left: 16px;
+                  padding-left: 8px;
               }
               .icon-title,
               .icon-category
@@ -78,7 +100,9 @@
                   font-size: 14px;
                   font-family: Arial, Helvetica, sans-serif;
                   margin: 2px 0;
-                  letter-spacing: 0.015em;
+                  letter-spacing: 0.025em;
+                  scale: .95;
+                
               }
               .icon-title,
               .icon-category {
@@ -101,9 +125,10 @@
       vertical-align: middle;
       border-radius: 3px;
       margin: 0 4px;
-      padding: 4px 24px;
+      padding: 4px 16px;
       transition: background-color 120ms ease;
       user-select: none;
+      color: $font-clr-1;
 
       &:hover {
           background: #dddddda1;
@@ -123,19 +148,24 @@
           border-top: 1px solid #dddddda1;
           border-bottom: 1px solid #dddddda1;
         }
+
+        li {
+            font-size: 14px;
+        }
   }
 
   .quick-toggles {
       display: flex;
-      justify-content: space-evenly;
+      justify-content: center;
       align-items: center;
       /* padding: 8px 0; */
 
       .btn {
-          height: 24px;
-          width: 25%;
-          padding: 24px 8px;
-          margin: 2px;
+        //   height: 24px;
+        //   width: 24px;
+          padding: 8px;
+        //   padding: 24px 8px;
+          margin: 2px 8px;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -150,6 +180,8 @@
           svg {
               // stroke: currentColor;
               fill: currentColor;
+              height: 20px;
+              width: 20px;
           }
       }
 

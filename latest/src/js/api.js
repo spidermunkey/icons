@@ -45,7 +45,10 @@ export const API = {
 
     },
     async addToCollection(title, props) {
-        const { data } = await axios.post( resolveCollectionEndpoint(title), { payload: { props } })
+        const { data } = await axios.post( resolveEP(`collections`), { payload: { 
+            collection: title,
+            props,
+         } })
         return data;
     },
     async getRandom(n=20,collection="all") {

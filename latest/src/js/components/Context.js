@@ -6,7 +6,7 @@ export class ContextMenu {
       this.overlay = $('.dashboard-cosm');
       this.infoElement = $('.context-card',this.element);
       listen(document, this.handleClickOutside.bind(this));
-      listen(document, this.handleRightClick.bind(this), 'contextmenu');
+    //   listen(document, this.handleRightClick.bind(this), 'contextmenu');
   }
 
   handleClickOutside(event) {
@@ -16,17 +16,13 @@ export class ContextMenu {
       }
   }
 
-  handleRightClick(event) {
+  handleRightClick(event,icon) {
       const clickedContextMenu = elementClicked('.db-context',event);
-      const clickedIcon = elementClicked('.dashboard .svg-wrapper',event);
-      // console.log(clickedIcon)
       // handle right click outside
       if ( this.state === 'active' && !clickedContextMenu ) {
           event.preventDefault();
 
-          if (clickedIcon) {
-              const { id } = clickedIcon.dataset;
-              const icon = getIconById(id)
+          if (icon) {
               this.updateMouseBasedPosition(event);
               this.update(icon)
               return
@@ -35,9 +31,7 @@ export class ContextMenu {
           return;
       }
       
-      if (this.state === 'inactive' && clickedIcon) {
-          const {id} = clickedIcon.dataset
-          const icon = getIconById(id)
+      if (this.state === 'inactive' && icon) {
           event.preventDefault();
           // position menu
           this.updateMouseBasedPosition(event);

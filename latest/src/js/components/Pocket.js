@@ -29,9 +29,7 @@ export class Pocket extends Notifier {
         let pushSuccessful = this.bucket.push(key,value);
         console.log('push successful', pushSuccessful);
         if (pushSuccessful) {
-            this.highlightDasboardElement(key)
-            // this.addSelectedToBench(icon.pocket)
-            $('.bench-count').textContent = this.size;
+            this.notify('add',icon)
             return icon;
         } else {
             console.warn('err something went wrong adding to your bench')
@@ -39,12 +37,10 @@ export class Pocket extends Notifier {
         }
     }
     remove(id) {
+        const icon = this.bucket.use(id);
         let pluckSuccessful = this.bucket.pluck(id);
         if (pluckSuccessful) {
-            this.removeHighlightFromDashboardElement(id);
-            // this.removeSelectedFromBench(id);
-            $('.bench-count').textContent = this.size;
-
+            this.notify('remove',icon)
             return null;
         } else
             console.log('err something went wrong with plucking from your bench')

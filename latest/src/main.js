@@ -3,9 +3,7 @@ import { Preview } from './js/components/Preview.js'
 import { ContextMenu } from './js/components/Context.js'
 import { Dashboard } from './js/components/Dashboard.js'
 import { Menu } from './js/components/Menu.js'
-import { Pocket } from './js/components/Pocket.js'
 import { Cursor } from './js/var/cursor.js'
-import { Icon } from './js/components/Icon.js'
 
 document.addEventListener('DOMContentLoaded',async function init() {
     
@@ -13,14 +11,12 @@ document.addEventListener('DOMContentLoaded',async function init() {
     preview = new Preview(),
     context = new ContextMenu(),
     dashboard = new Dashboard(),
-    pocket = new Pocket(),
     menu = new Menu(),
     state = {
         tabName: '',
         group: undefined,
         clicked: undefined,
-        context: {
-        },
+        context: {},
         bench: store.bench,
         mode: 'click',
         pinned: 'favorites',
@@ -28,59 +24,100 @@ document.addEventListener('DOMContentLoaded',async function init() {
         set tab(name){
             $('.dashboard__modal').setAttribute('tab',name);
             this.tabName = name;
-            console.trace('TAB SET',name,this.tabName)
-
         },
         get tab() {
             return this.tabName;
         }
     },
-    mode = 'click',
-    ready = store.init();
-    $('.btn-favit').onclick = () => addToCollection('favorites');
+    ready = store.init(),
+    pocket = store.pocket;
+
+    pocket.on('add',function(icon) {
+        const dashboard = $('.dashboard');
+        const binding = dashboard.querySelector(`[data-id="${icon.id}"]`);
+        if (binding && !binding.classList.contains('benched'))
+            binding.classList.add('benched');
+
+        if (preview.icon.id == icon.id)
+            $('.btn-bench').classList.add('icon-is-benched');
+
+        $('.bench-count').textContent = pocket.size;
+        icon.isBenched = true;
+    })
+    pocket.on('remove',function(icon) {
+        const dashboard = $('.dashboard');
+        const binding = dashboard.querySelector(`[data-id="${icon.id}"]`)
+        if (binding && binding.classList.contains('benched'))
+            binding.classList.remove('benched')
+
+        if (preview.icon.id == icon.id)
+            $('.btn-bench').classList.remove('icon-is-benched');
+
+        if (state.tab == 'bench')
+           pocket._find(icon.id)?.remove();
+
+        $('.bench-count').textContent = pocket.size;
+        icon.isBenched = false;
+    })
+
     dashboard.element.onmousedown = (e) => handleClick(e);
-    dashboard.element.ondblclick = (e) => handleDoubleClick(e);
-    // dashboard.element.onkeydown = (e) => handleKeys(e);
+    dashboard.element.oncontextmenu = (e) => toggleContext(e)
+    $('.btn-favit').onclick = () => addToCollection('favorites');
     $('.menu-modals').addEventListener('click',handleMenuClick)
     $('.preview-widget').addEventListener('click',openPreview)
     $('.close-preview').addEventListener('click',closePreview)
     $('.home').addEventListener('click', () => renderCollection('all'))
-    $('.bench-widget').addEventListener('click',openBench)
-    $('.pinned-widget').addEventListener('click',() => renderCollection(state.pinned))
-    $('.preview .btn-bench.toggler').addEventListener('click',() => {
-        const icon = state.selected;
-        let isBenched;
-        if (icon) isBenched = toggleBench(icon)
-        if (!isBenched) {
-            icon.isBenched = false;
-            $('.btn-bench').classList.remove('icon-is-benched');
-        } else {
-            icon.isBenched = true;
-            $('.btn-bench').classList.add('icon-is-benched');
-
-        }
-        
-    })
-    $('.preview__window--navigator.btn-next').addEventListener('click',async () => {
+    $('.bench-widget').addEventListener('click',() => !pocket.size || pocket.size <= 0 ? null : renderBench())
+    $('.pinned-widget').addEventListener('click',renderPinnedCollection)
+    $('.preview .btn-bench.toggler').addEventListener('click',() => state.selected ? pocket.toggle(state.selected): null)
+    $('.preview__window--navigator.btn-next').addEventListener('click',async function toggleNext() {
         await ready;
         preview.update(state.context.cursor.skipToNext())
     })
-    $('.preview__window--navigator.btn-prev').addEventListener('click',async () => {
+    $('.preview__window--navigator.btn-prev').addEventListener('click',async function togglePrev() {
         await ready;
         preview.update(state.context.cursor.skipToPrev())
     })
+    $('.add-to-collection').addEventListener('click',() => {
+        preview.toggleWindow('collections')
+        console.log('clicked')
+    })
+
+    // pointer events need fixin
     preview.close();
+
     renderCollection('all');
+    createA2CPreviewList();
+    generateCollectionPreviews()
 
-    function openBench(){
-        if (!store.pocket.size || store.pocket.size <= 0)
-            return;
-        renderBench();
+    async function copyFromWidget(){
+        if (!preview.icon) return;
+        await preview.copyToClipboard();
     }
+    function toggleBorderFromWidget() {
+        $('.widget-preview-icon').classList.toggle('active')
+    }
+    function toggleContext(event) {
+        const clickedIcon = elementClicked('.dashboard .svg-wrapper',event);
+        let icon;
+        if (clickedIcon)
+            icon = state.context.getIcon(clickedIcon.dataset.id)
 
-    function openPreview() {
+        context.handleRightClick(event,icon)
+    }
+    function openPreview(event) {
+        if (event.target.closest('.copy-icon'))
+            return copyFromWidget()
+        if(event.target.closest('.widget-preview-icon'))
+            return toggleBorderFromWidget()
+        if (event.target.closest('.tggle.color-icon'))
+            preview.currentModal = $(`.preview__modals--modal[data-tab="color"]`)
+        if (event.target.closest('.tggle-open'))
+            preview.currentModal = $(`.preview__modals--modal[data-tab="position"]`)
+
         if (preview.currentModal)
             preview.currentModal.classList.add('active');
+
         $('.widget-pre').classList.remove('active');
         $('.widget-main').classList.add('active');
     }
@@ -90,50 +127,78 @@ document.addEventListener('DOMContentLoaded',async function init() {
             preview.currentModal.classList.remove('active');
         $('.widget-main').classList.remove('active');
         $('.widget-pre').classList.add('active');
-    }
-
-    function handleDoubleClick(event) {
-
+        preview.close();
     }
 
     function renderBench() {
         dashboard.setLoading();
-        state.context = store.bench
-        state.context.cursor = new Cursor(store.bench.icons)
+        state.context = store.bench;
+        state.context.cursor = new Cursor(store.bench.icons);
         dashboard.render(store.bench.icons);
-        dashboard.updateHeader({});
         dashboard.setReady();
-        state.tab = 'bench';
-        // preview.setReady();
         preview.update(state.context.cursor.current);
+        state.tab = 'bench';
+    }
+
+    async function generateCollectionPreviews() {
+        const pinned = state.pinned;
+        const random = await store.getRandom(20,pinned);
+        const widgetElement = $('.pinned-widget .pinned-preview')
+
+        console.log('RANDO',random)
+        for (const rando of random){
+            const icon = document.createElement('div');
+            icon.innerHTML = rando.markup
+            icon.dataset.id = rando.id
+            icon.isFavorite = rando.isFavorite
+            icon.isBenched = rando.isBenched
+            icon.classList.add('pinned-icon')
+            widgetElement.appendChild(icon)
+        }
+
     }
     async function renderCollection(name) {
         await ready
         dashboard.setLoading();
         preview.setLoading();
-        const data = await store.getCollection(name);
-        state.context = data;
-        const {icons,cursor,meta} = data;
-        console.log('CURSOR',cursor);
-        dashboard.render(icons);
-        dashboard.updateHeader(meta);
+        state.context = await store.getCollection(name);
+        dashboard.render(state.context.icons);
         dashboard.setReady();
-        state.tab = name;
         preview.setReady();
         preview.update(state.context.cursor.current);
+        state.selected = preview.icon;
+        state.tab = name;
     }
-    function toggleBench(icon){
-        const iconAdded = store.pocket.toggle(icon)
-        return iconAdded
-    }
-    async function copy(message) {
-        try {
-            await window.navigator.clipboard.writeText(message);
-            return true;
-        } catch(err) {
-            return false
+
+    async function renderPinnedCollection(event) {
+        const icon = event.target.closest('.pinned-icon')
+        let index = 0;
+
+        await ready
+        dashboard.setLoading();
+        preview.setLoading();
+        state.context = await store.getCollection(state.pinned);
+        console.log(icon)
+        if (icon){
+            let id = icon.dataset.id;
+            let icons = state.context.icons;
+            for (let i = 0; i < icons.length; i++){
+                if (icons[i].id == id){
+                    index = i;
+                    state.context.cursor.setPointer(index);
+                    console.log(index)
+                    break;
+                }
+           }
         }
+        preview.update(state.context.cursor.current);
+        dashboard.render(state.context.icons);
+        dashboard.setReady();
+        preview.setReady();
+        state.tab = state.pinned;
+        state.selected = preview.icon
     }
+
      async function handleClick(event) {
         await ready;
         let wrapper = event.target.closest('.svg-wrapper');
@@ -144,35 +209,12 @@ document.addEventListener('DOMContentLoaded',async function init() {
               rightClick = event.buttons === 2,
               leftClick = event.buttons === 1;
 
-        if (leftClick && ctrlClick) {
-            const icon = state.context.getIcon(id);
-            const iconAdded = toggleBench(icon);
-            console.log(iconAdded)
-            if (!iconAdded) {
-                icon.isBenched = false;
-                if (state.tab == 'bench'){
-                    console.log('here')
-                    let element = store.pocket._find(id)
-                    console.log('found',element)
-                    if (element) {
-                        element.remove();
-                    }
-                }
-                if (preview.icon.id == id)
-                    $('.btn-bench').classList.remove('icon-is-benched');
-                    
-                return
-            }
-            icon.isBenched = true;
-            if (preview.icon.id == id)
-                $('.btn-bench').classList.add('icon-is-benched');
+        if (leftClick && ctrlClick)
+            pocket.toggle(state.context.getIcon(id));
+        
+        // else if (rightClick) 
+        //     return toggleContext(event);
 
-            console.log('TAB',state.tab)
-            console.log(state)
-
-            return;
-        }
-        else if (rightClick) return  console.log('right click');
         else if (leftClick) {
             const icon = state.context.getIcon(id);
             preview.update(icon);
@@ -182,9 +224,6 @@ document.addEventListener('DOMContentLoaded',async function init() {
         }
     }
     async function addToCollection( destination, node = preview.icon ) {
-        if (destination === 'favorites') 
-            node.isFavorite = true;
-        node = node.save();
         message = await store.addToCollection({destination,node});
         return message;
     }
@@ -195,6 +234,35 @@ document.addEventListener('DOMContentLoaded',async function init() {
         const modal = link.getAttribute('modal');
         menu.close();
         await renderCollection(modal);
+
+    }
+
+    async function createA2CPreviewList() 
+    {
+        const collectionNames = store.getCollectionNames();
+        (await collectionNames).forEach(name => {
+            const element = document.createElement('div');
+            element.textContent = name;
+            element.classList.add('preview-a2c-item');
+            element.dataset.collection = name;
+            $('[data-tab="collections"][data-role="window"]').appendChild(element)
+            element.addEventListener('click',async () => {
+                console.log('adding to collection')
+                const response = await store.addToCollection({ destination:name , icon:preview.icon })
+                if (response.success){
+                    // update tab data;
+                    
+                    state.tab == name ? null : null;
+
+                }
+            })
+        })
+        const createCollectionButton = document.createElement('div');
+        createCollectionButton.textContent = 'Create Collection';
+        createCollectionButton.classList.add('btn-create-collection');
+        $('[data-tab="collections"][data-role="window"]').appendChild(createCollectionButton)
+
+
 
     }
 

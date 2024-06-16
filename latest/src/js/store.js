@@ -97,35 +97,28 @@ export class SvgModel {
         console.log(`adding ${icon} to ${destination}`)
         const id = uuid();
         let collection = this.collections[destination];
-        if (!collection) collection = await this.createCollection(destination);
+        if (!collection) collection = await this.addCollection(destination);
         else if (collection[id] !== undefined) 
             return console.warn('this id already exists')
-        
-        let copy = icon.save();
 
         if (destination === 'favorites'){
             icon.isFavorite = true;
-            API.addFavorite(icon.props) // markup current icon;
-            copy.isFavorite = true;
+            API.addFavorite(icon.props)
         }
 
+        let copy = icon.save();
         copy.collection = destination;
         copy.trace = icon.id;
         copy.id = id;
         collection[id] = icon;
 
         console.log('optimistic update successful... asynchronously adding to database now');
-        const res = API.addToCollection( destination, copy.props );
-        return  {message:'optimistic update successful... asynchronously adding to database now',success:true ,promise:res,size: collection.size}
-    }
-
-    addManyToCollection(collection,array) {
-        array.forEach(obj => {
-            const {cid} = obj
-            const node = new Icon(obj)
-            this.collections[collection][cid] = node;
-        })
-        console.log('finished adding',array,'to',collection)
+        const response = await API.addToCollection( destination, copy.props );
+        console.log(response)
+        if (response.success){
+            this.collections[destination].meta.ready = false;
+        }
+        return response;
     }
 
     removeFromCollection(id, collection) {
@@ -175,6 +168,10 @@ export class SvgModel {
         if (this.collections[name] && this.collections[name].meta.ready == true)
             return this.collections[name];
 
+        if (this.collections[name]?.meta.ready == false){
+            this.collections[name] = this.createCollection((await API.getCollection(name)));
+            return this.collections[name]
+        }
         const collection = await API.getCollection(name);
         return collection;
 
@@ -188,6 +185,10 @@ export class SvgModel {
         }
     }
 
+    async updateCollection(name) {
+        const response = await this.getCollection(name);
+        this.collections[name] = this.createCollection(response);
+    }
     async init() {
         console.log('initializing store...')
         await this.populateAllIcons()
@@ -197,13 +198,5 @@ export class SvgModel {
         console.log('model ready')
         console.log(this)
         return this
-    }
-
-    async updateCollection(name) {
-        if (store.collections[name]) {
-            let {data} = await API.getCollection(name),
-                collection = store.collections[name];
-            if (data) collection = addManyToCollection(collection,data)
-        }
     }
 }

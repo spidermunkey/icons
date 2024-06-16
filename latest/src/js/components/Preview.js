@@ -253,7 +253,7 @@ export class Preview {
         if(this.targetElement) {
             const element = this.targetElement.cloneNode(true);
             this.colorPicker.clearMarkAll([element,...this.colorPicker.crawl(element)])
-            const status = await window.navigator.clipboard.writeText(this.targetElement.innerHTML);
+            const status = await window.navigator.clipboard.writeText(this.targetElement.outerHTML);
                 this.showCopySuccess()
 
         }
@@ -432,10 +432,32 @@ export class Preview {
     openTab(name){
         this.currentModal = $(`.preview__modals--modal[data-tab="${name}"]`)
         console.log(this.currentModal)
-        $$('.preview__modals--modal').forEach(modal => modal.classList.remove('active'))
+        $$('.preview__modals--modal[data-role="tab"]').forEach(modal => modal.classList.remove('active'))
         this.currentModal.classList.add('active')
+        this.closeWindows()
+    }
+    toggleWindow(name) {
+        const win =  $(`.preview__modals--modal[data-tab="${name}"][data-role="window"]`)
+        console.log('WIN',win)
+            if (!this.currentWindow) {
+                console.log('here')
+                this.currentWindow = win;
+                this.currentWindow.classList.add('active')
+                this.currentModal.classList.remove('active')
+            } else {
+                console.log('here now')
+                this.currentWindow = null;
+                win.classList.remove('active')
+                this.currentModal.classList.add('active')
+            }
     }
 
+    closeWindows(){
+        $$(`.preview__modals--modal[data-role="window"]`).forEach(modal => {
+            modal.classList.remove('active')
+            this.currentWindow = null;
+        })
+    }
     open = () => {
         if (this.currentModal)
             this.currentModal.classList.add('active');
@@ -446,11 +468,11 @@ export class Preview {
     close = () => {
         // close active modal or disable pointer events
         console.log(this.currentModal)
-        $('.widget-main').classList.remove('active');
-        $('.widget-pre').classList.add('active');
+        console.log(this.currentWindow)
         if (this.currentModal)
             this.currentModal.classList.remove('active');
-        console.log('close')
+        if (this.currentWindow)
+            this.currentWindow.classList.remove('active');
     }
 
     update(icon) {
