@@ -24,7 +24,6 @@
   
 
   &.active {
-
       opacity: 1;
       pointer-events: all;
       transition: none;
@@ -44,13 +43,14 @@
   & > .info {
     //   height: 100px;
       left: 0;
-      width: 100%;
+      min-width: 100%;
       position: absolute;
       border: 1px solid #dddddda1;
       background-color: white;
       bottom: calc(100% + 4px);
       border-radius: inherit;
       color: #313131;
+
       .context-card  {
         border-radius: 8px;
           height: 100%;
@@ -65,6 +65,12 @@
           inset -2px 0px 1px 1px rgba(171, 171, 171, 0.012), inset -1px 0px 2px 0px rgba(189, 189, 189, 0.01),
           0px 1px 4px 0px rgba(27,31,35,.0125),
           0 -2px 10px 0 rgba(255, 255, 255, 0.08), 0 -1px 2px 0 #97989828, 1px 0px 30px -4px rgba(221, 221, 221, 0.145);
+          .open-preview svg {
+            height: 24px;
+            width: 24px;
+            fill: #141414d1;
+            margin-right: 4px;
+          }
               .card-icon {
                   border-radius: 6px;
                   background-color: var(--currentContext);
@@ -72,16 +78,15 @@
                   display: flex;
                   justify-content: center;
                   align-items: center;
-                  width: 60px;
-                  height: 60px;
+                  padding: 12px;
                   margin-left: 12px;
                   opacity: .8;
                   cursor: pointer;
 
-                  &:active svg {
+                  &.active > svg {
                     border: 1px dotted red;
                   }
-                  svg {
+                  > svg {
                     border: 1px dotted transparent;
                     height: 32px;
                     width: 32px;
@@ -91,8 +96,44 @@
               }
               .icon-info {
                   display: flex;
-                  flex-direction: column;
+                  width: 100%;
                   padding-left: 8px;
+                  &.min-r .col:after {
+                    opacity: 1;
+                  }
+                  .col {
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    &:after {
+                      content: '...';
+                      position: absolute;
+                      top: 0;
+                      left: 100%;
+                      height: 20px;
+                      width: 20px;
+                      opacity: 0;
+                      pointer-events: none;
+                      // background-color: black;
+                    }
+                  }
+                  .open-preview {
+                    margin-left: 24px;
+                    margin-right: 8px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 8px;
+                    padding: 8px;
+                    border: 1px solid $border-light;
+                    cursor: pointer;
+                    font-size: 14px;
+                    color: #141414d1;
+                    font-family: Arial, Helvetica, sans-serif;
+                    .label {
+                      white-space: nowrap;
+                    }
+                  }
               }
               .icon-title,
               .icon-category
@@ -102,12 +143,33 @@
                   margin: 2px 0;
                   letter-spacing: 0.025em;
                   scale: .95;
+                  white-space: nowrap;
+                  overflow-x: hidden;
+                  max-width: 36px;
+
                 
               }
               .icon-title,
               .icon-category {
                   text-transform: capitalize;
               }
+      }
+      .info-card {
+        position: absolute;
+        top: 0;
+        left: 0;
+        height: 100%;
+        width: 100%;
+        background-color: white;
+        display: flex;
+        visibility: hidden;
+        opacity: 0;
+        pointer-events: none;
+        &.active {
+          visibility: visible;
+          opacity: 1;
+          pointer-events: all;
+        }
       }
 
   }
@@ -186,4 +248,11 @@
       }
 
   }
+}
+
+.db-context .btn.favit[isFav='true'] svg {
+  fill: #ffd904
+}
+.db-context .btn.pocket[isBenched='true'] svg {
+  fill: #00f;
 }

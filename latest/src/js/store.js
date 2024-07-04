@@ -32,7 +32,13 @@ export class SvgModel {
     }
 
     createCollection({icons,meta,state}) {
-            const i = icons.map(icon => new Icon(icon));
+            const i = icons.map(icon => {
+                const i = new Icon(icon);
+                if (i.isValid) {
+                    return i;
+                } else console.log(i)
+                
+            })
             return {
                 icons: i,
                 cursor: new Cursor(i),
@@ -172,6 +178,7 @@ export class SvgModel {
             this.collections[name] = this.createCollection((await API.getCollection(name)));
             return this.collections[name]
         }
+        
         const collection = await API.getCollection(name);
         return collection;
 

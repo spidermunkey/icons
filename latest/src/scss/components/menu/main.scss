@@ -35,16 +35,16 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
         .menu-item {
             opacity: 1;
             transform: translate(0);
-            color: #b4b4b4;
+            // color: $border-light;
             transition: transform 400ms ease, color 500ms ease-in-out, opacity 120ms ease;
             &:hover,
             &.active {
-               color: white;
-               color: $border-light;
+            //    color: white;
+            //    color: $border-light;
     
             }
             .menu-label.active {
-                color: $font-clr-light;   
+                // color: $font-clr-light;   
             }   
           }
         .menu-previews {
@@ -89,8 +89,17 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
 }
 
 .nav-list {
-    margin-top: 118px;
+    margin-top: 130px;
     margin-left: 46px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    height: max-content;
+    border-radius: 20px;
+    // border: 1px solid $border-light;
+    // border: 1px solid #656565c5;
 }
 
 .peek-modal {
@@ -121,19 +130,25 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
     user-select: none;
     font-family: arial;
     font-size: 20px;
-    color: $font-clr-light;
-    margin-bottom: 30px;
+    color: #656565c5;
     cursor: pointer;
     transition: color 400ms ease;
     overflow: hidden;
     opacity: 0;
     transform: translateY(30px);
     transition: transform 200ms ease, color 200ms ease-in-out, opacity 80ms ease;
+    &:last-of-type .menu-label {
+        padding-bottom: 0;
+    }
     // color: $border-super-light;
-    // .menu-label {
-    //     transition: transform 120ms ease 300ms;
-    //     opacity: 0;
-    // }
+    .menu-label {
+        height: 100%;
+        width: 100%;
+        padding-bottom: 24px;
+        padding-top: 8px;
+        // transition: transform 120ms ease 300ms;
+        // opacity: 0;
+    }
 
 }
 
@@ -399,16 +414,17 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
         padding-left: 40px;
         font-size: 18px;
         font-family: Arial, Helvetica, sans-serif;
-        color: $font-clr-light;
-        color: #b4b4b4;
+        color: #656565c5;
+        // color: #b4b4b4;
 
         letter-spacing: 0.05em;
         transform: translateY(80px);
-        border: 1px solid $border-light;
+        border: 1px solid #656565c5;
         padding: 40px;
         border-radius: 40px;
         border-top-right-radius: 15%;
         border-bottom-right-radius: 20%;
+        border-radius: 32px;
         opacity: 0;
         transition: transform 200ms ease, color 300ms ease, opacity 80ms ease;
 

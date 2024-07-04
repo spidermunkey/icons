@@ -1,7 +1,7 @@
 export class Icon {
 
     constructor(props) {
-
+        this.isValid = true;
         this.name = props.name;
         this.category = props.category;
         this.markup = props.markup;
@@ -21,7 +21,12 @@ export class Icon {
         this.created_at = props.created_at;
 
         this.element = this.createWrapper(props);
-        this.values = Icon.parse(this.element);
+        try {
+            this.values = Icon.parse(this.element);
+        } catch(e){
+            console.warn(e)
+            this.valid = false;
+        }
     }
 
     get props() {
@@ -205,8 +210,10 @@ export class Icon {
         // console.log(el)
         let icon = el.querySelector('svg');
 
-        if (!icon) 
-            return console.log(`${props._id} : ${props.name} is an invalid object`)
+        if (!icon) {
+            console.warn(`${props._id} : ${props.name} is an invalid object`)
+            return ''
+        }
 
         if (!icon.getAttribute('viewBox')) {
             console.warn('setting default viewbox in',category);

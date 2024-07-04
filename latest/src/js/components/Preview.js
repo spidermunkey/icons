@@ -8,6 +8,9 @@ export class Preview {
         this.startingViewbox = [0,0,20,20];
         this.colorPicker = new ColorPicker({});
         this.currentTab = 'position';
+        this.tabs = $$('.preview__modals--modal')
+        this.tabNames = this.tabs.map(modal => modal.dataset.tab);
+
         this.miniPreviewElement = $('.widget-preview-icon__wrapper');
         this.miniPreviewElementName = $('.widget-preview-info .widget--icon-title > div');
         this.miniPreviewElementCollection = $('.widget-preview-info .widget--icon-category > div');
@@ -458,17 +461,23 @@ export class Preview {
             this.currentWindow = null;
         })
     }
-    open = () => {
-        if (this.currentModal)
-            this.currentModal.classList.add('active');
+    open = (tabName) => {
+
         $('.widget-pre').classList.remove('active');
         $('.widget-main').classList.add('active');
+
+        if (tabName && this.tabNames.includes(tabName))
+            [this.currentModal] = this.tabs.filter(tab => tab.dataset.tab == tabName);
+        else 
+            [this.currentModal] = this.tabs.filter(tab => tab.dataset.tab == 'position')
+
+        if (this.currentModal)
+            this.currentModal.classList.add('active');
+
     }
 
     close = () => {
         // close active modal or disable pointer events
-        console.log(this.currentModal)
-        console.log(this.currentWindow)
         if (this.currentModal)
             this.currentModal.classList.remove('active');
         if (this.currentWindow)

@@ -61,8 +61,17 @@ document.addEventListener('DOMContentLoaded',async function init() {
     })
 
     dashboard.element.onmousedown = (e) => handleClick(e);
-    dashboard.element.oncontextmenu = (e) => toggleContext(e)
-    $('.btn-favit').onclick = () => addToCollection('favorites');
+    dashboard.element.oncontextmenu = (e) => toggleContext(e);
+    document.addEventListener('click',handleClickOutsideContext)
+    $('.search.passive-search input').focus()
+    $('.btn-favit').onclick = async () => {
+        if (preview.icon && !preview.icon.isFavorite){
+            console.log(preview.icon)
+            const message = await addToCollection('favorites',preview.icon);
+            if (message.success == true)
+                alert('successfully added to favorites')
+        } else alert('icon was not added to favorites')
+    }
     $('.menu-modals').addEventListener('click',handleMenuClick)
     $('.preview-widget').addEventListener('click',openPreview)
     $('.close-preview').addEventListener('click',closePreview)
@@ -82,6 +91,62 @@ document.addEventListener('DOMContentLoaded',async function init() {
         preview.toggleWindow('collections')
         console.log('clicked')
     })
+    $('.db-context .btn.copy').addEventListener('click',async function copyCurrentContextIcon(e) {
+        console.log('yo')
+        if (!context.icon || !context.icon.markup) return;
+        await window.navigator.clipboard.writeText(context.icon.markup);
+        context.handleCopy();
+    })
+    $('.db-context .btn.pocket').addEventListener('click',() => {
+        if (!context.icon) return;
+        context.handlePocket(pocket.toggle(context.icon))
+    })
+    $('.db-context .btn.pocket').addEventListener('click',() => {
+        if (!context.icon) return;
+        context.handlePocket(pocket.toggle(context.icon))
+    })
+    $('.db-context .c-atp').addEventListener('click',() => {
+        if (!context.icon) return;
+        context.handlePocket(pocket.toggle(context.icon))
+    })
+    $('.db-context .open-preview').addEventListener('click',() => {
+        preview.update(context.icon);
+        preview.open('position');
+        context.close();
+    })
+    $('.db-context .btn.favit').addEventListener('click', async () => {
+        console.log(context.icon)
+        console.log(context)    
+        if (context.icon && !context.icon.isFavorite){
+                console.log(context.icon)
+                const message = await addToCollection('favorites',context.icon);
+                if (message.success == true)
+                   context.showFavorite();
+                else console.log(message.message)
+                
+            } else alert('icon was not added to favorites')
+    })
+    $('.db-context .btn.info').addEventListener('click',() => {
+        $('.db-context .info-card').classList.toggle('active')
+    })
+    $('.db-context .card-icon').addEventListener('click',() => {
+        $('.db-context .card-icon').classList.toggle('active')
+    })
+    $('.db-context .o-color').addEventListener('click',() => {
+        preview.update(context.icon)
+        preview.open('color')
+        context.close();
+    })
+    $('.db-context .o-position').addEventListener('click',() => {
+        preview.update(context.icon)
+        preview.open('position')
+        context.close();
+    })
+    $('.db-context .o-components').addEventListener('click',() => {
+        preview.update(context.icon)
+        preview.open('components')
+        context.close();
+    })
 
     // pointer events need fixin
     preview.close();
@@ -89,6 +154,25 @@ document.addEventListener('DOMContentLoaded',async function init() {
     renderCollection('all');
     createA2CPreviewList();
     generateCollectionPreviews()
+
+    let contextMenu = $('.db-context');
+
+
+    const socket = new WebSocket('ws://localhost:1279');
+
+    socket.addEventListener('open', function (event) {
+        console.log('scanner is connected');
+        socket.send('hello')
+    })
+
+    socket.addEventListener('message', async function (event) {
+        const Notification = JSON.parse(event.data);
+        console.log('Notification:', JSON.parse(event.data));
+        if (Notification.type = 'new entry') {
+            
+        }
+    })
+
 
     async function copyFromWidget(){
         if (!preview.icon) return;
@@ -102,24 +186,30 @@ document.addEventListener('DOMContentLoaded',async function init() {
         let icon;
         if (clickedIcon)
             icon = state.context.getIcon(clickedIcon.dataset.id)
-
+            state.inspected = icon;
         context.handleRightClick(event,icon)
+    }
+
+    function handleClickOutsideContext(event) {
+        if (!event.target.closest('.db-context')) { 
+            event.preventDefault(); 
+            context.close();
+        }
     }
     function openPreview(event) {
         if (event.target.closest('.copy-icon'))
             return copyFromWidget()
-        if(event.target.closest('.widget-preview-icon'))
+        else if(event.target.closest('.widget-preview-icon'))
             return toggleBorderFromWidget()
-        if (event.target.closest('.tggle.color-icon'))
-            preview.currentModal = $(`.preview__modals--modal[data-tab="color"]`)
-        if (event.target.closest('.tggle-open'))
-            preview.currentModal = $(`.preview__modals--modal[data-tab="position"]`)
-
-        if (preview.currentModal)
-            preview.currentModal.classList.add('active');
-
+        else if (event.target.closest('.tggle.color-icon'))
+            preview.open('color')
+        else if (event.target.closest('.tggle-open'))
+            preview.open('position')
+        else 
+            preview.open()
         $('.widget-pre').classList.remove('active');
         $('.widget-main').classList.add('active');
+
     }
 
     function closePreview() {
@@ -223,8 +313,8 @@ document.addEventListener('DOMContentLoaded',async function init() {
             return;
         }
     }
-    async function addToCollection( destination, node = preview.icon ) {
-        message = await store.addToCollection({destination,node});
+    async function addToCollection( destination, icon = preview.icon ) {
+        message = await store.addToCollection({destination,icon});
         return message;
     }
     async function handleMenuClick(event){

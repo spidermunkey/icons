@@ -5,15 +5,7 @@ export class ContextMenu {
       this.element = $('.db-context');
       this.overlay = $('.dashboard-cosm');
       this.infoElement = $('.context-card',this.element);
-      listen(document, this.handleClickOutside.bind(this));
-    //   listen(document, this.handleRightClick.bind(this), 'contextmenu');
-  }
-
-  handleClickOutside(event) {
-      if (!event.target.closest('.color-context')) { 
-          event.preventDefault(); 
-          this.close(); 
-      }
+      this.icon = null;
   }
 
   handleRightClick(event,icon) {
@@ -21,7 +13,6 @@ export class ContextMenu {
       // handle right click outside
       if ( this.state === 'active' && !clickedContextMenu ) {
           event.preventDefault();
-
           if (icon) {
               this.updateMouseBasedPosition(event);
               this.update(icon)
@@ -49,6 +40,7 @@ export class ContextMenu {
   close() {
       this.element.classList.remove('active');
       this.overlay.classList.remove('active');
+      $('.db-context .info-card').classList.remove('active')
       this.state = 'inactive';
       return this.state;
   }
@@ -61,18 +53,38 @@ export class ContextMenu {
   }
 
   update(props) {
-      const { name, category,markup} = props;
+      const { name, category,markup,isFavorite,isBenched} = props;
       console.log(props,this)
-      $('.current-icon .card-icon').innerHTML = markup
+      if (name.length > 5) $('.icon-info').classList.add('min-r')
+        
+      $('.current-icon .card-icon',this.element).innerHTML = markup
       $('.icon-title',this.infoElement).textContent = name
       $('.icon-category',this.infoElement).textContent = category
       // root.style.setProperty('--currentContext', hex)
-      return this.state    
+      this.icon = props;
+      console.log(isFavorite)
+
+      isFavorite 
+        ? this.showFavorite()
+        : this.hideFavorite();
+      isBenched
+        ? this.showPocket()
+        : this.hidePocket();
+      
+      console.log('updated',this)
+      return this.state
   }
   
   updateMouseBasedPosition(event) {
-      root.style.setProperty('--context-x', `${event.clientX - $('.dashboard').getBoundingClientRect().left}px`);
-      root.style.setProperty('--context-y', `${event.clientY - $('.dashboard').getBoundingClientRect().top}px`);
+
+        const {left,top,bottom} = $('.dashboard').getBoundingClientRect();
+        const {height} = $('.db-context').getBoundingClientRect();
+
+      (height + event.clientY) > bottom
+        ? root.style.setProperty('--context-y', `${bottom - height - 40}px`)
+        : root.style.setProperty('--context-y', `${event.clientY - top}px`);
+
+        root.style.setProperty('--context-x', `${event.clientX - left}px`);
   }
 
   render(props) {
@@ -140,4 +152,34 @@ export class ContextMenu {
       return element;
   }
 
+  showIcon(){
+
+  }
+  
+  showInfo(){
+    if (!this.icon) return;
+  }
+
+  showFavorite(){
+    $('.db-context .btn.favit').setAttribute('isFav',true)
+  }
+  hideFavorite(){
+    $('.db-context .btn.favit').setAttribute('isFav','')
+  }
+  showPocket() {
+    $('.db-context .btn.pocket').setAttribute('isBenched',true)
+  }
+  hidePocket() {
+    $('.db-context .btn.pocket').setAttribute('isBenched','')
+  }
+
+  handleCopy(){
+    alert('element copied');
+  }
+  handlePocket(status) {
+    if (status == null)
+        this.hidePocket();
+    else if (status.id && status.id == this.icon.id)
+        this.showPocket();
+    }
 }
