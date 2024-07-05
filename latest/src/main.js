@@ -33,7 +33,11 @@ document.addEventListener('DOMContentLoaded',async function init() {
     ready = store.init(),
     scanner = new Scanner(),
     pocket = store.pocket;
-
+    scanner.notifier.on('new entry',async function(entry) {
+        await ready;
+        store.collections['recent'].meta.ready = false;
+        console.log(store.collections['recent'])
+    })
     pocket.on('add',function(icon) {
         const dashboard = $('.dashboard');
         const binding = dashboard.querySelector(`[data-id="${icon.id}"]`);

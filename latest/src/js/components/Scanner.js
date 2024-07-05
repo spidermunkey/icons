@@ -1,21 +1,26 @@
+import { Notifier } from "../var/notify.js";
 export class Scanner {
   constructor() {
     this.shouldReconnect = true;
-    this.max_retry_attempts = 0;
+    this.max_retry_attempts = 5;
     this.retry_attempts = 0;
     this.reconnecting = false;
     this.socket = this.createWebSocket();
     this.notifications = [];
+    this.notifier = new Notifier();
+
+    // emitter 
   }
 
   createWebSocket() {
+    this.cancelReconnect()
+
     try {
-      this.cancelRecconnect()
       let sock = new WebSocket('ws://localhost:1279');
       sock.onopen = this.handleConnection.bind(this);
       sock.onmessage = this.parseMessage.bind(this);
       sock.onclose = this.handleDisconnect.bind(this);
-      sock.onerror = function(err) {
+      sock.onerror = (err) => {
         console.error('WebSocket error:', err);
         this.handleDisconnect();
       };
@@ -43,14 +48,15 @@ export class Scanner {
       switch (type){
         case 'new entry' : console.log('new entry', data )
         default : console.log('incomming: ',notification);
-      } 
+      }
       this.notifications.push(notification)
+      this.notifier.notify('new entry',notification);
     } catch(e) {
         console.error(e);
       }
   }
 
-  cancelRecconnect() {
+  cancelReconnect() {
     if (this.socket) {
       this.socket.onopen = null;
       this.socket.onmessage = null;
@@ -71,14 +77,14 @@ export class Scanner {
       return;
     this.reconnecting = true; // Set the flag to indicate the reconnection logic is running
 
-    event.wasClean 
-      ? console.log(`WebSocket connection closed cleanly, code=${event.code}, reason=${event.reason}`)
-      : console.log('WebSocket connection closed abruptly');
+    // event.wasClean 
+    //   ? console.log(`WebSocket connection closed cleanly, code=${event.code}, reason=${event.reason}`)
+    //   : console.log('WebSocket connection closed abruptly');
 
     if (this.shouldReconnect && this.retry_attempts < this.max_retry_attempts) {
-        const timeout = Math.min(1000 * Math.pow(2, reconnectAttempts), 30000); // Exponential backoff
+        const timeout = Math.min(1000 * Math.pow(2, this.retry_attemps), 30000); // Exponential backoff
         console.log(`Attempting to reconnect in ${timeout / 1000} seconds...`);
-        setTimeout(this.createWebSocket, timeout);
+        setTimeout(this.createWebSocket.bind(this), timeout);
         this.retry_attempts++;
     }
   }
