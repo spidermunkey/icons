@@ -4,6 +4,7 @@ import { ContextMenu } from './js/components/Context.js'
 import { Dashboard } from './js/components/Dashboard.js'
 import { Menu } from './js/components/Menu.js'
 import { Cursor } from './js/var/cursor.js'
+import { Scanner } from './js/components/Scanner.js';
 
 document.addEventListener('DOMContentLoaded',async function init() {
     
@@ -30,6 +31,7 @@ document.addEventListener('DOMContentLoaded',async function init() {
         }
     },
     ready = store.init(),
+    scanner = new Scanner(),
     pocket = store.pocket;
 
     pocket.on('add',function(icon) {
@@ -157,21 +159,6 @@ document.addEventListener('DOMContentLoaded',async function init() {
 
     let contextMenu = $('.db-context');
 
-
-    const socket = new WebSocket('ws://localhost:1279');
-
-    socket.addEventListener('open', function (event) {
-        console.log('scanner is connected');
-        socket.send('hello')
-    })
-
-    socket.addEventListener('message', async function (event) {
-        const Notification = JSON.parse(event.data);
-        console.log('Notification:', JSON.parse(event.data));
-        if (Notification.type = 'new entry') {
-            
-        }
-    })
 
 
     async function copyFromWidget(){
