@@ -11,7 +11,8 @@
   padding-right: 64px;
   margin-left: 24px;
 
-  .btn-filter {
+  .btn-filter,
+  .btn-cancel {
     border: 1px solid rgba(128, 128, 128, 0.1771);
     font-family: Arial, Helvetica, sans-serif;
     padding: 4px 8px;
@@ -23,8 +24,13 @@
     display: inline-flex;
     align-items: center;
     transition: color 400ms;
-    margin-right:80px;
+    margin-left: 12px;
+    pointer-events: none;
 
+    &.active {
+      opacity: .8;
+      pointer-events: all;
+    }
     &:hover {
         box-shadow: -1px 0px 3px 0px rgba(128, 128, 128, 0.092), -1px 0px 3px 0px rgba(128, 128, 128, 0.0392);
         color: rgba(20,20,20,.82);
@@ -33,6 +39,11 @@
         }
     }
     cursor: pointer;
+    .icon {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
     .label {
         display: inline-flex;
         height: 100%;
@@ -54,6 +65,29 @@
   .info-bar {
       display: flex;
       width: 100%;
+      padding-left: 14px;
+      .divider { 
+        margin-right: 4px;
+      }
+      .info-text {
+        padding: 2px 0px;
+        cursor: pointer;
+      }
+      .current-tab,.breadcrumb {
+        margin-left: 8px;
+        text-transform: capitalize;
+        border-radius: 4px;
+        padding: 2px 8px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        transition: border 200ms ease, background 200ms ease;
+        border-radius: 8px;
+        background: #f7f7f71e;
+        border: 1px solid #80808051;
+        color: $font-clr-light;
+        letter-spacing: .08em;
+      }
   }
   .tool-bar {
       // justify-content: space-between;
@@ -137,6 +171,7 @@
   }
   .info-bar {
     // opacity: 0;
+      padding-left:18px;
       font-family: Arial, Helvetica, sans-serif;
       letter-spacing: 0.035em;
       color: rgba(20, 20, 21, .3);

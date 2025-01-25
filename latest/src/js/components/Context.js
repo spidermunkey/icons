@@ -40,7 +40,7 @@ export class ContextMenu {
   close() {
       this.element.classList.remove('active');
       this.overlay.classList.remove('active');
-      $('.db-context .info-card').classList.remove('active')
+      $('.db-context .info').classList.remove('active')
       this.state = 'inactive';
       return this.state;
   }
@@ -171,10 +171,6 @@ export class ContextMenu {
   }
   hidePocket() {
     $('.db-context .btn.pocket').setAttribute('isBenched','')
-  }
-
-  handleCopy(){
-    alert('element copied');
   }
   handlePocket(status) {
     if (status == null)

@@ -1,89 +1,129 @@
 import axios from "axios";
 const PORT = 1279;
-const endpoint =`http://localhost:${PORT}/icons`;
+const endpoint = `http://localhost:${PORT}/icons`;
 export const API = {
-
-    async getCategoryNames() {
-        const url = `${endpoint}/meta/categories`
-        return [...(await axios.get(url).data)].filter(
-            categoryName => categoryName !== 'all'
-        )
+    async fetch(url,method = 'get'){
+        try {
+            const res = await axios[method](url)
+            return res.data
+        } catch (e){
+            console.warn('[error]',`[url] : ${url}`,e)
+            return false
+        }
     },
-    async getCollectionNames() {
-        let url = `http://localhost:${PORT}/icons/meta/collections`
-        const res = await axios.get(url)
-        console.log(res)
-        const names = res.data.map(
-            collection => collection.name
-        )
-        return names;
+    async post(url,payload,log = false){
+        try {
+            const response = await axios.post(url, { payload: payload})
+            if (log) console.dir('[[ RESPONSE -- POST ]]',response)
+            return response.data
+        } catch(e){
+            console.warn('[ERROR -- POST]',`[url] : ${url}`,e)
+            return false
+        }
+    },
+    async put(url,payload,log = false){
+        try {
+            const response = await axios.put(url, { payload: payload})
+            if (log) console.dir('[[ RESPONSE -- PUT ]]',response)
+            return response.data
+        } catch(e){
+            console.warn('[ERROR -- PUT]',`[url] : ${url}`,e)
+            return false
+        }
+    },
+    async delete(url,log=false){
+        try {
+            const response = await axios.delete(url)
+            if (log) console.dir('[[ RESPONSE -- DELETE ]]',response)
+            return response.data
+        } catch(e){
+            console.warn('[ERROR -- DELETE]',`[url] : ${url}`,e)
+            return false
+        }
+    },
+    async requestSync(data){
+        return this.post(`${endpoint}/collections/sync`, {  cid: data.cid } )
+    },
+    async requestIgnore(data){
+        return this.post(`${endpoint}/collections/ignore`, {  cid: data.cid } )
+    },
+    async getStatus(){
+        const response = await this.fetch(`${endpoint}/local/status`)
+        if (response) response.connection = await this.ping('google.com')
+        return response
+    },
+    async getDownloads(n){
+        return this.fetch(`${endpoint}/local/downloads?n=${n}`)
+    },
+    async getIcon(id){
+        return this.fetch(`${endpoint}/all/${id}`)
+    },
+    async search(searchQuery){
+        return this.post(`http://localhost:${1279}/icons/all`, { query: searchQuery })
+    },
+    async savePreset(preset){
+        return this.post(`${endpoint}/settings`, { preset:preset })
+    },
+    async saveIconPreset(id,collection,setting){
+        return this.post(`${endpoint}/all/settings/${id}`, { id, collection, setting })
+    },
+    async deleteIconPreset(id,collection,pid){
+        return this.delete(`${endpoint}/all/settings/${id}?pid=${encodeURIComponent(pid)}&collection=${collection}`)
+    },
+    async setDefaultIconSetting(id,collection,pid){
+        return this.put(`${endpoint}/all/settings/${id}`,{id,collection,pid})
+    },
+    async setCollectionDefault(collection,setting){
+        return this.put(`${endpoint}/collections/settings`,{collection,preset:setting})
+    },
+    async clearCollectionDefault(collection){
+        return this.put(`${endpoint}/collections/settings/${collection}`)
+    },
+    async clearDefaultSetting(id,collection){
+        return this.put(`${endpoint}/all/settings/${id}`,{id,collection,pid:0})
+    },
+    async saveCollectionPreset(cid,setting){
+        return this.post(`${endpoint}/collections/settings`, { cid, setting } )
+    },
+    async removeCollectionPreset(cid,pid){
+        return this.delete(`${endpoint}/collections/settings?pid=${encodeURIComponent(pid)}&cid=${encodeURIComponent(cid)}`)
+    },
+    async updatePresetName(props){
+        return this.put(`${endpoint}/all/settings/edit`,props)
+    },
+    async getUploads(){
+        return this.fetch(`${endpoint}/collections/info?type=collection`)
+    },
+    async getCollectionNames(synced = false) {
+        return this.fetch(`${endpoint}/collections/info/names?synced=${synced}`)
+    },
+    async getCollection(name,filters = {subtypes:[],sub_collections:[]},useFilters=false) {
+        let subTypesQuery = encodeURIComponent(filters.subtypes.join(','))
+        let subCollectionsQuery = encodeURIComponent(filters.sub_collections.join(','))
+        return this.fetch(`${endpoint}/collections/${name}?filter=${useFilters}&st=${subTypesQuery}&sc=${subCollectionsQuery}`)
+    },
+    async getPage(name,page,limit){
+        const res = await this.fetch(`${endpoint}/collections/${name}?filter=false&page=${page}&limit=${limit}`)
+        return res;
     },
     async getCollectionData() {
-        let url = `http://localhost:${PORT}/icons/meta/collections`
-        const collections = (await axios.get(url)).data.filter(
-            collectionName => collectionName.name !== '{{meta}}'
-        )
-        return collections;
+        return this.fetch(`${endpoint}/collections/info?type=default`)
     },
-    async createCollection(title) {
-        const response = await axios.post( resolveEP(`/collections/create`),{payload:{name:title}});
-        return response;
+    async createCollection(name,icons) {
+        return this.post(`${endpoint}/collections/create` ,{ props: { name, icons }})
     },
-    async getCollection(title) {
-        const response = await axios.get( resolveCollectionEndpoint(title) );
-        console.log(response.data)
-        return response.data
+    async addToCollection(name,props) {
+        return this.post( `${endpoint}/collections/${name}`, { ...props } )
     },
-    async getCategory(title) {
-        const endpoint = resolveCategoryEndpoint(title);
-        console.log('no cache records... populating from scratch')
-        const response = await axios.get( endpoint );
-        console.log(response.data)
-        return response.data;
+    async dropCollection(name) {
+        return axios.delete(`${endpoint}/collections/${name}`);
     },
-    async addFavorite(props) {
-
+    async ping(){
+        try {
+            (await fetch('https://google.com', { method: 'GET', mode: 'no-cors',}))
+            return true;
+        } catch(e) {
+            return false;
+        }
     },
-    async addToCollection(title, props) {
-        const { data } = await axios.post( resolveEP(`collections`), { payload: { 
-            collection: title,
-            props,
-         } })
-        return data;
-    },
-    async getRandom(n=20,collection="all") {
-        const url = resolveEP(`random/${collection}?n=${n}`);
-        const data = await this.cache(url);
-        return data;
-    },
-    async cache(endpoint) {
-        return caches.match(endpoint).then(
-            async cacheRespone => {
-                if(cacheRespone){
-                    let data = await cacheRespone.json();
-                    console.log('found cache',data)
-                    return data;
-                } else {
-                    console.log('no cache records... populating from scratch')
-                    const response = await axios.get( endpoint );
-                    caches.open('icons').then(
-                        cache => cache.add(endpoint)
-                    )
-                    return response.data;
-                }}
-            )
-    },
-    dropCollection:() => 'no'
-}
-
-function resolveEP(endpoint) {
-    return `http://localhost:${PORT}/icons/${endpoint}`
-}
-
-function resolveCategoryEndpoint(categoryName) {
-    return resolveEP(`categories/${categoryName}`)
-}
-
-function resolveCollectionEndpoint(collectionName) {
-    return resolveEP(`collections/${collectionName}`)
 }

@@ -1,20 +1,19 @@
 // MAIN CONTAINER
 @import './header';
 @import './search';
+@import './home';
 
 .dashboard .dashboard__modal[tab="bench"] .svg-wrapper.benched {
-    background: white;
     box-shadow: 0 0 7px -4px #1b1f2303, 0 0 #1b1f2306, inset -2px 0 1px 1px #ababab03, inset -1px 0 2px #bdbdbd03, 0 1px 4px #1b1f2303;
     border-top: 0;
     border-left: 0;
     border-right: 0;
-    
     &:hover {
         box-shadow: 0px 3px 6px -2px rgba(0, 0, 0, 0.123), 0px 1px 3px 0px rgba(0, 0, 0, 0.127);
     }
 }
-.dashboard {
 
+.dashboard {
     position: relative;
     display: flex;
     flex-wrap: wrap;
@@ -53,16 +52,153 @@
     align-content: flex-start;
     overflow-y: scroll;
     padding-left: 24px;
-
-    background-color: white;
     opacity: 0;
     pointer-events: none;
-  
     &.active {
       opacity: 1;
       pointer-events: all
     }
-  
+}
+.dashboard__modal[tab="all"] .db-res {
+    flex-direction: column;
+    flex-wrap: nowrap;
+}
+
+.dashboard__modal[tab="settings"] .db-res .svg-wrapper {
+    padding: 15px;
+    scale: 1;
+}
+
+.db-res .preview-settings-modal{
+    display: flex;
+    flex-wrap: wrap;
+
+}
+.collection-summary, .collection-summary > div, .collection-summary .paginator {
+    display: flex;
+}
+
+.collection-summary {
+    border: 1px solid rgba(20, 20, 20, 0.05);
+    //   border: 1px solid #1414140d;
+    border-radius: 12px;
+    box-shadow: 0px 1px 3px 0px rgba(128, 128, 128, 0.092), -1px 0px 3px 0px rgba(128, 128, 128, 0.0392);
+    margin: 40px;
+    padding: 20px;
+    flex-direction: column;
+    position: relative;
+    font-family: Arial, Helvetica, sans-serif;
+    color: #323232c7;
+    .panel-header {
+        color: #323232b1;
+        padding: 4px 24px;
+        padding-left: 18px;
+        justify-content: space-between;
+        .panel-name {
+            font-size: 20px;
+            letter-spacing: 0.05em;
+            text-transform: capitalize;
+            cursor: pointer;
+        }
+        .panel-settings {
+            display: flex;
+            text-decoration: underline;
+            text-decoration-color: #c8c8c8b1;
+            cursor: pointer;
+            user-select: none;
+            &:hover {
+                color: #323232d2
+            }
+        }
+        .settings-icon {
+            margin-left: 12px;
+            stroke: #c8c8c8b1;
+            
+        }
+    }
+    .paginator {
+        margin-top: 24px;
+        width: 75%;
+        overflow: hidden;
+        margin-left: 12px;
+        padding: 4px;
+        .page {
+            scale: .87;
+            cursor: pointer;
+            border: 1px solid #8484841a;
+            padding: 6px 18px;
+            border-radius: 10px;
+            box-shadow: 0px 1px 2px -1px rgba(128, 128, 128, 0.092), -1px 0px 1px -1px rgba(128, 128, 128, 0.0392);
+            color: #323232dc;
+            margin: 0px 4px;
+            max-width: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            &[current="true"] {
+                box-shadow: 1px 2px -1px rgba(6, 40, 192, 0.092), -1px 0px 1px -1px rgba(10, 4, 139, 0.344), 0px 0px 4px 0px black;
+            border: 1px solid #6c6c6c34;
+
+            color: #171717;
+
+            }
+        }
+    }
+    .panel-menu {
+        height: 100%;
+        display: inline-flex;
+        width: 20%;
+        overflow-y: scroll;
+        flex-direction: column;
+        .sc-list {
+            display: none;
+        }
+    }
+    .db-container {
+        // height: 120px;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        max-width: 100%;
+        // margin: 24px 0;
+        margin-top: 12px;
+    }
+    .panel-preview{
+            height: 100%;
+            display: inline-flex;
+            align-content: flex-start;
+            gap: 10px;
+            flex-wrap: wrap;
+            flex: 1;
+                .svg-wrapper[icon-type=preview] {
+                    opacity: .9;
+                    background: #fff;
+                    margin: 2px 4px;
+                    padding:8px;
+                    border-radius: 8px;
+
+                    scale:1;
+                    transition: all .12s ease-in-out, background .4s, box-shadow .12s ease-in-out;
+                    position: relative;
+                    overflow: hidden;
+                    cursor: pointer;
+                    justify-content: center;
+                    align-items: center;
+                    display: flex;
+                    position: relative;
+                    overflow: hidden;
+                    z-index: 2;
+                    svg {
+                        height: 18px;
+                        width: 18px;
+                    }
+                }
+    }
+    .panel-footer {
+        overflow: hidden;
+        max-width: 600px;
+    }
 
 }
 

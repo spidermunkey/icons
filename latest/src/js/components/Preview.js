@@ -1,194 +1,412 @@
-import { ColorPicker } from "./ColorPicker";
-
-export class Preview {
-
-    constructor() {
-        this.icon = undefined;
-        this.viewBoxScale = [];
-        this.startingViewbox = [0,0,20,20];
-        this.colorPicker = new ColorPicker({});
-        this.currentTab = 'position';
-        this.tabs = $$('.preview__modals--modal')
-        this.tabNames = this.tabs.map(modal => modal.dataset.tab);
-
-        this.miniPreviewElement = $('.widget-preview-icon__wrapper');
-        this.miniPreviewElementName = $('.widget-preview-info .widget--icon-title > div');
-        this.miniPreviewElementCollection = $('.widget-preview-info .widget--icon-category > div');
-        this.element = $('#PREVIEW');
-        this.components = $('.preview__modals--modal[data-tab="components"]');
-        this.nameField = $('.title-group__name .label.name');
-        this.categoryField = $('.title-group__category .label.category');
-        this.btnCopy = $('.btn-copy'),
-        this.btnBorder = $('.btn-border'),
-        this.btnFavorite = $('.btn-favit');
-
-        this.vbxInput = $('.input-field.x .input');
-        this.vbyInput = $('.input-field.y .input');
-        this.vbhInput = $('.input-field.h .input');
-        this.vbwInput = $('.input-field.w .input');
-        
-        this.svgHeightInput = $('.input.input-height');
-        this.svgWidthInput = $('.input.input-width');
-
-        this.svgStrokeContainer = $('.field-stroke');
-        this.svgStrokeInput = $('.input.inp-stroke');
-
-        this.svgFillContainer = $('.field-fill');
-        this.svgFillInput = $('.input.inp-fill');
-        
-        this.vbhLabel = $('.input-field.h .label');
-        this.vbwLabel = $('.input-field.w .label');
-        this.defaultHeight = '24';
-        this.defaultWidth = '24';
-        this.width = '';
-        this.height = '';
-        this.openTab(this.currentTab)
-        $(`.preview__tabber--tab[data-tab="${this.currentTab}"]`).classList.add('active')
-        this.vbxLabel = new MouseTrackingSlider( $('.input-field.x .label') , {
-            onMouseMove:({x}) => this.updateWithMouseTracker(0,x),
-            onMouseUp:() => this.startingViewbox = this.viewBox,
-            reset: () => this.resetMouseTrackingSlider(0)
-        })
-
-        this.vbyLabel = new MouseTrackingSlider( $('.input-field.y .label') , {
-            onMouseMove:({x}) => this.updateWithMouseTracker(1,x),
-            onMouseUp:() => this.startingViewbox = this.viewBox,
-            reset: () => this.resetMouseTrackingSlider(1)
-    
-        })
-        
-        this.zoomSlider = new Slider( $('#zoomSlider') , {
-            onMouseMove: ({pct}) => this.updateWithSlider(pct),
-            onMouseDown: ({pct}) => this.updateWithSlider(pct),
-            onMouseUp: () => this.startingViewbox = this.viewBox
-        })
-
-        this.rotationSlider = new Slider( $('#rotationSlider'),{
-            onMouseMove: ({deg}) => {
-                this.updateRotation(deg);
-                this.targetElement.dataset.rotation = deg.deg;
-                this.icon.rotation = deg.deg;
-            },
-            onMouseUp: () => this.updatePreviews()
-            
-        })
-
-        this.vbxInput.addEventListener('keydown',handleViewBoxInput(0))
-        this.vbyInput.addEventListener('keydown',handleViewBoxInput(1))
-        this.svgHeightInput.addEventListener('keydown',(e) => {
-            const height = handleHeightWidthInput(e)
-            this.height = height;
-            // this.targetElement.setAttribute('height',`${height}px`)
-            // if (this.icon) this.icon.height = height
-        })
-        this.svgHeightInput.addEventListener('select',(e) => {
-            const selection = e.target.value.substring(
-                e.target.selectionStart,
-                e.target.selectionEnd,
-              );
-            this.svgHeightInput.setAttribute('selected','true')
-        })
-        this.svgHeightInput.addEventListener('blur',(e) => {
-            this.svgHeightInput.setAttribute('selected','')
-        });
-        this.svgWidthInput.addEventListener('keydown',(e) => {
-            const width = handleHeightWidthInput(e)
-            this.width = width;
-            // if (this.icon) this.icon.width = width
-        })
-        this.btnBorder.onclick = () => this.toggleBorder();
-        this.btnCopy.onclick = () => this.copyToClipboard();
-        $$('.preview__tabber--tab').forEach(tab => {
-            tab.addEventListener('click',(e) => {
-                $$('.preview__tabber--tab').forEach(tab => tab.classList.remove('active'))
-                tab.classList.add('active');
-                this.openTab(tab.dataset.tab)
+import { ColorPicker } from "./ColorPicker"
+import { EventEmitterClass } from "../utils/EventEmitter"
+const defaultSetting = {
+    viewBox: [0,0,20,20],
+     vbh:20, 
+     vbw:20, 
+     vby:0, 
+     vbx:0, 
+     width:'24', 
+     height:'24'
+}
+const htmlController = {
+    async copyToClipboard() {
+        if(this.targetElement) {
+            await window.navigator.clipboard.writeText(this.targetElement.outerHTML)
+            const notificationElement = $('#INTERFACE .notification-copy.success')
+            notificationElement.animate([
+                { transform: "translateY(-30px)"},
+                { transform: "translateY(0)", offset: 0.03},
+                { transform: "translateY(0)", offset:0.9},
+                { transform: "translateY(-30px)",easing: "ease-out",offset: 1}
+            ],{
+                duration: 3500,
             })
+        }
+    },
+    updateNameField(string) {
+        this.nameField.textContent = string;
+        this.miniPreviewElementName.textContent = string;
+    },
+    updateCategoryField(string) {
+        this.categoryField.textContent = string;
+        this.miniPreviewElementCollection.textContent = string;
+    },
+    updateDisplayElement(html) {
+        this.display.innerHTML = html;
+        this.miniPreviewElement.innerHTML = html;
+    },
+    updatePreviews() {
+        this.components.innerHTML = this.previews.all;
+    },
+    setLoading() {
+        this.element.classList.add('loading');
+        this.active = false;
+    },
+    setReady() {
+        this.element.classList.remove('loading');
+    },
+    openTab(name){
+        this.currentModal = $(`.preview__modals--modal[data-tab="${name}"]`)
+        $$('.preview__modals--modal[data-role="tab"]').forEach(modal => modal.classList.remove('active'))
+        this.currentModal.classList.add('active')
+        this.closeWindows()
+    },
+    toggleWindow(name) {
+        const win = $(`.preview__modals--modal[data-tab="${name}"][data-role="window"]`)
+        if (win == undefined){
+            console.warn(`${name} window is invalid`)
+            return;
+        }
+            if (!this.currentWindow) {
+                this.currentWindow = win;
+                this.currentWindow.classList.add('active')
+                this.currentModal.classList.remove('active')
+            } else {
+                this.currentWindow = null;
+                win.classList.remove('active')
+                this.currentModal.classList.add('active')
+            }
+    },
+    closeWindow(name){
+        const win = $(`.preview__modals--modal[data-tab="${name}"][data-role="window"]`)
+        if (win == undefined){
+            console.warn(`${name} window is invalid`)
+            return;
+        }
+        this.currentWindow = null;
+        win.classList.remove('active')
+        this.currentModal.classList.add('active');
+    },
+    closeWindows(){
+        $$(`.preview__modals--modal[data-role="window"]`).forEach(modal => {
+            modal.classList.remove('active')
+            this.currentWindow = null;
         })
-        function handleHeightWidthInput(e) {
+    },
+    open(tabName){
+        $('.widget-pre').classList.remove('active');
+        $('.widget-main').classList.add('active');
+        if (tabName && this.tabNames.includes(tabName))
+            this.currentModal = this.tabs.filter(tab => tab.dataset.tab == tabName)[0];
+        // if no name opens previously opened tab
+        if (this.currentModal){
+            let tabName = this.currentModal.dataset.tab
+            this.currentModal.classList.add('active');
+            if (tabName) {
+                console.log('tabname',tabName)
+             $$('.preview__tabber--tab').forEach(tab => tab?.classList.remove('active'))
+             $(`.preview__tabber--tab[data-tab=${tabName}]`)?.classList.add('active');
+            }
+        }
+        this.active = true;
+        $('.interface-window.preview').classList.add('active')
+        
+    },
+    close(){
+        // close active modal or disable pointer events
+        if (this.currentModal)
+            this.currentModal.classList.remove('active');
+        if (this.currentWindow)
+            this.currentWindow.classList.remove('active');
+        this.notify('close')
+        this.active = false;
+    },
+    openSettings(){
+        $('.color-editor').classList.remove('active')
+        $('.settings-editor').classList.add('active')
+        this.settingsActive = true
+    },
+    closeSettings(){
+        $('.settings-editor').classList.remove('active')
+        this.settingsActive = false
+    },
+    toggleSettings(){
+        if ($('.settings-editor').classList.contains('active')){
+            this.closeSettings();
+        } else {
+            console.log('here')
+            this.openSettings();
+        }
+    },
+    hydrate(){
+        this.openTab(this.currentTab)
 
+        const handleViewBoxInput = (index) => {
+            return (e) => {
+                e.preventDefault();
+    
+                let value = e.target.value;
+                let k = e.key;
+                let construct = e.target.value.toString();
+                const updateWithInput = (index,value) => {
+                    console.log('updating with input',value)
+                    let values = this.startingViewbox.slice();
+                    let x = values[index];
+                    let xi = Number(x);
+                    let adjusted = Math.min(value,999);
+                    values[index] = adjusted;
+                    this.setViewboxValues(values);
+                    this.startingViewbox = this.viewBox;
+                }
+                const leadingZero = /^0+/;
+                const keyIsNumber = /^\d$/.test(k);
+                const backspace = 8;
+                const validLength = 3;
+                const hasNonNumbers = /\D/;
+                let prefix = false;
+                if (e.keyCode == backspace && construct.length > 0) {
+                    const len = construct.length;
+                    construct = Array.from(construct).slice(0,len - 1).join('')
+                }
+                if (construct == '') {
+                    value = 0;
+                    e.target.value = 0;
+                }
+                if ( k === '-' && ( value == 0 || value == '')) {
+                    console.log('prefixing');
+                    prefix = true;
+                    construct = '-';
+                    e.target.value = '-';
+                }
+                if (keyIsNumber) {
+                    console.log('key is number');
+                    construct = value.toString() + k.toString();
+                    construct = construct.toString().replace(leadingZero,'');
+                }
+    
+                if ((construct.toString()[0] === '-' && construct.toString().length <= 4) || construct.toString().length <= 3 ){
+                    console.log('setting val',construct);
+                    e.target.value = construct;
+                }
+                // value = value.replace(leadingZero,'');
+                if (!isNaN(construct) && (((construct.toString()[0] === '-' && construct.toString().length <= 4)) || construct.toString().length <= 3))
+                    updateWithInput(index,prefix ? -(Number(construct)) : Number(construct));
+                
+            }
+        }
+        const handleHeightWidthInput = (e) => {
             e.preventDefault()
-            let value = e.target.value;
-            let selected = false;
-            let selection = '';
-
+            let value = e.target.value
+            let selected = false
+            let selection = ''
                 if (e.target.getAttribute('selected') === 'true'){
                     selection = e.target.value.substring(
                         e.target.selectionStart,
                         e.target.selectionEnd,
-                      );
-                      console.log(selection)
+                      )
                     selected = true;
                 }
-
                 let k = e.key;
                 let construct = e.target.value.toString();
-
-                console.log(value)
-                const leadingZero = /^0+/
-                const keyIsNumber = /^\d$/.test(k)
+                const leadingZero = /^0+/;
+                const keyIsNumber = /^\d$/.test(k);
                 const backspace = 8;
-                const hasNonNumbers = /\D/
-
+                const hasNonNumbers = /\D/;
+    
                 if (k === 'Backspace'){
                     construct = '';
                     e.target.value = '';
                 }
-
+    
                 if (keyIsNumber && value.length < 2){
-                    console.log('here')
+                    console.log('here');
                     e.target.value += k;
                 }
-    
                 return e.target.value;
         }
-        function handleViewBoxInput(index) {
-            return function(e) {
-                e.preventDefault();
-
-                let value = e.target.value;
-                let k = e.key;
-                let construct = e.target.value.toString();
-                console.log(value);
-                console.log(k);
+        const handleRotation = (deg) => {
+            if (deg || deg === 0) {
+                this.icon.rotation = deg;
+                this.targetElement.setAttribute('transform',`rotate(${deg})`);
+                this.targetElement.style.transform = `rotate(${deg}deg)`
+                this.targetElement.dataset.rotation = deg;
+            }
+            this.targetElement.dataset.rotation = deg.deg
+            this.icon.rotation = deg
+        }
+        const updateWithSlider = (pct) => {
+            if (!this.startingViewbox) {
+                console.warn('no initial viewbox value to update');
+                return
+            }
+            
+            let valuesToScaleFrom = this.viewBoxScale.slice(),
+                values = this.startingViewbox.slice(),
+            
+                x = valuesToScaleFrom[2],
+                y = valuesToScaleFrom[3],
     
-                const leadingZero = /^0+/
-                const keyIsNumber = /^\d$/.test(k);
-                const backspace = 8;
-                const validLength = 3
-                const hasNonNumbers = /\D/
-                let prefix = false;
-                if (e.keyCode == backspace) {
-                    console.log('back')
-                    console.log(value,value.length)
-                    construct = 0
-                    e.target.value = 0
-                    console.log(construct.toString().length <= 3)
-                }
-                if (k === '-' && value == 0 || value == ''){
-                    console.log('prefixing')
-                    prefix = true
-                    construct = '-'
-                    e.target.value = '-'
-                }
-                if (keyIsNumber) {
-                    console.log('key is number')
-                    construct = value.toString() + k.toString()
-                    construct = construct.toString().replace(leadingZero,'')
-                }
+                xi = Number(x),
+                yi = Number(y),
     
-                if ((construct.toString()[0] === '-' && construct.toString().length <= 4) || construct.toString().length <= 3 ){
-                    console.log('setting val',construct)
-                    e.target.value = construct
-                }
-                // value = value.replace(leadingZero,'');
-                if (!isNaN(construct) && (((construct.toString()[0] === '-' && construct.toString().length <= 4)) || construct.toString().length <= 3))
-                    this.updateWithInput(index,prefix ? -(Number(construct)) : Number(construct))
+                grow = (factor,...nums) => nums.map(num => Math.trunc(num * (factor/100) + num)),
+                shrink = (factor,...nums) => nums.map(num => Math.abs(Math.trunc(num * (factor/100) - num)));
+            
+            if (pct >= 50) {
+                let factor = (pct - 50) * 2,
+                    adjustedValues = shrink(factor,xi,yi),
+                    [h,w] = adjustedValues;
+                if (h < 0 || w < 0) return
                 
+                values[2] = h;
+                values[3] = w;
+    
+            }
+    
+            else if (pct < 50) {
+                let factor = Math.abs((pct * 2) - 100),
+                    adjustedValues = grow(factor,xi,yi),
+                    [h,w] = adjustedValues;
+                values[2] = h;
+                values[3] = w;
+            }
+    
+            else if (!pct || isNaN(pct))
+                console.error('invalid percent value, skipping unset')
+            
+            this.setViewboxValues(values)
+        }
+        const updateWithMouseTracker = (index,value) => {
+            let values = this.startingViewbox.slice();
+            let x = values[index];
+            let xi = Number(x);
+            let adjusted = Math.min(xi + value, 999);
+            values[index] = adjusted;
+            this.setViewboxValues(values);
+        }
+        const resetMouseTrackingSlider = (index) => {
+            let values = this.startingViewbox.slice();
+            values[index] = 0;
+            this.setViewboxValues(values);
+            this.startingViewbox = values;
+        }
+        const viewBoxEditorConfig = (viewBoxIndex) => {
+            return {
+                onMouseMove:({x}) => updateWithMouseTracker(viewBoxIndex,x),
+                onMouseUp:() => this.resetViewBoxScale(this.viewBox),
+                reset: () => resetMouseTrackingSlider(viewBoxIndex)
             }
         }
+        const zoomSliderConfig = {
+            onMouseMove: ({pct}) => updateWithSlider(pct),
+            onMouseDown: ({pct}) => updateWithSlider(pct),
+            onMouseUp: () => this.resetViewBoxScale(this.viewBox),
+        }
+        const rotationSliderConfig = {
+            onMouseMove: ({deg}) => handleRotation(deg),
+            onMouseUp: () => this.updatePreviews()
+        }
+
+        this.vbxLabel = new MouseTrackingSlider( $('.input-field.x .label') , viewBoxEditorConfig(0))
+        this.vbyLabel = new MouseTrackingSlider( $('.input-field.y .label') , viewBoxEditorConfig(1))
+        this.vbwLabel = new MouseTrackingSlider( $('.input-field.w .label') , viewBoxEditorConfig(2))
+        this.vbhLabel = new MouseTrackingSlider( $('.input-field.h .label') , viewBoxEditorConfig(3))
+        this.zoomSlider = new Slider( $('#zoomSlider') , zoomSliderConfig)
+        this.rotationSlider = new Slider( $('#rotationSlider'), rotationSliderConfig)
+
+        this.vbxInput.addEventListener('keydown',handleViewBoxInput(0))
+        this.vbyInput.addEventListener('keydown',handleViewBoxInput(1))
+        this.vbwInput.addEventListener('keydown',handleViewBoxInput(2))
+        this.vbhInput.addEventListener('keydown',handleViewBoxInput(3))
+
+        this.svgHeightInput.addEventListener('select',(e) => this.svgHeightInput.setAttribute('selected','true'))
+        this.svgHeightInput.addEventListener('blur',(e) => this.svgHeightInput.setAttribute('selected',''))
+        this.svgHeightInput.addEventListener('keydown',(e) => this.height = handleHeightWidthInput(e))
+        this.svgWidthInput.addEventListener('keydown', (e) => this.width = handleHeightWidthInput(e))
+
+        this.btnBorder.onclick = () => { 
+            if (!this.display.style.border) this.display.style.border = '1px dotted red'
+            else this.display.style.border = ''
+        }
+        this.btnCopy.onclick = () => this.copyToClipboard()
+
+        $('.preview-settings').addEventListener('click', () => this.toggleSettings());
+        $('.preset-header .current-preset').addEventListener('click', () => this.toggleSettings());
+        const rto = $('.revert-to-original',this.element)
+        this.rto = rto
+        const rtoActiveHTML = '<svg width="24px" height="24px" viewBox="-3 -3 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m69ycrek-00D6BEOOQAMB"><path fill-rule="evenodd" clip-rule="evenodd" d="M8.25 12C8.25 9.92893 9.92893 8.25 12 8.25C14.0711 8.25 15.75 9.92893 15.75 12C15.75 14.0711 14.0711 15.75 12 15.75C9.92893 15.75 8.25 14.0711 8.25 12ZM12 9.75C10.7574 9.75 9.75 10.7574 9.75 12C9.75 13.2426 10.7574 14.25 12 14.25C13.2426 14.25 14.25 13.2426 14.25 12C14.25 10.7574 13.2426 9.75 12 9.75Z" fill="black" pid="m69ycrek-01TJ7BDYXS7T" stroke="null"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M4.32343 10.6464C3.90431 11.2503 3.75 11.7227 3.75 12C3.75 12.2773 3.90431 12.7497 4.32343 13.3536C4.72857 13.9374 5.33078 14.5703 6.09267 15.155C7.61978 16.3271 9.71345 17.25 12 17.25C14.2865 17.25 16.3802 16.3271 17.9073 15.155C18.6692 14.5703 19.2714 13.9374 19.6766 13.3536C20.0957 12.7497 20.25 12.2773 20.25 12C20.25 11.7227 20.0957 11.2503 19.6766 10.6464C19.2714 10.0626 18.6692 9.42972 17.9073 8.84497C16.3802 7.67292 14.2865 6.75 12 6.75C9.71345 6.75 7.61978 7.67292 6.09267 8.84497C5.33078 9.42972 4.72857 10.0626 4.32343 10.6464ZM5.17941 7.65503C6.90965 6.32708 9.31598 5.25 12 5.25C14.684 5.25 17.0903 6.32708 18.8206 7.65503C19.6874 8.32028 20.4032 9.06244 20.9089 9.79115C21.4006 10.4997 21.75 11.2773 21.75 12C21.75 12.7227 21.4006 13.5003 20.9089 14.2089C20.4032 14.9376 19.6874 15.6797 18.8206 16.345C17.0903 17.6729 14.684 18.75 12 18.75C9.31598 18.75 6.90965 17.6729 5.17941 16.345C4.31262 15.6797 3.59681 14.9376 3.0911 14.2089C2.59937 13.5003 2.25 12.7227 2.25 12C2.25 11.2773 2.59937 10.4997 3.0911 9.79115C3.59681 9.06244 4.31262 8.32028 5.17941 7.65503Z" fill="black" pid="m69ycrek-00Y5D0BFOELD" stroke="null"></path></svg>'
+        const rtoInactiveHTML = '<svg width="24px" height="24px" viewBox="-3 -3 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m4lo5rs8-00OP23ZTDXMN"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20.5303 4.53033C20.8232 4.23744 20.8232 3.76256 20.5303 3.46967C20.2374 3.17678 19.7626 3.17678 19.4697 3.46967L3.46967 19.4697C3.17678 19.7626 3.17678 20.2374 3.46967 20.5303C3.76256 20.8232 4.23744 20.8232 4.53033 20.5303L7.37723 17.6834C8.74353 18.3266 10.3172 18.75 12 18.75C14.684 18.75 17.0903 17.6729 18.8206 16.345C19.6874 15.6797 20.4032 14.9376 20.9089 14.2089C21.4006 13.5003 21.75 12.7227 21.75 12C21.75 11.2773 21.4006 10.4997 20.9089 9.79115C20.4032 9.06244 19.6874 8.32028 18.8206 7.65503C18.5585 7.45385 18.2808 7.25842 17.989 7.07163L20.5303 4.53033ZM16.8995 8.16113L15.1287 9.93196C15.5213 10.5248 15.75 11.2357 15.75 12C15.75 14.0711 14.0711 15.75 12 15.75C11.2357 15.75 10.5248 15.5213 9.93196 15.1287L8.51524 16.5454C9.58077 16.9795 10.7621 17.25 12 17.25C14.2865 17.25 16.3802 16.3271 17.9073 15.155C18.6692 14.5703 19.2714 13.9374 19.6766 13.3536C20.0957 12.7497 20.25 12.2773 20.25 12C20.25 11.7227 20.0957 11.2503 19.6766 10.6464C19.2714 10.0626 18.6692 9.42972 17.9073 8.84497C17.5941 8.60461 17.2571 8.37472 16.8995 8.16113ZM11.0299 14.0307C11.3237 14.1713 11.6526 14.25 12 14.25C13.2426 14.25 14.25 13.2426 14.25 12C14.25 11.6526 14.1713 11.3237 14.0307 11.0299L11.0299 14.0307Z" pid="m4lo5rs8-00F4LH2DZYNA" stroke="null"></path><path fill="currentColor" d="M12 5.25C13.0323 5.25 14.0236 5.40934 14.9511 5.68101C15.1296 5.73328 15.1827 5.95662 15.0513 6.0881L14.2267 6.91265C14.1648 6.97451 14.0752 6.99928 13.99 6.97967C13.3506 6.83257 12.6839 6.75 12 6.75C9.71345 6.75 7.61978 7.67292 6.09267 8.84497C5.33078 9.42972 4.72857 10.0626 4.32343 10.6464C3.90431 11.2503 3.75 11.7227 3.75 12C3.75 12.2773 3.90431 12.7497 4.32343 13.3536C4.67725 13.8635 5.18138 14.4107 5.81091 14.9307C5.92677 15.0264 5.93781 15.2015 5.83156 15.3078L5.12265 16.0167C5.03234 16.107 4.88823 16.1149 4.79037 16.0329C4.09739 15.4517 3.51902 14.8255 3.0911 14.2089C2.59937 13.5003 2.25 12.7227 2.25 12C2.25 11.2773 2.59937 10.4997 3.0911 9.79115C3.59681 9.06244 4.31262 8.32028 5.17941 7.65503C6.90965 6.32708 9.31598 5.25 12 5.25Z" pid="m4lo5rs8-02CT5B0Y3UOA" stroke="null"></path><path fill="currentColor" d="M12 8.25C12.1185 8.25 12.2357 8.25549 12.3513 8.26624C12.5482 8.28453 12.6194 8.51991 12.4796 8.6597L11.2674 9.87196C10.6141 10.0968 10.0968 10.6141 9.87196 11.2674L8.6597 12.4796C8.51991 12.6194 8.28453 12.5482 8.26624 12.3513C8.25549 12.2357 8.25 12.1185 8.25 12C8.25 9.92893 9.92893 8.25 12 8.25Z" pid="m4lo5rs8-028MI5K4V6ZL" stroke="null"></path></svg>'
+        this.rtoInactiveHTML = rtoInactiveHTML
+        rto.addEventListener('click', () => {
+            if (rto.getAttribute('active') === 'true'){
+                this.applySetting(this.currentPreset)
+                rto.setAttribute('active','false')
+                rto.innerHTML = rtoInactiveHTML
+                console.log('HERE FOO',this.currentPreset)
+            } else {
+                this.applyTempSetting(this.original)
+                rto.setAttribute('active','true')
+                rto.innerHTML = rtoActiveHTML
+            }
+        })
+    }
+}
+
+export class Preview extends EventEmitterClass {
+    constructor() {
+        super()
+        this.active = false
+        this.settingsActive = false
+        this.presetType = 'icon'
+        this.icon = undefined
+
+        this.viewBoxScale = []
+        this.startingViewbox = [0,0,20,20]
+        this.colorPicker = new ColorPicker({})
+        this.currentTab = 'position'
+        this.tabs = $$('.preview__modals--modal')
+        this.tabNames = this.tabs.map(modal => modal.dataset.tab)
+        this.miniPreviewElement = $('.widget-preview-icon__wrapper')
+        this.miniPreviewElementName = $('.widget-preview-info .widget--icon-title > div')
+        this.miniPreviewElementCollection = $('.widget-preview-info .widget--icon-category > div')
+        this.element = $('#PREVIEW')
+        this.components = $('.preview__modals--modal[data-tab="components"]')
+        this.nameField = $('.title-group__name .label.name')
+        this.categoryField = $('.title-group__category .label.category')
+        this.btnCopy = $('.btn-copy')
+        this.btnBorder = $('.btn-border')
+        this.btnFavorite = $('.btn-favit')
+
+        this.vbxInput = $('.input-field.x .input')
+        this.vbyInput = $('.input-field.y .input')
+        this.vbhInput = $('.input-field.h .input')
+        this.vbwInput = $('.input-field.w .input')
+        
+        this.svgHeightInput = $('.input.input-height')
+        this.svgWidthInput = $('.input.input-width')
+        this.svgStrokeContainer = $('.field-stroke')
+        this.svgStrokeInput = $('.input.inp-stroke')
+        this.svgFillContainer = $('.field-fill')
+        this.svgFillInput = $('.input.inp-fill')
+        
+        this.vbhLabel = $('.input-field.h .label')
+        this.vbwLabel = $('.input-field.w .label')
+        this.defaultHeight = '24'
+        this.defaultWidth = '24'
+        this.width = ''
+        this.height = ''
+        this.collectionPreset = defaultSetting
+        this.iconPreset = defaultSetting
+        this.original = defaultSetting
+        this.tmp = defaultSetting
+        for (const [key, handler] of Object.entries(htmlController)) 
+            this[key] = handler.bind(this)
+        this.hydrate()
+
     }
 
+    get currentPreset(){
+        return {
+            viewbox: this.viewbox,
+            vbh: this.vbh,
+            vbw: this.vbw,
+            vby: this.vby,
+            vbx: this.vbx,
+            width: this.currentWidth,
+            height: this.currentHeight,
+        }
+    }
     get display() {
         return $('.current-icon',this.element);
     }
@@ -226,8 +444,9 @@ export class Preview {
         return this.targetElement.getAttribute('height');
     }
     set height(number) {
-        this.targetElement.setAttribute('height',`${number}px`)
+        this.targetElement.setAttribute('height',`${number}px`);
         if (this.icon) this.icon.height = number
+        this.currentHeight = number
         this.svgHeightInput.value = number
     }
     get width() {
@@ -236,288 +455,139 @@ export class Preview {
     set width(number) {
         this.targetElement.setAttribute('width',`${number}px`)
         if (this.icon) this.icon.width = number
+        this.currentWidth = number
         this.svgWidthInput.value = number
     }
-    showBorder() {
-        this.display.style.border = '1px dotted red';
-        return this;
-    }
-    hideBorder() {
-        this.display.style.border = '';
-        return this;
-    }
-    toggleBorder() {
-        if (!this.display.style.border) this.showBorder();
-        else this.hideBorder();
-        return this;
-    }
-    async copyToClipboard() {
-        console.log(this.targetElement)
-        if(this.targetElement) {
-            const element = this.targetElement.cloneNode(true);
-            this.colorPicker.clearMarkAll([element,...this.colorPicker.crawl(element)])
-            const status = await window.navigator.clipboard.writeText(this.targetElement.outerHTML);
-                this.showCopySuccess()
 
-        }
-    }    
-    showCopySuccess() {
-        const notification = $('#INTERFACE .notification-copy.success');
-        console.log(notification)
-        const showNote = [
-            { transform: "translateY(-30px)"},
-            { transform: "translateY(0)", offset: 0.03},
-            { transform: "translateY(0)", offset:0.9},
-            { transform: "translateY(-30px)",easing: "ease-out",offset: 1}
-        ]
-        
-        const timing = {
-            duration: 3500,
-        }
-        notification.animate(showNote,timing)
+    resetViewBoxScale(currentViewBox){
+        this.startingViewbox = currentViewBox.slice()
+        this.viewBoxScale = currentViewBox.slice()
     }
-
-     showCopyError() {
-        alert('copy failed')
-}
-
-    updateNameField(string) {
-        this.nameField.textContent = string;
-        this.miniPreviewElementName.textContent = string;
-        return this;
-    }
-
-    updateCategoryField(string) {
-        this.categoryField.textContent = string;
-        this.miniPreviewElementCollection.textContent = string;
-        return this;
-    }
-
-    updateDisplayElement(html) {
-        this.display.innerHTML = html;
-        this.miniPreviewElement.innerHTML = html;
-        console.log(html)
-        return this;
-    }
-
     setViewboxValues(array) {
         if (!this.icon) return
-        let stringValue = array.join(' ')
-        this.vbxInput.value = `${array[0]}`;
-        this.icon.vbx = Number(array[0]);
-
-        this.vbyInput.value = `${array[1]}`;
-        this.icon.vby = Number(array[1]);
-
-        this.vbhInput.value = `${array[2]}`;
-        this.icon.vbh = Number(array[2]);
-
-        this.vbwInput.value = `${array[3]}`;
-        this.icon.vbw = Number(array[3]);
-        
-        this.targetElement.setAttribute('viewBox',stringValue);
-        this.icon.viewBox = stringValue;
-        this.icon.markup = this.markup;
-
-        return this;
-    }
-
-    resetMouseTrackingSlider(index) {
-        let values = this.startingViewbox.slice();
-        values[index] = 0;
-        this.setViewboxValues(values);
-        this.startingViewbox = values;
-    }
-
-    updateWithMouseTracker(index,value) {
-        let values = this.startingViewbox.slice();
-        let x = values[index];
-        let xi = Number(x);
-        let adjusted = Math.min(xi + value, 999);
-        console.log(value,xi,adjusted)
-        values[index] = adjusted;
-        this.setViewboxValues(values);
-    }
-
-    updateWithInput(index,value) {
-        console.log('updating with input',value)
-        let values = this.startingViewbox.slice();
-        let x = values[index];
-        let xi = Number(x);
-        let adjusted = Math.min(value,999);
-        values[index] = adjusted;
-        this.setViewboxValues(values);
-        this.startingViewbox = this.viewBox;
-    }
-
-    updateWithSlider(pct) {
-
-        if (!this.startingViewbox) {
-            console.warn('no initial viewbox value to update');
-            return
-        }
-        
-        let valuesToScaleFrom = this.viewBoxScale.slice(),
-            values = this.startingViewbox.slice(),
-        
-            x = valuesToScaleFrom[2],
-            y = valuesToScaleFrom[3],
-
-            xi = Number(x),
-            yi = Number(y),
-
-            grow = (factor,...nums) => nums.map(num => Math.trunc(num * (factor/100) + num)),
-            shrink = (factor,...nums) => nums.map(num => Math.abs(Math.trunc(num * (factor/100) - num)));
-        
-        if (pct >= 50) {
-
-            let factor = (pct - 50) * 2,
-                adjustedValues = shrink(factor,xi,yi),
-                [h,w] = adjustedValues;
-                
-            if (h < 0 || w < 0) return
+        let stringValue = array.join(' '),
+            vbx = Number(array[0]),
+            vby = Number(array[1]),
+            vbw = Number(array[2]),
+            vbh = Number(array[3])
+            if (this.rto.getAttribute('active') === 'true'){
             
-            values[2] = h;
-            values[3] = w;
-
-        }
-
-        else if (pct < 50) {
-            
-            let factor = Math.abs((pct * 2) - 100),
-                adjustedValues = grow(factor,xi,yi),
-                [h,w] = adjustedValues;
-
-            values[2] = h;
-            values[3] = w;
-
-        } 
-
-        else if (!pct || isNaN(pct))
-            console.error('invalid percent value, skipping unset')
-        
-        this.setViewboxValues(values)
-    }
-
-    updateRotation(deg) {
-        if (deg || deg === 0) {
-            this.icon.rotation = deg;
-            this.element.setAttribute('transform',`rotate(${deg})`);
-            this.element.dataset.rotation = deg;
-        }
-    }
-
-    updatePreviews() {
-        this.components.innerHTML = this.previews.all;
-    }
-
-    getComponent(type,size) {
-        if (!this.icon) return
-        return this.icon.getComponent(type,size)
-    }
-
-    save() {
-        let node = this.icon.save();
-        return node;
-    }
-
-    setLoading() {
-        this.element.classList.add('loading');
-    }
-    setReady() {
-        this.element.classList.remove('loading');
-    }
-
-    setCursor(icons,index) {
-        
-    }
-
-    openTab(name){
-        this.currentModal = $(`.preview__modals--modal[data-tab="${name}"]`)
-        console.log(this.currentModal)
-        $$('.preview__modals--modal[data-role="tab"]').forEach(modal => modal.classList.remove('active'))
-        this.currentModal.classList.add('active')
-        this.closeWindows()
-    }
-    toggleWindow(name) {
-        const win =  $(`.preview__modals--modal[data-tab="${name}"][data-role="window"]`)
-        console.log('WIN',win)
-            if (!this.currentWindow) {
-                console.log('here')
-                this.currentWindow = win;
-                this.currentWindow.classList.add('active')
-                this.currentModal.classList.remove('active')
-            } else {
-                console.log('here now')
-                this.currentWindow = null;
-                win.classList.remove('active')
-                this.currentModal.classList.add('active')
+                this.rto.setAttribute('active','false')
+                this.rto.innerHTML = this.rtoInactiveHTML
             }
+        this.vbx = vbx
+        this.vbxInput.value = `${vbx}`
+        this.icon.vbx = vbx
+
+        this.vby = vby
+        this.vbyInput.value = `${vby}`
+        this.icon.vby = vby
+
+        this.vbw = vbw
+        this.vbwInput.value = `${vbw}`
+        this.icon.vbw = vbw
+
+        this.vbh = vbh
+        this.vbhInput.value = `${vbh}`
+        this.icon.vbh = vbh
+        
+        this.targetElement.setAttribute('viewBox',stringValue)
+        this.icon.viewBox = stringValue
+        this.viewbox = stringValue
+        this.icon.markup = this.markup
+        this.notify('viewbox changed')
+    }
+    applySetting(preset){
+        let { viewbox = '', vbh = 20, vbw = 20, vby = 0, vbx = 0, width = '24', height = '24'} = preset
+        let vb = [vbx,vby,vbw,vbh]
+        this.height = height
+        this.width = width
+        this.viewbox = viewbox
+        this.vbx = vbx
+        this.vby = vby
+        this.vbh = vbh
+        this.vbw = vbw
+        this.resetViewBoxScale(vb)
+        this.setViewboxValues(vb)
+    }
+    applyTempSetting(preset){
+        let {vbh = 20, vbw = 20, vby = 0, vbx = 0, width = '24', height = '24'} = preset
+        let vb = [vbx,vby,vbw,vbh]
+        let stringValue = vb.join(' ')
+        this.vbxInput.value = `${vbx}`
+        this.vbyInput.value = `${vby}`
+        this.vbwInput.value = `${vbw}`
+        this.vbhInput.value = `${vbh}`
+        this.targetElement.setAttribute('viewBox',stringValue)
+
+    }
+    setCollectionPreset(preset){
+        this.collectionPreset = {
+            ...defaultSetting,
+            ...preset
+        }
+    }
+    setIconPreset(preset){
+        this.iconPreset = {
+            ...defaultSetting,
+            ...preset
+        }
+    }
+    togglePresetType(){
+        if (this.presetType === 'icon')
+            this.presetType = 'collection'
+        else if (this.presetType === 'collection')
+            this.presetType = 'icon'
+        else {
+            console.warn('error setting preset type fallback = [icon]')
+            this.presetType = 'icon'
+        }
+    }
+    setPresetMode(mode){
+        if (mode === 'icon')
+            this.presetType = 'icon'
+        else if (mode === 'collection')
+            this.presetType = 'collection'
+        else {
+            console.warn('error setting preset type fallback = [icon]')
+            this.presetType = 'icon'
+        }
     }
 
-    closeWindows(){
-        $$(`.preview__modals--modal[data-role="window"]`).forEach(modal => {
-            modal.classList.remove('active')
-            this.currentWindow = null;
-        })
-    }
-    open = (tabName) => {
-
-        $('.widget-pre').classList.remove('active');
-        $('.widget-main').classList.add('active');
-
-        if (tabName && this.tabNames.includes(tabName))
-            [this.currentModal] = this.tabs.filter(tab => tab.dataset.tab == tabName);
-        else 
-            [this.currentModal] = this.tabs.filter(tab => tab.dataset.tab == 'position')
-
-        if (this.currentModal)
-            this.currentModal.classList.add('active');
+    handlePreset(icon){
+        // HANDLING PRESET
+        this.setIconPreset(icon.preset)
+        if (icon?.preset && this.presetType === 'icon') {
+            this.applySetting(icon.preset)
+            console.log('using icon preset... presetType: ', this.presetType)
+        } else {
+            this.applySetting(this.collectionPreset)
+            console.log('using collection preset... presetType: ',this.presetType)
+        }
+        this.original = icon.settings.original
 
     }
-
-    close = () => {
-        // close active modal or disable pointer events
-        if (this.currentModal)
-            this.currentModal.classList.remove('active');
-        if (this.currentWindow)
-            this.currentWindow.classList.remove('active');
-    }
-
     update(icon) {
         if (!icon) {
           this.setLoading();
           return;
         }
         this.icon = icon.save();
-        let { name , category , markup , viewBox , rotation,isBenched, isFavorite, height, width, stroke, fill } = icon;
-        console.log('updating',name,category)
-        // pathExtractor(markup)      
-        if (isFavorite) $('.btn-favit').classList.add('icon-is-favorite');
-        else $('.btn-favit').classList.remove('icon-is-favorite');
-        if (isBenched) $('.btn-bench').classList.add('icon-is-benched');
-        else $('.btn-bench').classList.remove('icon-is-benched');
         
-        this.startingViewbox = viewBox.slice();
-        this.viewBoxScale = viewBox.slice();
-
-        if (height) this.height = height;
-        else this.height = this.defaultHeight
-
-        if (width) this.width = width
-        else this.width = this.defaultWidth
-
-        this.updateDisplayElement(markup);
-        this.updateCategoryField(category);
-        this.setViewboxValues(viewBox);
-        this.updateNameField(name);
-        this.updatePreviews();
-        this.colorPicker.update(this.targetElement)
-        this.zoomSlider.setPercent(50);
-
-        if (rotation) this.rotationSlider.setDegrees(rotation);
-        else this.rotationSlider.setDegrees(0);
-
+        let { name , collection , markup , viewBox , rotation, isBenched, isFavorite, height, width, colors } = icon
+        if (isFavorite) $('.btn-favit').classList.add('icon-is-favorite')
+        else $('.btn-favit').classList.remove('icon-is-favorite')
+        if (isBenched) $('.btn-bench').classList.add('icon-is-benched')
+        else $('.btn-bench').classList.remove('icon-is-benched')
+        this.updateDisplayElement(colors.marked)
+        this.handlePreset(icon)
+        this.updateCategoryField(collection)
+        this.updateNameField(name)
+        this.updatePreviews()
+        this.zoomSlider.setPercent(50)
+        if (rotation) this.rotationSlider.setDegrees(rotation)
+        else this.rotationSlider.setDegrees(0)
+        this.notify('icon updated',icon,this.targetElement)
     }
 
 }

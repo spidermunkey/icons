@@ -3,6 +3,8 @@
 @import 'shadows.scss';
 @import 'zindex.scss';
 
+$transition-default: 200ms cubic-bezier(1,0,0,1);
+$transition-1: 200ms ease;
 // flex-boxes
 .row {
   display: flex;

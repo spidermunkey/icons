@@ -1,60 +1,45 @@
-import { SvgModel } from './store.js'
-import { Preview } from './components/Preview.js'
-import { Tracker } from './model.js'
-import { ContextMenu } from './components/Context.js'
-import { Dashboard } from './components/Dashboard.js'
-import { Menu } from './components/Menu.js'
+import { Home } from "./views/home/index.js";
+import { Dashboard } from "./views/dashboard/index.js";
+import { EventEmitterClass } from "./utils/EventEmitter.js";
+import { SvgModel } from "./store.js";
+export class App extends EventEmitterClass {
+    constructor() {
+        super();
+        this.store = new SvgModel();
+        this.routes = [
+            {path: '/home', view: new Home(this.store)},
+            {path: '/browse', view: new Dashboard(this.store)
+            }];
+        this.activeView = null;
+        window.addEventListener('popstate',this.route.bind(this));
+        console.log('initializing app');
+    }
+    route() {
+        let path = window.location.pathname;
+        let target = this.routes.find(route => path === route.path);
+        if (!target) target = this.routes[0] // home
+        let view = target.view;
+        view.ready = this.ready;
+        if (this.activeView) this.activeView.notify('inactive')
+        this.activeView = view;
+        this.activeView.notify('active');
+        view.render();
+        return view;
+      }
+    navigateTo(url){
+        history.pushState(null,null,url);
+        this.route();
+    }
+    async init() {
+        document.body.addEventListener("click", (e) => {
+            if (e.target.closest("[data-link]")) {
+              e.preventDefault();
+              this.navigateTo(e.target.closest("[data-link]").href);
+            }
+          })
+        this.route();
+    }
+    async render() {
 
-export function App() {
-    this.store = new SvgModel(),
-    this.preview = new Preview(),
-    this.context = new ContextMenu(),
-    this.dashboard = new Dashboard(),
-    this.menu = new Menu(),
-    this.tracker = Tracker;
-    this.state = {
-        tab: '',
-        group: undefined,
-        clicked: undefined,
-        context: undefined,
-        bench: {},
-        mode: 'click',
-    }
-    $('.btn-favit').onclick = () => addToCollection('favorites');
-    this.dashboard.element.onmousedown = (e) => this.handleClick(e);
-    this.dashboard.element.onkeydown = (e) => this.handleKeys(e);
-    this.ready = this.store.init();
-
-    this.copy =  async function(message) {
-        try {
-            await window.navigator.clipboard.writeText(message);
-            return true;
-        } catch(err) {
-            return false
-        }
-    }
-    this.handleClick = async function(event) {
-        await this.ready;
-        let wrapper = event.target.closest('.svg-wrapper');
-        if (!wrapper) return console.log('no click on wrapper');
-        let id = wrapper.dataset.id;
-        if (!id) return console.error('this element doesnt have an id');
-        const ctrlClick = event.ctrlKey,
-              rightClick = event.buttons === 2,
-              leftClick = event.buttons === 1;
-        if (leftClick && ctrlClick) return console.log('adding ',id,' to benched icons');
-        else if (rightClick) return  console.log('right click');
-        else if (leftClick) {
-            this.preview.update(this.store.all[id]);
-            this.tracker.logClickedIcon(this.store.all[id]);
-            return;
-        }
-    }
-    this.addToCollection = async function( destination, node = this.preview.icon ) {
-        if (destination === 'favorites') 
-            node.isFavorite = true;
-        node = node.save();
-        message = await store.addToCollection({destination,node});
-        return message;
     }
 }

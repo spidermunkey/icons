@@ -1,34 +1,50 @@
 export class Icon {
-
     constructor(props) {
         this.isValid = true;
         this.name = props.name;
-        this.category = props.category;
+        this.collection = props.collection;
         this.markup = props.markup;
-
         this.id = props.id;
         // this.trace = props.id;
         this.vid = props.vid;
         this.cid = props.cid;
-        
-        this.isFavorite = props.isFavorite;
+        this.isFavorit0e = props.isFavorite;
         this.isBenched = props.isBenched;
-
         this.rebased = props.rebased;
         this.type = props.type || 'default';
         this.colors = props.colors;
         this.styles = props.styles;
         this.created_at = props.created_at;
-
+        this.sub_collection = props.sub_collection;
+        this.subtype = props.subtype;
+        this.preset = props?.preset || null;
+        this.usePreset = props?.preset && props.usePreset == true ? props.usePreset : false;
         this.element = this.createWrapper(props);
+        this.settings = {
+            ...props?.settings
+         } || {};
         try {
-            this.values = Icon.parse(this.element);
+            const values = Icon.parse(this.element);
+            if (values){
+                const originalPreset = this.createPreset(values)
+                this.values = values
+                this.settings['original'] = originalPreset
+                let defaultPresetExists = !objectIsFalsey(this.preset)
+                // invalid/legacy preset generation
+                let presetHasId = this.preset?.pid
+                if (!defaultPresetExists || !presetHasId) 
+                    this.preset = this.settings['original']
+            }
+            else 
+                this.isValid = false;
         } catch(e){
             console.warn(e)
-            this.valid = false;
+            this.isValid = false;
         }
     }
-
+    get svg(){
+        return $('svg',this.element);
+    }
     get props() {
         return {
             name: this.name,
@@ -49,6 +65,9 @@ export class Icon {
             trace: this.trace,
             values: this.values,
             created_at: this.created_at,
+            preset: this.preset,
+            usePreset: this.usePreset,
+            settings: this.settings,
         }
     }
     get html() {
@@ -144,22 +163,30 @@ export class Icon {
         return structuredClone(this.props);
     }
 
-    mark(children) {
-        children.forEach(child => {
-            child.setAttribute('pid',uuid())
-        })
+    mark(element) {
+        element.setAttribute('pid',uuid())
+        return element;
     }
-
+    markAll(children) {
+        return children.map(this.mark);
+    }
+    clearMarkAll(children) {
+        return children.map(this.clearMark);
+    }
     clearMark() {
         children.forEach(child => {
             child.removeAttribute('pid');
         })
     }
-
+    crawl(svg){
+        return Icon.crawl(svg)
+    }
     static parse(element) {
         let icon = element.querySelector('svg');
-        return {
-            'height':icon.getAttribute('height'),
+        let viewBox = icon.getAttribute('viewBox');
+        let vb = viewBox.split(' ').map(v => Number(v));
+        const values = {
+            'height': icon.getAttribute('height'),
             'width': icon.getAttribute('width'),
             'stroke': icon.getAttribute('stroke'),
             'fill': icon.getAttribute('fill'),
@@ -167,18 +194,36 @@ export class Icon {
             'y': icon.getAttribute('y'),
             'viewBox': icon.getAttribute('viewBox'),
             'rotation': icon.dataset.rotation,
+            vbx:vb[0],
+            vby:vb[1],
+            vbh:vb[2],
+            vbw:vb[3],
+            pid: 'original',
             // 'children': this.crawl(icon)
         }
+        const allowedTags = ['g', 'path', 'circle', 'rect', 'line', 'polygon', 'polyline', 'ellipse', 'text', 'tspan','use'];
+        // invalid icon 
+            // has markup ( probably slow )
+        const children = Icon.crawl(icon);
+        const validTag = child => allowedTags.includes(child.tagName);
+        if (!children.some(validTag)){
+            // console.warn('error parsing icon [no valid tags]',icon)
+            return false;
+        }
+        return values;
     }
 
-    static crawl(element) {
+    static crawl(element = this.svg) {
         let children = [];
-        for (let child of element.childNodes) {
-            if (child.nodeType === Node.TEXT_NODE)
+        for (var i = 0; i < element.childNodes.length; i++) {
+            var child = element.childNodes[i];
+            // Skip text nodes
+            if (child.nodeType === Node.TEXT_NODE || child.nodeType === Node.COMMENT_NODE) 
                 continue;
-            if (child.tagName === 'g' || child.tagName === 'G') 
-                children = children.concat(this.crawl(child))
-            else
+            if (child.tagName === 'g' || child.tagName === 'G') {
+                var groupChildren = this.crawl(child);
+                children = children.concat(groupChildren);
+            } else
                 children.push(child);
         }
         return children;
@@ -197,28 +242,94 @@ export class Icon {
     
         return array.join(' ');
     }
+    createPreset(props){
+        return {
+            name: props?.name || 'untitled',
+            // can be collection or icon preset,
+            pid: props?.pid || uuid(),
+            viewbox: props?.viewbox || '',
+            vbx: props?.vbx || 0,
+            vby: props?.vby || 0,
+            vbw: props?.vbw || 24,
+            vbh: props?.vbh || 24,
+            height: props?.height || '',
+            width: props?.width || '',
+            created_at: props?.created_at || DateTime.stamp().ms,
+        }
+    }
+    addPreset(setting){
+        if (!setting.pid){
+            console.warn('error updating settings... invalid pid')
+            return null
+        } else if(Object.hasOwn(this.settings,setting.pid)) {
+            console.warn('error updating settings... this id already exists')
+            return null
+        }
+        this.settings[setting.pid] = setting;
+        return this;
+    }
+    setPresetDefault(setting){
+        console.log('applying default preset')
+        const pid = setting.pid
+        const isDefault = this.preset.pid === setting.pid
 
-    createWrapper(props,opts = {useValues: false}){
+        if (isDefault && defaultIsActive){
+            console.log('preset already active....')
+            this.preset = this.settings.original
+            console.log('... current default toggled off')
+            return false
+        }
+        else if(Object.hasOwn(this.settings,pid)){
+            console.log('... preset is not default.. setting default')
+            const settingFound = this.settings[pid]
+            this.settings.current = settingFound.pid
+            this.preset = settingFound
+            return true
+        } else {
+            console.warn('no preset found.... no action will be taken')
+        }
+    }
+    createWrapper(props, opts = {useValues: false}){
         let {name,category,markup,values} = props || this;
         let el = document.createElement('div');
-        el.dataset.category = category;
         el.dataset.name = name;
         el.dataset.cid = this.cid;
         el.dataset.id = this.id;
         el.innerHTML = markup;
-
         // console.log(el)
         let icon = el.querySelector('svg');
-
         if (!icon) {
             console.warn(`${props._id} : ${props.name} is an invalid object`)
             return ''
         }
-
         if (!icon.getAttribute('viewBox')) {
-            console.warn('setting default viewbox in',category);
+            console.warn('setting default viewbox for', this.collection );
             icon.setAttribute('viewBox','0 0 24 24');
-            this.markup = icon.outerHTML;
+        }
+        this.markup = icon.outerHTML;
+        if (!props.colors){
+            // create marked version for colors
+            const origin = {}
+            const mark = (child) => {
+                const id = uuid();
+                const marked = child.setAttribute('pid',id);
+                const stroke = child.getAttribute('stroke');
+                const fill = child.getAttribute('fill');
+                origin[id] = [stroke,fill]
+                return child
+            }
+            const children = [icon,...Icon.crawl(icon)].map(mark);
+            this.colors = {
+                marked: icon.outerHTML,
+                colorSets: {
+                    get original() {
+                        return origin
+                    },
+                    set original(val) {
+                        console.log('cannot overwrite original colorset')
+                    }
+                },
+            }
         }
         return el;
     }
@@ -470,7 +581,6 @@ export class Icon {
         } else 
             return component
     }
-
     getSquared(type) {
         let component = this.previews.logos[type]
         if (!component) {
@@ -479,7 +589,6 @@ export class Icon {
         } else 
             return component
     }
-
     getRoundedSquare(type) {
         let component = this.previews.logos[type]
         if (!component) {
@@ -488,7 +597,6 @@ export class Icon {
         } else 
             return component
     }
-    
     getButton(type) {
         let component = this.previews.logos[type]
         if (!component) {
@@ -505,4 +613,24 @@ export class Icon {
         } else 
             return component
     }
+}
+
+function ViewBoxPreset(props) {
+    return {
+        name: props?.name || 'untitled',
+        // can be collection or icon preset,
+        pid: props?.pid || uuid(),
+        viewbox: props?.viewbox || '',
+        vbx: props?.vbx || 0,
+        vby: props?.vby || 0,
+        vbw: props?.vbw || 24,
+        vbh: props?.vbh || 24,
+        height: props?.height || '',
+        width: props?.width || '',
+        created_at: props?.created_at || DateTime.stamp().ms,
+    }
+}
+
+function ComponentManager(){
+    
 }
