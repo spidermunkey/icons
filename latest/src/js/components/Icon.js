@@ -228,7 +228,96 @@ export class Icon {
         }
         return children;
     }
+    updateSVGClosedPaths(color,svgElement) {
+        // Select all <path> elements in the SVG
+        const paths = svgElement.querySelectorAll("path");
+      
+        paths.forEach((path) => {
+          const dAttr = path.getAttribute("d");
+      
+          // Check if the path is closed (ends with 'z' or 'Z')
+          if (dAttr && /z\s*$/i.test(dAttr)) {
+            const styleAttr = path.getAttribute("style");
 
+            if (styleAttr && styleAttr.includes("fill:")) {
+              // If there's an inline style with fill, overwrite the fill in the style
+              const updatedStyle = styleAttr.replace(/fill:[^;]+/, `fill:${newColor}`);
+              path.setAttribute("style", updatedStyle);
+            } else {
+              // Otherwise, set the `fill` attribute directly
+              path.setAttribute("fill", newColor);
+            }
+          }
+        });
+      }
+      createWrapper(props, opts = {useValues: false}){
+        let {name,category,markup,values} = props || this;
+        let el = document.createElement('div');
+        el.dataset.name = name;
+        el.dataset.cid = this.cid;
+        el.dataset.id = this.id;
+        el.innerHTML = markup;
+        // console.log(el)
+        let icon = el.querySelector('svg');
+        if (!icon) {
+            console.warn(`${props._id} : ${props.name} is an invalid object`)
+            return ''
+        }
+        if (!icon.getAttribute('viewBox')) {
+            console.warn('setting default viewbox for', this.collection );
+            icon.setAttribute('viewBox','0 0 24 24');
+        }
+        this.markup = icon.outerHTML;
+        if (!props.colors){
+            // create marked version for colors
+            const origin = {}
+
+            const mark = (child) => {
+                const id = uuid();
+                const styleAttr = child.getAttribute("style");
+                let inlineFill;
+                let inlineStroke;
+                if (styleAttr) {
+                    inlineFill = styleAttr.match(/fill:\s?([^;\s]+)/);
+                    inlineStroke = styleAttr.match(/stroke:\s?([^;\s]+)/);
+                }
+                    // replace inline style for attribute
+                if (inlineFill){
+                    child.setAttribute('fill',inlineFill[1])
+                    const updatedStyle = styleAttr.replace(/\s*fill:[^;]+(;|$)/, '')
+                    child.setAttribute("style", updatedStyle);
+                }
+                if (inlineStroke){
+                    child.setAttribute('stroke',inlineStroke[1])
+                    const updatedStyle = styleAttr.replace(/\s*stroke:[^;]+(;|$)/, '')
+                    child.setAttribute("style", updatedStyle);
+
+                }
+                if (props.name === 'Droplet'){
+                    console.log('DROPLET')
+                    console.log(inlineFill,inlineStroke,styleAttr,child.getAttribute('fill'))
+                }
+                const marked = child.setAttribute('pid',id)
+                const stroke = child.getAttribute('stroke')
+                const fill = child.getAttribute('fill')
+                origin[id] = [stroke,fill]
+                return child
+            }
+            const children = [icon,...Icon.crawl(icon)].map(mark);
+            this.colors = {
+                marked: icon.outerHTML,
+                colorSets: {
+                    get original() {
+                        return origin
+                    },
+                    set original(val) {
+                        console.log('cannot overwrite original colorset')
+                    }
+                },
+            }
+        }
+        return el;
+    }
     parseViewBoxString(string) {
         if (Array.isArray(string)) 
             return console.error('I think you trying to parse an array... try a string next time')
@@ -289,50 +378,8 @@ export class Icon {
             console.warn('no preset found.... no action will be taken')
         }
     }
-    createWrapper(props, opts = {useValues: false}){
-        let {name,category,markup,values} = props || this;
-        let el = document.createElement('div');
-        el.dataset.name = name;
-        el.dataset.cid = this.cid;
-        el.dataset.id = this.id;
-        el.innerHTML = markup;
-        // console.log(el)
-        let icon = el.querySelector('svg');
-        if (!icon) {
-            console.warn(`${props._id} : ${props.name} is an invalid object`)
-            return ''
-        }
-        if (!icon.getAttribute('viewBox')) {
-            console.warn('setting default viewbox for', this.collection );
-            icon.setAttribute('viewBox','0 0 24 24');
-        }
-        this.markup = icon.outerHTML;
-        if (!props.colors){
-            // create marked version for colors
-            const origin = {}
-            const mark = (child) => {
-                const id = uuid();
-                const marked = child.setAttribute('pid',id);
-                const stroke = child.getAttribute('stroke');
-                const fill = child.getAttribute('fill');
-                origin[id] = [stroke,fill]
-                return child
-            }
-            const children = [icon,...Icon.crawl(icon)].map(mark);
-            this.colors = {
-                marked: icon.outerHTML,
-                colorSets: {
-                    get original() {
-                        return origin
-                    },
-                    set original(val) {
-                        console.log('cannot overwrite original colorset')
-                    }
-                },
-            }
-        }
-        return el;
-    }
+
+
     getComponent(type,size) {
         if ( !this.previews[type] || type == 'all' ) 
             return `type ${type} not found`;

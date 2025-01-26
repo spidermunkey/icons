@@ -22,8 +22,8 @@ export class Settings {
   }
 
   get interface(){
-    let preset = this.settings
-    if (this.collection?.presets && this.collection.presets['default-01']){
+    let preset = this.collection.preset
+    if (this.collection?.settings && this.collection.settings['default-01']){
       preset = collection.presets['default-01'];
     } else {
       for (const id in this.settings){
@@ -143,9 +143,10 @@ export class Settings {
 
   async render(collection){
     this.collection = collection;
-    this.settings = await this.store.getSettings();
+    this.settings = collection.settings
+    // this.settings = await this.store.getCollection();
     $('.settings-interface .interface-window').innerHTML = this.interface;
-    $('.db-res').innerHTML = this.previewModal;
+    // $('.db-res').innerHTML = this.previewModal;
     await this.hydrate();
   }
 

@@ -120,6 +120,9 @@
       position: relative;
       background-color: black;
       background: -moz-linear-gradient(top, #fa1e1e, #fa431e, #fa681e, #fa8c1e, #fab11e, #fad61e, #fafa1e, #d6fa1e, #b1fa1e, #8cfa1e, #68fa1e, #43fa1e, #1efa1e, #1efa43, #1efa68, #1efa8c, #1efab1, #1efad6, #1efafa, #1ed6fa, #1eb1fa, #1e8cfa, #1e68fa, #1e43fa, #1e1efa, #431efa, #681efa, #8c1efa, #b11efa, #d61efa, #fa1efa, #fa1ed6, #fa1eb1, #fa1e8c, #fa1e68, #fa1e43, #fa1e1e);
+      background: -webkit-linear-gradient(bottom, #fa1e1e, #fa431e, #fa681e, #fa8c1e, #fab11e, #fad61e, #fafa1e, #d6fa1e, #b1fa1e, #8cfa1e, #68fa1e, #43fa1e, #1efa1e, #1efa43, #1efa68, #1efa8c, #1efab1, #1efad6, #1efafa, #1ed6fa, #1eb1fa, #1e8cfa, #1e68fa, #1e43fa, #1e1efa, #431efa, #681efa, #8c1efa, #b11efa, #d61efa, #fa1efa, #fa1ed6, #fa1eb1, #fa1e8c, #fa1e68, #fa1e43, #fa1e1e);
+      background: linear-gradient(to bottom, #fa1e1e, #fa431e, #fa681e, #fa8c1e, #fab11e, #fad61e, #fafa1e, #d6fa1e, #b1fa1e, #8cfa1e, #68fa1e, #43fa1e, #1efa1e, #1efa43, #1efa68, #1efa8c, #1efab1, #1efad6, #1efafa, #1ed6fa, #1eb1fa, #1e8cfa, #1e68fa, #1e43fa, #1e1efa, #431efa, #681efa, #8c1efa, #b11efa, #d61efa, #fa1efa, #fa1ed6, #fa1eb1, #fa1e8c, #fa1e68, #fa1e43, #fa1e1e);
+
       border-radius: 2px;
       border: 0;
       // align-items: center;
@@ -454,6 +457,9 @@
           svg {
               height: 20px;
               width: 20px;
+          }
+          &:hover {
+            cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><g stroke="%23000" stroke-width="1" stroke-linejoin="round"><path fill="%23FFF" d="m4 16-1 5 5-1 6-6-4-4-6 6z"></path><path fill="%23000" d="M19 5a2.84 2.84 0 0 0-4 0l-3 3-1-1c-.55-.55-1.45-.55-2 0s-.55 1.45 0 2l1 1 4 4 1 1c.55.55 1.45.55 2 0s.55-1.45 0-2l-1-1 3-3c1.1-1.1 1.1-2.9 0-4Z"></path></g></svg>') 12 12, auto;
           }
       }
   }

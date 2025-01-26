@@ -3,6 +3,7 @@ export const DashboardHeader = () =>
             <div class="info-bar">
                 <div class="info-text">Browse</div>
                 <div class="current-tab">Home</div>
+                <div class="breadcrumb">Settings</div>
             </div>
             <div class="tool-bar">
                 <a class="home" href="/home" data-link>

@@ -1124,12 +1124,13 @@ export class Dashboard extends AbstractView {
             const result = await this.store.savePreset(this.settings.currentPreset);
             console.log('PRESET SENT TO API', result);
         });
-
+        $('.breadcrumb').classList.add('active')
     }
     hideCollectionSettings(){
         $('.settings-interface').classList.remove('active');
         this.currentInterface.classList.add('active')
         this.currentInterface.classList.remove('settings-open')
+        $('.breadcrumb').classList.remove('active')
     }
     async generateCollectionPreviews() {
         const pinned = this.state.pinned;
@@ -1166,6 +1167,8 @@ export class Dashboard extends AbstractView {
                 return a + `<div class="hot-link" collection=${b}>${b}</div>`
             },'')}               
         </div>`;
+        // hide settings breadcrumb
+        $('.breadcrumb').classList.remove('active')
     }
     async renderCollection(name) {
         await this.ready
@@ -1213,6 +1216,7 @@ export class Dashboard extends AbstractView {
                 this.dashboard.setReady()
                 this.preview.setReady()
                 this.loadPresetMenu()
+                this.hideCollectionSettings();
             } catch(e){
                 console.log('error rendering collection',e)
         }
@@ -1286,7 +1290,7 @@ export class Dashboard extends AbstractView {
         let browseLink = event.target.closest('.info-text');
         // handle cosms
         const cosmPreviewSettings = this.preview.settingsActive == true && (!event.target.closest('#PREVIEW'));
-        const cosmColorSettings = (this.preview.colorPicker.fsActive == true || this.preview.colorPicker.active == true) && (!event.target.closest('#PREVIEW'));
+        const cosmColorSettings = (this.colorPicker.fsActive == true || this.colorPicker.active == true) && (!event.target.closest('#PREVIEW'));
         if (cosmPreviewSettings)
             this.preview.closeSettings();
         if (cosmColorSettings)
@@ -1353,12 +1357,13 @@ export class Dashboard extends AbstractView {
         let name = homeLink.getAttribute('collection');
         if (!name) return console.warn('no collection name', homeLink);
         let panelLink = closest('.collection-summary .panel-name');
-        let browseLink = closest('.info-text');
         let settingsLink = closest('.settings-label');
 
         if (panelLink){
             let name = panelLink.getAttribute('collection');
             await this.renderCollection(name);
+            // hide settings breadcrumb
+            $('.breadcrumb').classList.remove('active')
             return;
         }
         if (settingsLink){
@@ -1369,12 +1374,12 @@ export class Dashboard extends AbstractView {
             this.showCollectionSettings(await this.store.getCollection(name));
             $('.dashboard__modal').setAttribute('tab','settings')
             $('.info-bar .current-tab').textContent = name
-            console.trace('HERE FOO')
-            const currentTabBreadCrumbElement = document.createElement('div');
-            currentTabBreadCrumbElement.classList.add('breadcrumb')
-            currentTabBreadCrumbElement.textContent = 'Settings'
-            $('.info-bar').appendChild(currentTabBreadCrumbElement)
-            return;
+            // console.trace('HERE FOO')
+            // const currentTabBreadCrumbElement = document.createElement('div');
+            // currentTabBreadCrumbElement.classList.add('breadcrumb')
+            // currentTabBreadCrumbElement.textContent = 'Settings'
+            // $('.info-bar')
+            return
         }
     }
     async delegateCollectionMenuEvents(event){

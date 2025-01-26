@@ -1,3 +1,4 @@
+import { path, pick } from "ramda";
 import { Canvas } from "./Canvas.js";
 import { Color } from './Color.js';
 
@@ -21,12 +22,11 @@ export class ColorPicker {
         this.previewColor = $('.pv-preview-color');
         this.previewInput = $('.hex-input input');
         this.hexInput = $('.pv-inp input');
-        
+        this.currentDrop = ''
         this.updateCurrentHue = (state) => {
             this.canvas.updateHue(state.deg);
             this.updateAll(this.canvas.color.hex);
         }
-
         this.hueSlider = new Slider($('.color-picker .hue-bar'), {
             onMouseMove: this.updateCurrentHue.bind(this),
             onMouseDown: this.updateCurrentHue.bind(this),
@@ -46,12 +46,10 @@ export class ColorPicker {
                 }
             }
         })
-
         this.hydrate();
-
     }
     getTarget(pid) {
-        return this.targets.find(target => target.pid == pid)
+        return this.targets.find(target => target.pid === pid)
     }
     setInputValid() {
         this.previewInput.classList.remove('invalid');
@@ -193,7 +191,25 @@ export class ColorPicker {
             this.canvas.update({hex:hex})
             this.updateAll(hex)
         })
-        $('.preview__modals--modal[data-tab="color"]').addEventListener('click', (e) => {
+        const colorModal = $('.preview__modals--modal[data-tab="color"]')
+        colorModal.addEventListener('contextmenu',(e) => {
+            // eye dropper action
+            e.preventDefault();
+            let pickerElement = e.target.closest('.picker-element');
+            if (pickerElement && Color.isValidHex(this.currentDrop)){
+                let pathElement = e.target.closest('.path-element')
+                let id = pathElement.getAttribute('pid')
+                let targetType = pickerElement.getAttribute('target')
+                let target = this.getTarget(id)
+                if (targetType === 'stroke' || targetType === 'fill'){
+                    console.log('dropping color',this.currentDrop,targetType)
+                    target[targetType] = this.currentDrop
+                }
+            }
+       })
+        colorModal.addEventListener('click', (e) => {
+            const mapper = mapEvents(e);
+            if (mapper.rightClick()) return
             // UNDO
             let clickedUndo = e.target.closest('.canvas-undo');
                 if (clickedUndo) this.handleUndo()
@@ -202,12 +218,17 @@ export class ColorPicker {
                 if (clickedRedo) this.handleRedo()
             // EDITOR ELEMENT     
             let clickedPath = e.target.closest('.path-element');
-                if (!clickedPath)
-                    return;
+                if (!clickedPath) return;
+                // HANDLE DROPPER
+            let pickerElement = mapper.clicked('.picker-element');
+            if (pickerElement){
+                const color = pickerElement.getAttribute('color')
+                console.log('picking up', color)
+                this.currentDrop = color;
+            }
             let id = clickedPath.getAttribute('pid');
             let pathExists = clickedPath && this.getTarget(id);
-                if (!pathExists)
-                    return;
+                if (!pathExists) return;
             let clickedStrokeLabel = e.target.closest('.path-element .stroke-icon .picker-label');
                 if (clickedStrokeLabel) this.handleStrokeLabel(id);
             let clickedStrokeIcon = e.target.closest('.path-element .stroke-icon .picker-element');
@@ -228,7 +249,7 @@ export class ColorPicker {
         this.updateElements(hex);
         this.setInputValid();
         this.state.currentValue = hex;
-        return hex;        
+        return hex;
     }
     handleReset() {
         const setOriginStrokeOrFill = targetTypePair => {
@@ -271,6 +292,11 @@ export class ColorPicker {
         if (!target) return
         this.select(target,'stroke')
         this.updateCanvasWithSingleColor(target,'stroke');
+    }
+    applyStrokeIcon(pid,hex){
+        const target = this.getTarget(pid)
+        if (!target) return
+        this.select(target,stroke)
     }
     handleFillLabel(pid) {
         const target = this.getTarget(pid)
@@ -393,16 +419,22 @@ export class ColorPicker {
                             if (hex == null) {
                                 this.displayElement.removeAttribute('stroke');
                                 this.editorElement.strokeIcon.style.setProperty('--background','none');
+                                this.editorElement.strokeIcon.setAttribute('color','');
+                                console.log(this.editorElement.strokeIcon)
                                 this.editorElement.strokeIcon.classList.remove('hasCol');
                             } else if (hex == undefined) {
                                 this.displayElement.setAttribute('stroke','none');
                                 this.editorElement.strokeIcon.style.setProperty('--background','transparent');
+                                this.editorElement.strokeIcon.setAttribute('color','')
+                                console.log(this.editorElement.strokeIcon)
                                 this.editorElement.strokeIcon.classList.remove('hasCol');
                             } else {
                                 if (first(hex) !== '#')
                                     hex = '#' + hex;
                                 this.editorElement.strokeIcon.classList.add('hasCol');
                                 this.displayElement.setAttribute('stroke',hex);
+                                this.editorElement.strokeIcon.setAttribute('color',hex)
+                                console.log(this.editorElement.strokeIcon)
                                 this.editorElement.strokeIcon.style.setProperty('--background',hex);
                             }
                         },
@@ -415,19 +447,23 @@ export class ColorPicker {
                             return this.currentFill;
                         },
                         setFill(hex) {
+                            console.log('setting fill', hex)
                             if (hex == null) {
                                 this.displayElement.removeAttribute('stroke');
                                 this.editorElement.fillIcon.style.setProperty('--background','none');
+                                this.editorElement.fillIcon.setAttribute('color','')
                                 this.editorElement.fillIcon.classList.remove('hasCol');
                             } else if (hex == 'none') {
                                 this.displayElement.setAttribute('fill','none');
                                 this.editorElement.fillIcon.style.setProperty('--background','transparent');
+                                this.editorElement.fillIcon.setAttribute('color','')
                                 this.editorElement.fillIcon.classList.remove('hasCol');
                             } else {
                                 if (first(hex) !== '#')
                                     hex = '#' + hex;
                                 this.editorElement.fillIcon.classList.add('hasCol')
                                 this.displayElement.setAttribute('fill',hex);
+                                this.editorElement.fillIcon.setAttribute('color',hex)
                                 this.editorElement.fillIcon.style.setProperty('--background',hex);
                             }
                         },
@@ -546,7 +582,6 @@ export class ColorPicker {
             this.state.icon.colors.colorSets.temp = this.useColorSet();
         }
         this.state.icon = icon;
-        console.log(icon)
         console.dir('ICON COLOR SETTINGS', icon.colors.colorSets)
         if (icon?.colors){
             const colors = icon.colors;
@@ -604,14 +639,20 @@ function fillElement(fill) {
     elementFillLabel.classList.add('picker-label'),
     elementFillLabel.textContent = 'Fill',
     elementFillDataElement.classList.add('picker-element');
-    if (fill == null) 
+    if (fill == null) {
         elementFillDataElement.innerHTML = noAttrIcon()
-    else if (fill === 'none') 
+        elementFillDataElement.setAttribute('color','')
+    }
+    else if (fill === 'none') {
         elementFillDataElement.innerHTML = noColorIcon()
+        elementFillDataElement.setAttribute('color','')
+    }
     else if (Color.isValidHex(fill)) {
         elementFillDataElement.style.setProperty('--background',fill);
         elementFillDataElement.classList.add('hasCol')
+        elementFillDataElement.setAttribute('color',fill)
     }
+    elementFillDataElement.setAttribute('target','fill')
     elementFillIcon.appendChild(elementFillLabel);
     elementFillIcon.appendChild(elementFillDataElement);
     return elementFillIcon
@@ -624,15 +665,22 @@ function strokeElement(stroke) {
     elementStrokeLabel.classList.add('picker-label');
     elementStrokeLabel.textContent = 'Stroke';
     elementStrokeDataElement.classList.add('picker-element')
-    if (stroke == null) 
+    if (stroke == null) {
         elementStrokeDataElement.innerHTML = noAttrIcon()
-    else if (stroke === 'none') 
+        elementStrokeDataElement.setAttribute('color','')
+    }
+    else if (stroke === 'none') {
         elementStrokeDataElement.innerHTML = noColorIcon()
+        elementStrokeDataElement.setAttribute('color','')
+    }
     else if (Color.isValidHex(stroke)) {
         elementStrokeDataElement.style.setProperty('--background', stroke);
         elementStrokeDataElement.classList.add('hasCol')
+        elementStrokeDataElement.setAttribute('color',stroke)
     }
     elementStrokeIcon.appendChild(elementStrokeLabel);
     elementStrokeIcon.appendChild(elementStrokeDataElement);
+    elementStrokeDataElement.setAttribute('target','stroke')
+
     return elementStrokeIcon
 }

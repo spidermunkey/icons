@@ -222,8 +222,8 @@ export class SvgModel extends EventEmitterClass {
     }
     async getSettings(context){
         console.log('GETTING SETTINGS',context)
-        const settings = this.settings = await API.getSettings();
-        console.log(settings)
+        // const settings = this.settings = await API.getSettings();
+        // console.log(settings)
         return {}
     }
 }

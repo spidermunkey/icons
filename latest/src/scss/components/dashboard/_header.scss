@@ -88,6 +88,16 @@
         color: $font-clr-light;
         letter-spacing: .08em;
       }
+      .breadcrumb {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+        &.active {
+          opacity: 1;
+          pointer-events: all;
+          visibility: visible;
+        }
+      }
   }
   .tool-bar {
       // justify-content: space-between;

@@ -1,4 +1,3 @@
-import { ColorPicker } from "./ColorPicker"
 import { EventEmitterClass } from "../utils/EventEmitter"
 const defaultSetting = {
     viewBox: [0,0,20,20],
@@ -350,10 +349,8 @@ export class Preview extends EventEmitterClass {
         this.settingsActive = false
         this.presetType = 'icon'
         this.icon = undefined
-
         this.viewBoxScale = []
         this.startingViewbox = [0,0,20,20]
-        this.colorPicker = new ColorPicker({})
         this.currentTab = 'position'
         this.tabs = $$('.preview__modals--modal')
         this.tabNames = this.tabs.map(modal => modal.dataset.tab)
