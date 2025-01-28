@@ -33,7 +33,10 @@ export class Collection {
       return this.meta.name
   }
   get settings(){
-    return this.meta.settings
+    return this.meta?.settings || {}
+  }
+  get colors() {
+    return this.meta?.colors || {}
   }
   get recentSettings() {
     return this.meta.recent_settings

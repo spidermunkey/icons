@@ -1,4 +1,3 @@
-import { path, pick } from "ramda";
 import { Canvas } from "./Canvas.js";
 import { Color } from './Color.js';
 
@@ -15,6 +14,7 @@ export class ColorPicker {
             currentValue: '',
             values: new Cursor([]),
         }
+
         this.currentIcon = undefined;
         this.handleUpdate = handleUpdate;
         this.targetListElement = $('.path-extractor');
@@ -23,10 +23,12 @@ export class ColorPicker {
         this.previewInput = $('.hex-input input');
         this.hexInput = $('.pv-inp input');
         this.currentDrop = ''
+
         this.updateCurrentHue = (state) => {
             this.canvas.updateHue(state.deg);
             this.updateAll(this.canvas.color.hex);
         }
+
         this.hueSlider = new Slider($('.color-picker .hue-bar'), {
             onMouseMove: this.updateCurrentHue.bind(this),
             onMouseDown: this.updateCurrentHue.bind(this),
@@ -47,6 +49,16 @@ export class ColorPicker {
             }
         })
         this.hydrate();
+    }
+    get currentColors(){
+        let colors = {}
+        this.targets.forEach(path => {
+            const pid = path.pid;
+            const stroke = path.currentStroke;
+            const fill = path.currentFill;
+            colors[pid] = [stroke,fill];
+        })
+        return colors;
     }
     getTarget(pid) {
         return this.targets.find(target => target.pid === pid)
@@ -349,206 +361,26 @@ export class ColorPicker {
         this.updateColor();
     }
     updateInputText(hex) {
+        !Color.isValidHex(hex) ? this.setInputInvalid() :this.setInputValid()
         this.previewInput.value = hex;
         this.hexInput.value = hex;
-        if (!Color.isValidHex(hex)) 
-            this.setInputInvalid()
-        else 
-            this.setInputValid()
         return hex;
     }
-    saveColorSet(){
-        const icon = this.state.icon;
-        if (!icon.marked){
-            // create original
+
+    applyColors(target,colors){
+        for (const pid in colors){
+            let path = target.querySelector(`[pid="${pid}"]`);
+            let stroke = colors[0]
+            let fill = colors[1]
+            if (!path) continue;
+            path.setAttribute('stroke',stroke);
+            path.setAttribute('fill',fill);
         }
-    }
-    useColorSet(){
-        const colorSet = {}
-        this.targets.forEach(path => {
-            const pid = path.pid;
-            const stroke = path.currentStroke;
-            const fill = path.currentFill;
-            colorSet[pid] = [stroke,fill];
-        })
-        return colorSet;
     }
     applyFromColorset(target,colorset){
-        for (const pid in colorset){
-            let path = target.querySelector(`[pid="${pid}"]`);
-            if (!path) // probably the element itself
-                continue;
-            path.setAttribute('stroke',colorset[pid][0]);
-            path.setAttribute('fill',colorset[pid][1]);
-        }
-        this.elements = [target,...this.state.icon.crawl(target)];
-        this.targets = this.elements.map(function createElementPair(element) {
-                let 
-                    stroke = element.getAttribute('stroke'),
-                    fill = element.getAttribute('fill'),
-                    tag = element.tagName,
-                    pid = element.getAttribute('pid'),
-                   displayElement = element,
-                   pathElement = createPathElement({ stroke , fill , tag , pid }),
-                   statefulPair = {
-                        pid,
-                        displayElement,
-                        editorElement: {
-                            correspondingPath: displayElement,
-                            element: pathElement,
-                            label: $('.attr-label',pathElement),
-                            strokeElement: $('.stroke-icon',pathElement),
-                            strokeIcon: $('.stroke-icon .picker-element',pathElement),
-                            strokeLabel: $('.stroke-icon .picker-label',pathElement),
-                            fillElement: $('.fill-icon',pathElement),
-                            fillIcon: $('.fill-icon .picker-element',pathElement),
-                            fillLabel: $('.fill-icon .picker-label',pathElement)
-                        },
-                        currentFill: fill,
-                        currentStroke: stroke,
-                        originFill: fill,
-                        originStroke: stroke,
-                        previousFill: new Cursor([fill]),
-                        previousStroke: new Cursor([stroke]),
-                        isSelected: false,
-                        selected: [],
-                        get stroke() {
-                            return this.currentStroke
-                        },
-                        setStroke(hex) {
-                            if (hex == null) {
-                                this.displayElement.removeAttribute('stroke');
-                                this.editorElement.strokeIcon.style.setProperty('--background','none');
-                                this.editorElement.strokeIcon.setAttribute('color','');
-                                console.log(this.editorElement.strokeIcon)
-                                this.editorElement.strokeIcon.classList.remove('hasCol');
-                            } else if (hex == undefined) {
-                                this.displayElement.setAttribute('stroke','none');
-                                this.editorElement.strokeIcon.style.setProperty('--background','transparent');
-                                this.editorElement.strokeIcon.setAttribute('color','')
-                                console.log(this.editorElement.strokeIcon)
-                                this.editorElement.strokeIcon.classList.remove('hasCol');
-                            } else {
-                                if (first(hex) !== '#')
-                                    hex = '#' + hex;
-                                this.editorElement.strokeIcon.classList.add('hasCol');
-                                this.displayElement.setAttribute('stroke',hex);
-                                this.editorElement.strokeIcon.setAttribute('color',hex)
-                                console.log(this.editorElement.strokeIcon)
-                                this.editorElement.strokeIcon.style.setProperty('--background',hex);
-                            }
-                        },
-                        set stroke(hex) {
-                            this.setStroke(hex);
-                            this.previousStroke.addOneAndSkipTo(hex);
-                            this.currentStroke = hex;
-                        },
-                        get fill() {
-                            return this.currentFill;
-                        },
-                        setFill(hex) {
-                            console.log('setting fill', hex)
-                            if (hex == null) {
-                                this.displayElement.removeAttribute('stroke');
-                                this.editorElement.fillIcon.style.setProperty('--background','none');
-                                this.editorElement.fillIcon.setAttribute('color','')
-                                this.editorElement.fillIcon.classList.remove('hasCol');
-                            } else if (hex == 'none') {
-                                this.displayElement.setAttribute('fill','none');
-                                this.editorElement.fillIcon.style.setProperty('--background','transparent');
-                                this.editorElement.fillIcon.setAttribute('color','')
-                                this.editorElement.fillIcon.classList.remove('hasCol');
-                            } else {
-                                if (first(hex) !== '#')
-                                    hex = '#' + hex;
-                                this.editorElement.fillIcon.classList.add('hasCol')
-                                this.displayElement.setAttribute('fill',hex);
-                                this.editorElement.fillIcon.setAttribute('color',hex)
-                                this.editorElement.fillIcon.style.setProperty('--background',hex);
-                            }
-                        },
-                        set fill(hex) {
-                            this.setFill(hex);
-                            this.previousStroke.addOneAndSkipTo(hex);
-                            this.currentFill = hex;
-                        },
-                        set selectedTypes(val) {
-                            if (!this.selected.find(val => val === val) && (val === 'stroke' || val === 'fill'))
-                                this.selected.push(val);
-                        },
-                        resetStroke() {
-                            this.stroke = this.originStroke;
-                        },
-                        resetFill() {
-                            this.fill = this.originFill;
-                        },
-                        reset(type) {
-                            if (type === 'stroke') this.resetStroke()
-                            else if (type === 'fill') this.resetFill()
-                        },
-                        select(type) {
-                            if (type == 'stroke') {
-                                this.isSelected = true;
-                                this.editorElement.strokeElement.classList.add('selected')
-                                if (!this.selected.find(val => val === 'stroke'))
-                                    this.selected.push('stroke');
-                            }
-                            else if (type == 'fill') {
-                                this.isSelected = true;
-                                // this.selectedTypes = 'fill';
-                                this.editorElement.fillElement.classList.add('selected');
-                                if (!this.selected.find(val => val === 'fill'))
-                                    this.selected.push('fill');
-                            }
-                        },
-                        unselect(type) {
-                            if (type == 'stroke') {
-                                this.editorElement.strokeElement.classList.remove('selected');
-                                this.selected = this.selected.filter(val => val !== 'stroke');
-                                if (this.selected.length == 0) 
-                                    this.isSelected = false;
-                                return this.isSelected
-                            }
-                            else if (type == 'fill') {
-                                this.editorElement.fillElement.classList.remove('selected');
-                                this.selected = this.selected.filter(val => val !== 'fill');
-                                if (this.selected.length == 0) 
-                                    this.isSelected = false;
-                                return this.isSelected
-                            }
-                        },
-                        updateAll(hex) {
-                            this.selected.forEach(type => this[type] = hex)
-                        },
-                        update(type,hex) {
-                            if (type == 'stroke') this.setStroke(hex);
-                            else if (type == 'fill') this.setFill(hex);
-                        },
-                        undo(type) {
-                            if (type == 'stroke' || type == 'fill') {
-                                let str = `previous${uppercase(type)}`;
-                                let strProp = `current${uppercase(type)}`;
-                                let cursor = this[str];
-                                const prevState = cursor.skipToPrev();
-                                this.update(type,prevState);
-                                this[strProp] = prevState
-                                return prevState;
-                            }
-                        },
-                        redo(type) {
-                            if (type == 'stroke' || type == 'fill') {
-                                let str = `previous${uppercase(type)}`;
-                                let strProp = `current${uppercase(type)}`;
-                                let cursor = this[str];
-                                const nextState = cursor.skipToNext();
-                                this.update(type,nextState);
-                                this[strProp] = nextState
-                                return nextState
-                            }
-                        }
-                   }
-                return statefulPair
-        }.bind(this));
+        this.applyColors(target,colorset)
+        this.elements = [target, ...this.state.icon.crawl(target) ];
+        this.targets = this.elements.map(createElementPair.bind(this));
         const elements = this.targets.map(pair => pair.editorElement.element);
         const destination = this.targetListElement;
         let targetListElement = $('.markup-data');
@@ -560,7 +392,6 @@ export class ColorPicker {
         }
         elements.forEach(element => targetListElement.appendChild(element))
     }
-    
     useState(){
         return {
             selected: this.state.selected,
@@ -577,32 +408,180 @@ export class ColorPicker {
         this.state.color = state?.color || new Color({ hex: '#fff' });
     }
     update(icon,target) {
-        if (this.state.icon){
-            // save previous session { temp }
-            this.state.icon.colors.colorSets.temp = this.useColorSet();
-        }
+        if (this.state.icon) this.state.icon.colors.temp = this.currentColors;
         this.state.icon = icon;
-        console.dir('ICON COLOR SETTINGS', icon.colors.colorSets)
-        if (icon?.colors){
-            const colors = icon.colors;
-            const hasPrimary = Object.hasOwn(colors.colorSets,'primary');
-            const hasTemp = Object.hasOwn(colors.colorSets,'temp');
-            if (hasTemp){
-                this.applyFromColorset(target,colors.colorSets.temp)
-            }
-            else if (hasPrimary){
-                this.applyFromColorset(target,colors.colorSets.primary)
-            } else {
-                this.applyFromColorset(target,colors.colorSets.original)
-            }
-        } else {
-            console.warn('this icon has no colors')
-        }
-        this.state.icon = icon;
+        this.applyFromColorset( target , icon?.color ? icon?.color : icon?.colors.original )
         this.handleState( icon?.colors || {})
     }
 }
 
+function createElementPair(element) {
+    let 
+        stroke = element.getAttribute('stroke'),
+        fill = element.getAttribute('fill'),
+        tag = element.tagName,
+        pid = element.getAttribute('pid'),
+        displayElement = element,
+        pathElement = createPathElement({ stroke , fill , tag , pid }),
+        statefulPair = {
+            pid,
+            displayElement,
+            editorElement: {
+                correspondingPath: displayElement,
+                element: pathElement,
+                label: $('.attr-label',pathElement),
+                strokeElement: $('.stroke-icon',pathElement),
+                strokeIcon: $('.stroke-icon .picker-element',pathElement),
+                strokeLabel: $('.stroke-icon .picker-label',pathElement),
+                fillElement: $('.fill-icon',pathElement),
+                fillIcon: $('.fill-icon .picker-element',pathElement),
+                fillLabel: $('.fill-icon .picker-label',pathElement)
+            },
+            currentFill: fill,
+            currentStroke: stroke,
+            originFill: fill,
+            originStroke: stroke,
+            previousFill: new Cursor([fill]),
+            previousStroke: new Cursor([stroke]),
+            isSelected: false,
+            selected: [],
+            get stroke() {
+                return this.currentStroke
+            },
+            setStroke(hex) {
+                if (hex == null) {
+                    this.displayElement.removeAttribute('stroke');
+                    this.editorElement.strokeIcon.style.setProperty('--background','none');
+                    this.editorElement.strokeIcon.setAttribute('color','');
+                    console.log(this.editorElement.strokeIcon)
+                    this.editorElement.strokeIcon.classList.remove('hasCol');
+                } else if (hex == undefined) {
+                    this.displayElement.setAttribute('stroke','none');
+                    this.editorElement.strokeIcon.style.setProperty('--background','transparent');
+                    this.editorElement.strokeIcon.setAttribute('color','')
+                    console.log(this.editorElement.strokeIcon)
+                    this.editorElement.strokeIcon.classList.remove('hasCol');
+                } else {
+                    if (first(hex) !== '#')
+                        hex = '#' + hex;
+                    this.editorElement.strokeIcon.classList.add('hasCol');
+                    this.displayElement.setAttribute('stroke',hex);
+                    this.editorElement.strokeIcon.setAttribute('color',hex)
+                    console.log(this.editorElement.strokeIcon)
+                    this.editorElement.strokeIcon.style.setProperty('--background',hex);
+                }
+            },
+            set stroke(hex) {
+                this.setStroke(hex);
+                this.previousStroke.addOneAndSkipTo(hex);
+                this.currentStroke = hex;
+            },
+            get fill() {
+                return this.currentFill;
+            },
+            setFill(hex) {
+                console.log('setting fill', hex)
+                if (hex == null) {
+                    this.displayElement.removeAttribute('stroke');
+                    this.editorElement.fillIcon.style.setProperty('--background','none');
+                    this.editorElement.fillIcon.setAttribute('color','')
+                    this.editorElement.fillIcon.classList.remove('hasCol');
+                } else if (hex == 'none') {
+                    this.displayElement.setAttribute('fill','none');
+                    this.editorElement.fillIcon.style.setProperty('--background','transparent');
+                    this.editorElement.fillIcon.setAttribute('color','')
+                    this.editorElement.fillIcon.classList.remove('hasCol');
+                } else {
+                    if (first(hex) !== '#')
+                        hex = '#' + hex;
+                    this.editorElement.fillIcon.classList.add('hasCol')
+                    this.displayElement.setAttribute('fill',hex);
+                    this.editorElement.fillIcon.setAttribute('color',hex)
+                    this.editorElement.fillIcon.style.setProperty('--background',hex);
+                }
+            },
+            set fill(hex) {
+                this.setFill(hex);
+                this.previousStroke.addOneAndSkipTo(hex);
+                this.currentFill = hex;
+            },
+            set selectedTypes(val) {
+                if (!this.selected.find(val => val === val) && (val === 'stroke' || val === 'fill'))
+                    this.selected.push(val);
+            },
+            resetStroke() {
+                this.stroke = this.originStroke;
+            },
+            resetFill() {
+                this.fill = this.originFill;
+            },
+            reset(type) {
+                if (type === 'stroke') this.resetStroke()
+                else if (type === 'fill') this.resetFill()
+            },
+            select(type) {
+                if (type == 'stroke') {
+                    this.isSelected = true;
+                    this.editorElement.strokeElement.classList.add('selected')
+                    if (!this.selected.find(val => val === 'stroke'))
+                        this.selected.push('stroke');
+                }
+                else if (type == 'fill') {
+                    this.isSelected = true;
+                    // this.selectedTypes = 'fill';
+                    this.editorElement.fillElement.classList.add('selected');
+                    if (!this.selected.find(val => val === 'fill'))
+                        this.selected.push('fill');
+                }
+            },
+            unselect(type) {
+                if (type == 'stroke') {
+                    this.editorElement.strokeElement.classList.remove('selected');
+                    this.selected = this.selected.filter(val => val !== 'stroke');
+                    if (this.selected.length == 0) 
+                        this.isSelected = false;
+                    return this.isSelected
+                }
+                else if (type == 'fill') {
+                    this.editorElement.fillElement.classList.remove('selected');
+                    this.selected = this.selected.filter(val => val !== 'fill');
+                    if (this.selected.length == 0) 
+                        this.isSelected = false;
+                    return this.isSelected
+                }
+            },
+            updateAll(hex) {
+                this.selected.forEach(type => this[type] = hex)
+            },
+            update(type,hex) {
+                if (type == 'stroke') this.setStroke(hex);
+                else if (type == 'fill') this.setFill(hex);
+            },
+            undo(type) {
+                if (type == 'stroke' || type == 'fill') {
+                    let str = `previous${uppercase(type)}`;
+                    let strProp = `current${uppercase(type)}`;
+                    let cursor = this[str];
+                    const prevState = cursor.skipToPrev();
+                    this.update(type,prevState);
+                    this[strProp] = prevState
+                    return prevState;
+                }
+            },
+            redo(type) {
+                if (type == 'stroke' || type == 'fill') {
+                    let str = `previous${uppercase(type)}`;
+                    let strProp = `current${uppercase(type)}`;
+                    let cursor = this[str];
+                    const nextState = cursor.skipToNext();
+                    this.update(type,nextState);
+                    this[strProp] = nextState
+                    return nextState
+                }
+            }
+       }
+    return statefulPair
+}
 function createPathElement({tag,fill,stroke,pid}) {
     const pathElement = document.createElement('div');
     pathElement.classList.add('path-element');
@@ -611,19 +590,6 @@ function createPathElement({tag,fill,stroke,pid}) {
     pathElement.appendChild(fillElement(fill));
     pathElement.appendChild(strokeElement(stroke));
     return pathElement
-}
-
-function noAttrIcon(){
-    return `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px" height="24px" viewBox="0 0 64 64" enable-background="new 0 0 64 64" xml:space="preserve">
-    <path fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" d="M53.919,10.08c12.108,12.106,12.108,31.733,0,43.84
-        c-12.105,12.107-31.732,12.107-43.838,0c-12.108-12.106-12.108-31.733,0-43.84C22.187-2.027,41.813-2.027,53.919,10.08z"></path>
-    <line fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" x1="10.08" y1="10.08" x2="53.92" y2="53.92"></line>
-    </svg>`
-}
-function noColorIcon(){
-    return `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" enable-background="new 0 0 50 50" xml:space="preserve" height="40px" width="40px">
-    <path d="M40,23.99H10c-0.552,0-1,0.447-1,1s0.448,1,1,1h30c0.552,0,1-0.447,1-1S40.552,23.99,40,23.99z"></path>
-    </svg>`
 }
 function pathLabel(tag) {
     const elementLabel = document.createElement('div');
@@ -683,4 +649,16 @@ function strokeElement(stroke) {
     elementStrokeDataElement.setAttribute('target','stroke')
 
     return elementStrokeIcon
+}
+function noAttrIcon(){
+    return `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px" height="24px" viewBox="0 0 64 64" enable-background="new 0 0 64 64" xml:space="preserve">
+    <path fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" d="M53.919,10.08c12.108,12.106,12.108,31.733,0,43.84
+        c-12.105,12.107-31.732,12.107-43.838,0c-12.108-12.106-12.108-31.733,0-43.84C22.187-2.027,41.813-2.027,53.919,10.08z"></path>
+    <line fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" x1="10.08" y1="10.08" x2="53.92" y2="53.92"></line>
+    </svg>`
+}
+function noColorIcon(){
+    return `<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" enable-background="new 0 0 50 50" xml:space="preserve" height="40px" width="40px">
+    <path d="M40,23.99H10c-0.552,0-1,0.447-1,1s0.448,1,1,1h30c0.552,0,1-0.447,1-1S40.552,23.99,40,23.99z"></path>
+    </svg>`
 }

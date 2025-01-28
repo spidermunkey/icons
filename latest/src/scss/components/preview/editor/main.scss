@@ -69,7 +69,6 @@
     pointer-events: none;
     font-family: Arial, Helvetica, sans-serif;
     box-shadow: 0px 0px 10px 2px #00000027, 0px 0px 2px #0000001f;
-
     &.active {
       transform: translateY(-60px);
       opacity: 1;
@@ -649,8 +648,15 @@
           width: 100%;
           // overflow: scroll;
           // overflow-x: visible;
+          overflow-y: scroll;
           transition: 80ms linear;
           padding: 12px 8px;
+          &[data-tab="collections"]{
+            overflow-y: hidden;
+            .synced-collection-names {
+              overflow-y: scroll;
+            }
+          }
           // stops nested "hidden" && "active" tabs from interupting top level pointer
           [data-role="tab"] {
               pointer-events: none;

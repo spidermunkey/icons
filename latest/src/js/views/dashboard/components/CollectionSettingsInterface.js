@@ -146,7 +146,7 @@ export class Settings {
     this.settings = collection.settings
     // this.settings = await this.store.getCollection();
     $('.settings-interface .interface-window').innerHTML = this.interface;
-    // $('.db-res').innerHTML = this.previewModal;
+    $('.db-res').innerHTML = this.previewModal;
     await this.hydrate();
   }
 

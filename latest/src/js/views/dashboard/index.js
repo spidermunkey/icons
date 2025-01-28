@@ -13,7 +13,7 @@ import { ContextMenuElement } from '../../components/html/ContextMenu.js'
 import { DashboardHeader } from '../../components/html/DashboardHeader.js'
 import { DashboardModal } from '../../components/html/DashboardModal.js'
 import { InterfaceNotificationBar } from '../../components/html/InterfaceNotificationBar.js'
-
+import { SettingsInterface } from '../../components/html/SettingsInterface.js'
 import { CurrentCollectionWidget } from '../../components/html/CurrentCollectionWidget.js'
 import { PreviewWidget } from '../../components/html/PreviewWidget.js'
 import { PinnedCollectionWidget } from '../../components/html/PinnedCollectionWidget.js'
@@ -25,6 +25,7 @@ import { PreviewInterface } from '../../components/html/PreviewInterface.js'
 import { Settings } from './components/CollectionSettingsInterface.js'
 import { PocketInterface} from '../../components/html/PocketInterface.js'
 import { ColorPicker } from '../../components/ColorPicker.js'
+import { CollectionPreview } from '../../components/CollectionPreview.js'
 
 export class Dashboard extends AbstractView {
   constructor(store) {
@@ -33,6 +34,7 @@ export class Dashboard extends AbstractView {
     this.mode = 'dark'
     this.on('rendered',() => { 
         this.preview = new Preview()
+        this.collectionPreview = new CollectionPreview();
         this.colorPicker = new ColorPicker({})
         this.contextMenu = new ContextMenu()
         this.dashboard = new DashboardElement()
@@ -41,6 +43,8 @@ export class Dashboard extends AbstractView {
         this.settings.store = this.store
         this.dashboardElement = this.dashboard.element
         this.editor = $('#INTERFACE')
+        this.collectionSettingsWindow = $('.widget-settings.widget-wrapper');
+
     })
     this.state = {
         tabName: 'home',
@@ -53,6 +57,7 @@ export class Dashboard extends AbstractView {
         pinned: 'favorites',
         cursor: undefined,
         ccActive: false,
+        cSettingsActive: false,
         previousTab:{},
         query: '',
         searchView: {},
@@ -147,8 +152,20 @@ export class Dashboard extends AbstractView {
                 this.colorPicker.close()
             }
         })
-
-
+            // settings menu
+            const settingsTabs = $$('.settings-tab')
+            const settingsModals = $$('.settings-interface .settings-modal')
+            settingsTabs.forEach(tab => {
+                tab.addEventListener('click',() => {
+                    settingsTabs.forEach(tab => tab.classList.remove('active'))
+                    settingsModals.forEach(modal => modal.classList.remove('active'))
+                    const modal = $(`.settings-modal[modal=${tab.getAttribute('tab')}]`)
+                    if (modal){
+                        modal.classList.add('active')
+                        tab.classList.add('active')
+                    }
+                })
+        })
         $('.search.passive-search').addEventListener('input',this.search())
         $('.search.passive-search input').focus()
         $('.btn-cancel').addEventListener('click',() => this.cancelSearch())
@@ -165,6 +182,7 @@ export class Dashboard extends AbstractView {
         $('.current-collection-widget').addEventListener('click',(e) => this.openCollectionMenu(e))
         $('.collection-menu .close-menu').addEventListener('click',(e) => this.closeCollectionMenu(e))
         $('.pinned-widget').addEventListener('click',(e) => this.renderPinnedCollection(e))
+        // collection settings menu
 
         $('.preview .btn-bench.toggler').addEventListener('click',() => this.selected ? this.state.bench.add(this.selected): null)
         $('.preview__window--navigator.btn-next').addEventListener('click',() => this.togglePreviewNext())
@@ -458,7 +476,6 @@ export class Dashboard extends AbstractView {
         let recentSettings = {}
         if (collection?.recentSettings && Array.isArray(collection.recentSettings))
             collection.recentSettings.forEach(setting => recentSettings[setting.pid] = setting)
-        console.log('RECENT SETTINGS',recentSettings)
         let currentAnimation
         const presetIsDefaultIcon = '<svg width="24px" height="24px" viewBox="-4 -4 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m4lgxgw9-0265D74VQICG"><path d="M10.5 16C10.5 15.1716 11.1716 14.5 12 14.5C12.8284 14.5 13.5 15.1716 13.5 16C13.5 16.8284 12.8284 17.5 12 17.5C11.1716 17.5 10.5 16.8284 10.5 16Z" fill="black" pid="m4lgxgw9-00NA2554UM3C" stroke="null"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M9.81049 4.00497C10.0428 3.91246 10.2852 3.8475 10.5327 3.81144C12.006 3.59678 13.4327 4.42661 13.9745 5.81335L14.0495 6.00537C14.1424 6.2433 14.2087 6.4908 14.2472 6.74334L14.4638 8.16565L15.9467 7.9398L15.7301 6.51749C15.675 6.15544 15.5799 5.80062 15.4466 5.45951L15.3716 5.26749C14.5758 3.23066 12.4804 2.01182 10.3165 2.32712C9.95295 2.38008 9.59691 2.47548 9.25563 2.61137C7.22397 3.42026 6.01867 5.52354 6.34793 7.68538L6.37897 7.88919C6.43411 8.25123 6.52918 8.60605 6.66245 8.94716L7.3166 10.6215L6.93512 10.6519C5.85239 10.7384 4.96829 11.5523 4.79277 12.6242C4.4267 14.8598 4.4267 17.1401 4.79277 19.3758C4.96829 20.4477 5.85239 21.2616 6.93512 21.348L8.43125 21.4675C10.8066 21.6571 13.1934 21.6571 15.5687 21.4675L17.0649 21.348C18.1476 21.2616 19.0317 20.4477 19.2072 19.3758C19.5733 17.1401 19.5733 14.8598 19.2072 12.6242C19.0317 11.5523 18.1476 10.7384 17.0649 10.6519L15.5687 10.5325C13.3426 10.3548 11.1065 10.3436 8.87916 10.499L8.0596 8.4013C7.96665 8.16337 7.90033 7.91587 7.86187 7.66334L7.83083 7.45953C7.60666 5.98768 8.42727 4.55569 9.81049 4.00497ZM15.4494 12.0277C13.1534 11.8445 10.8466 11.8445 8.55062 12.0277L7.05449 12.1472C6.65956 12.1787 6.33708 12.4756 6.27306 12.8666C5.93327 14.9417 5.93327 17.0583 6.27306 19.1334C6.33708 19.5244 6.65956 19.8213 7.05449 19.8528L8.55062 19.9722C10.8465 20.1555 13.1534 20.1555 15.4494 19.9722L16.9455 19.8528C17.3404 19.8213 17.6629 19.5244 17.7269 19.1334C18.0667 17.0583 18.0667 14.9417 17.7269 12.8666C17.6629 12.4756 17.3404 12.1787 16.9455 12.1472L15.4494 12.0277Z" fill="black" pid="m4lgxgw9-01EYDRNJVEAJ" stroke="null"></path></svg>'
         const presetNotDefaultIcon = '<svg width="24px" height="24px" viewBox="-4 -4 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m4lgxgw6-003EWOTOIWH9"><path d="M10.5 16C10.5 15.1716 11.1716 14.5 12 14.5C12.8284 14.5 13.5 15.1716 13.5 16C13.5 16.8284 12.8284 17.5 12 17.5C11.1716 17.5 10.5 16.8284 10.5 16Z" fill="black" pid="m4lgxgw6-02FPUN3FPP0X" stroke="null"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M7.62165 10.5971L7.30621 7.75816C7.26577 7.39418 7.26577 7.02684 7.30621 6.66286L7.32898 6.45796C7.57046 4.28457 9.27907 2.56492 11.4509 2.30941C11.8157 2.26649 12.1843 2.26649 12.5491 2.30941C14.7209 2.56492 16.4295 4.28458 16.671 6.45797L16.6937 6.66286C16.7342 7.02684 16.7342 7.39418 16.6937 7.75815L16.3783 10.5971L17.0649 10.6519C18.1476 10.7384 19.0317 11.5523 19.2073 12.6242C19.5733 14.8598 19.5733 17.1401 19.2073 19.3758C19.0317 20.4477 18.1476 21.2616 17.0649 21.348L15.5688 21.4675C13.1934 21.6571 10.8067 21.6571 8.43128 21.4675L6.93515 21.348C5.85242 21.2616 4.96832 20.4477 4.7928 19.3758C4.42673 17.1401 4.42673 14.8598 4.7928 12.6242C4.96832 11.5523 5.85242 10.7384 6.93515 10.6519L7.62165 10.5971ZM11.6261 3.79914C11.8745 3.76992 12.1255 3.76992 12.3738 3.79914C13.8525 3.97309 15.0157 5.1439 15.1802 6.62361L15.2029 6.82851C15.2311 7.08239 15.2311 7.33862 15.2029 7.59251L14.8818 10.483C12.9626 10.3594 11.0374 10.3594 9.1182 10.483L8.79704 7.59251C8.76883 7.33862 8.76883 7.08239 8.79704 6.82851L8.8198 6.62361C8.98422 5.1439 10.1475 3.97309 11.6261 3.79914ZM15.4494 12.0277C13.1535 11.8445 10.8466 11.8445 8.55065 12.0277L7.05452 12.1472C6.65959 12.1787 6.33711 12.4756 6.27309 12.8666C5.9333 14.9417 5.9333 17.0583 6.27309 19.1334C6.33711 19.5244 6.65959 19.8213 7.05452 19.8528L8.55065 19.9722C10.8466 20.1555 13.1535 20.1555 15.4494 19.9722L16.9455 19.8528C17.3405 19.8213 17.6629 19.5244 17.727 19.1334C18.0668 17.0583 18.0668 14.9417 17.727 12.8666C17.6629 12.4756 17.3405 12.1787 16.9455 12.1472L15.4494 12.0277Z" fill="black" pid="m4lgxgw6-002BR93QMXFL" stroke="null"></path></svg>'
@@ -957,8 +974,6 @@ export class Dashboard extends AbstractView {
             }
             destination.innerHTML = ''
             let rendered = 0
-
-              console.log('LEN',getLength(settings))
             for (const pid in settings){
                 // ignore default-setting]
                 let frozenSettings = ['original','setting','preset']
@@ -982,7 +997,6 @@ export class Dashboard extends AbstractView {
             }
             if (rendered === 0) destination.innerHTML = 'no presets to show'
         }
-        console.log(recentSettings,'RECENT')
         function getLength(settings){
             let frozenSettings = ['original','setting','preset']
             const keys = Object.keys(settings).filter(key => !frozenSettings.some(i => i === key))
@@ -995,9 +1009,35 @@ export class Dashboard extends AbstractView {
         $('.preset-option[tab="collections"] .preset-count').textContent = getLength(collectionSettings)
         $('.preset-option[tab="recent"] .preset-count').textContent = getLength(recentSettings)
     }
-
+    async toggleCollectionSettingsMenu(){
+        console.log('SETTINGS ACTIVE')
+        if (this.state.cSettingsActive){
+            this.closeCollectionSettingsMenu();
+            return
+        }
+        await this.openCollectionSettingsMenu()
+    }
+    closeCollectionSettingsMenu(){
+        this.collectionSettingsWindow.classList.remove('active')
+        $('.settings')
+        this.state.cSettingsActive = false;
+    }
+    async openCollectionSettingsMenu(){
+        await this.loadCollectionSettings();
+        this.collectionSettingsWindow.classList.add('active')
+        this.state.cSettingsActive = true
+    }
+    async loadCollectionSettings(collectionName){
+        const settingsWindow = $('.settings-interface .interface-window');
+        const collection = this.collection;
+        const preset = collection.meta?.preset;
+        collection.meta.name
+        console.log('LOADING DEFAULT PRESET', preset)
+        console.log('LOADING COLLECTION SETTINGS',collection.settings)
+        console.log('LOADING COLLECTION COLORS',collection.colors)
+    }
     toggleContextMenu(event) {
-        const clickedIcon = elementClicked('.dashboard .svg-wrapper',event)
+        const clickedIcon = clicked('.dashboard .svg-wrapper',event)
         let icon;
         if (clickedIcon) icon = this.state.context.getIcon(clickedIcon.dataset.id)
         this.state.inspected = icon;
@@ -1152,12 +1192,14 @@ export class Dashboard extends AbstractView {
         const collection = await this.store.getCollection('all')
         const collection_names = await this.store.getNames()
         this.dashboard.renderHome(await Promise.all(collection_names.map(async name => (await this.store.getCollectionPaginated(name,1,39)))))
+        this.closeCollectionSettingsMenu();
         this.updateCollectionInfo(collection)
         this.state.context = collection
         this.state.collection = collection
         this.state.selected = this.currentIcon
         this.preview.update(this.currentIcon)
         this.setTab('home')
+        $('.dashboard__header .panel-settings').classList.remove('active')
         $('.collection-menu').innerHTML = `
         <div class="menu-controls">
             <div class="close-menu">close</div>
@@ -1183,6 +1225,7 @@ export class Dashboard extends AbstractView {
                     const collection = await this.store.getCollection(name)
                     this.state.collection = collection
                     this.preview.setCollectionPreset(collection.meta?.preset || {})
+                    this.collectionPreview.update(collection)
                     console.log('COLLECTION PRESET',collection.meta.preset)
                     this.state.context = collection
                     this.dashboard.render(collection)
@@ -1212,11 +1255,11 @@ export class Dashboard extends AbstractView {
                     this.state.selected = this.currentIcon
                     this.setTab(name)
                     this.updateCollectionInfo(collection)
+                    $('.dashboard__header .panel-settings').classList.add('active')
                 }
                 this.dashboard.setReady()
                 this.preview.setReady()
                 this.loadPresetMenu()
-                this.hideCollectionSettings();
             } catch(e){
                 console.log('error rendering collection',e)
         }
@@ -1236,7 +1279,6 @@ export class Dashboard extends AbstractView {
     updateCollectionInfo(collection){
             const getAgo = msDate => DateTime.from(msDate).string;
             let meta = {...collection.meta}
-            console.dir('UPDATING COLLECTION INFO', meta)
             let {collection_type,subtypes,sub_collections,size,name, uploaded_at = undefined,created_at = null, updated_on = null}  = meta;
             if (collection_type == 'auto') collection_type = 'default'
             let lastUpdate = 
@@ -1288,13 +1330,14 @@ export class Dashboard extends AbstractView {
         let wrapper = event.target.closest('.svg-wrapper');
         let homeLink = event.target.closest('.collection-summary');
         let browseLink = event.target.closest('.info-text');
+        let settingsLink = event.target.closest('.settings-label');
         // handle cosms
         const cosmPreviewSettings = this.preview.settingsActive == true && (!event.target.closest('#PREVIEW'));
         const cosmColorSettings = (this.colorPicker.fsActive == true || this.colorPicker.active == true) && (!event.target.closest('#PREVIEW'));
         if (cosmPreviewSettings)
             this.preview.closeSettings();
         if (cosmColorSettings)
-            this.preview.colorPicker.close();
+            this.colorPicker.close();
         if (browseLink){
             await this.renderCollection('home')
             $('.widget-wrapper.active').classList.remove('active')
@@ -1302,10 +1345,25 @@ export class Dashboard extends AbstractView {
             $('.widget-pre').classList.add('active')
             return
         }
+        if (settingsLink){
+            console.log('LINKR',settingsLink)
+            await this.toggleCollectionSettingsMenu()
+            return
+        } 
         if (homeLink){
-            await this.delegateHomePanelEvents(event , homeLink)
+            let name = homeLink.getAttribute('collection');
+            if (!name) return console.warn('no collection name', homeLink);
+            let panelLink = event.target.closest('.collection-summary .panel-name');
+            if (panelLink){
+                let name = panelLink.getAttribute('collection');
+                await this.renderCollection(name);
+                // hide settings breadcrumb
+                $('.breadcrumb').classList.remove('active')
+                return;
+            }
             return
         }
+
         if (!wrapper) return
         onWrapper.call(this)
         function onWrapper(){
@@ -1353,34 +1411,7 @@ export class Dashboard extends AbstractView {
         console.log('EVENT', event)
         let homeLink = element;
         let target = event.target;
-        let closest = target.closest.bind(target);
-        let name = homeLink.getAttribute('collection');
-        if (!name) return console.warn('no collection name', homeLink);
-        let panelLink = closest('.collection-summary .panel-name');
-        let settingsLink = closest('.settings-label');
 
-        if (panelLink){
-            let name = panelLink.getAttribute('collection');
-            await this.renderCollection(name);
-            // hide settings breadcrumb
-            $('.breadcrumb').classList.remove('active')
-            return;
-        }
-        if (settingsLink){
-            if ($('.settings-interface').classList.contains('active')){
-                this.hideCollectionSettings();
-                return;
-            }
-            this.showCollectionSettings(await this.store.getCollection(name));
-            $('.dashboard__modal').setAttribute('tab','settings')
-            $('.info-bar .current-tab').textContent = name
-            // console.trace('HERE FOO')
-            // const currentTabBreadCrumbElement = document.createElement('div');
-            // currentTabBreadCrumbElement.classList.add('breadcrumb')
-            // currentTabBreadCrumbElement.textContent = 'Settings'
-            // $('.info-bar')
-            return
-        }
     }
     async delegateCollectionMenuEvents(event){
         const hotlink = event.target.closest('.hot-link');
@@ -1600,8 +1631,11 @@ export class Dashboard extends AbstractView {
                 </div>
                 <div class="widget-settings widget-wrapper settings-interface">
                     <div class="interface-window">
+                    ${SettingsInterface()}
                     </div>
                 </div>
+
+
                 <div class="widget-pocket widget-wrapper pocket-interface">
                     Pocet Interface
                 </div>

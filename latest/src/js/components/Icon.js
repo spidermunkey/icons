@@ -21,14 +21,20 @@ export class Icon {
         this.usePreset = props?.preset && props.usePreset == true ? props.usePreset : false;
         this.element = this.createWrapper(props);
         this.settings = {
-            ...props?.settings
+            ...props?.settings,
+
          } || {};
         try {
             const values = Icon.parse(this.element);
             if (values){
                 const originalPreset = this.createPreset(values)
                 this.values = values
-                this.settings['original'] = originalPreset
+                this.settings['original'] = {
+                    ...originalPreset,
+                    get viewbox() {
+                        return [this.vbx,this.vby,this.vbw,this.vbh].map(Number)
+                    },
+                }
                 let defaultPresetExists = !objectIsFalsey(this.preset)
                 // invalid/legacy preset generation
                 let presetHasId = this.preset?.pid
@@ -97,7 +103,6 @@ export class Icon {
         vb[index] = val;
         this.viewBox = this.formatViewBoxArray(vb);
     }
-
     set vbx(x) {
         this.pos = [0,x]
     }
@@ -110,7 +115,6 @@ export class Icon {
     set vbh(h) {
         this.pos = [3,h]
     }
-
     get height() {
         if (this.values['height'])
             return this.values['height'].split('p')[0]
@@ -124,45 +128,36 @@ export class Icon {
             return this.values['width'].split('p')[0];
         return null;
     }
-
     set width(value) {
         this.values.width = value;
     }
-
     get stroke() {
         return this.values['stroke'];
     }
-
     get fill() {
         return this.values['fill'];
     }
-
     set rotation(deg) {
 
         this.values['rotation'] = deg
         return deg;
     }
-
     get rotation() {
         return this.values.rotation
     }
-
     save() {
         let cpy = new Icon(this.use())
         cpy.created_at = DateTime.stamp();
         return cpy;
     }
-
     copy() {
         window.navigator.clipboard.writeText(this.markup)
         console.log('copied');
         return true;
     }
-
     use() {
         return structuredClone(this.props);
     }
-
     mark(element) {
         element.setAttribute('pid',uuid())
         return element;
@@ -212,7 +207,6 @@ export class Icon {
         }
         return values;
     }
-
     static crawl(element = this.svg) {
         let children = [];
         for (var i = 0; i < element.childNodes.length; i++) {
@@ -249,9 +243,9 @@ export class Icon {
             }
           }
         });
-      }
-      createWrapper(props, opts = {useValues: false}){
-        let {name,category,markup,values} = props || this;
+    }
+    createWrapper(props){
+        let {name,markup} = props || this;
         let el = document.createElement('div');
         el.dataset.name = name;
         el.dataset.cid = this.cid;
@@ -267,16 +261,22 @@ export class Icon {
             console.warn('setting default viewbox for', this.collection );
             icon.setAttribute('viewBox','0 0 24 24');
         }
-        this.markup = icon.outerHTML;
+        this.children = [icon,...Icon.crawl(icon)]
         if (!props.colors){
             // create marked version for colors
-            const origin = {}
-
-            const mark = (child) => {
+            this.colors = {
+                original:{},
+            }
+            this.children.forEach((child) => {
                 const id = uuid();
                 const styleAttr = child.getAttribute("style");
                 let inlineFill;
                 let inlineStroke;
+                let existingFill = child.getAttribute('fill');
+                let tagname = child.tagName;
+                let isLine = tagname === 'line'
+                let existingStroke = child.getAttribute('stroke');
+
                 if (styleAttr) {
                     inlineFill = styleAttr.match(/fill:\s?([^;\s]+)/);
                     inlineStroke = styleAttr.match(/stroke:\s?([^;\s]+)/);
@@ -286,36 +286,26 @@ export class Icon {
                     child.setAttribute('fill',inlineFill[1])
                     const updatedStyle = styleAttr.replace(/\s*fill:[^;]+(;|$)/, '')
                     child.setAttribute("style", updatedStyle);
+                } else if (!existingFill && tagname !== 'svg'){
+                    child.setAttribute('fill','#000')
                 }
                 if (inlineStroke){
                     child.setAttribute('stroke',inlineStroke[1])
                     const updatedStyle = styleAttr.replace(/\s*stroke:[^;]+(;|$)/, '')
                     child.setAttribute("style", updatedStyle);
+                } else if (!existingStroke && isLine){
+                    child.setAttribute('stroke','#000')
+                } 
 
-                }
-                if (props.name === 'Droplet'){
-                    console.log('DROPLET')
-                    console.log(inlineFill,inlineStroke,styleAttr,child.getAttribute('fill'))
-                }
                 const marked = child.setAttribute('pid',id)
                 const stroke = child.getAttribute('stroke')
-                const fill = child.getAttribute('fill')
-                origin[id] = [stroke,fill]
+                const fill = child.getAttribute('fill') || 'none'
+                this.colors.original[id] = [stroke,fill,tagname]
                 return child
-            }
-            const children = [icon,...Icon.crawl(icon)].map(mark);
-            this.colors = {
-                marked: icon.outerHTML,
-                colorSets: {
-                    get original() {
-                        return origin
-                    },
-                    set original(val) {
-                        console.log('cannot overwrite original colorset')
-                    }
-                },
-            }
+            })
+
         }
+        this.markup = icon.outerHTML;
         return el;
     }
     parseViewBoxString(string) {
@@ -324,7 +314,6 @@ export class Icon {
 
         return string.split(/\s+|,/).map(value => Number(value));
     }
-
     formatViewBoxArray(array) {
         if (!Array.isArray(array))
             return console.log('I think your trying to format a string... try an array next time');
@@ -378,7 +367,6 @@ export class Icon {
             console.warn('no preset found.... no action will be taken')
         }
     }
-
 
     getComponent(type,size) {
         if ( !this.previews[type] || type == 'all' ) 
@@ -660,24 +648,4 @@ export class Icon {
         } else 
             return component
     }
-}
-
-function ViewBoxPreset(props) {
-    return {
-        name: props?.name || 'untitled',
-        // can be collection or icon preset,
-        pid: props?.pid || uuid(),
-        viewbox: props?.viewbox || '',
-        vbx: props?.vbx || 0,
-        vby: props?.vby || 0,
-        vbw: props?.vbw || 24,
-        vbh: props?.vbh || 24,
-        height: props?.height || '',
-        width: props?.width || '',
-        created_at: props?.created_at || DateTime.stamp().ms,
-    }
-}
-
-function ComponentManager(){
-    
 }

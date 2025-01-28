@@ -9,7 +9,7 @@ export class ContextMenu {
   }
 
   handleRightClick(event,icon) {
-      const clickedContextMenu = elementClicked('.db-context',event);
+      const clickedContextMenu = eventMaps.clicked(event,'.db-context');
       // handle right click outside
       if ( this.state === 'active' && !clickedContextMenu ) {
           event.preventDefault();

@@ -22,6 +22,7 @@ export class Canvas extends MouseTrackingSlider {
             let adjustedColor = this.handleCanvasPosition(event);
             if (actions?.handleColor) actions.handleColor(adjustedColor);
             if (actions?.mouseUp) actions.mouseUp(adjustedColor);
+            console.log('here')
             this.setCanvasHue();
             return state
         };

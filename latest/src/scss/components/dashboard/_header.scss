@@ -61,11 +61,39 @@
         transition: fill 400ms ease;
     }
   }
-  .tool-bar,
-  .info-bar {
+  .tool-bar{
+    display: flex;
+    width: 100%;
+  }
+  .panel-settings {
+    display: flex;
+    text-decoration: underline;
+    text-decoration-color: #c8c8c8b1;
+    text-wrap: nowrap;
+    cursor: pointer;
+    user-select: none;
+    color: #323232b1;
+    font-family: Arial, Helvetica, sans-serif;
+    align-items: flex-end;
+    @include hide();
+    &.active {
+      @include show();
+    }
+    .settings-icon {
+      margin-left: 12px;
+      stroke: #c8c8c8b1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+  }
+    &:hover {
+        color: #323232d2
+    }
+  }
+  .info-bar,
+  .nav-bar {
       display: flex;
       width: 100%;
-      padding-left: 14px;
       .divider { 
         margin-right: 4px;
       }
@@ -102,7 +130,6 @@
   .tool-bar {
       // justify-content: space-between;
       align-items: center;
-      padding-left: 14px;
       margin-bottom: 12px;
       .logo,.home {
         // border: 1px solid #9999994f;

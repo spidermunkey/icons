@@ -133,86 +133,30 @@ const htmlController = {
 
         const handleViewBoxInput = (index) => {
             return (e) => {
-                e.preventDefault();
-    
-                let value = e.target.value;
-                let k = e.key;
-                let construct = e.target.value.toString();
-                const updateWithInput = (index,value) => {
-                    console.log('updating with input',value)
+                let value = Number(e.target.value);
+                if (!isNaN(value)) {
                     let values = this.startingViewbox.slice();
-                    let x = values[index];
-                    let xi = Number(x);
-                    let adjusted = Math.min(value,999);
-                    values[index] = adjusted;
+                    values[index] = value;
                     this.setViewboxValues(values);
-                    this.startingViewbox = this.viewBox;
                 }
-                const leadingZero = /^0+/;
-                const keyIsNumber = /^\d$/.test(k);
-                const backspace = 8;
-                const validLength = 3;
-                const hasNonNumbers = /\D/;
-                let prefix = false;
-                if (e.keyCode == backspace && construct.length > 0) {
-                    const len = construct.length;
-                    construct = Array.from(construct).slice(0,len - 1).join('')
-                }
-                if (construct == '') {
-                    value = 0;
-                    e.target.value = 0;
-                }
-                if ( k === '-' && ( value == 0 || value == '')) {
-                    console.log('prefixing');
-                    prefix = true;
-                    construct = '-';
-                    e.target.value = '-';
-                }
-                if (keyIsNumber) {
-                    console.log('key is number');
-                    construct = value.toString() + k.toString();
-                    construct = construct.toString().replace(leadingZero,'');
-                }
-    
-                if ((construct.toString()[0] === '-' && construct.toString().length <= 4) || construct.toString().length <= 3 ){
-                    console.log('setting val',construct);
-                    e.target.value = construct;
-                }
-                // value = value.replace(leadingZero,'');
-                if (!isNaN(construct) && (((construct.toString()[0] === '-' && construct.toString().length <= 4)) || construct.toString().length <= 3))
-                    updateWithInput(index,prefix ? -(Number(construct)) : Number(construct));
-                
             }
         }
-        const handleHeightWidthInput = (e) => {
-            e.preventDefault()
-            let value = e.target.value
-            let selected = false
-            let selection = ''
-                if (e.target.getAttribute('selected') === 'true'){
-                    selection = e.target.value.substring(
-                        e.target.selectionStart,
-                        e.target.selectionEnd,
-                      )
-                    selected = true;
+        const handleHeightWidthInput = (dimension) => {
+            return (event) => {
+                let value = Number(event.target.value);
+                if (!isNaN(value) && value >= 0) this[dimension] = value
+            }
+        }
+        const resetOnViewBoxInputOnDoubleClick = (index,prop) => {
+            if (this.original[prop] !== undefined){
+                console.trace('reseting',prop,' to ', this.original[prop])
+                let value = this.original[prop]
+                if (!isNaN(value)) {
+                    let values = this.startingViewbox.slice();
+                    values[index] = value;
+                    this.setViewboxValues(values);
                 }
-                let k = e.key;
-                let construct = e.target.value.toString();
-                const leadingZero = /^0+/;
-                const keyIsNumber = /^\d$/.test(k);
-                const backspace = 8;
-                const hasNonNumbers = /\D/;
-    
-                if (k === 'Backspace'){
-                    construct = '';
-                    e.target.value = '';
-                }
-    
-                if (keyIsNumber && value.length < 2){
-                    console.log('here');
-                    e.target.value += k;
-                }
-                return e.target.value;
+            }
         }
         const handleRotation = (deg) => {
             if (deg || deg === 0) {
@@ -223,6 +167,9 @@ const htmlController = {
             }
             this.targetElement.dataset.rotation = deg.deg
             this.icon.rotation = deg
+        }
+        const resetRotation = () => {
+            handleRotation(0)
         }
         const updateWithSlider = (pct) => {
             if (!this.startingViewbox) {
@@ -266,6 +213,13 @@ const htmlController = {
             
             this.setViewboxValues(values)
         }
+        const resetWithSlider = () => {
+            let values = this.startingViewbox.slice();
+            values[2] = this.original.vbw;
+            values[3] = this.original.vbh;
+            this.setViewboxValues(values);
+            this.resetViewBoxScale(values)
+        }
         const updateWithMouseTracker = (index,value) => {
             let values = this.startingViewbox.slice();
             let x = values[index];
@@ -280,10 +234,11 @@ const htmlController = {
             this.setViewboxValues(values);
             this.startingViewbox = values;
         }
-        const viewBoxEditorConfig = (viewBoxIndex) => {
+        const viewBoxEditorConfig = (viewBoxIndex,prop) => {
             return {
                 onMouseMove:({x}) => updateWithMouseTracker(viewBoxIndex,x),
                 onMouseUp:() => this.resetViewBoxScale(this.viewBox),
+                onDblClick:(event) => resetOnViewBoxInputOnDoubleClick(viewBoxIndex,prop),
                 reset: () => resetMouseTrackingSlider(viewBoxIndex)
             }
         }
@@ -291,28 +246,32 @@ const htmlController = {
             onMouseMove: ({pct}) => updateWithSlider(pct),
             onMouseDown: ({pct}) => updateWithSlider(pct),
             onMouseUp: () => this.resetViewBoxScale(this.viewBox),
+            onReset: () => resetWithSlider()
         }
         const rotationSliderConfig = {
             onMouseMove: ({deg}) => handleRotation(deg),
-            onMouseUp: () => this.updatePreviews()
+            onMouseUp: () => this.updatePreviews(),
+            onReset: () => resetRotation(),
+            start: 0,
         }
 
-        this.vbxLabel = new MouseTrackingSlider( $('.input-field.x .label') , viewBoxEditorConfig(0))
-        this.vbyLabel = new MouseTrackingSlider( $('.input-field.y .label') , viewBoxEditorConfig(1))
-        this.vbwLabel = new MouseTrackingSlider( $('.input-field.w .label') , viewBoxEditorConfig(2))
-        this.vbhLabel = new MouseTrackingSlider( $('.input-field.h .label') , viewBoxEditorConfig(3))
-        this.zoomSlider = new Slider( $('#zoomSlider') , zoomSliderConfig)
-        this.rotationSlider = new Slider( $('#rotationSlider'), rotationSliderConfig)
+        this.vbxLabel = new MouseTrackingSlider( $('.input-field.x .label') , viewBoxEditorConfig(0,'vbx'))
+        this.vbyLabel = new MouseTrackingSlider( $('.input-field.y .label') , viewBoxEditorConfig(1),'vby')
+        this.vbwLabel = new MouseTrackingSlider( $('.input-field.w .label') , viewBoxEditorConfig(2),'vbh')
+        this.vbhLabel = new MouseTrackingSlider( $('.input-field.h .label') , viewBoxEditorConfig(3),'vbw')
+        
+        this.zoomSlider = new Slider( $('.input-field.zoom') , zoomSliderConfig)
+        this.rotationSlider = new Slider( $('.input-field.rotate'), rotationSliderConfig)
 
-        this.vbxInput.addEventListener('keydown',handleViewBoxInput(0))
-        this.vbyInput.addEventListener('keydown',handleViewBoxInput(1))
-        this.vbwInput.addEventListener('keydown',handleViewBoxInput(2))
-        this.vbhInput.addEventListener('keydown',handleViewBoxInput(3))
+        this.vbxInput.addEventListener('input',handleViewBoxInput(0))
+        this.vbyInput.addEventListener('input',handleViewBoxInput(1))
+        this.vbwInput.addEventListener('input',handleViewBoxInput(2))
+        this.vbhInput.addEventListener('input',handleViewBoxInput(3))
 
         this.svgHeightInput.addEventListener('select',(e) => this.svgHeightInput.setAttribute('selected','true'))
         this.svgHeightInput.addEventListener('blur',(e) => this.svgHeightInput.setAttribute('selected',''))
-        this.svgHeightInput.addEventListener('keydown',(e) => this.height = handleHeightWidthInput(e))
-        this.svgWidthInput.addEventListener('keydown', (e) => this.width = handleHeightWidthInput(e))
+        this.svgHeightInput.addEventListener('input',handleHeightWidthInput('height'))
+        this.svgWidthInput.addEventListener('input',handleHeightWidthInput('width'))
 
         this.btnBorder.onclick = () => { 
             if (!this.display.style.border) this.display.style.border = '1px dotted red'
@@ -345,13 +304,6 @@ const htmlController = {
 export class Preview extends EventEmitterClass {
     constructor() {
         super()
-        this.active = false
-        this.settingsActive = false
-        this.presetType = 'icon'
-        this.icon = undefined
-        this.viewBoxScale = []
-        this.startingViewbox = [0,0,20,20]
-        this.currentTab = 'position'
         this.tabs = $$('.preview__modals--modal')
         this.tabNames = this.tabs.map(modal => modal.dataset.tab)
         this.miniPreviewElement = $('.widget-preview-icon__wrapper')
@@ -376,19 +328,26 @@ export class Preview extends EventEmitterClass {
         this.svgStrokeInput = $('.input.inp-stroke')
         this.svgFillContainer = $('.field-fill')
         this.svgFillInput = $('.input.inp-fill')
+
+        this.active = false
+        this.presetType = 'icon'
+        this.icon = undefined
+        this.viewBoxScale = []
+        this.startingViewbox = [0,0,20,20]
+        this.currentTab = 'position'
         
-        this.vbhLabel = $('.input-field.h .label')
-        this.vbwLabel = $('.input-field.w .label')
         this.defaultHeight = '24'
         this.defaultWidth = '24'
         this.width = ''
         this.height = ''
+
         this.collectionPreset = defaultSetting
-        this.iconPreset = defaultSetting
         this.original = defaultSetting
         this.tmp = defaultSetting
+
         for (const [key, handler] of Object.entries(htmlController)) 
             this[key] = handler.bind(this)
+
         this.hydrate()
 
     }
@@ -425,18 +384,6 @@ export class Preview extends EventEmitterClass {
     set viewBox(string) {
         this.icon.viewBox = string;
     }
-    get VBX() {
-        return Number(this.viewBox[0]);
-    }
-    get VBY() {
-        return Number(this.viewBox[1]);
-    }
-    get VBH() {
-        return Number(this.viewBox[2]);
-    }
-    get VBW() {
-        return Number(this.viewBox[3]);
-    }
     get height() {
         return this.targetElement.getAttribute('height');
     }
@@ -468,7 +415,6 @@ export class Preview extends EventEmitterClass {
             vbw = Number(array[2]),
             vbh = Number(array[3])
             if (this.rto.getAttribute('active') === 'true'){
-            
                 this.rto.setAttribute('active','false')
                 this.rto.innerHTML = this.rtoInactiveHTML
             }
@@ -524,66 +470,22 @@ export class Preview extends EventEmitterClass {
             ...preset
         }
     }
-    setIconPreset(preset){
-        this.iconPreset = {
-            ...defaultSetting,
-            ...preset
-        }
-    }
-    togglePresetType(){
-        if (this.presetType === 'icon')
-            this.presetType = 'collection'
-        else if (this.presetType === 'collection')
-            this.presetType = 'icon'
-        else {
-            console.warn('error setting preset type fallback = [icon]')
-            this.presetType = 'icon'
-        }
-    }
-    setPresetMode(mode){
-        if (mode === 'icon')
-            this.presetType = 'icon'
-        else if (mode === 'collection')
-            this.presetType = 'collection'
-        else {
-            console.warn('error setting preset type fallback = [icon]')
-            this.presetType = 'icon'
-        }
-    }
-
     handlePreset(icon){
-        // HANDLING PRESET
-        this.setIconPreset(icon.preset)
-        if (icon?.preset && this.presetType === 'icon') {
-            this.applySetting(icon.preset)
-            console.log('using icon preset... presetType: ', this.presetType)
-        } else {
-            this.applySetting(this.collectionPreset)
-            console.log('using collection preset... presetType: ',this.presetType)
-        }
+        (icon?.preset && this.presetType === 'icon') 
+          ? this.applySetting(icon.preset)
+          : this.applySetting(this.collectionPreset)
         this.original = icon.settings.original
-
     }
     update(icon) {
-        if (!icon) {
-          this.setLoading();
-          return;
-        }
+        if (!icon) return this.setLoading();
         this.icon = icon.save();
-        
-        let { name , collection , markup , viewBox , rotation, isBenched, isFavorite, height, width, colors } = icon
-        if (isFavorite) $('.btn-favit').classList.add('icon-is-favorite')
-        else $('.btn-favit').classList.remove('icon-is-favorite')
-        if (isBenched) $('.btn-bench').classList.add('icon-is-benched')
-        else $('.btn-bench').classList.remove('icon-is-benched')
-        this.updateDisplayElement(colors.marked)
+        let { name , collection , rotation } = icon
+        this.updateDisplayElement(icon.markup)
         this.handlePreset(icon)
         this.updateCategoryField(collection)
         this.updateNameField(name)
         this.updatePreviews()
-        this.zoomSlider.setPercent(50)
         if (rotation) this.rotationSlider.setDegrees(rotation)
-        else this.rotationSlider.setDegrees(0)
         this.notify('icon updated',icon,this.targetElement)
     }
 

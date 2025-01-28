@@ -1,11 +1,39 @@
+// FILE TO MINIMIZE IMPORTS
+const eventMaps = {
+  enter(event){
+    return event.keyCode == 13 || event.which == 13 || event.key == 'Enter'
+  },
+  backspace(event){
+    return event.keyCode == 8;
+  },
+  leftClick(event){
+    return event.button === 0;
+  },
+  rightClick(event){
+    return event.button === 2;
+  },
+  dblclick(event = e){
+    return event.detail === 2;
+  },
+  cosm(event,parent){
+    return event.target.closest(parent)
+  },
+  clicked(event,elementClass){
+    return event.target.closest(elementClass)
+  },
+  isNumber(event){
+    var charCode = event.which ? event.which : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) return false;
+    return true;
+  },
+
+}
 class Cursor {
     // Allows extends a basic array allowing easy access to the next and previous elements in a list
     // according to a pointer in memory
-  
     // EXPECTS INDEXES TO START FROM 1 INSTEAD OF ZERO
     // INDEX OF 0 == "FIRST"
     // INDEX OF length-1 = "LAST"
-  
     // expects callers to add one when using array indexes
     constructor(array, startingIndex = 1) {
       if (!Array.isArray(array))
@@ -132,7 +160,6 @@ class Cursor {
       if (!isNaN(num)) {
         let n = num;
         let suff;
-  
         if (num > 20) {
           // convert to string
           let d = num.toString();
@@ -147,13 +174,11 @@ class Cursor {
           : n == 3
           ? (suff = "rd")
           : (suff = "th");
-  
         return num.toString() + suff;
       }
       return `this function expects numbers`;
     }
   }
-  
 class Bucket {
     constructor() {
       this.items = new Map();
@@ -177,9 +202,7 @@ class Bucket {
     push(key, value) {
       if (!key) return `item not pushed bucket... invalid key`;
       if (!value) return `item not pushed to bucket... invalid value`;
-      if (this.items.has(key))
-        return `item not pushed to bucket... duplicate key`;
-  
+      if (this.items.has(key)) return `item not pushed to bucket... duplicate key`;
       this.items.set(key, value);
       return "success";
     }
@@ -202,97 +225,74 @@ class Bucket {
   
     spread(map) {
       let duplicates = this.compare(map);
-  
       if (duplicates.length > 0) {
-        console.error(
-          `${duplicates.length} duplicates found in the keyset. No items were added`,
-          duplicates
-        );
+        console.error(`${duplicates.length} duplicates found in the keyset. No items were added`,duplicates);
         return duplicates;
       }
-  
       map.forEach((value, key) => this.push(key, value));
       return this;
     }
-  
     compare(map) {
       return Array.from(map.keys()).filter(this.has);
     }
-  
     wipe() {
       this.items = new Map();
     }
 }
-  
 class Collection {
   constructor() {
     this.bucket = new Bucket();
     this.cursor = new Cursor([]);
     this.indexes = {};
   }
-  
     get size() {
       return this.items.size;
     }
-  
     get keys() {
       return this.bucket.keys;
     }
-  
     get values() {
       return this.bucket.values;
     }
-  
     get items() {
       return this.bucket.items;
     }
-  
     use(key) {
       return this.bucket.use(key);
     }
-  
     useValue(key) {
       return this.bucket.useValue(key);
     }
-  
     add(key, value) {
       let status = this.bucket.push(key, value);
       if (status === "success") this.cursor.addOne(key);
       return status;
     }
-  
     spread(map) {
       let status = this.bucket.spread(map);
       if (status) this.cursor.spread(Array.from(map.keys()));
       return status;
     }
-  
     has(key) {
       return this.bucket.has(key);
     }
-  
     remove(key) {
       let status = this.bucket.pluck(key);
       if (status) this.cursor.pluck(this.items.useKeys().indexOf(key));
     }
-  
     drop() {
       this.items = new Bucket();
       this.cursor = new Cursor([]);
     }
   }
-  
-  // -------------------------
-  // OBSERVABLES
-  // -----------------------------------------
+
   function signal(value) {
     let subcriptions = new Set();
     let subscriber = null;
     let Signal = {
       get value() {
-        if(subscriber) {
+        if(subscriber) 
           subcriptions.add(subscriber);
-        }
         return value
       },
       set value(updated) {
@@ -307,21 +307,15 @@ class Collection {
       fn();
       subscriber = null;
     }
-    useEffect(() => {
-      console.log('effect triggered current value', Signal.value)
-    })
+    useEffect(() => console.log('effect triggered current value', Signal.value))
     return [ useEffect, Signal ]
   }
 
   function derivedSignal(fn) {
     const [effect,derived] = signal();
-    effect(() => {
-
-      derived.value = fn();
-    })
+    effect(() => derived.value = fn())
     return derived;
   }
-
    class Observer {
     constructor(target) {
       this.Target = target;
@@ -330,12 +324,10 @@ class Collection {
     }
   
     subscribe(...fns) {
-      fns.forEach((fn) => {
-        if (this.Target) fn = fn.bind(this.Target);
-  
-        this.subscribers.add(fn);
-      });
-  
+      fns.forEach((fn) => 
+        this.Target 
+          ? fn = fn.bind(this.Target) 
+          : this.subscribers.add(fn))
       return this;
     }
   
@@ -354,16 +346,11 @@ class Collection {
     }
   
     notify(...values) {
-      for (const fn of this.priorities) {
-        if (fn)
-          fn(...values);
-      }
-      for (const fn of this.subscribers) {
-        if (fn)
-          fn(...values);
-      }
+      for (const fn of this.priorities)
+        if (fn) fn(...values);
+      for (const fn of this.subscribers)
+        if (fn) fn(...values);
     }
-  
     get isEmpty() {
       return this.subscribers.size === 0;
     }
@@ -372,90 +359,12 @@ class Collection {
       return this.priorities.size > 0;
     }
   }
-  
-  //  class Observable {
-  //   constructor(target) {
-  //     this.observer = new Observer(target);
-  //   }
-
-
-  //   set() {
-  //     this.notify();
-  //     console.log('observer triggered',console.log(this))
-  //   }
-  
-  //   subscribe(...fns) {
-  //     this.observer.subscribe(...fns);
-  //     return this;
-  //   }
-  
-  //   unsubscribe(fn) {
-  //     this.observer.unsubscribe(fn);
-  //     return this;
-  //   }
-  
-  //   prioritize(fn) {
-  //     this.observer.prioritize(fn);
-  //     return this;
-  //   }
-  
-  //   unprioritize(fn) {
-  //     this.observer.unprioritize(fn);
-  //     return this;
-  //   }
-  
-  //   notify(...values) {
-  //     this.observer.notify(...values);
-  //     return this;
-  //   }
-  
-  //   get isEmpty() {
-  //     return this.observer.isEmpty;
-  //   }
-  
-  //   get hasPriorities() {
-  //     return this.observer.hasPriorities;
-  //   }
-  
-  //   get listeners() {
-  //     return this.observer.listeners;
-  //   }
-  //   get priorities() {
-  //     return this.observer.priorities;
-  //   }
-  
-  //   static create(target) {
-  //     return new Observable(target);
-  //   }
-  
-  //   static observe(obj) {
-  //     if (obj != null) {
-  //       Object.assign(obj, {
-  //         subscribe: this.subscribe.bind(obj),
-  //         unsubscribe: this.unsubscribe.bind(obj),
-  //         prioritize: this.prioritize.bind(obj),
-  //         unprioritize: this.unprioritize.bind(obj),
-  //         notify: this.notify.bind(obj),
-  //         subscribe: this.subscribe.bind(obj),
-  //         get isEmpty() {
-  //           return this.observer.isEmpty;
-  //         },
-  //         get hasPriorities() {
-  //           return this.observer.hasPriorities;
-  //         },
-  //       });
-  //       return obj;
-  //     }
-  //   }
-  // }
-  
   class EventEmitter {
     constructor(events) {
       this.events = events || new Map();
     }
     on(event, ...listeners) {
       if (!this.events.has(event)) this.events.set(event, new Observable());
-  
       listeners.forEach((listener) => {
         this.events.get(event).subscribe(listener);
       });
@@ -489,56 +398,11 @@ class Collection {
       return object;
     }
   }
-  
-  //  class Task {
-  //   constructor(promiseFn) {
-  //     this.state = undefined; // [undefined || pending || ready ]
-  //     this.result = undefined;
-  //     this.task = promiseFn;
-  //     this.emitter = new EventEmitter();
-  //   }
-  
-  //   async run(...args) {
-  //     try {
-  //       this.state = "pending";
-  //       this.emit("pending");
-  //       this.result = await promiseFn.call(...args);
-  //       this.state = "ready";
-  //       this.emit("ready", this.result);
-  //     } catch (error) {
-  //       console.error(error);
-  //       this.state = "error";
-  //       this.result = error;
-  //       this.emit("error", error);
-  //     }
-  //   }
-  
-  //   register(event, listener) {
-  //     this.emitter.on(event, listener);
-  //     return this;
-  //   }
-  
-  //   remove(event, listener) {
-  //     this.emitter.off(event, listener);
-  //     return this;
-  //   }
-  
-  //   emit(event, ...args) {
-  //     this.emitter.emit(event, ...args);
-  //     return this;
-  //   }
-  // }
-  
-  // -------------------------
-  // COMPONENTS
-  // -----------------------------------------
-  
    class MenuList {
     constructor(listOfNames, classList, dataset) {
       this.element = document.createElement("ul");
       this.element.classList.add(...classList);
       this.items = [];
-  
       listOfNames.forEach((name) => this.addItem(name));
     }
   
@@ -548,10 +412,8 @@ class Collection {
   
     addItem(name) {
       const newLink = new MenuListItem(name);
-      // console.log('adding menu item ',name, ' to ', this);
       this.element.append(newLink.element);
       this.items.push(newLink);
-  
       return newLink;
     }
   
@@ -588,12 +450,9 @@ class Collection {
       this.name = name;
       this.element = document.createElement("li");
       this.content = document.createElement("span");
-  
       this.element.append(this.content);
-  
       this.element.classList.add(...classNames);
       this.content.classList.add(...contentClassNames);
-  
       this.element.dataset.tab = name;
       this.content.textContent = name;
     }
@@ -623,13 +482,8 @@ class Collection {
       // console.log(status,this.status)
       if (status == "inactive") this.close(event);
       else if (status == "active") this.open(event);
-      else
-        console.log(
-          "active and inactive are the only two states needed here",
-          status
-        );
+      else console.log("active and inactive are the only two states needed here",status);
     }
-  
     get state() {
       return this.status;
     }
@@ -708,7 +562,6 @@ class Collection {
       return this;
     }
   }
-  
    class DynamicModal extends Modal {
     // adds functionality to handle a modals loader/suspense component
     // open/close observers will prioritize async fetching/showing data
@@ -725,13 +578,10 @@ class Collection {
       }
     ) {
       super(element);
-  
       this.type = config.type || "lazy";
       this.endpoint = config.endpoint;
-  
       this.suspense = `<div class="loading-container"><span class="loader"></span></div>`;
       this.errRes = `<div>Error Fetching Resources</div>`;
-  
       this.handleData = config.dataHandler;
       this.handleRequest = config.requestHandler;
       this.handleResponse = config.responseHandler;
@@ -739,14 +589,10 @@ class Collection {
       this.ready = false;
       this.pending = false;
       this.hasChanged = false;
-  
       this.initial = true;
-  
       this.value = "";
-  
       // super
       this.openTimeLine.prioritize(this.checkForUpdatesToRender.bind(this));
-  
       if (config.type === "eager") this.update();
     }
   
@@ -767,9 +613,7 @@ class Collection {
       this.value = this.suspense;
       this.setPending();
       this.renderSuspense();
-  
       const res = await this.handleRequest();
-
       if (res) {
         console.log(res)
         this.renderComponent(res);
@@ -815,7 +659,6 @@ class Collection {
         return false;
       }
     }
-  
     renderSuspense() {
       this.element.innerHTML = this.suspense;
     }
@@ -824,13 +667,10 @@ class Collection {
     }
     renderComponent(data) {
       this.element.innerHTML = this.handleData(data);
-      if (this.handleHydration) {
-        // console.log('hydrating component')
+      if (this.handleHydration)
         this.handleHydration(this.element);
-      }
     }
   }
-  
   class Tabber {
       contructor() {
           this.current = undefined
@@ -844,12 +684,10 @@ class Collection {
               this.current = value
           }
       }
-
       closeActive = (event) => {
           if (this.current !== undefined && this.current.state !== 'inactive') 
               this.current.close(event);
       }
-
   }
 
   class Toggler {
@@ -857,44 +695,39 @@ class Collection {
       this.state = state || "inactive";
       this.modal = modal;
       this.button = button;
-      // button.addEventListener('click', this.toggle.bind(this))
     }
     enable() {
       this.modal.setAttribute("active", "true");
       this.button.classList.add("active");
       this.state = "active";
+      return this.state;
     }
     disable() {
       this.modal.setAttribute("active", "false");
       this.button.classList.remove("active");
       this.state = "inactive";
+      return this.state;
     }
     toggle() {
-      if (this.state === "active") {
-        this.disable();
-        return;
-      }
-      if (this.state === "inactive") {
-        this.enable();
-        return;
-      }
+      if (this.state === "active") return this.disable()
+      if (this.state === "inactive") return this.enable()
     }
   }
-  
    class Slider {
     constructor(
         targetElement, 
-        { onMouseUp, onMouseDown, onMouseMove }, 
-        orientation = 'horizontal') 
+        { onMouseUp, onMouseDown, onMouseMove, onReset, start = 50 }, 
+        orientation = 'horizontal',
+      ) 
     {
-
       const self = this;
       this.orientation = orientation;
-
+      this.start = start;
       this.container = targetElement;
+      console.log(targetElement)
       this.track = targetElement.querySelector(".slider-track") || targetElement;
       this.handle = targetElement.querySelector(".slider-handle");
-  
+      this.label = targetElement.querySelector('.label')
       this.onMouseDown = onMouseDown ||
         function (state) {
           console.log("mouse down", state);
@@ -909,9 +742,13 @@ class Collection {
         if(onMouseMove !== undefined && typeof onMouseMove === 'function')
           requestAnimationFrame(onMouseMove.bind(this, ...args));
         else console.log("mouse moving", state);
-          ;
     }
 
+    this.onReset = function(state){
+      if(onReset !== undefined && typeof onReset === 'function')
+        onReset(state)
+      else console.log('slider reset')
+    }
   
       this.coords = {
         get max() {
@@ -948,291 +785,194 @@ class Collection {
           return self.handle.getBoundingClientRect();
         },
         clamp(val) {
-
           let max = this.max;
           let min = this.min;
-  
-          if (isNaN(val))
-            throw new Error(
-              `clamp function expects a number...you passed ${val}`
-            );
-  
+          if (isNaN(val)) throw new Error(`clamp function expects a number...you passed ${val}`);
           if (val >= max) return max;
           else if (val <= min) return min;
           else return val;
-  
         },
       };
-  
       this.MAX = {
         px: this.coords.track.width,
         pct: 100,
         deg: 360,
       };
-  
       this.MIN = {
         px: 0,
         pct: 0,
         deg: 0,
       };
-  
       this.state = {
         px: undefined,
         deg: undefined,
         pct: undefined,
       };
-  
       this.handle.addEventListener("mousedown", this.handleDrag);
       this.track.addEventListener("click", this.handleClick);
+      if (this.label) this.label.addEventListener("dblclick", this.reset)
+      this.setPercent(this.start)
     }
-  
-
-  
     update = (event) => {
         return this.setHandle(this.getDistanceTraveled(event));
     }
-  
     setHandle = (distanceTraveled) => {
-
       let clamped = this.coords.clamp(distanceTraveled);
-  
       this.handle.style.transform = `${this.orientation == 'horizontal' ? 'translateX(' : 'translateY('}${clamped - this.coords.handleMidpoint}px)`;
-
-      if (distanceTraveled <= 0)
-        return this.MIN;
+      if (distanceTraveled <= 0) return this.MIN;
       if ( (this.orientation == 'horizontal' ? distanceTraveled >= this.coords.track.width : distanceTraveled >= this.coords.track.height))
         return this.MAX;
-  
       let distance = Math.trunc(distanceTraveled);
       let distanceInPercent = Math.trunc((distanceTraveled / (this.orientation == 'horizontal' ? this.coords.track.width : this.coords.track.height)) * 100);
       let distanceInDegrees = Math.trunc((distanceTraveled / (this.orientation == 'horizontal' ? this.coords.track.width : this.coords.track.height)) * 360);
-  
       let values = {
         px: distance,
         pct: distanceInPercent,
         deg: distanceInDegrees,
       };
-  
       return values;
     }
-
     handleDrag = (event) => {
-
         event.stopImmediatePropagation();
-    
         let initialMouseUpIfAny = document.onmouseup;
         let controller = new AbortController();
         let state;
-  
         const update = event => {
           state = this.update(event);
           this.onMouseMove(state);
         }
-    
         const cleanupListener = () => {
-          document.removeEventListener("mousemove", update, {
-              capture: true,
-              signal: controller.signal,
-            });
-  
+          document.removeEventListener("mousemove", update, { capture: true, signal: controller.signal});
           document.onmouseup = initialMouseUpIfAny;
         }
-  
         const abort = () => {
           controller.abort();
           this.onMouseUp(state);
           nextTick(cleanupListener);
         }
-  
-        document.addEventListener("mousemove", update, {
-          capture: true,
-          signal: controller.signal,
-        });
-    
+        document.addEventListener("mousemove", update, { capture: true, signal: controller.signal,});
         document.onmouseup = abort;
-    
     }
-  
     handleClick = (event) => {
-
         if (event.target == this.handle) return;
-    
         let state = this.update(event);
         this.onMouseDown(state);
         this.onMouseUp(state);
-
     }
     reset = () => {
-      return this.update(0);
+      let state = this.setFrom('pct',this.start)
+      console.log(state)
+      return this.onReset(state)
     }
-  
     disable = () => {
       this.handle.removeEventListener( "mousedown", this.handleDrag);
       this.track.removeEventListener( "mousedown", this.handleClick);
     }
-  
     getDistanceTraveled = (event) => {
         return this.orientation == 'horizontal' ? event.clientX - this.coords.trackLeft : event.clientY - this.coords.trackLeft;
     }
-  
     convertValue = (type, value) => {
-    
       let max = this.orientation == 'horizontal' ? this.coords.track.width : this.coords.track.height;
-
-  
       if (type === "pct") return max * (value / 100);
       if (type === "deg") return max * (value / 360);
       if (type === undefined) {
         console.warn('you passed an invalid type to the sliders conver function',type,value);
         return undefined; 
       }
-
         console.error('something went wrong in the convert value function',type,value);
         return;
     }
-  
     setFrom = (type, value) => {
       return this.setHandle(this.convertValue(type, value));
     }
-  
     setDegrees = (value) => {
       return this.setFrom("deg", value);
     }
-  
     setPercent = (value) => {
       return this.setFrom("pct", value);
     }
-  
     setPixels = (value) => {
       return this.setHandle(value);
     }
   }
-  
    class MouseTrackingSlider {
-    constructor(targetElement, { onMouseMove, onMouseUp, onMouseDown, reset }) {
-
+    constructor(targetElement, { onMouseMove, onMouseUp, onMouseDown, onDblClick, reset }) {
       this.targetElement = targetElement;
-
       this.initialPosition_x = null;
       this.initialPosition_y = null;
-  
       this.currentPosition_x = null;
       this.currentPosition_y = null;
-  
       this.onMouseMove = onMouseMove || null
+      this.onDoubleClick = (event) => {
+        event.stopImmediatePropagation()
+        console.log(targetElement, "double click detected")
+        if (onDblClick) onDblClick(event)
+      }
       this.onMouseDown = onMouseDown ||
         function () {
             console.log(targetElement, "triggered mousetracker mouseDown");
         };
-
       this.onMouseUp = onMouseUp ||
         function () {
           console.log(targetElement, "triggered mousetracker mouseUp");
         };
-
        this.reset = reset || 
         function() {
             console.log('reseting mousetracker')
         }
-
       this.targetElement.addEventListener("mousedown", this.track);
       this.targetElement.addEventListener("click", this.handleClick);
-
-    //   if (this.reset)
-      //too slow
-        // targetElement.addEventListener('dblclick',(event) => this.reset({event,targetElement}))
-    
     }
-
     handleDrag = (event) =>{
         let distanceFromInitialPosition_x = event.clientX - this.initialPosition_x;
         let distanceFromInitialPosition_y = event.clientY - this.initialPosition_y;
-    
         let debuffed_y = this.currentPosition_x = Math.floor(distanceFromInitialPosition_x / 3);
         let debuffed_x = this.currentPosition_y = Math.floor(distanceFromInitialPosition_y / 3);
-    
         this.onMouseMove({ x: Number(debuffed_y), y: Number(debuffed_x), event });
-
       }
-    
-  
     track = (event) => {
-
-      if (event.button !== 0) return;
-  
-      if (!this.initialPosition_x) this.initialPosition_x = event.pageX;
-  
-      if (!this.initialPosition_y) this.initialPosition_y = event.pageY;
-  
       let controller = new AbortController();
-  
+      if (event.button !== 0) return;
+      if (event.detail === 2) return this.onDoubleClick(event);
+      if (!this.initialPosition_x) this.initialPosition_x = event.pageX;
+      if (!this.initialPosition_y) this.initialPosition_y = event.pageY;
       this.handleClick(event)
-
-      document.addEventListener("mousemove", this.handleDrag, { 
-        signal: controller.signal },
-        true
-      );
-  
+      document.addEventListener("mousemove", this.handleDrag, { signal: controller.signal },true);
       document.addEventListener("mouseup", () => {
-
         controller.abort();
         this.initialPosition_x = null;
         this.initialPosition_y = null;
         event.stopImmediatePropagation();
         if ( this.onMouseUp ) this.onMouseUp({event, x: Number(this.xPos), y: Number(this.yPos)});
-
-
       });
     }
-  
-
     handleClick = (event) => {
-
-      console.log('clicky')
       let xZeroed = event.clientX - this.initialPosition_x;
       let yZeroed = event.clientY - this.initialPosition_x;
-
       // divide by 3 for slower realistic drag effect?
-
       let vx = this.currentPosition_x = Math.floor(xZeroed / 3);
       let vy = this.currentPosition_y = Math.floor(yZeroed / 3);
-
       if (this.onMouseDown) this.onMouseDown({ x: Number(vx), y: Number(vy), event })
     }
   }
-  
-  // -------------------------
-  // DATE & TIME
-  // -----------------------------------------
-  
    class DateTime {
     constructor(dateObject) {}
-  
     static mns = 1 / 1000;
     static snm = 1 / 60;
     static mnh = 1 / 60;
     static hnd = 1 / 24;
     static dny = 1 / 365;
     static mny = 1 / 12;
-  
     static msns = 1000;
     static msnMinute = 60000;
     static msnHour = 3600000;
     static msnDay = 86400000;
     static msnYear = DateTime.msnDay * 365;
-  
-    // static thisYear() {
-    //     let d = new Date()
-    //     console.log(d.getFullYear())
-    // }
-  
     static daysIn(month) {
       const abbrv = month.slice(0, 3);
-  
       if (DateTime.monthMap[month]) return DateTime.monthMap[month];
       else if (DateTime.monthMap[abbrv]) return DateTime.monthMap[abbrv];
     }
-  
     static dayMap = {
       0: "Sunday",
       1: "Monday",
@@ -1242,17 +982,8 @@ class Collection {
       5: "Friday",
       6: "Saturday",
       7: null,
-  
       toArray() {
-        const arr = [
-          "sunday",
-          "monday",
-          "tuesday",
-          "wednesday",
-          "thursday",
-          "friday",
-          "saturday",
-        ];
+        const arr = ["sunday","monday","tuesday","wednesday","thursday","friday","saturday"];
         arr.abbrv = arr.abbreviate = () => arr.map(slice.bind(months, [0, 3]));
         return arr;
       },
@@ -1283,50 +1014,15 @@ class Collection {
     }
   
     static get months() {
-      const arr = [
-        "january",
-        "february",
-        "march",
-        "april",
-        "may",
-        "june",
-        "july",
-        "august",
-        "september",
-        "october",
-        "november",
-        "december",
-      ];
+      const arr = ["january","february","march","april","may","june","july","august","september","october","november","december",];
       arr.abbrv = arr.abbreviate = () => arr.map(slice.bind(arr, [0, 3]));
       return arr;
     }
   
     static get clock() {
       const curDate = new Date();
-      const days = [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday",
-      ];
-      const months = [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-      ];
+      const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+      const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
       const hours = curDate.getHours();
       const minutes = curDate.getMinutes();
       const seconds = curDate.getSeconds();
@@ -1335,28 +1031,18 @@ class Collection {
         dow: days[curDate.getDay()],
         month: months[curDate.getMonth()],
         date: curDate.getDate(),
-  
         hour: hours <= 12 ? hours : hours - 12,
         minute: minutes,
         second: seconds,
         miliseconds: curDate.getMilliseconds(),
         context,
-  
         time: {
           hour: hours <= 12 ? hours.toString() : (hours - 12).toString(),
-          minute:
-            minutes >= 10
-              ? minutes.toString()
-              : minutes.toString().padStart(2, "0"),
-          second:
-            seconds >= 10
-              ? seconds.toString()
-              : seconds.toString().padStart(2, "0"),
+          minute: minutes >= 10? minutes.toString() : minutes.toString().padStart(2, "0"),
+          second: seconds >= 10 ? seconds.toString() : seconds.toString().padStart(2, "0"),
           context,
           get string() {
-            return (
-              [this.hour, this.minute, this.second].join(":") + " " + context
-            );
+            return ([this.hour, this.minute, this.second].join(":") + " " + context);
           },
           get default() {
             return [this.hour, this.minute].join(":") + " " + context;
@@ -1377,7 +1063,6 @@ class Collection {
       west: undefined,
       central: undefined,
       leap: DateTime.thisYearIsLeap(),
-  
       dayMap: {
         0: "Sunday",
         1: "Monday",
@@ -1388,7 +1073,6 @@ class Collection {
         6: "Saturday",
         7: null,
       },
-  
       get monthMap() {
         return {
           January: 31,
@@ -1396,7 +1080,6 @@ class Collection {
             if (DateTime.date.leap) return 29;
             return 28;
           },
-  
           March: 31,
           April: 30,
           May: 31,
@@ -1409,50 +1092,10 @@ class Collection {
           December: 31,
         };
       },
-  
-      days: [
-        "Sunday",
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        null,
-      ],
-  
+      days: ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday",null],
       daysABRV: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", null],
-  
-      months: [
-        "January",
-        "February",
-        "March",
-        "April",
-        "May",
-        "June",
-        "July",
-        "August",
-        "September",
-        "October",
-        "November",
-        "December",
-        null,
-      ],
-  
-      monthsABRV: [
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sept",
-        "Nov",
-        "Dec",
-        null,
-      ],
+      months: ["January","February","March","April","May","June","July","August","September","October","November","December",null],
+      monthsABRV: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sept","Nov","Dec",null],
     };
   
     static now() {
@@ -1476,10 +1119,9 @@ class Collection {
     }
   
     static weekOf(stamp) {}
-  
     static monthOf(stamp) {}
-  
     static yearOf(stamp) {}
+    
     static today() {
       return DateTime.date.days[new Date().getDay()];
     }
@@ -1588,7 +1230,6 @@ class Collection {
       const then = toMinutesFloat(stamp).minutes;
       const minutes = Math.floor(now - then);
       const seconds = Math.floor((now - then - Math.floor(now - then)) / snm);
-  
       const ago = {
         minutes: minutes,
         seconds: seconds,
@@ -1596,166 +1237,113 @@ class Collection {
       };
       return ago;
     }
-  
+
     static toHours(milliseconds) {
       let minutes = toMinutes(milliseconds);
       let hours = Math.floor(minutes / 60);
       return hours;
     }
-  
+
     static toHoursFloat(milliseconds) {
       let minutes = toMinutesFloat(milliseconds);
       let hours = minutes / 60;
       return hours;
     }
-  
+
     static toDays(milliseconds) {
       let hours = toHours(milliseconds);
       let days = Math.floor(hours / 24);
       return days;
     }
-  
+
     static toDaysFloat(milliseconds) {
       let hours = toHoursFloat(milliseconds);
       let days = hours / 24;
       return days;
     }
-  
+
     static toMonths(milliseconds) {}
-  
     static toMonthsFloat(milliseconds) {}
-  
+
     static toYears(milliseconds) {
       let days = toDays(milliseconds);
       let years = Math.floor(days / 365);
       return years;
     }
-  
-    // const minutesInYear = msnYear;
-  
+
     static from(since, compare = Date.now()) {
-      // since Date , compareMILISECONDS
-      const now = compare;
-      const then = since.getTime();
-      const nowDate = new Date(compare);
-  
-      console.log(now, then);
-  
-      const monthsInYear = 1 / 12;
-      const msnYear = DateTime.msnDay * 365;
-      const msInWeek = 604800000;
-      const msInDay = 86400000;
-      const msInHour = 3600000;
-      const msInMin = 60000;
-      const msInSec = 1000;
-  
-      const minutesInHour = 60;
-      const secondsInMinute = 60;
-  
-      /* TODO
-  
-              DAYS ONLY WORKS IF IN SAME MONTH
-              CALCULATE MONTHS SINCE AND AMOUNT OF DAYS BETWEEN EACH MONTH
-              THEN GET DAYS
-  
-              MONTHS ALGO IS WRONG TOO!
-              WEEKS ALGO IS WRONG!
-          */
-  
-      const monthOf = DateTime.months[since.getMonth()];
-      const prevMonthOf = DateTime.months[nowDate.getMonth()];
-  
-      const daysIn = DateTime.monthMap[monthOf];
-      const prevDaysIn = DateTime.monthMap[prevMonthOf];
-  
-      const dayOf = since.getDate();
-      const prevDayOf = nowDate.getDate();
-  
-      // const days = daysIn - dayOf;
-  
-      const days = Math.abs(dayOf - prevDayOf);
-  
-      const leapSince = DateTime.getLeaps(
-        since.getFullYear(),
-        new Date(now).getFullYear()
-      );
-  
-      let msAgo = now - then;
-      let context = "ago";
-      if (msAgo < 0) {
-        context = "til";
-      }
-  
-      msAgo = Math.abs(msAgo);
-      console.log(msAgo);
-  
-      const years = msAgo >= msnYear ? msAgo / msnYear : 0;
-  
-      const monthsAgo = DateTime.getRemainder(years);
-      // const months = monthsAgo / monthsInYear;
-      // NULL SEE TODO
-  
-      const weeksAgo = msAgo >= msInWeek ? Math.floor(msAgo / msInWeek) : 0;
-      // const weeks = monthsAgo / weeksInYear;
-      // NULL SEE TODO
-  
-      const daysAgo =
-        msAgo >= msInDay ? Math.floor(msAgo / msInDay) + leapSince : 0;
-      // NULL SEE TODO
-  
-      const hoursAgo = msAgo >= msInHour ? Math.floor(msAgo / msInHour) : 0;
-      const hours = hoursAgo;
-  
-      const minutesAgo = msAgo >= msInMin ? Math.floor(msAgo / msInMin) : 0;
-      const minutes = Math.floor(
-        DateTime.getRemainder(msAgo / msInHour) * minutesInHour
-      );
-  
-      const secondsAgo = msAgo >= msInSec ? Math.floor(msAgo / msInSec) : 0;
-      const seconds = Math.floor(
-        DateTime.getRemainder(msAgo / msInMin) * secondsInMinute
-      );
-  
-      const ago = {
-        since: new Date(now),
-        then: new Date(then),
-  
-        years: Math.floor(years),
-        // months: Math.floor(months),
-        days: days,
-  
-        yearsAgo: years,
-        weeksAgo: weeksAgo,
-        daysAgo: daysAgo,
-        hoursAgo: hoursAgo,
-        hours,
-        minutesAgo: minutesAgo,
-        minutes,
-  
-        secondsAgo: secondsAgo,
-        seconds,
-  
-        milisecondsAgo: msAgo,
-        // milliseconds: msAgo,
-  
-        leaps: leapSince,
-        string: undefined,
-      };
-  
+      console.warn('months ago algorithm is WRONG... Weeks ago too')
+      const now = compare,
+            then = since.getTime(),
+            nowDate = new Date(compare),
+            monthsInYear = 1 / 12,
+            msnYear = DateTime.msnDay * 365,
+            msInWeek = 604800000,
+            msInDay = 86400000,
+            msInHour = 3600000,
+            msInMin = 60000,
+            msInSec = 1000,
+            minutesInHour = 60,
+            secondsInMinute = 60,
+            monthOf = DateTime.months[since.getMonth()],
+            prevMonthOf = DateTime.months[nowDate.getMonth()],
+            daysIn = DateTime.monthMap[monthOf],
+            prevDaysIn = DateTime.monthMap[prevMonthOf],
+            dayOf = since.getDate(),
+            prevDayOf = nowDate.getDate(),
+            days = Math.abs(dayOf - prevDayOf),
+            leapSince = DateTime.getLeaps(since.getFullYear(), new Date(now).getFullYear());
+      let msAgo = now - then, 
+          context = msAgo < 0 ? "til" : "ago";
+      msAgo = Math.abs(msAgo)
+
+      const years = msAgo >= msnYear ? msAgo / msnYear : 0,
+            monthsAgo = DateTime.getRemainder(years),
+            months = monthsAgo / monthsInYear,
+            weeksAgo = msAgo >= msInWeek ? Math.floor(msAgo / msInWeek) : 0,
+            weeks = monthsAgo / weeksInYear,
+            daysAgo = msAgo >= msInDay ? Math.floor(msAgo / msInDay) + leapSince : 0,
+            hoursAgo = msAgo >= msInHour ? Math.floor(msAgo / msInHour) : 0,
+            hours = hoursAgo,
+            minutesAgo = msAgo >= msInMin ? Math.floor(msAgo / msInMin) : 0,
+            minutes = Math.floor(DateTime.getRemainder(msAgo / msInHour) * minutesInHour),
+            secondsAgo = msAgo >= msInSec ? Math.floor(msAgo / msInSec) : 0,
+            seconds = Math.floor(DateTime.getRemainder(msAgo / msInMin) * secondsInMinute),
+            ago = {
+              since: new Date(now),
+              then: new Date(then),
+              years: Math.floor(years),
+              months: Math.floor(months),
+              days: days,
+              yearsAgo: years,
+              weeksAgo: weeksAgo,
+              daysAgo: daysAgo,
+              hoursAgo: hoursAgo,
+              hours,
+              minutesAgo: minutesAgo,
+              minutes,
+              secondsAgo: secondsAgo,
+              seconds,
+              milisecondsAgo: msAgo,
+              // milliseconds: msAgo,
+              leaps: leapSince,
+              string: undefined,
+            };
       if (ago.yearsAgo >= 1) {
         if (ago.months >= 1)
           ago.string = `${ago.years} Years, ${ago.months} Months ${context}`;
-        else if (ago.months < 1) ago.string = `${ago.years} Years ${context}`;
-      } else if (ago.weeksAgo < 4 && ago.weeksAgo > 2) {
-        ago.string = `${ago.weeksAgo} Weeks ${context}`;
-      } else if (ago.daysAgo < 14 && ago.daysAgo > 2) {
-        ago.string = `${ago.daysAgo} Days ${context}`;
-      } else if (ago.hoursAgo <= 48 && ago.hoursAgo >= 1) {
-        if (ago.hoursAgo < 2 && ago.hoursAgo >= 1) {
-          ago.string = `${ago.hoursAgo} Hour ${context}`;
-        } else {
-          ago.string = `${ago.hoursAgo} Hours ${context}`;
-        }
+        else if (ago.months < 1) 
+          ago.string = `${ago.years} Years ${context}`;
+        else if (ago.weeksAgo < 4 && ago.weeksAgo > 2)
+          ago.string = `${ago.weeksAgo} Weeks ${context}`;
+        else if (ago.daysAgo < 14 && ago.daysAgo > 2)
+          ago.string = `${ago.daysAgo} Days ${context}`;
+        else if (ago.hoursAgo <= 48 && ago.hoursAgo >= 1) {
+          if (ago.hoursAgo < 2 && ago.hoursAgo >= 1) {
+            ago.string = `${ago.hoursAgo} Hour ${context}`;
+          } else {
+            ago.string = `${ago.hoursAgo} Hours ${context}`;
+          }
       } else if (ago.minutesAgo < 59 && ago.minutesAgo > 1) {
         ago.string = `${ago.minutesAgo} Minutes ${context}`;
       } else if (ago.secondsAgo < 60 && ago.secondsAgo > 30) {
@@ -1765,92 +1353,65 @@ class Collection {
         ago.time = "Just Now";
         ago["context"] = context;
         return ago;
-      } else {
-        return ago;
-      }
+      } else return ago;
       ago.time = ago.string.split(" ")[0];
       ago.suffix = ago.string.split(" ")[1];
       ago["context"] = context;
-  
       return ago;
+      }
     }
-  
     static getRemainder(float) {
       // miliseconds left after floored value IN DECIMAL
       return float - Math.floor(float);
     }
   }
-  
-  // refactor timer to be used without the dom.
-  // add TimerElement and TrackerElements to build on top of refactor
-  
    class Time {
-    constructor() {
-      // current time
-      //      -time.in(ms,hms,hm)
-    }
-  
+    constructor() {}
     static get current() {
       return new Date().toLocaleTimeString();
     }
-  
     static setTimer(start, end) {}
-  
     static in(format) {
       switch (format) {
-        case "ms" || "miliseconds": {
-        }
-        case "hms" || "hourminutesseconds": {
-        }
-        case "hm" || "hoursminutes": {
-        }
+        case "ms" || "miliseconds": {}
+        case "hms" || "hourminutesseconds": {}
+        case "hm" || "hoursminutes": {}
       }
     }
-  
     static get current() {
       return {};
     }
-  
     static padNum(num) {
       if (num.toString().length == 1) return num.toString().padStart(2, "0");
       else return num.toString();
     }
-  
     static msToStamp(ms) {
       const msInHour = 3600000;
       const msInMin = 60000;
       const msInSec = 1000;
       const minutesInHour = 60;
       const secondsInMinute = 60;
-  
       const hours = ms >= msInHour ? Math.floor(ms / msInHour) : 0;
       // const hours = hoursAgo;
-  
       // const minutesAgo = ms >= msInMin ? Math.floor(ms / msInMin) : 0;
       const minutes = Math.floor(getRemainder(ms / msInHour) * minutesInHour);
-  
       // const secondsAgo = ms >= msInSec ? Math.floor(ms / msInSec) : 0;
       const seconds = Math.floor(getRemainder(ms / msInMin) * secondsInMinute);
-  
       function getRemainder(float) {
         // miliseconds left after floored value IN DECIMAL
         return float - Math.floor(float);
       }
-      return {
-        hours,
-        minutes,
-        seconds,
+      return { hours, minutes, seconds,
         get formatted() {
           return {
             hours: Time.padNum(this.hours),
             minutes: Time.padNum(this.minutes),
             seconds: Time.padNum(this.seconds),
-          };
-        },
-      };
+          }
+        }
+      }
     }
   }
-  
    class Timer {
     // DEFAULTS TO COUNTDOWN
     constructor({ props }) {
@@ -1972,7 +1533,6 @@ class Collection {
       const frag = this.create(type);
       this.element = $(`[data-id="${this.id}"]`, frag);
       destination.appendChild(frag);
-  
       listen($(".ctrl-wrapper", this.element), () => {
         if (!this.currentInterval) {
           this.showPlaying();
@@ -2100,7 +1660,6 @@ class Collection {
           </div>`;
     }
   }
-  
    class TimeTracker extends Timer {
     constructor({ props }) {
       super({ props });
@@ -2134,58 +1693,31 @@ class Collection {
       this.currentInterval = setInterval(this.countup.bind(this), 1000);
     }
   }
-  
-  
    class scrollTrap {    
     constructor( scrollable , tick = 30) {
-        
         this.isScrolling = false;
         this.tickReady = false;
         this.direction = 'idle';
-        
         this.intermediateScrollPosition = 0;
         this.lastKnownScrollPostion = 0;
         this.tick = tick;
-  
         this.element = scrollable;
         this.lksp = this.lastKnownScrollPostion;
         this.imsp = this.intermediateScrollPosition;
-        
         this.element.addEventListener('scroll',this.handleScroll);
-  
     }
-  
-    
     diff(eventTarget) {
-  
       let last = this.lksp;
       let current = eventTarget.scrollTop;
-  
       let dir = last < current ? 'incer' : 'decer';
       let diffy = Math.abs(last - current);
       this.direction = dir;
       return [diffy,dir]
     }
-  
-    handleScroll(event) {
-  
-    }
-  
-    onScrollUp() {
-  
-    }
-    onScrollDown() {
-  
-    }
-  
-    alignTrap() {
-  
-    }
-  
   }
-  
-const root = document.documentElement;
-const docStyle = root.style;
+
+  const root = document.documentElement;
+  const docStyle = root.style;
 
  function getRoot(element) {
   return element.documentElement.style;
@@ -2253,14 +1785,10 @@ const docStyle = root.style;
     console.warn('no element passed to listen  function')
     return;
   }
-
   // let context = this;
-
   element.addEventListener(
     listener,
     function (event) {
-      // callback.element = element;
-      // callback.event = event;
       callback.apply(callback,[event, ...arguments, element]);
     },
     capture
@@ -2273,7 +1801,6 @@ const docStyle = root.style;
 }
 
  function throttle(fn, wait = 60) {
-
   var time = Date.now();
   return function() {
     if ((time + wait - Date.now()) < 0) {
@@ -2281,7 +1808,6 @@ const docStyle = root.style;
       time = Date.now();
     } else return;
   }
-  
 }
 
  function nextTick(callback) {
@@ -2477,26 +2003,21 @@ function focusInputOnClick(event, placholder) {
         The disabled attribute is supported by 
         <button>, <fieldset>, <optgroup>, <option>, <select>, <textarea> and <input>.
     */
-
     input.disabled = true;
     setTimeout(() => (input.disabled = false), time);
-
   return;
 }
 
 function debounce(fn,interval = 60) {
-    
     var time = Date.now();
     let timeoutId;
-
     return function() {
-
-      clearTimeout(timeoutId);
-
+      clearTimeout(timeoutId)
       timeoutId = setTimeout(() => {
         fn.call(this,...arguments);
         time = Date.now();
-      },interval)    
+      },interval)
+      return time
     }
 
 }
@@ -2521,41 +2042,23 @@ function debounce(fn,interval = 60) {
   return new Date().toLocaleTimeString();
 }
 
- function mouseClickRight(event) {
-  return event.button === 2;
-}
-
- function mouseClickLeft(event) {
-  return event.button === 0;
-}
-
- function isNumberKey(event) {
-  var charCode = event.which ? event.which : event.keyCode;
-  if (charCode > 31 && (charCode < 48 || charCode > 57)) return false;
-  return true;
-}
-
  function highlightInput(input) {
   input.focus();
   input.select();
   return input;
 }
 
- function isBackspaceKey(event) {
-  return event.keyCode == 8;
-}
-
  function isEmptyNumberInput(input) {
   return input.value === 0 || input.value === "0" || input.value === "";
 }
 
- function elementClicked(elementClass, event) {
-  return event.target.closest(elementClass);
+ function clicked(elementClass, event) {
+  return eventMaps.clicked(event,elementClass)
 }
 
  function toClipboard(value, message) {
-  window.navigator.clipboard.writeText(value);
-  if (message) console.log("message from clipboard", message);
+  window.navigator.clipboard.writeText(value)
+  if (message) console.log("message from clipboard", message)
 }
 
  function mergeObj(targetObj, mergingObj) {
@@ -2566,40 +2069,33 @@ function debounce(fn,interval = 60) {
 }
 
  function uuid() {
-  let timmy = Date.now().toString(36).toLocaleLowerCase();
+  let time = Date.now().toString(36).toLocaleLowerCase();
   // random high number
-  let randy = parseInt(Math.random() * Number.MAX_SAFE_INTEGER);
+  let randomNumber = parseInt(Math.random() * Number.MAX_SAFE_INTEGER);
   // random high num to hex => "005EIPQUTQ64" => add 0s to make sure its 12digits
-  randy = randy.toString(36).slice(0, 12).padStart(12, "0").toLocaleUpperCase();
+  randomNumber = randomNumber.toString(36).slice(0, 12).padStart(12, "0").toLocaleUpperCase();
   // coerce into a string
-  return "".concat(timmy, "-", randy);
+  return "".concat(time, "-", randomNumber);
 }
 
-function clickedOutSide(parentTagName) {
-  return function(event) {
-    event.target.closest(parentTagName)
-  }
+function cosm(parentTagName) {
+  return (event) => event.target.closest(parentTagName)
 }
-
+function has(obj,property){
+  return Object.hasOwn(obj,property);
+}
+function isObj(obj){
+    return !(typeof obj !== 'object' || Array.isArray(obj) || obj === null )
+}
 function objectIsEmpty(obj){
-    if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) {
-      console.warn('Input should be a non-array object... use object is falsey');
-    }
-    for (const prop in obj) {
-      if (Object.hasOwn(obj, prop)) {
+    for (const prop in obj) 
+      if (Object.hasOwn(obj, prop)) 
         return false;
-      }
-    }
     return true;
 }
 function objectIsFalsey(obj){
-    if (typeof obj !== 'object' || obj === null || Array.isArray(obj)) return true
-    for (const prop in obj) {
-      if (Object.hasOwn(obj, prop)) {
-        return false;
-      }
-    }
-    return true;
+    if (!isObj(obj)) return true
+    else return objectIsEmpty(obj)
 }
 
 function mapEvents(event){
@@ -2617,6 +2113,9 @@ function mapEvents(event){
     rightClick(event = e){
       return event.button === 2;
     },
+    dblclick(event = e){
+      return event.detail === 2;
+    },
     cosm(parent, event = e){
       return event.target.closest(parent)
     },
@@ -2629,30 +2128,4 @@ function mapEvents(event){
       return true;
     },
   }
-}
-const eventMaps = {
-  enter(event){
-    return event.keyCode == 13 || event.which == 13 || event.key == 'Enter'
-  },
-  backspace(event){
-    return event.keyCode == 8;
-  },
-  leftClick(event){
-    return event.button === 0;
-  },
-  rightClick(event){
-    return event.button === 2;
-  },
-  cosm(event,parent){
-    return event.target.closest(parent)
-  },
-  clicked(event,elementClass){
-    return event.target.closest(elementClass)
-  },
-  isNumber(event){
-    var charCode = event.which ? event.which : event.keyCode;
-    if (charCode > 31 && (charCode < 48 || charCode > 57)) return false;
-    return true;
-  },
-
 }

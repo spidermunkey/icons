@@ -188,8 +188,8 @@ module.exports.eventHandlers = {
         this.showCollectionSettings(await this.store.getCollection(name));
         $('.dashboard__modal').setAttribute('tab','settings')
         $('.info-bar .current-tab').textContent = name
-        const currentTabBreadCrumbElement = document.createElement('div');
-        currentTabBreadCrumbElement.classList.add('breadcrumb')
+        // const currentTabBreadCrumbElement = document.createElement('div');
+        // currentTabBreadCrumbElement.classList.add('breadcrumb')
         currentTabBreadCrumbElement.textContent = 'Settings'
         $('.info-bar').appendChild(currentTabBreadCrumbElement)
         return;

@@ -2,45 +2,53 @@
     //   border: 1px solid #1414140d;
       border-radius: 10px;
 
-      .preset-header {
-        position: absolute;
-        right: 8px;
-        top: 8px;
-        display: flex;
-        border: 1px solid #8787874a;
-        align-items: center;
-        padding: 0px 2px;
-        color: #141414ac;
-        border-top-left-radius: 8px;
-        border-bottom-left-radius: 8px;
-        border-radius: 8px;
-        .current-preset {
-            padding: 0px 6px;
-            font-size: 14px;
-            border-right: inherit;
-            cursor: pointer;
-            &:hover {
-                color: #272727d8;
-            }
-        }
-        .action {
-            border-radius: 4px;
-            height: 100%;
-            width: 100%;
-            display: flex;
-            color: inherit;
-            color: #393939ac;
-            cursor: pointer;
-            justify-content: center;
-            &:hover {
-                color: #272727d8;
-            }
-            align-items: center;
-            padding: 2px;
-            // border: inherit;
-        }
-      }
+
 }
+.settings-modal .preset-header .current-preset {
+    margin-right: 8px;
+}
+.settings-modal .icon-borders {
+    margin-right: 2px;
+}
+.preset-header {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    display: flex;
+    border: 1px solid #8787874a;
+    align-items: center;
+    padding: 0px 2px;
+    color: #141414ac;
+    border-top-left-radius: 8px;
+    border-bottom-left-radius: 8px;
+    border-radius: 8px;
+    .current-preset {
+        padding: 0px 6px;
+        font-size: 14px;
+        border-right: inherit;
+        cursor: pointer;
+        text-wrap: nowrap;
+        &:hover {
+            color: #272727d8;
+        }
+    }
+    .action {
+        border-radius: 4px;
+        height: 100%;
+        width: 100%;
+        display: flex;
+        color: inherit;
+        color: #393939ac;
+        cursor: pointer;
+        justify-content: center;
+        &:hover {
+            color: #272727d8;
+        }
+        align-items: center;
+        padding: 2px;
+        // border: inherit;
+    }
+  }
 .position__inputs {
     // border: 1px solid $border-super-light;
     margin-top: 14px;

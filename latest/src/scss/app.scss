@@ -1,7 +1,9 @@
 @import 'lib/main.scss';
 @import 'var/main.scss';
-@import 'components/main.scss';
 @import 'color.scss';
+@import 'borders.scss';
+@import 'components/main.scss';
+
 
 :root {
     --sidebar_width: 64px;
@@ -27,6 +29,9 @@
     --cp-pointer--pos: calc(0deg + var(--current-hue));
     --context-y: 0;
     --context-x: 0;
+
+    --variable-height: 24px;
+    --varibale-width: 24px;
 }
 *,*:before,*::after {
     box-sizing: border-box;
