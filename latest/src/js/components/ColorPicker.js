@@ -41,7 +41,12 @@ export class ColorPicker {
             hueBar: this.hueSlider,
             state: this.state,
             actions: {
-                handleColor: color => {
+                mouseMove: color => {
+                    const hex = color.hex;
+                    this.updateAll(hex);
+                    this.state.currentValue = hex;
+                },
+                onClick: color => {
                     const hex = color.hex;
                     this.updateAll(hex);
                     this.state.currentValue = hex;
@@ -74,12 +79,11 @@ export class ColorPicker {
     setCanvasIfSingleColor() {
         const singleUpdate = this.state.selected.length == 1 && this.state.selected[0].selected.length == 1;
         if (singleUpdate) {
-            let index = this.state.selected[0];
-            console.log(this.state.selected,index)
-            let target = index[0];
-            let type = target.selected[0];
-            let strProp = `current${uppercase(type)}`;
-            this.updateCanvas(target[strProp]);
+            let state = this.state.selected[0];
+            console.log(state)
+            let target = state.selected[0];
+            let strProp = `current${capitalize(target)}`;
+            this.updateCanvas(state[strProp]);
         }
     }
     updateCanvasWithSingleColor(target,type) {
@@ -158,7 +162,7 @@ export class ColorPicker {
         if (Color.isValidHex(this.previewInput.value)) this.updatePreviewColor(this.previewInput.value);
         $('.canvas-copy').addEventListener('click',() => this.copy());
         $('.open-palette').addEventListener('click',() => this.toggle());
-        $('.pv-preview-color').addEventListener('click',()=> this.toggle());
+        // $('.pv-preview-color').addEventListener('click',()=> this.toggle());
         $('.cp-header .cp-close').addEventListener('click', () => this.close());
         $('.updater .btn-reset').addEventListener('click',() => this.handleReset());
         $('.pv-updater .btn-reset').addEventListener('click',() => this.handleReset());
@@ -212,11 +216,7 @@ export class ColorPicker {
                 let pathElement = e.target.closest('.path-element')
                 let id = pathElement.getAttribute('pid')
                 let targetType = pickerElement.getAttribute('target')
-                let target = this.getTarget(id)
-                if (targetType === 'stroke' || targetType === 'fill'){
-                    console.log('dropping color',this.currentDrop,targetType)
-                    target[targetType] = this.currentDrop
-                }
+                this.dropColor(id,targetType)
             }
        })
         colorModal.addEventListener('click', (e) => {
@@ -235,8 +235,7 @@ export class ColorPicker {
             let pickerElement = mapper.clicked('.picker-element');
             if (pickerElement){
                 const color = pickerElement.getAttribute('color')
-                console.log('picking up', color)
-                this.currentDrop = color;
+                this.pickupColor(color)
             }
             let id = clickedPath.getAttribute('pid');
             let pathExists = clickedPath && this.getTarget(id);
@@ -252,6 +251,16 @@ export class ColorPicker {
             let clickedPathLabel = e.target.closest('.path-element .attr-label');
                 if (clickedPathLabel) this.handlePathLabel(id);
         })
+    }
+    pickupColor(hex) {
+        this.currentDrop = hex;
+    }
+    dropColor(pathId,targetType,hex = this.currentDrop){
+        let target = this.getTarget(pathId)
+        if ((targetType === 'stroke' || targetType === 'fill') && hex !== undefined){
+            // set(type) should be a function for clarity
+            target[targetType] = this.currentDrop
+        }
     }
     handleInput(hex) {
         this.updateInputText(hex)
@@ -276,9 +285,10 @@ export class ColorPicker {
     }
     handleUndo() {
         this.state.selected.forEach(index => {
-            let target = index[0]
-            let type = index[1]
-            target.undo(type);
+            console.log(this.state.selected[0].currentFill,this.state.selected[0].previousFill)
+            let type = index.selected
+            index.undo(type);
+            console.log(this.state.selected[0].currentFill,this.state.selected[0].previousFill)
         })
         this.setCanvasIfSingleColor()
         this.updateColor();
@@ -557,21 +567,24 @@ function createElementPair(element) {
                 if (type == 'stroke') this.setStroke(hex);
                 else if (type == 'fill') this.setFill(hex);
             },
-            undo(type) {
-                if (type == 'stroke' || type == 'fill') {
-                    let str = `previous${uppercase(type)}`;
-                    let strProp = `current${uppercase(type)}`;
+            undo(targetType) {
+                if (targetType === 'stroke' || targetType === 'fill') {
+                    let str = `previous${capitalize(targetType)}`;
+                    let strProp = `current${capitalize(targetType)}`;
+                    console.log(targetType, typeof targetType)
+                    console.log(targetType[0].toUpperCase(), targetType.slice(1))
+                    console.log(capitalize(targetType))
                     let cursor = this[str];
                     const prevState = cursor.skipToPrev();
-                    this.update(type,prevState);
+                    this.update(targetType,prevState);
                     this[strProp] = prevState
                     return prevState;
                 }
             },
             redo(type) {
                 if (type == 'stroke' || type == 'fill') {
-                    let str = `previous${uppercase(type)}`;
-                    let strProp = `current${uppercase(type)}`;
+                    let str = `previous${capitalize(type)}`;
+                    let strProp = `current${capitalize(type)}`;
                     let cursor = this[str];
                     const nextState = cursor.skipToNext();
                     this.update(type,nextState);

@@ -12,17 +12,18 @@ export class Canvas extends MouseTrackingSlider {
         this.onMouseMove = function(state) { // state = { x , y , event }
             let event = state.event;
             let adjustedColor = this.handleCanvasPosition(event);
-            if (actions?.handleColor) actions.handleColor(adjustedColor);
+            if (actions?.mouseMove) actions.mouseMove(adjustedColor);
             this.setCanvasHue()
             return state
         }
-        this.onMouseUp = null;
+        this.onMouseUp = function() {
+            if (actions?.mouseUp) actions.mouseUp(this.color)
+        }
         this.onMouseDown = function(state) { // state = { x , y , event }
             let event = state.event;
             let adjustedColor = this.handleCanvasPosition(event);
-            if (actions?.handleColor) actions.handleColor(adjustedColor);
-            if (actions?.mouseUp) actions.mouseUp(adjustedColor);
-            console.log('here')
+            if (actions?.onClick) actions.onClick(adjustedColor);
+            // if (actions?.mouseUp) actions.mouseUp(adjustedColor);
             this.setCanvasHue();
             return state
         };

@@ -100,7 +100,6 @@ export class Dashboard extends AbstractView {
     }
     async hydrate(){
         this.dashboard.element.onmousedown = (e) => this.handleDashboardClick(e)
-        this.editor.onmousedown = (e) => this.handleEditorInterface(e)
         this.dashboard.element.oncontextmenu = (e) => this.toggleContextMenu(e)
         this.dashboard.element.addEventListener('click',(e) => this.handleClickOutsideContext(e))
         // handle preview
@@ -152,7 +151,11 @@ export class Dashboard extends AbstractView {
                 this.colorPicker.close()
             }
         })
-            // settings menu
+        // collection settings
+        this.collectionPreview.on('save color',(collection,color) => {
+            console.log('SAVING COLORSET',collection,color)
+        })
+        // icons settings menu
             const settingsTabs = $$('.settings-tab')
             const settingsModals = $$('.settings-interface .settings-modal')
             settingsTabs.forEach(tab => {
@@ -165,7 +168,7 @@ export class Dashboard extends AbstractView {
                         tab.classList.add('active')
                     }
                 })
-        })
+            })
         $('.search.passive-search').addEventListener('input',this.search())
         $('.search.passive-search input').focus()
         $('.btn-cancel').addEventListener('click',() => this.cancelSearch())
@@ -1383,10 +1386,7 @@ export class Dashboard extends AbstractView {
             }
         }
     }
-    async handleEditorInterface(event){
-        let settingsMenu = event.target.closest('.widget-settings.settings-interface.active')
-        if (settingsMenu) this.delegateSettingsMenuEvent(event,settingsMenu)
-    }
+
     async delegateAddToCollectionWindowEvents(event) {
         let clicked = event.target.closest('.preview-a2c-item');
         let close = event.target.closest('.close-cc-form');
@@ -1503,14 +1503,6 @@ export class Dashboard extends AbstractView {
         this.menu.close();
         await this.renderCollection(modalName);
     }
-    async delegateSettingsMenuEvent(event,element){
-        if ($('.dashboard__modal').getAttribute('tab') == 'settings'){
-            console.log('settings now are responsive');
-            const vbx = event.target.closest('.vb-setting input')
-        } else {
-            console.log('settings will be applied via selection')
-        }
-    }
     async addToCollection(name,icon ) {
         if (collection && icon) result = await this.store.addToCollection({ destination: collection, props:icon })
         this.notify('icon added',{ icon,collection,result })
@@ -1601,10 +1593,6 @@ export class Dashboard extends AbstractView {
         if (names.length > 0)
             $('.synced-collection-names').innerHTML = `${names.reduce((acc,red)=> acc + `<div class="preview-a2c-item" collection=${red}>${red}</div>`, '' )}`
     }
-    // HOME VIEW
-    async renderList(collection_names){
-
-    }
     getHTML() {
     return `
             <!--          MENU AND THINGS        -->
@@ -1653,5 +1641,3 @@ function showMiniWidgets(){
     $('.widget-pre').classList.remove('active');
     $('.widget-main').classList.add('active');
 }
-
-

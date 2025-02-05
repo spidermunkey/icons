@@ -1,12 +1,70 @@
+import { Color } from "./Color";
 import { EventEmitterClass } from "../utils/EventEmitter";
 import { Canvas } from "./Canvas";
+import { COSM } from "../utils/Cosm";
 
+const ColorState = (originalColor = '#000') => ({
+  original: originalColor,
+  currentColor: originalColor,
+  history: new Cursor([originalColor]),
+})
+const ShapeModeHtml = () => {
+  return `
+  <div class="default-colors">
+    <div class="color-group-label">All Shapes</div>
+    <div class="color-group">
+      <div class="default-fill editor-value-container" container="shapes" sVal="fill">
+        <div class="cEdit-label selector" selector="shapes" sVal="fill">Fill</div>
+        <div class="cEdit-icon reflector" selector="shapes" sVal="fill"></div>
+      </div>
+      <div class="default-stroke editor-value-container" container="shapes" sVal="stroke">
+        <div class="cEdit-label selector" selector="shapes" sVal="stroke">Stroke</div>
+        <div class="cEdit-icon reflector" selector="shapes" sVal="stroke"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="element-colors">
+    <div class="color-group-label">Svg Element</div>
+    <div class="color-group">
+      <div class="element-fill editor-value-container" container="element" sVal="fill">
+        <div class="cEdit-label selector" selector="element" sVal="fill">Fill</div>
+        <div div class="cEdit-icon reflector" selector="element" sVal="fill"></div>
+      </div>
+      <div class="element-stroke editor-value-container" container="element" sVal="stroke">
+        <div class="cEdit-label selector" selector="element" sVal="stroke">Stroke</div>
+        <div class="cEdit-icon reflector" selector="element" sVal="stroke"></div>
+      </div>
+      </div>
+    </div>
+
+  <div class="colors-found">
+    <div class="color-group-label">Colors Found</div>
+    <div class="current-palette color-group">
+      <div class="cEdit-icon"></div>
+      <div class="cEdit-icon"></div>
+      <div class="cEdit-icon"></div>
+      <div class="cEdit-icon"></div>
+    </div>
+  </div>
+
+  `
+}
+const InverterState = (colorsFound = ['#000']) => colorsFound.map(ColorState)
 export class CollectionPreview extends EventEmitterClass {
   constructor() {
     super()
-
     this.on('close',() => this.revertIconToOriginalHTML())
-
+    this.on('mode changed',() => {
+      let mode = this.currentMode;
+      let currentColor = mode.currentColor;
+      if (isValidHex(currentColor)){
+        this.canvas.update({hex:currentColor})
+      } else {
+        console.warn('current color invalid using #000',currentColor)
+        this.canvas.update({hex:'#000'})
+      }
+    })
     this.previewModeActive = false;
     this.bordersActive = false;
     this.icons = [];
@@ -30,7 +88,29 @@ export class CollectionPreview extends EventEmitterClass {
       width:'24', 
       height:'24'
     }
-    this.originalColor = {}
+
+    this.mode = {
+      currentMode: 'shapes',
+      currentType: 'fill',
+      'shapes': {
+        stroke: ColorState(),
+        fill: ColorState(),
+      },
+      element: {
+        stroke: ColorState(),
+        fill: ColorState(),
+      },
+      'inverter': {
+        stroke: InverterState(),
+        fill: InverterState(),
+      },
+      'selector': {
+        stroke: ColorState(),
+        fill: ColorState(),
+        icons:[],
+      },
+    }
+
     this.collectionPreset = this.defaultSetting
     this.iconPreset = this.defaultSetting
     this.original = this.defaultSetting
@@ -39,26 +119,26 @@ export class CollectionPreview extends EventEmitterClass {
     this.vby = this.preset['vby']
     this.vbw = this.preset['vbw']
     this.vbh = this.preset['vbh']
-    this.state = {}
-    this.canvasPreviewColor = $('.preview-color',this.element);
+
+    this.canvasPreviewColor = $('.preview-color',this.element)
+    this.hueSlider = new Slider($('.collection-color-picker .hue-bar'), {
+      onMouseMove: (state) => this.updateCurrentHue(state),
+      onMouseDown: (state) => this.updateCurrentHue(state),
+      onMouseUp: () => this.updateColorState(this.canvas.color.hex)
+    }, 'vertical' )
+
     this.canvas = new Canvas({
       canvas: $('.canvas',this.element),
       pointer: $('.canvas-pointer',this.element),
       hueBar: this.hueSlider,
       state: this.state,
       actions: {
-          handleColor: color => {
-              const hex = color.hex;
-              this.updateSelected(hex);
-              this.state.currentValue = hex;
-          },
+          mouseMove: color => this.updateSelected(color.hex),
+          onClick: color => this.updateSelected(color.hex),
+          mouseUp: color => this.updateColorState(color.hex)
       }
     })
-    this.hueSlider = new Slider($('.collection-color-picker .hue-bar'), {
-      onMouseMove: (state) => this.updateCurrentHue(state),
-      onMouseDown: (state) => this.updateCurrentHue(state),
-      onMouseUp: (state) => console.log(state),
-    }, 'vertical' )
+
 
     const handleViewBoxInput = (index) => {
       return (e) => {
@@ -126,11 +206,44 @@ export class CollectionPreview extends EventEmitterClass {
     this.svgHeightInput.addEventListener('input',handleHeightWidthInput('height'))
     this.svgWidthInput.addEventListener('input',handleHeightWidthInput('width'))
     $('.icon-borders.action',this.element).addEventListener('click',() => this.toggleBorder())
+    $('.editor-action[action="undo"]').addEventListener('click',() => this.undoPreviousAction())
+    $('.editor-action[action="redo"]').addEventListener('click',() => this.redoPreviousAction())
+    $('.editor-action[action="reset"]').addEventListener('click',() => this.resetAction())
     $$('.selector').forEach(selector => {
       let target = selector.getAttribute('selector');
       let type = selector.getAttribute('sVal')
-      selector.addEventListener('click',() => this.selection = [target,type])
+      selector.addEventListener('click',() => {
+        this.mode.currentMode = target
+        this.mode.currentType = type
+        $$('.editor-value-container').forEach(selector => selector.classList.remove('active'))
+        $(`[container=${target}][sVal=${type}]`).classList.add('active')
+        this.notify('mode changed')
+      })
+      const initiallyActive = $(`[container=${this.mode.currentMode}][sVal=${this.mode.currentType}]`)
+      initiallyActive.classList.add('active')
     })
+    $$('.bg-toggle').forEach(toggler => {
+      toggler.addEventListener('click',() => {
+        let cls = toggler.getAttribute('cls')
+        if (cls) this.applyPreviewBackground(cls)
+      })
+    })
+    $('.save-colorset').addEventListener('click',() => {
+      this.notify('save color',this.collection,this.mode)
+      this.toggleSaveMenu();
+    })
+    this.cosm = new COSM({
+      selectors: ['.settings-interface'],
+      exceptions: ['.settings-tab[tab="viewbox"]'],
+      handler: this.hideSaveMenu.bind(this)
+    })
+  }
+
+  get iconElements() {
+    return $$('.db-res .svg-wrapper')
+  }
+  get currentHex() {
+    return this.canvas.color.hex;
   }
 
   get currentPreset(){
@@ -143,6 +256,25 @@ export class CollectionPreview extends EventEmitterClass {
         width: this.preset.width,
         height: this.preset.height,
     }
+  }
+
+  get currentColorSet() {
+    return {
+      shapes: {
+        fill: this.mode.shapes.fill.currentColor,
+        stroke: this.mode.shapes.stroke.currentColor,
+      },
+      element: {
+        fill: this.mode.element.fill.currentColor,
+        stroke: this.mode.element.stroke.currentColor,
+      }
+    }
+  }
+
+  get currentMode(){
+    let mode = this.mode.currentMode
+    let targetType = this.mode.currentType
+    return this.mode[mode][targetType]
   }
 
   set height(number) {
@@ -166,31 +298,82 @@ export class CollectionPreview extends EventEmitterClass {
       this.svgWidthInput.value = number
       this.setIconDimensions(this.preset)
   }
-  
+  getElement({id}){
+    return $(`.db-res .svg-wrapper[data-id=${id}] svg`)
+  }
+  eachElement(callback) {
+    this.iconElements.forEach(element => callback(element))
+  }
+  getIcon(id){
+    return this.icons.filter(id => icon.id !== id)
+  }
+  eachIcon(callback){
+    this.icons.forEach(icon => callback(icon))
+  }
+  pickupColor(hex){
+    this.currentDrop = hex;
+  }
   setPreviewColor(hex){
     this.canvasPreviewColor.style.setProperty('background',hex)
   }
+  updateColorPicker(parsedColorSet){
+    const {elements,shapes} = parsedColorSet;
+    const shapeFill = shapes.matchingFill ? shapes.fill[0] : null;
+    const shapeStroke = shapes.matchingStroke ? shapes.stroke[0] : null;
+    const svgFill = elements.matchingFill ? elements.matchingFill : null;
+    const svgStroke = elements.matchingStroke ? elements.matchingStroke : null;
+    if (shapeFill != null) $('.default-fill .cEdit-icon').style.backgroundColor = shapeFill
+    else $('.default-fill .cEdit-icon').style.backgroundColor = '#f9f9f9'
+    if (shapeStroke != null) $('.default-stroke .cEdit-icon').style.backgroundColor = shapeFill
+    else $('.default-stroke .cEdit-icon').style.backgroundColor = '#f9f9f9'
+  }
+  updateAllShapes(hex,attr = 'fill'){
+      this.eachIcon(icon =>
+          icon.crawl(this.getElement(icon)).forEach(child => child.tagName !== 'svg' ? child.setAttribute(attr,hex) : '' )
+      )
+  }
+  updateAllSvgElements(hex,attr='fill'){
+    this.eachElement(element => element.setAttribute(attr,hex))
+    $('.cEdit-icon[s')
+  }
+  updateColorState(hex){
+    let state = this.currentMode
+    state.history.addOneAndSkipTo(hex)
+    state.currentColor = hex
+  }
 
-  updateAllShapes(hex){
-      this.icons.forEach(icon => {
-        const element = $(`.db-res .svg-wrapper[data-id=${icon.id}] svg`)
-        if (element){
-          const children = icon.crawl(element)
-          children.forEach(child => child.tagName !== 'svg' ? child.setAttribute('fill',hex) : '' )
-        }
-      })
+  refreshColorState(parsedColorSet){
+    const {elements,shapes} = parsedColorSet;
+    const shapeFill = shapes.matchingFill ? shapes.fill[0] : null;
+    const shapeStroke = shapes.matchingStroke ? shapes.stroke[0] : null;
+    const svgFill = elements.matchingFill ? elements.matchingFill : null;
+    const svgStroke = elements.matchingStroke ? elements.matchingStroke : null;
+      this.mode['shapes']['fill'] = ColorState(shapeFill ? shapeFill : undefined)
+      this.mode['shapes']['stroke'] = ColorState(shapeStroke ? shapeStroke : undefined)
+      this.mode['element']['fill'] = ColorState(svgFill ? svgFill : undefined)
+      this.mode['element']['stroke'] = ColorState(svgStroke ? svgStroke : undefined)
   }
   
   updateSelected(hex){
     this.setPreviewColor(hex)
-    if (this.selection && this.selection[0] === 'shapes')
-      this.updateAllShapes(hex)
+    let mode = this.mode.currentMode
+    let targetType = this.mode.currentType
+    console.log('updating elements... [MODE]',mode, targetType)
+    if (mode === 'shapes'){
+      this.updateAllShapes(hex,targetType)
+      $(`.reflector[selector="shapes"][sVal=${targetType}]`).style.backgroundColor = hex
+    }
+    if (mode === 'element'){
+      this.updateAllSvgElements(hex,targetType)
+      $(`.reflector[selector="element"][sVal=${targetType}]`).style.backgroundColor = hex
+    }
+    console.log(this)
   }
 
   updateCurrentHue = (state) => {
     this.canvas.updateHue(state.deg)
-    this.setPreviewColor(hex)
-    this.updateSelected(this.canvas.color.hex)
+    this.setPreviewColor(this.currentHex)
+    this.updateSelected(this.currentHex)
  }
 
   resetViewBoxScale(currentViewBox){
@@ -259,10 +442,22 @@ export class CollectionPreview extends EventEmitterClass {
      return this.bordersActive ? this.hideBorders() : this.showBorders()
   }
 
+  showSaveMenu(){
+    $('.color-save-menu').classList.add('active')
+  }
+  hideSaveMenu(){
+    $('.color-save-menu').classList.remove('active')
+  }
+  toggleSaveMenu(){
+    $('.color-save-menu').classList.toggle('active')
+  }
   revertIconToOriginalHTML(){
     const {height,width,viewbox} = this.original;
     this.setIconViewboxHTML(viewbox)
     this.setIconDimensions({ height:height, width:width })
+    this.iconElements.forEach(element => {
+      element.classList.remove('bg-neutral','bg-dark','bg-default')
+    })
   }
 
   findMatchingViewbox(icons){
@@ -285,73 +480,136 @@ export class CollectionPreview extends EventEmitterClass {
     }
     return original
   }
-
-  findMatchingFill(icons){
+  parseColors(icons){
+    let colorsFound = new Set();
+  }
+  findMatchingColors(icons){
     let fill = 'start';
     let svgFill = 'start';
+    let stroke = 'start';
+    let svgStroke = 'start';
+    let parsed = {
+      'elements':{
+        fill: new Set(),
+        stroke: new Set(),
+        get matchingFill() {
+          return this.fill.size === 1
+        },
+        get matchingStroke() {
+          return this.stroke.size === 1
+        }
+      },
+      'shapes':{
+        fill: new Set(),
+        stroke: new Set(),
+        get matchingFill() {
+          return this.fill.size === 1
+        },
+        get matchingStroke() {
+          return this.stroke.size === 1
+        }
+      },
+    }
     for (let i = 0; i < icons.length; i++){
       let icon = icons[i];
       let colorSet = icon.colors.original;
-      if (fill === null && svgFill === null) return {
-        shapeFill: null,
-        svgFill: null,
+      const normalize = (hex)=> {
+        if (!hex.startsWith('#')) return Color.isValidHex(Color.isValidNamedColor(hex)) ? Color.isValidNamedColor(hex) : false
+        else return Color.toSixDigitHex(hex)
       }
-      const checkSvgFill = (colorSet) => {
-        if (svgFill === null) return;
+      const parseFill = (colorSet) => {
         for(const id in colorSet){
-          let iconFill = colorSet[id][1]
+          let iconFill = normalize(colorSet[id][1])
           let tagName = colorSet[id][2]
-          if (tagName !== 'svg') continue;
-          if (svgFill === 'start') {
-            svgFill = iconFill
-            console.log('first value found', iconFill, svgFill)
-            continue
-          } else if (svgFill !== iconFill){
-            console.log('count...',i)
-            console.warn('this ones different', tagName ,icon, iconFill, svgFill)
-            svgFill = null;
-            return fill
-          }
+          if (iconFill != undefined || iconFill != false) {
+            if (tagName == 'svg') parsed.elements.fill.add(iconFill)
+            else parsed.shapes.fill.add(iconFill)
+          } else console.warn('something wrong with this hex', this.colorSet[id][1])
         }
       }
-      const checkShapeFill = (colorSet) => {
-        if (fill === null) return
+      const parseStroke = (colorSet) => {
         for(const id in colorSet){
-          let iconFill = colorSet[id][1]
+          if (colorSet[id][0] == null) continue
+          let iconStroke = normalize(colorSet[id][0])
           let tagName = colorSet[id][2]
-          if (tagName === 'svg') continue;
-          if (fill === 'start') {
-            fill = iconFill
-            console.log('first value found', fill, iconFill)
-            continue
-          } else if (iconFill !== fill){
-            console.log('count...',i)
-            console.warn('this ones different', icon, fill, iconFill)
-            fill = null;
-            return fill
-          }
+          if (iconStroke != undefined || iconStroke != false) {
+            if (tagName == 'svg') parsed.elements.fill.add(iconStroke)
+            else parsed.shapes.fill.add(iconStroke)
+          } else console.warn('something wrong with this hex', this.colorSet[id][0])
         }
-        return fill;
       }
-      checkShapeFill(colorSet)
-      checkSvgFill(colorSet)
+      parseFill(colorSet)
+      parseStroke(colorSet)
     }
-    return { shapeFill: fill , svgFill }
+    let elementResult = {
+      fill: parsed.elements.fill.values().toArray(),
+      stroke: parsed.elements.stroke.values().toArray(),
+      matchingFill: parsed.elements.matchingFill,
+      matchingStroke: parsed.elements.matchingStroke
+    }
+    let shapeResult = {
+      fill: parsed.shapes.fill.values().toArray(),
+      stroke: parsed.shapes.stroke.values().toArray(),
+      matchingFill: parsed.shapes.matchingFill,
+      matchingStroke: parsed.shapes.matchingStroke
+    }
+    console.dir('PARSED ELEMENT',elementResult)
+    console.dir('PARSED SHAPES',shapeResult)
+    return { shapes: shapeResult, elements: elementResult}
   }
-
+  applyPreviewBackground(style){
+      this.iconElements.forEach(element => {
+        element.classList.remove('bg-neutral','bg-dark','bg-default')
+        element.classList.add(style)
+      })
+  }
+  removeStyles(){
+    this.iconElements.forEach(element => element.classList.remove('bg-neutral','bg-dark','bg-default'))
+  }
+  undoPreviousAction(){
+    console.log('REDOING')
+    const state = this.currentMode;
+    let previousColor = state.history.prev;
+    console.log(previousColor)
+    if (isValidHex(previousColor)) {
+      state.history.skipToPrev(previousColor)
+      state.currentColor = previousColor
+      this.canvas.update({hex:previousColor})
+      this.updateSelected(previousColor)
+    }
+  }
+  redoPreviousAction(){
+    const state = this.currentMode;
+    let nextColor = state.history.next;
+    console.log(nextColor)
+    if (isValidHex(nextColor)) {
+      state.history.skipToNext(nextColor)
+      state.currentColor = nextColor
+      this.canvas.update({hex:nextColor})
+      this.updateSelected(nextColor)
+    }
+  }
+  resetAction(){
+    const state = this.currentMode;
+    const original = state.original;
+    let mode = this.mode.currentMode
+    let targetType = this.mode.currentType
+    if (isValidHex){
+      this.mode[mode][targetType] = ColorState(original)
+      this.canvas.update({hex:original})
+      this.updateSelected(original)
+    }
+  }
   update(collection){
     this.icons = collection.icons;
+    this.collection = collection;
     const matchingViewbox = this.findMatchingViewbox(this.icons)
-    const {shapeFill,svgFill} = this.findMatchingFill(this.icons)
-
-    if (shapeFill !== null) $('.default-fill .cEdit-icon').style.backgroundColor = shapeFill
-    else $('.default-fill .cEdit-icon').style.backgroundColor = '#f9f9f9'
-    
-    if (svgFill !== null) $('.element-fill .cEdit-icon').style.backgroundColor = svgFill
-    else $('.element-fill .cEdit-icon').style.backgroundColor = '#f9f9f9'
-
+    const matchingColors = this.findMatchingColors(this.icons)
+    this.updateColorPicker(matchingColors)
+    this.refreshColorState(matchingColors)
     this.original = matchingViewbox
     this.preset = matchingViewbox
+    this.colors = collection.colors
     const { viewbox } = matchingViewbox
     this.setViewbox(viewbox)
     this.resetViewBoxScale(viewbox)

@@ -208,6 +208,10 @@ export class Icon {
         return values;
     }
     static crawl(element = this.svg) {
+        if (element === null){
+            console.log('crawl operation failed... no icon')
+            return
+        }
         let children = [];
         for (var i = 0; i < element.childNodes.length; i++) {
             var child = element.childNodes[i];

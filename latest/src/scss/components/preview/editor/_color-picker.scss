@@ -1,4 +1,23 @@
 
+.editor-wrapper {
+    display: flex;
+}
+.editor-actions {
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    .editor-action {
+        cursor: pointer;
+        font-size: 14px;
+        color:#2a2929f0;
+        padding: 4px 6px;
+        @include widgetBorder();
+        margin-bottom: 8px;
+    }
+}
+.preview-color,.pv-preview-color {
+    @include colorDropperIcon();
+}
 .collection-color-picker {
     background: white;
     z-index: 100;
@@ -171,6 +190,160 @@
       
         }
       }
+}
+.color-editor {
+    margin-top: 10px;
+    // padding: 0px 14px;
+    color: #141414ac;
+    font-size: 14px;
+    .editor-value-container.active {
+      border: 1px solid #8787874a;
+      background-color: #f9f9f9;
+    }
+    .color-group-label {
+      display: flex;
+      border: 1px solid #8787874a;
+      align-items: center;
+      padding: 8px;
+      color: #141414ac;
+      border-top-left-radius: 8px;
+      border-bottom-left-radius: 8px;
+      border-radius: 8px;
+
+    }
+    .color-group,.editor-value-container {
+      display: flex;
+      margin: 0px 2px;
+    }
+
+    .color-group {
+      padding: 8px;
+      justify-content: space-between;
+      justify-content: flex-start;
+
+      &.current-palette {
+        padding-left: 0px;
+      }
+    }
+    .editor-value-container {
+      @include widgetBorder();
+      padding: 6px 8px;
+      border-radius: 4px;
+      margin-right: 24px;
+    }
+    .cEdit-label {
+      cursor: pointer;
+      margin-right: 4px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .cEdit-icon {
+      width: 24px;
+      height: 20px;
+      border-radius: 2px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #f9f9f9;
+      margin-left: 16px;
+      @include widgetBorder();
+      svg {
+          height: 20px;
+          width: 20px;
+      }
+      &:hover {
+        cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><g stroke="%23000" stroke-width="1" stroke-linejoin="round"><path fill="%23FFF" d="m4 16-1 5 5-1 6-6-4-4-6 6z"></path><path fill="%23000" d="M19 5a2.84 2.84 0 0 0-4 0l-3 3-1-1c-.55-.55-1.45-.55-2 0s-.55 1.45 0 2l1 1 4 4 1 1c.55.55 1.45.55 2 0s.55-1.45 0-2l-1-1 3-3c1.1-1.1 1.1-2.9 0-4Z"></path></g></svg>') 12 12, auto;
+      }
+    }
+}
+.color-toggler {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+    // flex: 1;
+    border:1px solid #8787874a;
+    border-radius: 8px;
+    margin-top: 12px;
+    .color-group-label {
+        white-space: nowrap;
+        color:#141414ac;
+    }
+    & .mode-toggle,
+    & .preset-toggle {
+        padding: 8px;
+        border-radius: 8px;
+    }
+
+    &.preset-toggler,
+    &.current-mode-toggler {
+        padding: 2px 8px;
+        .color-group-label {
+            margin-right: 64px;
+        }
+    }
+    &.preset-toggler .color-group-label,
+    &.current-mode-toggler .color-group-label{
+        margin-right: 64px;
+    }
+    .color-toggle {
+        margin: 0px 8px;
+        border:1px solid #8787874a;
+        cursor: pointer;
+        white-space: nowrap;
+        color:#141414c4;
+        position: relative;
+    }
+}
+.current-mode-toggler {
+
+    .tggle-mode {
+        position: absolute;
+        top: 0;
+        &.tggle-next {
+            right: 0;
+        }
+        &.tggle-prev {
+            left: 0;
+        }
+    }
+} 
+.background-toggler {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    padding: 8px;
+    border:1px solid #8787874a;
+    border-radius: 8px;
+    .color-group-label {
+        white-space: nowrap;
+        color:#141414ac;
+    }
+
+    .bg-toggle {
+        margin: 0px 8px;
+        border:1px solid #8787874a;
+        cursor: pointer;
+        white-space: nowrap;
+    }
+
+    .bg-toggle {
+        height: 26px;
+        width: 26px;
+        border-radius: 4px;
+        margin: 0px 8px;
+        border:1px solid #8787874a;
+        cursor: pointer;
+        &.toggle-default {
+            background: #fff;
+        }
+        &.toggle-dark {
+            background: var(--darkmode-background);
+        }
+        &.toggle-neutral {
+            background: var(--background-neutral)
+        }
+    }
 }
 .color-picker {
   pointer-events: none;
@@ -443,7 +616,6 @@
     padding: 0px 16px;
   }
   .pv-preview-color {
-      cursor: pointer;
       height: 20px;
       border-bottom: 1px solid $border-light;
       border-top-left-radius: 10px;
@@ -643,4 +815,74 @@
           display: none;
       }
   }
+}
+.collection-settings-controller {
+    margin-top: 32px;
+    // display: flex;
+    // flex-direction: column;
+    // justify-content: flex-end;
+    .btn-apply {
+        &:first-of-type {
+            margin-right: 12px;
+        }
+        &.save-colorset {
+            background: #1bd261;
+            color: #222;
+            &:hover {
+                background: #70f09f;
+                color: #444
+            }
+        }
+        &.preview-colorset {
+
+        }
+        margin: 8px 12px;
+        border-radius: 6px;
+        border:1px solid #87878727;
+        text-transform: capitalize;
+        color: #444;
+        letter-spacing: .035em;
+        cursor: pointer;
+        background: #1414140d;
+        justify-content: center;
+        align-items: center;
+        padding: 6px 0;
+        transition: background .12s;
+        display: flex;
+        // background: #14141452;
+        color: #222;
+  
+        &:hover {
+            background:#14141428;
+        }
+        &.disabled {
+          cursor:not-allowed;
+          &:hover {
+            background: #14141452;
+          }
+
+        }
+    }
+}
+
+.color-save-menu {
+    position: absolute;
+    top: 0;
+    left: -300px;
+    width: 300px;
+    height: 300px;
+    border: 1px solid red;
+    background: white;
+    border-radius: 8px;
+    @include widgetBorder();
+    box-shadow:  0px 0px 10px 2px #00000016, 0 0 2px #0000001f;
+    transform: translateY(100px);
+    transition: 200ms ease;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    &.active {
+        transform: translateY(0);
+        @include show();
+    }
 }

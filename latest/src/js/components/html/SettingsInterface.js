@@ -96,70 +96,62 @@ export const SettingsInterface = () => {
         </div>
 
         <div class="settings-modal" modal="colors">
+        <div class="editor-wrapper">
           <div class="collection-canvas">
-            <div class="collection-color-picker">
-              <div class="cp-canvas">
-                  <div class="canvas" style="--hue: 0;"><div class="cp-canvas--pointer canvas-pointer"></div></div>
-                  <div class="hue-bar input-bar slider-track"><div class="hue-thumb input-thumb slider-handle" style="transform: translateY(0px);"></div></div>
-              </div>
-              <div class="cp-inputs">
-                  <div class="preview-color"></div>
-                  <div class="hex-input">
-                      <div class="input"><input type="text"></div>
-                      <div class="canvas-copy">
-                          <div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px" width="16px"><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"></path></svg></div>
-                      </div>
-                  </div>
-                </div>
-
+          <div class="collection-color-picker">
+            <div class="cp-canvas">
+                <div class="canvas" style="--hue: 0;"><div class="cp-canvas--pointer canvas-pointer"></div></div>
+                <div class="hue-bar input-bar slider-track"><div class="hue-thumb input-thumb slider-handle" style="transform: translateY(0px);"></div></div>
             </div>
+            <div class="cp-inputs">
+                <div class="preview-color"></div>
+                <div class="hex-input">
+                    <div class="input"><input type="text"></div>
+                    <div class="canvas-copy"><div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px" width="16px"><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"></path></svg></div></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="editor-actions">
+            <div class="revert-action editor-action" action="reset">reset</div>
+            <div class="undo-action editor-action" action="undo">undo</div>
+            <div class="redo-action editor-action" action="redo">redo</div>
+          </div>
+        </div>
+           
+
+          <div class="background-toggler color-toggler">
+            <div class="color-group-label">Element Background</div>
+            <div class="bg-toggle toggle-default color-toggle" cls="bg-default"></div>
+            <div class="bg-toggle toggle-neutral color-toggle" cls="bg-neutral"></div>
+            <div class="bg-toggle toggle-dark color-toggle" cls="bg-dark"></div>
+          </div>
+          <div class="preset-toggler color-toggler">
+            <div class="color-group-label">Current Preset</div>
+            <div class="preset-toggle color-toggle">  :name:  </div>
           </div>
 
           <div class="color-editor">
-          <div class="default-colors">
-            <div class="color-group-label">All Shapes</div>
-            <div class="color-group">
-              <div class="default-fill editor-value-container">
-                <div class="cEdit-label selector" selector="shapes" sVal="fill">Fill</div>
-                <div class="cEdit-icon"></div>
+              <div class="color-group">
+                <div class="default-fill editor-value-container" container="shapes" sVal="fill">
+                  <div class="cEdit-label selector" selector="shapes" sVal="fill">Fill</div>
+                  <div class="cEdit-icon reflector" selector="shapes" sVal="fill"></div>
+                </div>
+                <div class="default-stroke editor-value-container" container="shapes" sVal="stroke">
+                  <div class="cEdit-label selector" selector="shapes" sVal="stroke">Stroke</div>
+                  <div class="cEdit-icon reflector" selector="shapes" sVal="stroke"></div>
+                </div>
               </div>
-              <div class="default-stroke editor-value-container">
-                <div class="cEdit-label selector" selector="shapes" sVal="stroke">Stroke</div>
-                <div class="cEdit-icon"></div>
-              </div>
-            </div>
+          </div>
 
+          <div class="collection-settings-controller">
+            <div class="btn-apply save-colorset">Save</div>
+            <div class="btn-apply update-colorset disabled">Update</div>
+            <div class="btn-apply preview-colorset">Preview</div>
           </div>
-          <div class="element-colors">
-            <div class="color-group-label">Svg Element</div>
-            <div class="color-group">
-              <div class="element-fill editor-value-container">
-                <div class="cEdit-label selector" selector="element" sVal="fill">Fill</div>
-                <div div class="cEdit-icon"></div>
-              </div>
-              <div class="element-stroke editor-value-container">
-                <div class="cEdit-label selector" selector="element" sVal="stroke">Stroke</div>
-                <div class="cEdit-icon"></div>
-              </div>
-            </div>
-
+          <div class="color-save-menu">
+          
           </div>
-          <div class="colors-found">
-            <div class="color-group-label">Colors Found</div>
-            <div class="current-palette color-group">
-              <div class="cEdit-icon"></div>
-              <div class="cEdit-icon"></div>
-              <div class="cEdit-icon"></div>
-              <div class="cEdit-icon"></div>
-            
-            </div>
-          </div>
-        </div>
-        <div class="collection-settings-controller">
-          <div class="btn-apply">Select/Unselect All</div>
-          <div class="btn-apply">Preview/Revert ColorSet</div>
-          <div class="btn-apply">Preview/Revert Preset</div>
-        </div>
       </div>
     `
 }

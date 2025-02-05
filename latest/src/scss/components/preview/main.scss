@@ -69,68 +69,7 @@
           .preset-header {
             top: 0px;
           }
-          .color-editor {
-            margin-top: 10px;
-            padding: 14px;
-            color: #141414ac;
-            font-size: 14px;
-            .color-group-label {
-              display: flex;
-              border: 1px solid #8787874a;
-              align-items: center;
-              padding: 8px;
-              color: #141414ac;
-              border-top-left-radius: 8px;
-              border-bottom-left-radius: 8px;
-              border-radius: 8px;
 
-            }
-            .color-group,.editor-value-container {
-              display: flex;
-              margin: 0px 2px;
-            }
-
-            .color-group {
-              padding: 8px;
-              justify-content: space-between;
-              justify-content: flex-start;
-
-              &.current-palette {
-                padding-left: 0px;
-              }
-            }
-            .editor-value-container {
-              @include widgetBorder();
-              padding: 6px 8px;
-              border-radius: 4px;
-              margin-right: 24px;
-            }
-            .cEdit-label {
-              cursor: pointer;
-              margin-right: 4px;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-            }
-            .cEdit-icon {
-              width: 24px;
-              height: 20px;
-              border-radius: 2px;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              background-color: #f9f9f9;
-              margin-left: 16px;
-              @include widgetBorder();
-              svg {
-                  height: 20px;
-                  width: 20px;
-              }
-              &:hover {
-                cursor: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"><g stroke="%23000" stroke-width="1" stroke-linejoin="round"><path fill="%23FFF" d="m4 16-1 5 5-1 6-6-4-4-6 6z"></path><path fill="%23000" d="M19 5a2.84 2.84 0 0 0-4 0l-3 3-1-1c-.55-.55-1.45-.55-2 0s-.55 1.45 0 2l1 1 4 4 1 1c.55.55 1.45.55 2 0s.55-1.45 0-2l-1-1 3-3c1.1-1.1 1.1-2.9 0-4Z"></path></g></svg>') 12 12, auto;
-              }
-            }
-          }
           .current-collection {
             display: flex;
             border: 1px solid #8787874a;
