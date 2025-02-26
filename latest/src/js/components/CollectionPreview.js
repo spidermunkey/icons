@@ -307,8 +307,10 @@ export class CollectionPreview extends EventEmitterClass {
     this.saveMenuActive = true
   }
   hideSaveMenu(){
-    $('.color-save-menu').classList.remove('active')
-    this.saveMenuActive = false;
+    if (this.saveMenuActive){
+      $('.color-save-menu').classList.remove('active')
+      this.saveMenuActive = false;
+    }
   }
   toggleSaveMenu(){
     if (this.saveMenuActive) this.hideSaveMenu()

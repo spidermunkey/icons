@@ -18,15 +18,24 @@ export class Home extends AbstractView {
     this.lastSync = new LastSyncElement();
     this.TotalIcons = new TotalIconsElement();
     this.testconnection = new TestConnectionElement();
-    this.recentSection = new RecentDownloads();
-    this.uploadSection = new UploadSection();
+    this.localCollections = new RecentDownloads();
+    this.uploadedCollections = new UploadSection();
+    this.uploadingQue = new Set();
     this.on('inactive',() => {
-      this.recentSection.active = false;
-      this.uploadSection.active = false;
+      this.localCollections.active = false;
+      this.uploadedCollections.active = false;
     })
-    this.on('upload', async (data) => {
-      const stat = await API.requestSync({cid:data});
+    this.on('upload', async (id) => {
+      if (this.uploadingQue.has(id)){
+        console.warn('upload already in process',id)
+        return;
+      }
+      console.log('uploading.....',id)
+      // animate here
+      this.uploadingQue.add(id);
+      const stat = await API.requestSync({cid:id});
       console.log('COLLECTION SYNCED',stat);
+      this.uploadingQue.delete(id);
     })
     this.on('ignore',(data) => {
       this.broker.sendMessage(JSON.stringify({
@@ -35,42 +44,64 @@ export class Home extends AbstractView {
       }))
       console.log('message sent');
     })
+    this.hydrate()
   }
 
   async render(){
+    $('#app').innerHTML = ''
     $('#app').innerHTML = await this.getHTML();
-    // handling tabbing mechanism
-    this.recentSection.on('render',() => {
-      this.uploadSection.active = false;
-      $('.rt-uploads').addEventListener('click',() => this.uploadSection.renderHTML($('.col-2.recent-activity')))
-    })
-    this.recentSection.on('render', () => this.uploadSection.active = false )
-    this.uploadSection.on('render', () => {
-      this.recentSection.active = false;
-      $('.rt-downloads').addEventListener('click',() => this.recentSection.renderHTML($('.col-2.recent-activity')))
-    }) 
-    
     this.lastSync.render($('.l-stat'));
     this.TotalIcons.render($('.t-stat'));
     this.testconnection.render($('.c-stat'));
     this.appstat.render($('.m-stat'));
-    this.recentSection.render($('.col-2.recent-activity'));
-    await this.hydrate();
+    this.localCollections.render($('.col-2.recent-activity'));
+    $('.db-res').classList.add('active');
+    // $('.test-area').addEventListener('click',this.handleSync.bind(this))
   }
 
   async hydrate() {
-    $('.db-res').classList.add('active');
-    $('.test-area').addEventListener('click',async (e)=> {
+    $('#app').addEventListener('click',async (e) => {
+      if (!this.active){
+        return;
+      }
+      console.log('CLICK HANDLING')
+        // handle upload
+        let upload = e.target.closest('.recent-collection .option-accept');
+        let ignore = e.target.closest('.recent-collection .option-ignore');
+        let downloadsTab = e.target.closest('.rt-downloads');
+        let uploadedTab = e.target.closest('.rt-uploads');
+        if (upload){
+          let collection = e.target.closest('.recent-collection')
+          console.trace('uploading collection',collection)
+          let id = collection.getAttribute('cid');
+          collection.
+          this.notify('upload',id)
+        }
+        else if (ignore) {
+          let collection = e.target.closest('.recent-collection');
+          console.log('ignoring collection',collection);
+          let id = collection.getAttribute('cid');
+          const stat = await API.requestIgnore({cid:id});
+          console.log('IGNORE PROCESS COMPLETE', stat);
+        } // handle tabs 
+        else if (downloadsTab){
+          this.renderLocalCollections()
+        } else if (uploadedTab){
+          this.renderUploadedCollections()
+        }
+    })
+  }
+  async handleSync(event){
       let target = e.target;
       if (!target.closest('.recent-collection')) return;
       let accept = target.closest('.option-accept');
       let ignore = target.closest('.option-ignore');
       if (accept){
         let collection = e.target.closest('.recent-collection')
-        console.log('uploading collection',collection)
+        console.trace('uploading collection',collection)
         let id = collection.getAttribute('cid');
-        const stat = await API.requestSync({cid:id});
-        console.log('SYNC PROCESS COMPLETE', stat);
+        // const stat = await API.requestSync({cid:id});
+        console.trace('SYNC PROCESS COMPLETE');
       } else if (ignore) {
         let collection = e.target.closest('.recent-collection');
         console.log('ignoring collection',collection);
@@ -78,10 +109,16 @@ export class Home extends AbstractView {
         const stat = await API.requestIgnore({cid:id});
         console.log('IGNORE PROCESS COMPLETE', stat);
       }
-    })
-
   }
-  async renderPreview(collection){
+  renderLocalCollections(){
+    this.uploadedCollections.active = false;
+    this.localCollections.renderHTML($('.col-2.recent-activity'))
+  }
+  renderUploadedCollections(){
+    this.localCollections.active = false;
+    this.uploadedCollections.renderHTML($('.col-2.recent-activity'))
+  }
+  showUploadingAnimation(cid){
 
   }
   async getHTML() {

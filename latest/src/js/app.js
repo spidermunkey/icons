@@ -2,12 +2,10 @@ import { Home } from "./views/home/index.js";
 import { Dashboard } from "./views/dashboard/index.js";
 import { EventEmitterClass } from "./utils/EventEmitter.js";
 import { SvgModel } from "./store.js";
-import { Delegator } from "./utils/Delegator.js";
 export class App extends EventEmitterClass {
     constructor() {
         super();
         this.store = new SvgModel();
-        this.delegator = new Delegator();
         this.routes = [
             {path: '/home', view: new Home(this.store)},
             {path: '/browse', view: new Dashboard(this.store)
@@ -29,6 +27,7 @@ export class App extends EventEmitterClass {
       }
     navigateTo(url){
         history.pushState(null,null,url);
+        console.trace('routing')
         this.route();
     }
     async init() {
@@ -38,6 +37,7 @@ export class App extends EventEmitterClass {
               this.navigateTo(e.target.closest("[data-link]").href);
             }
           })
+        console.trace('routing')
         this.route();
     }
     async render() {

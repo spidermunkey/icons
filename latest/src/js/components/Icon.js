@@ -315,7 +315,6 @@ export class Icon {
                     child.setAttribute('fill',inlineFill[1])
                     const updatedStyle = styleAttr.replace(/\s*fill:[^;]+(;|$)/, '')
                     child.setAttribute("style", updatedStyle);
-                    console.log('setting fill', updatedStyle)
                 } else if (!inlineFill && !existingFill && tagname !== 'svg' && !shouldNotFill){
                     child.setAttribute('fill','#000')
                 } else if (existingFill && existingFill === 'currentColor'){
@@ -328,7 +327,6 @@ export class Icon {
                     child.setAttribute('stroke',inlineStroke[1])
                     const updatedStyle = styleAttr.replace(/\s*stroke:[^;]+(;|$)/, '')
                     child.setAttribute("style", updatedStyle);
-                    console.log('setting stroke',updatedStyle)
                 } else if (!inlineStroke && !existingStroke && isLine && tagname !== 'svg'){
                     child.setAttribute('stroke','#000')
                 } else if (existingStroke && existingStroke === 'currentColor'){
