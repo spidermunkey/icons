@@ -58,7 +58,7 @@ export class Icon {
             category: this.category,
             markup: this.markup,
             rebased: this.rebased,
-
+            collection: this.collection,
             isFavorite: this.isFavorite,
             isBenched: this.isBenched,
 

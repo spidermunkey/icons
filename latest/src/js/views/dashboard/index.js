@@ -1998,10 +1998,10 @@ export class Dashboard extends AbstractView {
         } else if (close){
             console.log('closing')
             await this.loadCollectionNames();
-            state.ccActive = false;
+            this.state.ccActive = false;
         } else if (create){
             await this.loadCreateCollectionForm();
-            state.ccActive = true;
+            this.state.ccActive = true;
         } else if (upload){
             await this.addToNewCollection();
         }
@@ -2102,23 +2102,31 @@ export class Dashboard extends AbstractView {
         this.menu.close();
         await this.renderCollection(modalName);
     }
-    async addToCollection(name,icon ) {
-        if (collection && icon) result = await this.store.addToCollection({ destination: collection, props:icon })
+    async addToCollection(collection,icon) {
+        let result
+        if (collection && icon) result = await this.store.addToCollection({ destination: collection, icon:icon })
         this.notify('icon added',{ icon,collection,result })
     }
     async addToNewCollection(){
         const name = $('.create-cc-form input').value;
         let result;
+        console.log('adding to new collection',name);
+        console.log('using state',this.state)
+        console.log(this.state.selected)
         try {
             if (!name) throw new Error('invalid input name value');
-            if (!state.selected) throw new Error('invalid icon selection')
+            if (!this.state.selected) throw new Error('invalid icon selection')
+
             this.store.ready = false;
             result = await this.store.saveCollection(name, [ {
-                ...state.selected,
+                ...this.state.selected,
                 collection:name,
             } ] )
         } catch(e){ console.log(e) }
-        if (result.success == true) console.log('collection created')
+        if (result.success == true) {
+            console.log('collection created',result.data)
+            console.log('updating menus....',result.data)
+        }
     }
     openAddToCollectionMenu() {
         this.preview.toggleWindow('collections');

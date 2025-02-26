@@ -134,7 +134,7 @@ export class SvgModel extends EventEmitterClass {
     async addToCollection({ destination, icon }) {
         const id = uuid()
         let collection = this.collections[destination]
-        if (!collection) collection = await this.addCollection(destination)
+        if (!collection) collection = this.createCollection(destination)
         else if (collection[id] !== undefined) return console.warn('this id already exists')
         let copy = icon.save()
 
@@ -144,10 +144,7 @@ export class SvgModel extends EventEmitterClass {
         collection[id] = icon
         console.log('optimistic update successful... asynchronously adding to database now')
         const response = await API.addToCollection( destination, copy.props )
-        console.log(response)
-        if (response.success){
-            this.collections[destination].meta.ready = false;
-        }
+        console.log('a2c response...')
         return response;
     }
 
@@ -176,6 +173,7 @@ export class SvgModel extends EventEmitterClass {
         // console.log('creating collection',data)
         const collection = new Collection(data)
         this.notify('collection compiled',collection)
+        this.collections[collection.cid] = collection
         return collection
     }
     async saveCollection(name,icons){
