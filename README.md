@@ -21,5 +21,7 @@ localhost:2222
 
 -- create new user flow
 
+-- setup guest flow for demo with default icon set
+
 [SIDENOTE]
 if your reading this. I have no idea what i'm doing, i just know it works on my machine... venture futher if you dare.
