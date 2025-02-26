@@ -34,8 +34,27 @@ export const PreviewInterface = () => {
 
         </div>
         <!-- Color Settings -->
-        <div class="color-editor cp-fs" data-role="interface">
-            color
+        <div class="color-editor cp-fs icon-color-editor" data-role="interface">
+            <div class="modal-header">
+                <div class="modal-label">Browse Colors</div>
+                <div class="color-editor-tab-container">
+                    <div class="preset-option color-editor-tab" tab="icons">Icon <span class="preset-count">0</span></div>
+                    <div class="preset-option color-editor-tab" tab="collections">Collection <span class="preset-count">0</span></div>
+                    <div class="preset-option color-editor-tab" tab="recent">Recently Used <span class="preset-count">0</span></div>
+                </div>
+            </div>
+            <div class="colorset-modals">
+                <div class="color-data color-editor-modal" modal="icons">
+                    ...loading icon color presets
+                </div>
+                <div class="color-data color-editor-modal" modal="collections">
+                    ...loading collection color presets
+                </div>
+                <div class="color-data color-editor-modal" modal="recent">
+                    ...loading recent color presets
+                </div>
+            </div>
+
         </div>
         <!-- Bench Preview -->
         <!-- Settings -->
@@ -50,9 +69,9 @@ export const PreviewInterface = () => {
                     </div>
                 </div>
                 <div class="settings-modal preset-modal">
-                    <div class="settings-tab active" role="tab" modal="icons">icon presets</div>
-                    <div class="settings-tab" role="tab" modal="collections">collection presets</div>
-                    <div class="settings-tab" role="tab" modal="recent">... recent settings</div>
+                    <div class="settings-tab active" role="tab" modal="icons">...loading icon presets</div>
+                    <div class="settings-tab" role="tab" modal="collections">...loading collection presets</div>
+                    <div class="settings-tab" role="tab" modal="recent">...loading recent settings</div>
                 </div>
             </div>
         </div>

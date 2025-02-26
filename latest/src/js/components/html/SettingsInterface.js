@@ -107,7 +107,10 @@ export const SettingsInterface = () => {
                 <div class="preview-color"></div>
                 <div class="hex-input">
                     <div class="input"><input type="text"></div>
-                    <div class="canvas-copy"><div class="icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px" width="16px"><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"></path></svg></div></div>
+                    <div class="input-controls">
+                      <div class="like-color btn-hex"><svg xmlns="http://www.w3.org/2000/svg" width="16px" height="16px" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart" pid="m6tpyzsp-014IMNR18CK0"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" pid="m6tpyzsp-01354HBA2MQQ" stroke="undefined" fill="undefined"></path></svg></div>
+                      <div class="canvas-copy btn-hex"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px" width="16px"><path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 256C192 355.4 220.7 384 256 384h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 192.1c0-8.836 7.164-16 16-16H160V128H63.99c-35.35 0-64 28.65-64 64l.0098 256C.002 483.3 28.66 512 64 512h192c35.2 0 64-28.8 64-64v-32h-47.1L272 448z"></path></svg></div>
+                    </div>
                 </div>
               </div>
             </div>
@@ -150,7 +153,40 @@ export const SettingsInterface = () => {
             <div class="btn-apply preview-colorset">Preview</div>
           </div>
           <div class="color-save-menu">
-          
+          <div class="colorset-name colorset-data">untitled</div>
+          <div class="colorset-global-shape colorset-data cd-color-data">
+            <div class="colorset-data-label">Global Shape Color</div>
+            <div class="colorset-data-colors">
+              <div class="colorset-global-shape-fill cd-selector">
+                <div class="shape-fill-label cd-label">fill</div>
+                <div class="shape-fill-reflector cd-reflector shape-reflector" reflector="fill"></div>
+              </div>
+              <div class="colorset-global-shape-stroke cd-selector">
+                <div class="shape-stroke-label cd-label">stroke</div>
+                <div class="shape-stroke-reflector shape-reflector cd-reflector" reflector="stroke"></div>
+              </div>
+            </div>
+            </div>
+        
+          <div class="colorset-global-element colorset-data cd-color-data">
+            <div class="colorset-data-label">Global Element Color</div>
+            <div class="colorset-data-colors">
+              <div class="colorset-global-element-fill cd-selector">
+                <div class="element-fill-label cd-label">fill</div>
+                <div class="element-fill-reflector element-reflector cd-reflector" reflector="fill"></div>
+              </div>
+              <div class="colorset-global-element-stroke cd-selector">
+                <div class="element-stroke-label cd-label">stroke</div>
+                <div class="element-stroke-reflector element-reflector cd-reflector" reflector="stroke"></div>
+              </div>
+            </div>
+          </div>
+        
+          <div class="color-settings-controller">
+            <div class="btn-setting apply-default-colorset">Apply Collection Default</div>
+            <div class="btn-setting preview-colorset">Apply Collection Preview</div>
+            <div class="btn-setting save-colorset">Save As New Colorset</div>
+          </div>
           </div>
       </div>
     `

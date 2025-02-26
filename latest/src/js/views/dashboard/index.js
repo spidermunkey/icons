@@ -1,11 +1,15 @@
+import { Cursor } from '../../utils/Cursor.js'
+import { DateTime } from '../../utils/DateTime.js'
+
 import { AbstractView } from '../../components/AbstractView.js'
 import { Preview } from './../../components/Preview.js'
 import { ContextMenu } from '../../components/Context.js'
 import { DashboardElement } from '../../components/Dashboard.js'
 import { Menu } from '../../components/Menu.js'
-import { Cursor } from '../../utils/Cursor.js'
-import { DateTime } from '../../utils/DateTime.js'
 import { Collection } from '../../components/Collection.js'
+import { Settings } from './components/CollectionSettingsInterface.js'
+import { ColorPicker } from '../../components/ColorPicker.js'
+import { CollectionPreview } from '../../components/CollectionPreview.js'
 
 import { MainMenu } from '../../components/html/MainMenu.js'
 import { COSM } from '../../components/html/cosm.js'
@@ -22,19 +26,16 @@ import { ScannerWidget } from '../../components/html/ScannerWidget.js'
 
 import { CollectionInterface } from '../../components/html/CollectionInterface.js'
 import { PreviewInterface } from '../../components/html/PreviewInterface.js'
-import { Settings } from './components/CollectionSettingsInterface.js'
 import { PocketInterface} from '../../components/html/PocketInterface.js'
-import { ColorPicker } from '../../components/ColorPicker.js'
-import { CollectionPreview } from '../../components/CollectionPreview.js'
-
+import { icons } from '../../components/html/PresetIcons.js'
 export class Dashboard extends AbstractView {
   constructor(store) {
-    super(store);
-    this.once = false;
+    super(store)
+    this.once = false
     this.mode = 'dark'
     this.on('rendered',() => { 
         this.preview = new Preview()
-        this.collectionPreview = new CollectionPreview();
+        this.collectionPreview = new CollectionPreview()
         this.colorPicker = new ColorPicker({})
         this.contextMenu = new ContextMenu()
         this.dashboard = new DashboardElement()
@@ -43,8 +44,7 @@ export class Dashboard extends AbstractView {
         this.settings.store = this.store
         this.dashboardElement = this.dashboard.element
         this.editor = $('#INTERFACE')
-        this.collectionSettingsWindow = $('.widget-settings.widget-wrapper');
-
+        this.collectionSettingsWindow = $('.widget-settings.widget-wrapper')
     })
     this.state = {
         tabName: 'home',
@@ -110,16 +110,16 @@ export class Dashboard extends AbstractView {
         })
         this.preview.on('close',() => {
             if (this.colorPicker.active)
-                this.colorPicker.close();
+                this.colorPicker.close()
             if (this.colorPicker.fsActive)
-                this.colorPicker.closeFS();
+                this.colorPicker.closeFS()
         })
         $$('.preview__tabber--tab').forEach(tab => {
             tab.addEventListener('click',(e) => {
                 $$('.preview__tabber--tab').forEach(tab => tab.classList.remove('active'))
-                tab.classList.add('active');
-                const tabName = tab.dataset.tab;
-                this.preview.openTab(tabName);
+                tab.classList.add('active')
+                const tabName = tab.dataset.tab
+                this.preview.openTab(tabName)
                 if (tabName !== 'color') this.colorPicker.close()
             })
         })
@@ -131,44 +131,53 @@ export class Dashboard extends AbstractView {
                 && !event.target.closest('[data-tab="presets"]')
                 && !event.target.closest('.preset-header .current-preset')
             );
-            const cosmColorPicker = (this.colorPicker.active || this.colorPicker.fsActive) && !event.target.closest('.preview__modals--modal.color')
+            const cosmColorPicker = (this.colorPicker.active || this.colorPicker.fsActive) && !event.target.closest('.preview__modals--modal.color') && !event.target.closest('.color-editor')
             
             if (cosmSettings) {
-                console.log(!event.target.closest('.settings-editor'))
-                console.log(event.target.closest('.settings-tab'))
-                console.log(event.target.closest('.settings-modal'))
-                console.log(event.target.closest('.pre-opt'))
-                console.log('closing',event.target)
-                console.log(event)
-                this.preview.closeSettings();
+                this.preview.closeSettings()
             }
             if (cosmColorPicker){
-                console.log('cosm color')
-                console.log(event.target.closest('.preview__modals--modal.color'))
-                console.log(this.colorPicker.fsActive)
-                console.log(this.colorPicker.active)
-                console.log(cosmColorPicker)
                 this.colorPicker.close()
             }
         })
-        // collection settings
-        this.collectionPreview.on('save color',(collection,color) => {
-            console.log('SAVING COLORSET',collection,color)
+        // save collection color settings
+        $('.collection-color-picker .like-color').addEventListener('click',() => {
+            console.log('saving color for later....',this.collectionPreview.currentHex)
+        })
+        $('.color-settings-controller .btn-setting.save-colorset').addEventListener('click',async () => {
+            console.log('SAVING COLORSET',this.collectionPreview.colors)
+            let preview = this.collectionPreview
+            let colorset = preview.currentColorSet
+            let collection = this.state.collection
+            let colorSetID = uuid()
+            let colors = {
+                csid:colorSetID,
+                name: 'untitled',
+                colorset_type: 'global',
+                ...colorset,
+            }
+            console.log('saving colorset to collection....')
+            const response = await this.store.saveCollectionColorset(collection.meta.cid,colors)
+            console.log('SAVE ACTION RESPONSE....',response)
+            collection.colors = {
+                ...collection.colors,
+                [colorSetID]: colors
+            }
         })
         // icons settings menu
-            const settingsTabs = $$('.settings-tab')
-            const settingsModals = $$('.settings-interface .settings-modal')
-            settingsTabs.forEach(tab => {
-                tab.addEventListener('click',() => {
-                    settingsTabs.forEach(tab => tab.classList.remove('active'))
-                    settingsModals.forEach(modal => modal.classList.remove('active'))
-                    const modal = $(`.settings-modal[modal=${tab.getAttribute('tab')}]`)
-                    if (modal){
-                        modal.classList.add('active')
-                        tab.classList.add('active')
-                    }
-                })
+        const settingsTabs = $$('.settings-tab')
+        const settingsModals = $$('.settings-interface .settings-modal')
+        settingsTabs.forEach(tab => {
+            tab.addEventListener('click',() => {
+                settingsTabs.forEach(tab => tab.classList.remove('active'))
+                settingsModals.forEach(modal => modal.classList.remove('active'))
+                const modal = $(`.settings-modal[modal=${tab.getAttribute('tab')}]`)
+                if (modal){
+                    modal.classList.add('active')
+                    tab.classList.add('active')
+                }
             })
+        })
         $('.search.passive-search').addEventListener('input',this.search())
         $('.search.passive-search input').focus()
         $('.btn-cancel').addEventListener('click',() => this.cancelSearch())
@@ -194,12 +203,11 @@ export class Dashboard extends AbstractView {
         $('.add-to-collection').addEventListener('click',() => this.openAddToCollectionMenu())
         // open fullscreen color editor
         $('.pv-action').addEventListener('click',() => this.openColorEditor())
+        $('.icon-label.open-colors').addEventListener('click',() => this.toggleColorEditor())
         $('.save-preset-modal').addEventListener('click', this.handleSavePreset() )
         $('.save-preset.action').addEventListener('click', async () => {
             await this.ready
-            const showSavePopup = () => {
-                savePresetModal.classList.toggle('active')
-            }
+            const showSavePopup = () => savePresetModal.classList.toggle('active')
             const savePresetModal = $('.save-preset-modal')
             showSavePopup()
         })
@@ -210,7 +218,6 @@ export class Dashboard extends AbstractView {
             // show current collection presets
         })
         $('.btn-create-collection').addEventListener('click',() => this.loadCreateCollectionForm())
-
         $('.db-context .btn.copy').addEventListener('click',(e) => this.copyCurrentIcon(e))
         $('.db-context .btn.pocket').addEventListener('click',() => this.togglePocketFromContext())
         $('.db-context .c-atp').addEventListener('click',() => this.togglePocketFromContext())
@@ -220,7 +227,6 @@ export class Dashboard extends AbstractView {
         $('.db-context .o-components').addEventListener('click',() => this.openPreviewFromContext('components'))
         $('.db-context .btn.info').addEventListener('click',() => $('.db-context .info-card').classList.toggle('active'))
         $('.db-context .card-icon').addEventListener('click',() => $('.db-context .card-icon').classList.toggle('active'))
-
         this.notify('hydrated')
         return this;
     }
@@ -293,10 +299,608 @@ export class Dashboard extends AbstractView {
         if (!this.context.icon) return;
         this.state.pocket.add((this.context.icon))
     }
+    loadCollectionColors(){
+        let colorDataContainer = $('.icon-color-editor .color-data');
+            colorDataContainer.innerHTML = ''
+        let collectionColors = this.state.collection.colors
+        let collectionPresetHTML = (colorset,type) => {
+            const container = document.createElement('div')
+            container.classList.add('colorset')
+            if (type === 'collection') {
+                container.innerHTML = `
+                <div class="type-container colorset-data">
+                    <div class="preset-type-label">Preset Name:</div>
+                    <div class="preset-type">
+                        ${ colorset?.name || 'untitled' }
+                    </div>
+                </div>
+                <div class="colorset-colors">
+                    <div class="global-fill-container reflector">
+                        <div class="gf-label">Global Fill</div>
+                        <div class="gf-reflector">${colorset.shapes.fill}</div>
+                    </div>
+                    <div class="global-stroke-container reflector">
+                        <div class="gf-label">Global Stroke</div>
+                        <div class="gf-reflector">${colorset.shapes.stroke}</div>
+                    </div>
+                </div>
+                <div class="colorset-controls">
+                    <div class="btn-apply-colorset">apply colorset</div>
+                </div> 
+                `
+                $('.global-fill-container .gf-reflector',container).style.background = colorset.shapes.fill;
+                $('.global-stroke-container .gf-reflector',container).style.background = colorset.shapes.stroke;
+                $('.btn-apply-colorset',container).addEventListener('click', () => {
+                    this.colorPicker.updateFillGroup(colorset.shapes.fill)
+                    this.colorPicker.updateStrokeGroup(colorset.shapes.stroke)
+                })
+            } 
+            return container
+        }
+        for (const id in collectionColors){
+            let colorset = collectionColors[id]
+            console.log('APPENDING COLORSET [COLLECTION]',collectionColors,colorset)
+            colorDataContainer.appendChild(collectionPresetHTML(colorset,'collection'))
+        }
+    }
+    loadColorMenu(){
+        let currentAnimation
+        const collection = this.currentView
+        const meta = collection.meta
+        const currentIcon = this.currentIcon
+        const collectionID = meta.cid
+        const iconColors = currentIcon?.colors
+        const collectionColors = collection?.colors
+
+        const iconColorsTab = $('.color-editor-modal[modal="icons"]')
+        const collectionColorsTab = $('.color-editor-modal[modal="collections"]')
+        const recentColorsTab = $('.color-editor-modal[modal="recent"]')
+        const iconColorsTabber = $('.color-editor-tab[tab="icons"]')
+        const collectionColorsTabber = $('.color-editor-tab[tab="collections"]')
+        const recentColorsTabber = $('.color-editor-tab[tab="recent"]')
+        const tab = collection.state?.colorsetTab || 'collections'
+        const currentTab = $(`.color-editor-modal[modal="${tab}"]`)
+        const tabs = [
+            ['icons',iconColorsTab,iconColorsTabber],
+            ['collections',collectionColorsTab,collectionColorsTabber],
+            ['recent',recentColorsTab,recentColorsTabber],
+        ]
+        tabs.forEach(tab => tab[2].addEventListener('click', () => {
+            tabs.forEach(tab => {
+                tab[2].classList.remove('active')
+                tab[1].classList.remove('active')
+            })
+            tab[1].classList.add('active')
+            tab[2].classList.add('active')
+            collection.state.colorsetTab = tab[0]
+        }))
+        currentTab.classList.add('active')
+        console.log(tab)
+        $(`.color-editor .preset-option[tab=${tab}]`).classList.add('active')
+
+        const colorDataContainer = $('.color-editor .color-data')
+
+        const presetIsDefaultIcon = '<svg width="24px" height="24px" viewBox="-4 -4 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m4lgxgw9-0265D74VQICG"><path d="M10.5 16C10.5 15.1716 11.1716 14.5 12 14.5C12.8284 14.5 13.5 15.1716 13.5 16C13.5 16.8284 12.8284 17.5 12 17.5C11.1716 17.5 10.5 16.8284 10.5 16Z" fill="black" pid="m4lgxgw9-00NA2554UM3C" stroke="null"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M9.81049 4.00497C10.0428 3.91246 10.2852 3.8475 10.5327 3.81144C12.006 3.59678 13.4327 4.42661 13.9745 5.81335L14.0495 6.00537C14.1424 6.2433 14.2087 6.4908 14.2472 6.74334L14.4638 8.16565L15.9467 7.9398L15.7301 6.51749C15.675 6.15544 15.5799 5.80062 15.4466 5.45951L15.3716 5.26749C14.5758 3.23066 12.4804 2.01182 10.3165 2.32712C9.95295 2.38008 9.59691 2.47548 9.25563 2.61137C7.22397 3.42026 6.01867 5.52354 6.34793 7.68538L6.37897 7.88919C6.43411 8.25123 6.52918 8.60605 6.66245 8.94716L7.3166 10.6215L6.93512 10.6519C5.85239 10.7384 4.96829 11.5523 4.79277 12.6242C4.4267 14.8598 4.4267 17.1401 4.79277 19.3758C4.96829 20.4477 5.85239 21.2616 6.93512 21.348L8.43125 21.4675C10.8066 21.6571 13.1934 21.6571 15.5687 21.4675L17.0649 21.348C18.1476 21.2616 19.0317 20.4477 19.2072 19.3758C19.5733 17.1401 19.5733 14.8598 19.2072 12.6242C19.0317 11.5523 18.1476 10.7384 17.0649 10.6519L15.5687 10.5325C13.3426 10.3548 11.1065 10.3436 8.87916 10.499L8.0596 8.4013C7.96665 8.16337 7.90033 7.91587 7.86187 7.66334L7.83083 7.45953C7.60666 5.98768 8.42727 4.55569 9.81049 4.00497ZM15.4494 12.0277C13.1534 11.8445 10.8466 11.8445 8.55062 12.0277L7.05449 12.1472C6.65956 12.1787 6.33708 12.4756 6.27306 12.8666C5.93327 14.9417 5.93327 17.0583 6.27306 19.1334C6.33708 19.5244 6.65956 19.8213 7.05449 19.8528L8.55062 19.9722C10.8465 20.1555 13.1534 20.1555 15.4494 19.9722L16.9455 19.8528C17.3404 19.8213 17.6629 19.5244 17.7269 19.1334C18.0667 17.0583 18.0667 14.9417 17.7269 12.8666C17.6629 12.4756 17.3404 12.1787 16.9455 12.1472L15.4494 12.0277Z" fill="black" pid="m4lgxgw9-01EYDRNJVEAJ" stroke="null"></path></svg>'
+        const presetNotDefaultIcon = '<svg width="24px" height="24px" viewBox="-4 -4 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m4lgxgw6-003EWOTOIWH9"><path d="M10.5 16C10.5 15.1716 11.1716 14.5 12 14.5C12.8284 14.5 13.5 15.1716 13.5 16C13.5 16.8284 12.8284 17.5 12 17.5C11.1716 17.5 10.5 16.8284 10.5 16Z" fill="black" pid="m4lgxgw6-02FPUN3FPP0X" stroke="null"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M7.62165 10.5971L7.30621 7.75816C7.26577 7.39418 7.26577 7.02684 7.30621 6.66286L7.32898 6.45796C7.57046 4.28457 9.27907 2.56492 11.4509 2.30941C11.8157 2.26649 12.1843 2.26649 12.5491 2.30941C14.7209 2.56492 16.4295 4.28458 16.671 6.45797L16.6937 6.66286C16.7342 7.02684 16.7342 7.39418 16.6937 7.75815L16.3783 10.5971L17.0649 10.6519C18.1476 10.7384 19.0317 11.5523 19.2073 12.6242C19.5733 14.8598 19.5733 17.1401 19.2073 19.3758C19.0317 20.4477 18.1476 21.2616 17.0649 21.348L15.5688 21.4675C13.1934 21.6571 10.8067 21.6571 8.43128 21.4675L6.93515 21.348C5.85242 21.2616 4.96832 20.4477 4.7928 19.3758C4.42673 17.1401 4.42673 14.8598 4.7928 12.6242C4.96832 11.5523 5.85242 10.7384 6.93515 10.6519L7.62165 10.5971ZM11.6261 3.79914C11.8745 3.76992 12.1255 3.76992 12.3738 3.79914C13.8525 3.97309 15.0157 5.1439 15.1802 6.62361L15.2029 6.82851C15.2311 7.08239 15.2311 7.33862 15.2029 7.59251L14.8818 10.483C12.9626 10.3594 11.0374 10.3594 9.1182 10.483L8.79704 7.59251C8.76883 7.33862 8.76883 7.08239 8.79704 6.82851L8.8198 6.62361C8.98422 5.1439 10.1475 3.97309 11.6261 3.79914ZM15.4494 12.0277C13.1535 11.8445 10.8466 11.8445 8.55065 12.0277L7.05452 12.1472C6.65959 12.1787 6.33711 12.4756 6.27309 12.8666C5.9333 14.9417 5.9333 17.0583 6.27309 19.1334C6.33711 19.5244 6.65959 19.8213 7.05452 19.8528L8.55065 19.9722C10.8466 20.1555 13.1535 20.1555 15.4494 19.9722L16.9455 19.8528C17.3405 19.8213 17.6629 19.5244 17.727 19.1334C18.0668 17.0583 18.0668 14.9417 17.727 12.8666C17.6629 12.4756 17.3405 12.1787 16.9455 12.1472L15.4494 12.0277Z" fill="black" pid="m4lgxgw6-002BR93QMXFL" stroke="null"></path></svg>'
+        const presetIsCollectionDefaultIcon = '<svg width="24px" height="24px" viewBox="-4 -4 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m4lhje14-011M3D6DXUR4"><path d="M18.68 9.98322C18.7196 10.231 18.7546 10.4792 18.7851 10.7279C18.8028 10.8722 18.8961 10.9956 19.0278 11.0569C19.3826 11.2219 19.7185 11.4206 20.0315 11.6488C20.174 11.7528 20.3819 11.6471 20.3678 11.4712C20.3215 10.8947 20.2527 10.3194 20.1613 9.74679L20.0972 9.34535C19.8913 8.05533 18.7786 7.10612 17.4722 7.10612L9.15777 7.10612C8.95226 6.04846 8.02099 5.25 6.90323 5.25H4.61167C3.25538 5.25 2.11298 6.26343 1.95127 7.61004L1.67879 9.87915C1.38913 12.2913 1.46388 14.7333 1.90055 17.1232C2.11607 18.3027 3.10258 19.1869 4.2986 19.2725L5.81261 19.3808C7.53657 19.5041 9.26382 19.5659 10.9911 19.5661C11.1458 19.5661 11.2421 19.3969 11.1709 19.2596C11.0216 18.9719 10.8949 18.6706 10.7932 18.358C10.7375 18.1866 10.5813 18.0651 10.4011 18.0636C8.90627 18.051 7.4117 17.9914 5.91965 17.8846L4.40565 17.7763C3.89217 17.7396 3.46865 17.36 3.37612 16.8536C2.96649 14.6116 2.89636 12.3208 3.16809 10.058L3.44057 7.78888C3.51176 7.19611 4.01464 6.75 4.61167 6.75H6.90323C7.34328 6.75 7.7 7.10672 7.7 7.54677C7.7 8.13183 8.17429 8.60612 8.75936 8.60612H17.4722C18.0414 8.60612 18.5262 9.0197 18.6159 9.58178L18.68 9.98322Z" fill="black" pid="m4lhje14-02G8MUTWRREV" stroke="null"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M12 16.5C12 17.4719 12.3081 18.3718 12.8319 19.1074C13.1238 19.5173 13.4827 19.8762 13.8926 20.1681C14.6282 20.6919 15.5281 21 16.5 21C18.9853 21 21 18.9853 21 16.5C21 15.5281 20.6919 14.6282 20.1681 13.8926C19.8762 13.4827 19.5173 13.1238 19.1074 12.8319C18.3718 12.3081 17.4719 12 16.5 12C14.0147 12 12 14.0147 12 16.5ZM16.5 19.5C15.9436 19.5 15.4227 19.3486 14.976 19.0846L19.0846 14.976C19.3486 15.4227 19.5 15.9436 19.5 16.5C19.5 18.1569 18.1569 19.5 16.5 19.5ZM13.9154 18.024L18.024 13.9154C17.5773 13.6514 17.0564 13.5 16.5 13.5C14.8431 13.5 13.5 14.8431 13.5 16.5C13.5 17.0564 13.6514 17.5773 13.9154 18.024Z" fill="black" pid="m4lhje14-02B47GTRSP3K" stroke="null"></path></svg>'
+        const presetNotCollectionDefaultIcon = '<svg width="24px" height="24px" viewBox="-4 -4 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m4lhje15-00TIO5N7LRCX"> <path fill-rule="evenodd" clip-rule="evenodd" d="M18.5 11.25C17.2275 11.25 16.1285 12.14 15.864 13.3847L15.8418 13.4891C15.7739 13.8088 15.7619 14.1379 15.8064 14.4617L15.9594 15.5744C15.9023 15.5813 15.8451 15.5885 15.788 15.5959C14.9083 15.7102 14.25 16.4595 14.25 17.3466V19.6534C14.25 20.5405 14.9083 21.2899 15.788 21.4041C17.5884 21.6379 19.4116 21.6379 21.212 21.4041C22.0917 21.2899 22.75 20.5405 22.75 19.6534V17.3466C22.75 16.4595 22.0917 15.7102 21.212 15.5959C21.1549 15.5885 21.0977 15.5813 21.0406 15.5744L21.1936 14.4617C21.2381 14.1379 21.2261 13.8088 21.1582 13.4891L21.136 13.3847C20.8715 12.14 19.7724 11.25 18.5 11.25ZM19.5441 15.4464L19.7076 14.2574C19.7284 14.1054 19.7228 13.951 19.6909 13.8009L19.6688 13.6965C19.5515 13.1446 19.0642 12.75 18.5 12.75C17.9358 12.75 17.4485 13.1446 17.3312 13.6965L17.3091 13.8009C17.2772 13.951 17.2715 14.1054 17.2924 14.2574L17.4559 15.4464C18.1515 15.4119 18.8484 15.4119 19.5441 15.4464ZM15.9812 17.0834C17.6534 16.8663 19.3466 16.8663 21.0188 17.0834C21.151 17.1006 21.25 17.2132 21.25 17.3466V19.6534C21.25 19.7868 21.151 19.8994 21.0188 19.9166C19.3466 20.1338 17.6534 20.1338 15.9812 19.9166C15.849 19.8994 15.75 19.7868 15.75 19.6534V17.3466C15.75 17.2132 15.849 17.1006 15.9812 17.0834Z" fill="black" pid="m4lhje15-0029CY6QDQ9D" stroke="null"></path><path d="M12.75 18.3653C12.75 18.1984 12.6138 18.0637 12.4468 18.0647C10.6034 18.0763 8.7596 18.0163 6.91965 17.8846L5.40565 17.7763C4.89217 17.7396 4.46865 17.36 4.37612 16.8536C3.96649 14.6116 3.89636 12.3208 4.16809 10.058L4.44057 7.78888C4.51176 7.19611 5.01464 6.75 5.61167 6.75H7.90323C8.34328 6.75 8.7 7.10672 8.7 7.54677C8.7 8.13183 9.17429 8.60612 9.75936 8.60612H18.4722C19.0414 8.60612 19.5262 9.0197 19.6159 9.58178L19.6293 9.66531C19.6537 9.8182 19.7647 9.94169 19.9105 9.99377C20.2621 10.1194 20.5933 10.2908 20.8961 10.5016C21.0468 10.6066 21.2677 10.4888 21.2434 10.3067C21.2184 10.1198 21.191 9.93317 21.1613 9.74679L21.0972 9.34535C20.8913 8.05533 19.7786 7.10612 18.4722 7.10612L10.1578 7.10612C9.95226 6.04846 9.02099 5.25 7.90323 5.25H5.61167C4.25538 5.25 3.11298 6.26343 2.95127 7.61004L2.67879 9.87915C2.38913 12.2913 2.46388 14.7333 2.90055 17.1232C3.11607 18.3027 4.10258 19.1869 5.2986 19.2725L6.81261 19.3808C8.69028 19.5151 10.5719 19.5764 12.4531 19.5647C12.6176 19.5637 12.75 19.4298 12.75 19.2653V18.3653Z" fill="black" pid="m4lhje15-020YA1B619UI" stroke="null"></path></svg>'
+        const hidePresetIcon = '<svg width="24px" height="24px" viewBox="-3 -3 30 30" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m4lo5rs8-00OP23ZTDXMN"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M20.5303 4.53033C20.8232 4.23744 20.8232 3.76256 20.5303 3.46967C20.2374 3.17678 19.7626 3.17678 19.4697 3.46967L3.46967 19.4697C3.17678 19.7626 3.17678 20.2374 3.46967 20.5303C3.76256 20.8232 4.23744 20.8232 4.53033 20.5303L7.37723 17.6834C8.74353 18.3266 10.3172 18.75 12 18.75C14.684 18.75 17.0903 17.6729 18.8206 16.345C19.6874 15.6797 20.4032 14.9376 20.9089 14.2089C21.4006 13.5003 21.75 12.7227 21.75 12C21.75 11.2773 21.4006 10.4997 20.9089 9.79115C20.4032 9.06244 19.6874 8.32028 18.8206 7.65503C18.5585 7.45385 18.2808 7.25842 17.989 7.07163L20.5303 4.53033ZM16.8995 8.16113L15.1287 9.93196C15.5213 10.5248 15.75 11.2357 15.75 12C15.75 14.0711 14.0711 15.75 12 15.75C11.2357 15.75 10.5248 15.5213 9.93196 15.1287L8.51524 16.5454C9.58077 16.9795 10.7621 17.25 12 17.25C14.2865 17.25 16.3802 16.3271 17.9073 15.155C18.6692 14.5703 19.2714 13.9374 19.6766 13.3536C20.0957 12.7497 20.25 12.2773 20.25 12C20.25 11.7227 20.0957 11.2503 19.6766 10.6464C19.2714 10.0626 18.6692 9.42972 17.9073 8.84497C17.5941 8.60461 17.2571 8.37472 16.8995 8.16113ZM11.0299 14.0307C11.3237 14.1713 11.6526 14.25 12 14.25C13.2426 14.25 14.25 13.2426 14.25 12C14.25 11.6526 14.1713 11.3237 14.0307 11.0299L11.0299 14.0307Z" pid="m4lo5rs8-00F4LH2DZYNA" stroke="null"></path><path fill="currentColor" d="M12 5.25C13.0323 5.25 14.0236 5.40934 14.9511 5.68101C15.1296 5.73328 15.1827 5.95662 15.0513 6.0881L14.2267 6.91265C14.1648 6.97451 14.0752 6.99928 13.99 6.97967C13.3506 6.83257 12.6839 6.75 12 6.75C9.71345 6.75 7.61978 7.67292 6.09267 8.84497C5.33078 9.42972 4.72857 10.0626 4.32343 10.6464C3.90431 11.2503 3.75 11.7227 3.75 12C3.75 12.2773 3.90431 12.7497 4.32343 13.3536C4.67725 13.8635 5.18138 14.4107 5.81091 14.9307C5.92677 15.0264 5.93781 15.2015 5.83156 15.3078L5.12265 16.0167C5.03234 16.107 4.88823 16.1149 4.79037 16.0329C4.09739 15.4517 3.51902 14.8255 3.0911 14.2089C2.59937 13.5003 2.25 12.7227 2.25 12C2.25 11.2773 2.59937 10.4997 3.0911 9.79115C3.59681 9.06244 4.31262 8.32028 5.17941 7.65503C6.90965 6.32708 9.31598 5.25 12 5.25Z" pid="m4lo5rs8-02CT5B0Y3UOA" stroke="null"></path><path fill="currentColor" d="M12 8.25C12.1185 8.25 12.2357 8.25549 12.3513 8.26624C12.5482 8.28453 12.6194 8.51991 12.4796 8.6597L11.2674 9.87196C10.6141 10.0968 10.0968 10.6141 9.87196 11.2674L8.6597 12.4796C8.51991 12.6194 8.28453 12.5482 8.26624 12.3513C8.25549 12.2357 8.25 12.1185 8.25 12C8.25 9.92893 9.92893 8.25 12 8.25Z" pid="m4lo5rs8-028MI5K4V6ZL" stroke="null"></path></svg>'
+        const saveAsCollectionDefaultIcon = '<svg width="24px" height="24px" viewBox="-3 -3 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m69q4n3v-00RDW2RAYPMU"><path fill-rule="evenodd" clip-rule="evenodd" d="M18.5 11.25C17.2275 11.25 16.1285 12.14 15.864 13.3847L15.8418 13.4891C15.7739 13.8088 15.7619 14.1379 15.8064 14.4617L15.9594 15.5744C15.9023 15.5813 15.8451 15.5885 15.788 15.5959C14.9083 15.7102 14.25 16.4595 14.25 17.3466V19.6534C14.25 20.5405 14.9083 21.2899 15.788 21.4041C17.5884 21.6379 19.4116 21.6379 21.212 21.4041C22.0917 21.2899 22.75 20.5405 22.75 19.6534V17.3466C22.75 16.4595 22.0917 15.7102 21.212 15.5959C21.1549 15.5885 21.0977 15.5813 21.0406 15.5744L21.1936 14.4617C21.2381 14.1379 21.2261 13.8088 21.1582 13.4891L21.136 13.3847C20.8715 12.14 19.7724 11.25 18.5 11.25ZM19.5441 15.4464L19.7076 14.2574C19.7284 14.1054 19.7228 13.951 19.6909 13.8009L19.6688 13.6965C19.5515 13.1446 19.0642 12.75 18.5 12.75C17.9358 12.75 17.4485 13.1446 17.3312 13.6965L17.3091 13.8009C17.2772 13.951 17.2715 14.1054 17.2924 14.2574L17.4559 15.4464C18.1515 15.4119 18.8484 15.4119 19.5441 15.4464ZM15.9812 17.0834C17.6534 16.8663 19.3466 16.8663 21.0188 17.0834C21.151 17.1006 21.25 17.2132 21.25 17.3466V19.6534C21.25 19.7868 21.151 19.8994 21.0188 19.9166C19.3466 20.1338 17.6534 20.1338 15.9812 19.9166C15.849 19.8994 15.75 19.7868 15.75 19.6534V17.3466C15.75 17.2132 15.849 17.1006 15.9812 17.0834Z" fill="black" pid="m69q4n3v-01NJ1I89COBG" stroke="null"></path><path d="M12.75 18.3653C12.75 18.1984 12.6138 18.0637 12.4468 18.0647C10.6034 18.0763 8.7596 18.0163 6.91965 17.8846L5.40565 17.7763C4.89217 17.7396 4.46865 17.36 4.37612 16.8536C3.96649 14.6116 3.89636 12.3208 4.16809 10.058L4.44057 7.78888C4.51176 7.19611 5.01464 6.75 5.61167 6.75H7.90323C8.34328 6.75 8.7 7.10672 8.7 7.54677C8.7 8.13183 9.17429 8.60612 9.75936 8.60612H18.4722C19.0414 8.60612 19.5262 9.0197 19.6159 9.58178L19.6293 9.66531C19.6537 9.8182 19.7647 9.94169 19.9105 9.99377C20.2621 10.1194 20.5933 10.2908 20.8961 10.5016C21.0468 10.6066 21.2677 10.4888 21.2434 10.3067C21.2184 10.1198 21.191 9.93317 21.1613 9.74679L21.0972 9.34535C20.8913 8.05533 19.7786 7.10612 18.4722 7.10612L10.1578 7.10612C9.95226 6.04846 9.02099 5.25 7.90323 5.25H5.61167C4.25538 5.25 3.11298 6.26343 2.95127 7.61004L2.67879 9.87915C2.38913 12.2913 2.46388 14.7333 2.90055 17.1232C3.11607 18.3027 4.10258 19.1869 5.2986 19.2725L6.81261 19.3808C8.69028 19.5151 10.5719 19.5764 12.4531 19.5647C12.6176 19.5637 12.75 19.4298 12.75 19.2653V18.3653Z" fill="black" pid="m69q4n3v-00NKXI5S6E2P" stroke="null"></path></svg>'
+        const removeCollectionDefaultIcon = '<svg width="24px" height="24px" viewBox="-3 -3 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m69q4n3u-021JUMZVM3JV"><path d="M18.68 9.98322C18.7196 10.231 18.7546 10.4792 18.7851 10.7279C18.8028 10.8722 18.8961 10.9956 19.0278 11.0569C19.3826 11.2219 19.7185 11.4206 20.0315 11.6488C20.174 11.7528 20.3819 11.6471 20.3678 11.4712C20.3215 10.8947 20.2527 10.3194 20.1613 9.74679L20.0972 9.34535C19.8913 8.05533 18.7786 7.10612 17.4722 7.10612L9.15777 7.10612C8.95226 6.04846 8.02099 5.25 6.90323 5.25H4.61167C3.25538 5.25 2.11298 6.26343 1.95127 7.61004L1.67879 9.87915C1.38913 12.2913 1.46388 14.7333 1.90055 17.1232C2.11607 18.3027 3.10258 19.1869 4.2986 19.2725L5.81261 19.3808C7.53657 19.5041 9.26382 19.5659 10.9911 19.5661C11.1458 19.5661 11.2421 19.3969 11.1709 19.2596C11.0216 18.9719 10.8949 18.6706 10.7932 18.358C10.7375 18.1866 10.5813 18.0651 10.4011 18.0636C8.90627 18.051 7.4117 17.9914 5.91965 17.8846L4.40565 17.7763C3.89217 17.7396 3.46865 17.36 3.37612 16.8536C2.96649 14.6116 2.89636 12.3208 3.16809 10.058L3.44057 7.78888C3.51176 7.19611 4.01464 6.75 4.61167 6.75H6.90323C7.34328 6.75 7.7 7.10672 7.7 7.54677C7.7 8.13183 8.17429 8.60612 8.75936 8.60612H17.4722C18.0414 8.60612 18.5262 9.0197 18.6159 9.58178L18.68 9.98322Z" fill="black" pid="m69q4n3u-011XLEIB0F8E" stroke="null"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M12 16.5C12 17.4719 12.3081 18.3718 12.8319 19.1074C13.1238 19.5173 13.4827 19.8762 13.8926 20.1681C14.6282 20.6919 15.5281 21 16.5 21C18.9853 21 21 18.9853 21 16.5C21 15.5281 20.6919 14.6282 20.1681 13.8926C19.8762 13.4827 19.5173 13.1238 19.1074 12.8319C18.3718 12.3081 17.4719 12 16.5 12C14.0147 12 12 14.0147 12 16.5ZM16.5 19.5C15.9436 19.5 15.4227 19.3486 14.976 19.0846L19.0846 14.976C19.3486 15.4227 19.5 15.9436 19.5 16.5C19.5 18.1569 18.1569 19.5 16.5 19.5ZM13.9154 18.024L18.024 13.9154C17.5773 13.6514 17.0564 13.5 16.5 13.5C14.8431 13.5 13.5 14.8431 13.5 16.5C13.5 17.0564 13.6514 17.5773 13.9154 18.024Z" fill="black" pid="m69q4n3u-014LY68EEF08" stroke="null"></path></svg>'
+        const removeFromCollectionIcon = '<svg width="24px" height="24px" viewBox="-3 -3 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m69qqotf-005USGAM7PMH"><path d="M9.70191 11.2019C9.9948 10.909 10.4697 10.909 10.7626 11.2019L12 12.4393L13.2374 11.2019C13.5303 10.909 14.0052 10.909 14.2981 11.2019C14.591 11.4948 14.591 11.9697 14.2981 12.2626L13.0607 13.5L14.2981 14.7374C14.591 15.0303 14.591 15.5052 14.2981 15.7981C14.0052 16.091 13.5303 16.091 13.2374 15.7981L12 14.5607L10.7626 15.7981C10.4697 16.091 9.9948 16.091 9.70191 15.7981C9.40901 15.5052 9.40901 15.0303 9.70191 14.7374L10.9393 13.5L9.70191 12.2626C9.40902 11.9697 9.40902 11.4948 9.70191 11.2019Z" fill="black" pid="m69qqotf-02A1LON86UDH" stroke="null"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M21.1613 9.74679C21.5581 12.233 21.5297 14.7686 21.0771 17.2453C20.8748 18.353 19.9484 19.1833 18.8253 19.2636L17.1874 19.3808C13.7335 19.6279 10.2665 19.6279 6.81261 19.3808L5.2986 19.2725C4.10258 19.1869 3.11607 18.3027 2.90055 17.1232C2.46388 14.7333 2.38913 12.2913 2.67879 9.87915L2.95127 7.61004C3.11298 6.26343 4.25538 5.25 5.61167 5.25H7.90323C9.02099 5.25 9.95226 6.04846 10.1578 7.10612L18.4722 7.10612C19.7786 7.10612 20.8913 8.05533 21.0972 9.34535L21.1613 9.74679ZM19.6016 16.9757C20.0236 14.6662 20.0501 12.3017 19.68 9.98322L19.6159 9.58178C19.5262 9.0197 19.0414 8.60612 18.4722 8.60612H9.75936C9.17429 8.60612 8.7 8.13183 8.7 7.54677C8.7 7.10672 8.34328 6.75 7.90323 6.75H5.61167C5.01464 6.75 4.51176 7.19611 4.44057 7.78888L4.16809 10.058C3.89636 12.3208 3.96649 14.6116 4.37612 16.8536C4.46865 17.36 4.89217 17.7396 5.40565 17.7763L6.91965 17.8846C10.3022 18.1266 13.6978 18.1266 17.0804 17.8846L18.7182 17.7674C19.1588 17.7359 19.5222 17.4102 19.6016 16.9757Z" fill="black" pid="m69qqotf-01QUMYO3BSAD" stroke="null"></path></svg>'
+        const addToCollectionIcon = '<svg width="24px" height="24px" viewBox="-3 -3 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m69qu6q2-02A7JGMVLEMP"><path d="M8.75 13.5C8.75 13.0858 9.08579 12.75 9.5 12.75H11.25V11C11.25 10.5858 11.5858 10.25 12 10.25C12.4142 10.25 12.75 10.5858 12.75 11V12.75H14.5C14.9142 12.75 15.25 13.0858 15.25 13.5C15.25 13.9142 14.9142 14.25 14.5 14.25H12.75V16C12.75 16.4142 12.4142 16.75 12 16.75C11.5858 16.75 11.25 16.4142 11.25 16V14.25H9.5C9.08579 14.25 8.75 13.9142 8.75 13.5Z" fill="black" pid="m69qu6q2-017MOA1JU5V4" stroke="null"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M21.1613 9.74679C21.5581 12.233 21.5297 14.7686 21.0771 17.2453C20.8748 18.353 19.9484 19.1833 18.8253 19.2636L17.1874 19.3808C13.7335 19.6279 10.2665 19.6279 6.81261 19.3808L5.2986 19.2725C4.10258 19.1869 3.11607 18.3027 2.90055 17.1232C2.46388 14.7333 2.38913 12.2913 2.67879 9.87915L2.95127 7.61004C3.11298 6.26343 4.25538 5.25 5.61167 5.25H7.90323C9.02099 5.25 9.95226 6.04846 10.1578 7.10612L18.4722 7.10612C19.7786 7.10612 20.8913 8.05533 21.0972 9.34535L21.1613 9.74679ZM19.6016 16.9757C20.0236 14.6662 20.0501 12.3017 19.68 9.98322L19.6159 9.58178C19.5262 9.0197 19.0414 8.60612 18.4722 8.60612H9.75936C9.17429 8.60612 8.7 8.13183 8.7 7.54677C8.7 7.10672 8.34328 6.75 7.90323 6.75H5.61167C5.01464 6.75 4.51176 7.19611 4.44057 7.78888L4.16809 10.058C3.89636 12.3208 3.96649 14.6116 4.37612 16.8536C4.46865 17.36 4.89217 17.7396 5.40565 17.7763L6.91965 17.8846C10.3022 18.1266 13.6978 18.1266 17.0804 17.8846L18.7182 17.7674C19.1588 17.7359 19.5222 17.4102 19.6016 16.9757Z" fill="black" pid="m69qu6q2-007LBGPNOWUH" stroke="null"></path></svg>'
+
+        // const collectionColors = this.state.collection.colors
+        const createColorsetWrapper = (colors,destination)=>{
+            const createColorsetElement = (colorset) => {
+                console.log('COLORSET TYPE: ',colorset.colorset_type)
+                const container = document.createElement('div')
+                const element_id = colorset?.csid ? colorset.csid : null
+                const preset_type = colorset?.colorset_type || 'global'
+                const isIconDefault = currentIcon?.color?.csid == colorset.csid
+                const isCollectionDefault = meta?.color?.csid == colorset.csid
+                const collectionSettingExists = !objectIsEmpty(collectionColors) && Object.hasOwn(collectionColors,colorset.csid)
+                const inverterSet = new Set();
+
+                if (preset_type === 'variable') {
+                
+                    for (const id in colorset){
+                        if (!Array.isArray(colorset[id])){
+                        // do you refactor all places where the preset is created and used
+                        // or do you just write a buggy patch like this
+                        // what design pattern / principles should have been in place for this not to happen?
+                        // below code was implimented before meta properties were created
+                        // how do you know and define object meta properties ahead of functionality
+                        // if at first you just want a working feature/ proof of concept?
+                            continue
+                        }
+                        let fill = colorset[id][0]
+                        let stroke = colorset[id][1]
+                        console.log(fill,stroke)
+                        if (fill && fill !== 'none')
+                            inverterSet.add(fill)
+                        if (stroke && stroke !== 'none')
+                            inverterSet.add(stroke)
+                    }
+                }
+                container.classList.add('colorset')
+                container.setAttribute('csid',element_id)
+                container.innerHTML = `
+                <div class="preset-element-toast">
+                    <div class="toast success defaultSet"> default setting applied </div>
+                    <div class="toast failure settingError"> error setting preset </div>
+                    <div class="toast clear defaultCleared"> default setting removed </div>
+                    <div class="toast delete removeCollectionSetting"> collection setting removed </div>
+                    <div class="toast success collectionDefault"> collection setting saved</div>
+                    <div class="toast info previewCollection">collection preview applied</div>
+                    <div class="toast success nameChange">name successfully changed</div>
+                    <div class="toast failure nameChangeError">error saving name</div>
+                </div>
+                <div class="preset-element-option">
+                    <div class="pre-opt opt-aid iconDefault">
+                        <div class="icon" active="${isIconDefault ? true : false }">${ isIconDefault ? presetNotDefaultIcon : presetIsDefaultIcon  }</div>
+                        <div class="tool-tip">${ isIconDefault ? 'ignore as icon default' : 'set as icon default' }</div>
+                    </div>
+                    <div class="pre-opt opt-acd collectionDefault"> 
+                        <div class="icon">${ isCollectionDefault ? presetIsCollectionDefaultIcon : presetNotCollectionDefaultIcon } </div>
+                        <div class="tool-tip">${ isCollectionDefault ? 'clear collection default' : 'set collection default' }</div>
+                    </div>
+                    <div class="pre-opt opt-pi previewIcon"> 
+                        <div class="icon">${ icons.previewIcon } </div>
+                        <div class="tool-tip">preview icon</div>
+                    </div>
+                    <div class="pre-opt opt-pc previewCollection">
+                        <div class="icon">${icons.previewCollection}</div>
+                        <div class="tool-tip">preview collection</div>
+                    </div>
+                    <div class="pre-opt opt-dp deletePreset"> 
+                            <div class="icon"><svg width="24px" height="24px" viewBox="-4 -4 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m4lkyhp9-02ABXVVV5HTN">
+                            <path d="M10 2.25C9.58579 2.25 9.25 2.58579 9.25 3V3.75H5C4.58579 3.75 4.25 4.08579 4.25 4.5C4.25 4.91421 4.58579 5.25 5 5.25H19C19.4142 5.25 19.75 4.91421 19.75 4.5C19.75 4.08579 19.4142 3.75 19 3.75H14.75V3C14.75 2.58579 14.4142 2.25 14 2.25H10Z" fill="black" pid="m4lkyhp9-01CH2FKOVM1P" stroke="null"></path>
+                            <path d="M13.0607 15L14.5303 16.4697C14.8232 16.7626 14.8232 17.2374 14.5303 17.5303C14.2374 17.8232 13.7626 17.8232 13.4697 17.5303L12 16.0607L10.5303 17.5303C10.2374 17.8232 9.76257 17.8232 9.46968 17.5303C9.17678 17.2374 9.17678 16.7626 9.46968 16.4697L10.9393 15L9.46967 13.5303C9.17678 13.2374 9.17678 12.7626 9.46967 12.4697C9.76256 12.1768 10.2374 12.1768 10.5303 12.4697L12 13.9393L13.4697 12.4697C13.7626 12.1768 14.2374 12.1768 14.5303 12.4697C14.8232 12.7626 14.8232 13.2374 14.5303 13.5303L13.0607 15Z" fill="black" pid="m4lkyhp9-01VZPDFEMFGW" stroke="null"></path>
+                            <path fill-rule="evenodd" clip-rule="evenodd" d="M5.99142 7.91718C6.03363 7.53735 6.35468 7.25 6.73684 7.25H17.2632C17.6453 7.25 17.9664 7.53735 18.0086 7.91718L18.2087 9.71852C18.5715 12.9838 18.5715 16.2793 18.2087 19.5446L18.189 19.722C18.045 21.0181 17.0404 22.0517 15.7489 22.2325C13.2618 22.5807 10.7382 22.5807 8.25108 22.2325C6.95954 22.0517 5.955 21.0181 5.81098 19.722L5.79128 19.5446C5.42846 16.2793 5.42846 12.9838 5.79128 9.71852L5.99142 7.91718ZM7.40812 8.75L7.2821 9.88417C6.93152 13.0394 6.93152 16.2238 7.2821 19.379L7.3018 19.5563C7.37011 20.171 7.84652 20.6612 8.45905 20.747C10.8082 21.0758 13.1918 21.0758 15.5409 20.747C16.1535 20.6612 16.6299 20.171 16.6982 19.5563L16.7179 19.379C17.0685 16.2238 17.0685 13.0394 16.7179 9.88417L16.5919 8.75H7.40812Z" fill="black" pid="m4lkyhp9-01OHI2KX2T3R" stroke="null"></path>
+                            </svg></div>
+                        <div class="tool-tip">delete preset</div>
+                    </div>
+                </div>
+                <div class="preset-val p-type"><span class="p-label type-label">type</span>${preset_type}</div>
+                <div class="preset-val p-name"><span class="p-label name-label">name</span> <span class="p-val name-val">${colorset?.name ? colorset.name : 'untitled' }</span></div>
+                ${preset_type === 'global' 
+                    ? `<div class="preset-val p-stroke">
+                            <span class="p-label stroke-label">stroke</span>
+                            <span class="global-stroke-reflector gf-reflector"></span>
+                            <span class="p-val stroke-val">${colorset?.shapes?.stroke ? colorset.shapes.stroke : 'none'}</span>
+                        </div>
+                        <div class="preset-val p-fill">
+                            <span class="p-label fill-label">fill</span>
+                            <span class="global-fill-reflector gf-reflector"></span>
+                            <span class="p-val vb-val">${colorset?.shapes?.fill ? colorset.shapes.fill : 'none'}</span>
+                        </div>`
+                    : `<div class="preset-val colors-list">
+                            <div class="p-label inverter-label">colors</div>
+                            <div class="p-val inverter-val"></div>
+                        </div>`
+                    }
+
     
+                `
+                if (preset_type === 'global') {
+                    $('.global-fill-reflector',container).style.background = colorset.shapes.fill;
+                    $('.global-stroke-reflector',container).style.background = colorset.shapes.stroke;
+                } else if (preset_type === 'variable'){
+                    inverterSet.forEach(color => {
+                        const colorElement = document.createElement('div');
+                        colorElement.classList.add("inverter-color")
+                        $('.colors-list .inverter-val',container).appendChild(colorElement)
+                        colorElement.style.background = color
+                    })
+                }
+
+                // $('.btn-apply-colorset',container).addEventListener('click', () => {
+                //     this.colorPicker.updateFillGroup(colorset.shapes.fill)
+                //     this.colorPicker.updateStrokeGroup(colorset.shapes.stroke)
+                // })
+                return container
+            }
+            const hydrate = async (event,element,preset) => {
+                event.stopPropagation();
+
+                const currentNameElement = $('.preset-val.p-name',element)
+
+                const icon = currentIcon.id == this.preview.icon.id ? currentIcon : null
+                let id = icon.id
+                let collection = icon.collection
+                let csid = preset.csid
+                let frozenSettings = ['original','setting','preset']
+
+                const notify = (toastElement) => {
+                    if (currentAnimation && currentAnimation.playState === 'running')
+                        currentAnimation.cancel()
+                    currentAnimation = toastElement.animate([
+                        {transform: 'translateY(-100%, offset:0'},
+                        {transform: 'translateY(0)', offset:0.025},
+                        {transform: 'translateY(0)', offset:0.990},
+                        {transform: 'translateY(-100%', offset:1}
+                    ],{duration:1500,iterations:1,easing:'ease'})
+                    return currentAnimation
+                }
+                const removePreset = (element) => {
+                    const removeAnimation = element.animate([
+                        {transform: `translateX(-200%)`},
+                    ],{duration: 300,easing: 'ease','fill':'forwards'})
+                    removeAnimation.onfinish = () => {
+                        element.classList.add('deleted')
+                        element.remove()
+                    }
+                }
+                const addNewPreset = (setting) => {
+                    let element = createColorsetElement(setting)
+                    if (element) element.addEventListener('click', event => hydrate(event,element,setting))
+                    collectionColorsTab.appendChild(element)
+                }
+                const setPresetDefault = async () => {
+                    const icon = currentIcon.id == this.preview.icon.id ? currentIcon : null;
+                    let presetActive = icon.color?.csid === preset.csid
+                    let isActiveIcon = $('.pre-opt.opt-aid',element)
+
+                    const notifyDefaultApplied = () => notify($('.toast.defaultSet',element))
+                    const notifyDefaultCleared = () => notify($('.toast.defaultCleared',element))
+                    const showLockedPreset = () => {
+                        const iconPresetTab = $('.color-editor-modal[modal="icons"]')
+                        const presetElements = $$('.pre-opt.opt-aid',iconPresetTab)
+                        presetElements.forEach(element => {
+                            element.innerHTML = `<div class="icon">${presetIsDefaultIcon}</div>
+                            <div class="tool-tip"> set as icon default </div>
+                            `
+                            el.setAttribute('active',false)
+                        })
+                        isActiveIcon.setAttribute('active','true')
+                        isActiveIcon.innerHTML = `<div class="icon">${presetNotCollectionDefaultIcon}</div>
+                        <div class="tool-tip">ignore as icon default</div>`
+                    }
+                    const showUnlockedPreset = () => {
+                        isActiveIcon.setAttribute('active','false')
+                        isActiveIcon.innerHTML = `<div class="icon">${presetIsDefaultIcon}</div><div class="tool-tip"> set as icon default </div>`
+                    }
+                    if (presetActive){
+                        console.warn('preset already active')
+                        console.log('removing default preset...')
+                        // let updated = await this.store.clearDefaultSetting(id,collection,icon)
+                        // let updatedSuccess = updated.id === currentIcon
+                        let updatedSuccess = true;
+                        if (updatedSuccess){
+                            icon.color = icon.colors.original
+                            showUnlockedPreset()
+                            notifyDefaultCleared()
+                        }
+                    } else {
+                        console.log('setting default color...')
+                        let updated = await this.store.setDefaultIconColor(id,collection,csid)
+                        let updateSuccess = updated.id === currentIcon.id
+                        if (updateSuccess){
+                            icon.color = preset
+                            console.log('preset updated')
+                            showLockedPreset()
+                            notifyDefaultApplied()
+                        } else {
+                            console.error('something went wrong setting default color')
+                        }
+                    }
+                }
+                const toggleCollectionDefaultSetting = async () => {
+                    if (preset.preset_type !== 'global'){
+                        console.warn('can only add global colorsets to collections')
+                        notify($('.toast.settingError',element))
+                        return;
+                    }
+                    const isCollectionDefault = this.collection.meta?.color?.csid === preset.csid
+                    console.log('TOGGLING COLLECTION DEFAULT', isCollectionDefault,this.collection.meta)
+                    if (isCollectionDefault){
+                        const updated = await this.store.clearCollectionDefaultColor(collection)
+                        const updateSuccess = updated.cid === meta.cid
+                        if (updateSuccess){
+                            this.collection.meta.color = {}
+                            console.log('default successfully cleared',updated)
+                        } else {
+                            console.error('something went wrong applying collection default')
+                        }
+                    } else {
+                        // const updated = await this.store.setCollectionDefault(collection,preset)
+                        // const updateSuccess = updated.cid === meta.cid
+                        const updateSuccess = true;
+                        if (updateSuccess){
+                            this.collection.meta.color = preset;
+                            console.log('default applied', updated)
+                        } else {
+                            console.warn('something wen wrong applying collection default')
+                        }
+
+                        // this.preview.setCollectionColor(this.collection.meta.color)
+                    }
+                    updateCollectionIsDefaultIcon()
+
+                }
+                const updateCollectionIsDefaultIcon = () => {
+                    const defaultPid = this.collection.meta?.color?.csid
+                    const csid = preset.csid
+                    const isCollectionDefault = defaultPid = csid
+                    const iPreviewElement = $(`.preset-preview-element[csid=${csid}] .pre-opt.collectionDefault`,iconColorsTab)
+                    const cPreviewElement = $(`.preset-preview-element[csid=${csid}] .pre-opt.collectionDefault`,collectionColorsTab)
+                    const updatedHTML = `<div class="pre-opt opt-acd collectionDefault">
+                        <div active="${isCollectionDefault ? true : false}" class="icon">${ isCollectionDefault ? removeCollectionDefaultIcon : saveAsCollectionDefaultIcon  }</div>
+                        <div class="tool-tip">${ isCollectionDefault ? 'ignore as collection default' : 'set as collection default' }</div>
+                    </div>`
+                    console.log(csid,isCollectionDefault,cPreviewElement)
+                    const activeButtons = $$('.pre-opt.collectionDefault .icon[active="true"]')
+                    console.log(activeButtons)
+                    activeButtons.forEach(btn => {
+                        btn.setAttribute('active',false);
+                        btn.innerHTML = saveAsCollectionDefaultIcon
+                    })
+                    if (iPreviewElement) iPreviewElement.outerHTML = updatedHTML
+                    if (cPreviewElement) cPreviewElement.outerHTML = updatedHTML
+                }
+                const addCollectionPreset = async () => {
+                    if (preset.preset_type !== 'global'){
+                        console.warn('can only add global colorsets to collections')
+                        notify($('.toast.settingError',element))
+                        return;
+                    }
+                    const updated = await this.store.saveCollectionColorset( collectionID , preset )
+                    console.log('COLLECTION PRESET SAVED',updated)
+                    const updateSuccess = updated.cid === collectionID;
+                    console.log('UPDATE STATUS', updateSuccess)
+                    // let updateSuccess = true;
+                    if (updateSuccess){
+                        notify($('.toast.collectionDefault',element))
+                        this.collection.meta.colors[csid] = preset
+                        recentSettings = updated.recent_settings
+                        addNewPreset(preset)
+                        updateCollectionPresetExistIcon(element,true)
+                        rerenderRecentSettings()
+                        $('.preset-option[tab="collections"] .preset-count').textContent = getLength(this.collection.meta.colors)
+                    } else {
+                        console.error('something went wrong adding collection color')
+                    }
+                }
+                const deleteCollectionPreset = async () => {
+                    if (preset.csid === 'original') {
+                        console.warn('cannot delete original')
+                        notify($('.toast.settingError',element))
+                        return;
+                    }
+                    const updated = await this.store.deleteCollectionColor( collectionID , csid);
+                    console.log('COLLECTION PRESET DELETED', updated)
+                    const updateSuccess = updated.cid === collectionID && updated.colors[csid] == undefined;
+                    console.log('UPDATE STATUS', updateSuccess)
+                    // const updateSuccess = true;
+                    if (updateSuccess){
+                        const existingPresetIcon = $(`.preset-preview-element[csid=${csid}]`,collectionColorsTab)
+                        if (existingPresetIcon)
+                            updateCollectionPresetExistIcon(element,false)
+                        removePreset(element)
+                        notify($('.toast.delete',element))
+                        delete this.collection.meta.colors[csid]
+                        $('.preset-option[tab="collections"] .preset-count').textContent = getLength(this.collection.meta.colors)
+                    } else {
+                        console.warn('update failed')
+                        notify($('.toast.failure'),element)
+                    }
+                }
+                const removeCollectionPreset = async () => {
+                    // const updated = await this.store.deleteCollectionPreset( collectionID , csid);
+                    // console.log('COLLECTION PRESET SAVED',updated)
+                    // const updateSuccess = updated.cid === collectionID && updated.settings[csid] == undefined;
+                    const updateSuccess = true
+                    console.log('UPDATE STATUS',updateSuccess)
+                    if (updateSuccess){
+                        const existingPresetIcon = $(`.preset-preview-element[csid=${csid}]`,collectionColorsTab)
+                        if (existingPresetIcon)
+                            updateCollectionPresetExistIcon(element,false)
+                        removePreset(element)
+                        delete this.collection.meta.colors[csid]
+                        $('.preset-option[tab="collections"] .preset-count').textContent = getLength(this.collection.meta.settings)
+                    } else {
+                        console.warn('update failed')
+                    }
+                }
+                const previewCollection = async () => {
+                    console.log('here')
+                    this.colorPicker.setCollectionColor(preset)
+                    this.colorPicker.applyColors(preset)
+                    notify($('.toast.previewCollection',element))
+                }
+                const deleteIconPreset = async () => {
+                    const deleted = await this.store.deleteIconColorset(id,collection,csid)
+                    console.log('DELETED',deleted)
+                    if (deleted?.id === id){
+                        console.log('delete operation successful',deleted.settings.csid)
+                        console.log(this.currentIcon.colors[csid])
+                        console.log(deleted)
+                        delete this.currentIcon.colors[csid]
+                        removePreset(element)
+                        $('.preset-option[tab="icons"] .preset-count').textContent = getLength(this.currentIcon.colors)
+                        if (this.currentIcon.color?.csid === csid){
+                            this.currentIcon.preset = {}
+                        }
+                    }
+                }
+                const updateCollectionPresetExistIcon = (element,doesExist) => {
+                    $('.pre-opt.opt-a2c',element).outerHTML = `                    
+                    <div class="pre-opt opt-a2c ${ doesExist ? 'removeFromCollection' : 'addToCollection' } "> 
+                        <div class="icon">${ doesExist ? removeFromCollectionIcon : addToCollectionIcon } </div>
+                        <div class="tool-tip">${ doesExist ? 'remove collection preset' : 'save as collection preset' } </div>
+                    </div>`
+                }
+
+                const handleNameChange = () => {
+                    currentNameElement.classList.add('active')
+                    currentNameElement.innerHTML = `<input type="text" class="edit-save-name" placeholder="${preset.name}"><span class="btn-save-name">save</span>`
+                    $('input.edit-save-name',currentNameElement).focus()
+                    $('input.edit-save-name',currentNameElement).addEventListener('keyup',(event) => {
+                        // throttle
+                        const enter = event.keyCode == 13 || event.which == 13 || event.key == 'Enter'
+                        if (enter) updateName()
+                    })
+                }
+                const updateName = async () => {
+                    const input = $('input.edit-save-name',currentNameElement)
+                    if (input) {
+                        const value = input.value
+                        console.log('UPDATING NAME', value)
+                        // const update = await this.store.updatePresetName({id,collection,csid,name:value})
+                        // console.log(update)
+                        // const updateSuccess = update.iconSetting.found && update.iconSetting.updated;
+                        const updateSuccess = true;
+                        if (updateSuccess){
+                            preset.name = value
+                            hideInput()
+                            console.log('herefoo')
+                            const correspondingElement = $$(`.preset-preview-element[csid=${csid}] .preset-val.p-name`).forEach(presetName => presetName.innerHTML = `<span class="p-label name-label">name</span><span class="p-val name-val">${value}</span>`)
+                            notify($('.toast.nameChange',element))
+                        } else {
+                            notify($('.toast.nameChangeError',element))
+                        }
+                        // const uppdateCollection = update.collectionColors.found && update.collectionColors.updated
+                        const updateCollection = true;
+                        if (updateCollection){
+                            this.collection.colors[csid].name = value;
+                        }
+                        // const updateRecent = update.recentSetting.found;
+                        const updateRecent = true;
+                        if (updatedRecent){
+                            this.collection.meta.recent_colors = this.collection.meta.recent_colors.map(
+                                setting => {
+                                    if (setting.csid == csid) setting.name = value
+                                    return setting
+                                }
+                            )
+                        }
+
+                    }
+                }
+
+                const hideInput = () => {
+                    currentNameElement.classList.remove('active')
+                    currentNameElement.innerHTML = `<span class="p-label name-label">name</span><span class="p-val name-val">${preset?.name}</span>`
+                }
+                const getLength = (settings) => {
+                    const keys = Object.keys(settings).filter(key => !frozenSettings.some(i => i === key))
+                    return keys.length
+                }
+
+                const applyToIconDefault = event.target.closest('.iconDefault')
+                const addToCollection = event.target.closest('.pre-opt.addToCollection')
+                const previewIcon = event.target.closest('.previewIcon')
+                const toggleCollectionDefault = event.target.closest('.pre-opt.collectionDefault')
+                const presetDelete = event.target.closest('.deletePreset')
+                const collectionPreview = event.target.closest('.previewCollection')
+                const editName = event.target.closest('.preset-val.p-name')
+                const saveName = event.target.closest('.btn-save-name')
+
+                if (!preset) return
+                if (!icon) return
+
+                if (saveName) await updateName()
+                else if (editName && !currentNameElement.classList.contains('active')) handleNameChange()
+                else hideInput()
+
+                if (collectionPreview) {
+                    console.log('applying preset to preview default...', preset )
+                    if (preset.colorset_type !== 'global'){
+                        console.warn('cannot preview preset...')
+                        console.warn(' invalid preset type...')
+                    } else {
+                        console.log('previewing global preset.....')
+                        this.colorPicker.setCollectionColor(preset)
+                        this.colorPicker.applyFromColorset(preset)
+                        console.log()
+                    }
+                    // previewCollection()
+                }
+                else if (previewIcon){
+                    console.log('applying icon preview....')
+                    if (preset.colorset_type !== 'global' && preset.name !== 'original'){
+                        console.warn('cannot preview preset...')
+                        console.warn(' invalid preset type...')
+                    } else {
+                        console.log('previewing global preset.....')
+                        this.colorPicker.applyFromColorset(preset)
+                    }
+                }
+                else if(applyToIconDefault) {
+                    console.log('setting default icon preset', preset )
+                    console.log('preset type.....', preset.colorset_type )
+                    // setPresetDefault()
+                } 
+                else if(addToCollection) {
+                    console.log('adding preset to collection', preset)
+                    if (preset.colorset_type !== 'global') {
+                        console.warn('cannot add preset to collection...')
+                        console.warn(' invalid preset type...')
+                    } else {
+                        console.log('adding preset to collection...')
+                        // addCollectionPreset()
+                    }
+                }
+                else if (toggleCollectionDefault) {
+                    console.log('toggling default collection colors...',preset)
+                    if (preset.colorset_type !== 'global') {
+                        console.warn('cannot add preset to collection...')
+                        console.warn(' invalid preset type...')
+                    } else if (preset.colorset_type === 'variable') {
+                        console.log('adding preset to collection...')
+                        // toggleCollectionDefaultSetting()
+                    } else {
+                        console.warn('preset type not supported')
+                    }
+                }
+                else if (presetDelete) {
+                    console.log('deleting preset...',preset)
+                    if (preset.colorset_type === 'global'){
+                        console.log('searching for preset in collection...')
+                        console.log(collection)
+                        // removeCollectionPreset()
+                    } else if (preset.colorset_type === 'variable'){
+                        console.log('deleting icon preset....')
+                        // deleteIconPreset()
+                    } else {
+                        console.log('preset not supported')
+                    }
+                }
+                else return;
+            }
+            destination.innerHTML = ''
+            let rendered = 0
+            for (const id in colors){
+                let colorset = colors[id]
+                console.log('APPENDING COLORSET [COLLECTION]',colors,colorset)
+                const element = createColorsetElement(colorset)
+                element.addEventListener('click', event => hydrate(event,element,colorset))
+                destination.appendChild(element)
+                rendered += 1
+            }
+            if (rendered === 0) destination.innerHTML = 'no presets to show'
+        }
+        if (!objectIsFalsey(collectionColors)) createColorsetWrapper(collectionColors,collectionColorsTab,'collections')
+        if (!objectIsFalsey(iconColors)) createColorsetWrapper(iconColors,iconColorsTab,'icons')
+        $('.color-editor .preset-option[tab="collections"] .preset-count').textContent = objectLength(collectionColors)
+        $('.color-editor .preset-option[tab="icons"] .preset-count').textContent = objectLength(iconColors)
+    }
     openColorEditor(){
         this.colorPicker.openFS()
         this.preview.closeSettings()
+        this.loadColorMenu()
+    }
+    toggleColorEditor(){
+        if (this.colorPicker.fsActive){
+            this.colorPicker.closeFS()
+        } else {
+            this.openColorEditor()
+        }
+    }
+    handleSaveIconColorset(csid){
+        const preset = this.currentIcon.colors[csid];
+        console.log('SAVING PRESET');
     }
     handleSavePreset() {
         let currentAnimation
@@ -491,20 +1095,19 @@ export class Dashboard extends AbstractView {
         const addToCollectionIcon = '<svg width="24px" height="24px" viewBox="-3 -3 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m69qu6q2-02A7JGMVLEMP"><path d="M8.75 13.5C8.75 13.0858 9.08579 12.75 9.5 12.75H11.25V11C11.25 10.5858 11.5858 10.25 12 10.25C12.4142 10.25 12.75 10.5858 12.75 11V12.75H14.5C14.9142 12.75 15.25 13.0858 15.25 13.5C15.25 13.9142 14.9142 14.25 14.5 14.25H12.75V16C12.75 16.4142 12.4142 16.75 12 16.75C11.5858 16.75 11.25 16.4142 11.25 16V14.25H9.5C9.08579 14.25 8.75 13.9142 8.75 13.5Z" fill="black" pid="m69qu6q2-017MOA1JU5V4" stroke="null"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M21.1613 9.74679C21.5581 12.233 21.5297 14.7686 21.0771 17.2453C20.8748 18.353 19.9484 19.1833 18.8253 19.2636L17.1874 19.3808C13.7335 19.6279 10.2665 19.6279 6.81261 19.3808L5.2986 19.2725C4.10258 19.1869 3.11607 18.3027 2.90055 17.1232C2.46388 14.7333 2.38913 12.2913 2.67879 9.87915L2.95127 7.61004C3.11298 6.26343 4.25538 5.25 5.61167 5.25H7.90323C9.02099 5.25 9.95226 6.04846 10.1578 7.10612L18.4722 7.10612C19.7786 7.10612 20.8913 8.05533 21.0972 9.34535L21.1613 9.74679ZM19.6016 16.9757C20.0236 14.6662 20.0501 12.3017 19.68 9.98322L19.6159 9.58178C19.5262 9.0197 19.0414 8.60612 18.4722 8.60612H9.75936C9.17429 8.60612 8.7 8.13183 8.7 7.54677C8.7 7.10672 8.34328 6.75 7.90323 6.75H5.61167C5.01464 6.75 4.51176 7.19611 4.44057 7.78888L4.16809 10.058C3.89636 12.3208 3.96649 14.6116 4.37612 16.8536C4.46865 17.36 4.89217 17.7396 5.40565 17.7763L6.91965 17.8846C10.3022 18.1266 13.6978 18.1266 17.0804 17.8846L18.7182 17.7674C19.1588 17.7359 19.5222 17.4102 19.6016 16.9757Z" fill="black" pid="m69qu6q2-007LBGPNOWUH" stroke="null"></path></svg>'
         // * NEED TO HANDLE STATE CHANGES WHEN CHANGING COLLECTIONS! * //
         const iconSettingsTab = $('.settings-modal [role="tab"][modal="icons"]')
-        const iconSettingsTabber = $('.preset-option.icon')
+        const iconSettingsTabber = $('.settings-editor .preset-option.icon')
         const collectionSettingsTab = $('.settings-modal [role="tab"][modal="collections"]')
-        const collectionSettingsTabber = $('.preset-option.collection')
+        const collectionSettingsTabber = $('.settings-editor .preset-option.collection')
         const recentSettingsTab = $('.settings-modal [role="tab"][modal="recent"]')
-        const recentSettingsTabber = $('.preset-option.recent')
-        const tab = collection.state?.presetTab || 'icons';
+        const recentSettingsTabber = $('.settings-editor .preset-option.recent')
+        const tab = collection.state?.presetTab || 'icons'
         const currentTab = $(`.settings-modal [role="tab"][modal="${tab}"]`)
         const tabs = [
             ['icons',iconSettingsTab,iconSettingsTabber],
             ['collections',collectionSettingsTab,collectionSettingsTabber],
             ['recent',recentSettingsTab,recentSettingsTabber]
         ]
-
-        tabs.forEach(tab => tab[2].addEventListener('click',() => {
+        tabs.forEach(tab => tab[2].addEventListener('click', () => {
             tabs.forEach(tab => {
                 tab[2].classList.remove('active')
                 tab[1].classList.remove('active')
@@ -512,14 +1115,10 @@ export class Dashboard extends AbstractView {
             tab[1].classList.add('active')
             tab[2].classList.add('active')
             collection.state.presetTab = tab[0]
-
         }))
-
         currentTab.classList.add('active')
-        $(`.preset-option[tab=${tab}`).classList.add('active')
-
+        $(`.settings-editor .preset-option[tab=${tab}]`).classList.add('active')
         const createPresetWrapper = (settings,destination,type) => {
-
             const createPresetElement = (setting) => {
                 const element = document.createElement('div');
                 const element_id = setting?.pid ? setting.pid : null
@@ -732,11 +1331,14 @@ export class Dashboard extends AbstractView {
                         const iconPresetTab = $('.settings-tab[modal="icons"]')
                         const presetElements =  $$('.pre-opt.opt-aid',iconPresetTab)
                         presetElements.forEach(el => {
-                                el.innerHTML = `<div class="icon">${presetIsDefaultIcon}</div><div class="tool-tip"> set as icon default </div>`
+                                el.innerHTML = `<div class="icon">
+                                ${presetIsDefaultIcon}</div>
+                                <div class="tool-tip"> set as icon default </div>`
                                 el.setAttribute('active',false)
                             })
                         isActiveIcon.setAttribute('active','true')
-                        isActiveIcon.innerHTML = `<div class="icon">${presetNotDefaultIcon}</div><div class="tool-tip"> ignore as icon default </div>`
+                        isActiveIcon.innerHTML = `<div class="icon">${presetNotDefaultIcon}</div>
+                        <div class="tool-tip"> ignore as icon default </div>`
 
                     }
                     const showUnlockedPreset = () => {
@@ -749,12 +1351,13 @@ export class Dashboard extends AbstractView {
                         let updated = await this.store.clearDefaultSetting(id,collection,icon)
                         let updateSuccess = updated.id === currentIcon.id
                         if (updateSuccess){
-                            icon.preset = icon.settings.original}
+                            icon.preset = icon.settings.original
                             console.log('preset updated and reset to original...', icon.preset)
                             icon.preset = icon.settings.original
                             showUnlockedPreset()
                             notifyDefaultCleared()
-                        // notify "original preset applied" -- grey
+                            // notify "original preset applied" -- grey
+                        }
                     } else {
                         console.log('setting default preset...')
                         let updated = await this.store.setDefaultIconSetting(id,collection,pid)
@@ -819,7 +1422,7 @@ export class Dashboard extends AbstractView {
                         const existingPresetIcon = $(`.preset-preview-element[pid=${pid}]`,collectionSettingsTab)
                         if (existingPresetIcon)
                             updateCollectionPresetExistIcon(element,false)
-                        removePreset()
+                        removePreset(element)
                         notify($('.toast.delete',element))
                         delete this.collection.meta.settings[pid]
                         $('.preset-option[tab="collections"] .preset-count').textContent = getLength(this.collection.meta.settings)
@@ -856,7 +1459,7 @@ export class Dashboard extends AbstractView {
                     const deleted = await this.store.deleteIconPreset(id,collection,pid)
                     console.log('DELETED',deleted)
                     if (deleted?.id === id ){
-                        console.log('delete operation successfull',deleted.settings.pid)
+                        console.log('delete operation successful',deleted.settings.pid)
                         console.log(this.currentIcon.settings[pid])
                         console.log(deleted)
                         delete this.currentIcon.settings[pid]
@@ -897,7 +1500,6 @@ export class Dashboard extends AbstractView {
                         $('.preset-option[tab="recent"] .preset-count').textContent = getLength(recentSettings)
 
                     }
-
                 }
                 const handleNameChange = () => {
                     currentNameElement.classList.add('active')
@@ -921,10 +1523,10 @@ export class Dashboard extends AbstractView {
                         if (updateSuccess){
                             preset.name = value
                             hideInput()
-                            const correspondingElement = $$(`.preset-preview-element[pid=${pid}] .p-val.name-val`).forEach(presetName => presetName.textContent = value)
-                            notify($('.toast.nameChange'))
+                            const correspondingElement = $$(`.preset-preview-element[pid=${pid}] .preset-val.p-name`).forEach(presetName => presetName.innerHTML =`<span class="p-label name-label">name:</span><span class="p-val name-val"> ${value}</span>`)
+                            notify($('.toast.nameChange',element))
                         } else {
-                            notify($('.toast.nameChangeError'))
+                            notify($('.toast.nameChangeError',element))
                         }
                         const updatedCollection = update.collectionSetting.found && update.collectionSetting.updated
                         if (updatedCollection){
@@ -933,9 +1535,9 @@ export class Dashboard extends AbstractView {
                         const updatedRecent = update.recentSetting.found
                         if (updatedRecent){
                             this.collection.meta.recent_settings = this.collection.meta.recent_settings.map(
-                                s => {
-                                    if (s.pid == pid) s.name = value
-                                    return s
+                                setting => {
+                                    if (setting.pid == pid) setting.name = value
+                                    return setting
                                 }
                             )
                         }
@@ -947,11 +1549,10 @@ export class Dashboard extends AbstractView {
                     currentNameElement.innerHTML = `<span class="p-val name-val">${preset?.name}</span>`
                     console.log(preset.name)
                 }
-
                 const getLength = (settings) => {
                     const keys = Object.keys(settings).filter(key => !frozenSettings.some(i => i === key))
                     return keys.length
-                  }
+                }
 
                 if (!preset) return
                 if (!icon) return
@@ -984,45 +1585,41 @@ export class Dashboard extends AbstractView {
                 let shouldRender = !frozenSettings.some(i => i === pid) && !pid.startsWith('_meta')
                 let validSetting = !objectIsFalsey(preset)
                 if (validSetting && shouldRender) {
-                    let element;
+                    let element
                     if(type === 'icon')
-                        element = createPresetElement(preset);
+                        element = createPresetElement(preset)
                     else if (type === 'collection') 
                         element = createCollectionPresetElement(preset);
-                    else if (type === 'recent') 
-                        element = createRecentPresetElement(preset);
+                    else if (type === 'recent')
+                        element = createRecentPresetElement(preset)
                     if (element) {
                         element.addEventListener('click', event => hydrate(event,element,preset) )
                         destination.appendChild(element)
                     }
-                    rendered += 1;
+                    rendered += 1
                 }
             }
             if (rendered === 0) destination.innerHTML = 'no presets to show'
         }
-        function getLength(settings){
-            let frozenSettings = ['original','setting','preset']
-            const keys = Object.keys(settings).filter(key => !frozenSettings.some(i => i === key))
-            return keys.length
-          }
+        
+        let frozenSettings = ['original','setting','preset']
         if (!objectIsFalsey(iconSettings)) createPresetWrapper(iconSettings,iconSettingsTab,'icon')
         if (!objectIsFalsey(this.currentView.settings)) createPresetWrapper(collectionSettings,collectionSettingsTab,'collection')
         if (!objectIsFalsey(recentSettings)) createPresetWrapper(recentSettings,recentSettingsTab,'recent')
-        $('.preset-option[tab="icons"] .preset-count').textContent = getLength(iconSettings)
-        $('.preset-option[tab="collections"] .preset-count').textContent = getLength(collectionSettings)
-        $('.preset-option[tab="recent"] .preset-count').textContent = getLength(recentSettings)
+        $('.settings-editor .preset-option[tab="icons"] .preset-count').textContent = objectLength(iconSettings,frozenSettings)
+        $('.settings-editor .preset-option[tab="collections"] .preset-count').textContent = objectLength(collectionSettings,frozenSettings)
+        $('.settings-editor .preset-option[tab="recent"] .preset-count').textContent = objectLength(recentSettings,frozenSettings)
     }
     async toggleCollectionSettingsMenu(){
         console.log('SETTINGS ACTIVE')
         if (this.state.cSettingsActive){
-            this.closeCollectionSettingsMenu();
+            this.closeCollectionSettingsMenu()
             return
         }
         await this.openCollectionSettingsMenu()
     }
     closeCollectionSettingsMenu(){
         this.collectionSettingsWindow.classList.remove('active')
-        $('.settings')
         this.state.cSettingsActive = false;
     }
     async openCollectionSettingsMenu(){
@@ -1031,9 +1628,9 @@ export class Dashboard extends AbstractView {
         this.state.cSettingsActive = true
     }
     async loadCollectionSettings(collectionName){
-        const settingsWindow = $('.settings-interface .interface-window');
-        const collection = this.collection;
-        const preset = collection.meta?.preset;
+        const settingsWindow = $('.settings-interface .interface-window')
+        const collection = this.collection
+        const preset = collection.meta?.preset
         collection.meta.name
         console.log('LOADING DEFAULT PRESET', preset)
         console.log('LOADING COLLECTION SETTINGS',collection.settings)
@@ -1048,8 +1645,8 @@ export class Dashboard extends AbstractView {
     }
     handleClickOutsideContext(event) {
         if (!event.target.closest('.db-context')) { 
-            event.preventDefault(); 
-           this.contextMenu.close();
+            event.preventDefault()
+           this.contextMenu.close()
         }
     }
     // widget preview ( sub-menu || home view )
@@ -1098,21 +1695,21 @@ export class Dashboard extends AbstractView {
         else if (event?.target.closest('.tggle-open') || tab === 'position')
             this.preview.open('position')
         else this.preview.open()
-        $('.widget-pre').classList.remove('active');
+        $('.widget-pre').classList.remove('active')
         $('.widget-main').classList.add('active');
-        $('.interface-window.collection-menu').classList.remove('active');
+        $('.interface-window.collection-menu').classList.remove('active')
     }
     closePreview() {
         if (this.preview.currentModal)
-            this.preview.currentModal.classList.remove('active');
-        $('.widget-main').classList.remove('active');
-        $('.widget-pre').classList.add('active');
-        this.preview.close();
+            this.preview.currentModal.classList.remove('active')
+        $('.widget-main').classList.remove('active')
+        $('.widget-pre').classList.add('active')
+        this.preview.close()
     }
     hidePreview(){
         if (this.preview.currentModal)
-            this.preview.currentModal.classList.remove('active');
-        this.preview.close();
+            this.preview.currentModal.classList.remove('active')
+        this.preview.close()
     }
     showPreview(event){
         if (event.target.closest('.copy-icon'))
@@ -1127,11 +1724,11 @@ export class Dashboard extends AbstractView {
             this.preview.open('position')
     }
     async togglePreviewNext() {
-        await this.ready;
+        await this.ready
         this.preview.update(this.cursor.skipToNext())
     }
     async togglePreviewPrevious(){
-        await this.ready;
+        await this.ready
         this.preview.update(this.cursor.skipToPrev())
     }
     renderPocket() {
@@ -1141,18 +1738,18 @@ export class Dashboard extends AbstractView {
         this.dashboard.render({
             meta: {name:'bench'},
             icons:this.store.pocket.icons,
-        });
+        })
         this.dashboard.setReady()
         this.preview.update(this.currentIcon)
         this.setTab('pocket')
     }
     async showCollectionSettings(collection){
-        let active_interface = this.currentInterface = $('.widget-wrapper.active');
-        active_interface.classList.add('settings-open');
-        active_interface.classList.remove('active');
-        $('.settings-interface').classList.add('active');
-        $('.settings-interface .interface-window').classList.add('active');
-        await this.settings.render(collection);
+        let active_interface = this.currentInterface = $('.widget-wrapper.active')
+        active_interface.classList.add('settings-open')
+        active_interface.classList.remove('active')
+        $('.settings-interface').classList.add('active')
+        $('.settings-interface .interface-window').classList.add('active')
+        await this.settings.render(collection)
         // apply settings from settings interface
         $('.s-ctrl.btn-apply').addEventListener('click',() => {
             console.log('applying collection settings to preview')
@@ -1161,26 +1758,26 @@ export class Dashboard extends AbstractView {
         // save preset from settings interface
         $('.s-ctrl.btn-save').addEventListener('click',async () => {
             console.log('saving current preset')
-            const preset = this.settings.currentPreset;
-            preset.preset_type = 'collection';
-            preset.for = collection.name;
-            const result = await this.store.savePreset(this.settings.currentPreset);
-            console.log('PRESET SENT TO API', result);
+            const preset = this.settings.currentPreset
+            preset.preset_type = 'collection'
+            preset.for = collection.name
+            const result = await this.store.savePreset(this.settings.currentPreset)
+            console.log('PRESET SENT TO API', result)
         });
         $('.breadcrumb').classList.add('active')
     }
     hideCollectionSettings(){
-        $('.settings-interface').classList.remove('active');
+        $('.settings-interface').classList.remove('active')
         this.currentInterface.classList.add('active')
         this.currentInterface.classList.remove('settings-open')
         $('.breadcrumb').classList.remove('active')
     }
     async generateCollectionPreviews() {
-        const pinned = this.state.pinned;
-        const random = await this.store.getRandom(20,pinned);
+        const pinned = this.state.pinned
+        const random = await this.store.getRandom(20,pinned)
         const widgetElement = $('.pinned-widget .pinned-preview')
         for (const rando of random){
-            const icon = document.createElement('div');
+            const icon = document.createElement('div')
             icon.innerHTML = rando.markup
             icon.dataset.id = rando.id
             icon.isFavorite = rando.isFavorite
@@ -1195,7 +1792,7 @@ export class Dashboard extends AbstractView {
         const collection = await this.store.getCollection('all')
         const collection_names = await this.store.getNames()
         this.dashboard.renderHome(await Promise.all(collection_names.map(async name => (await this.store.getCollectionPaginated(name,1,39)))))
-        this.closeCollectionSettingsMenu();
+        this.closeCollectionSettingsMenu()
         this.updateCollectionInfo(collection)
         this.state.context = collection
         this.state.collection = collection
@@ -1211,7 +1808,7 @@ export class Dashboard extends AbstractView {
             ${(collection_names).reduce((a,b)=> {
                 return a + `<div class="hot-link" collection=${b}>${b}</div>`
             },'')}               
-        </div>`;
+        </div>`
         // hide settings breadcrumb
         $('.breadcrumb').classList.remove('active')
     }
@@ -1228,6 +1825,7 @@ export class Dashboard extends AbstractView {
                     const collection = await this.store.getCollection(name)
                     this.state.collection = collection
                     this.preview.setCollectionPreset(collection.meta?.preset || {})
+                    this.colorPicker.setCollectionColor(collection.meta?.color || {})
                     this.collectionPreview.update(collection)
                     console.log('COLLECTION PRESET',collection.meta.preset)
                     this.state.context = collection
@@ -1339,8 +1937,10 @@ export class Dashboard extends AbstractView {
         const cosmColorSettings = (this.colorPicker.fsActive == true || this.colorPicker.active == true) && (!event.target.closest('#PREVIEW'));
         if (cosmPreviewSettings)
             this.preview.closeSettings();
-        if (cosmColorSettings)
+        if (cosmColorSettings){
             this.colorPicker.close();
+            console.log('COSM COLOR PICKER')
+        }
         if (browseLink){
             await this.renderCollection('home')
             $('.widget-wrapper.active').classList.remove('active')
@@ -1386,7 +1986,6 @@ export class Dashboard extends AbstractView {
             }
         }
     }
-
     async delegateAddToCollectionWindowEvents(event) {
         let clicked = event.target.closest('.preview-a2c-item');
         let close = event.target.closest('.close-cc-form');

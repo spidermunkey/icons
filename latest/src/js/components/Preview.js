@@ -86,6 +86,9 @@ const htmlController = {
     open(tabName){
         $('.widget-pre').classList.remove('active');
         $('.widget-main').classList.add('active');
+        if (this.currentModal){
+            this.currentModal.classList.remove('active')
+        }
         if (tabName && this.tabNames.includes(tabName))
             this.currentModal = this.tabs.filter(tab => tab.dataset.tab == tabName)[0];
         // if no name opens previously opened tab
@@ -97,6 +100,8 @@ const htmlController = {
              $$('.preview__tabber--tab').forEach(tab => tab?.classList.remove('active'))
              $(`.preview__tabber--tab[data-tab=${tabName}]`)?.classList.add('active');
             }
+        } else {
+            console.log('no current modal')
         }
         this.active = true;
         $('.interface-window.preview').classList.add('active')
@@ -300,7 +305,6 @@ const htmlController = {
         })
     }
 }
-
 export class Preview extends EventEmitterClass {
     constructor() {
         super()

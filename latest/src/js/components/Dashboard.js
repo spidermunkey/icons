@@ -117,17 +117,15 @@ export class DashboardElement extends EventEmitterClass {
     this.setReady();
   }
   async renderIcons(icons,destination,settings){
-
     destination.innerHTML = '';
-
-      let stroke = settings?.stroke || '', 
-          fill = settings?.fill || '', 
-          height = settings?.height || '', 
-          width = settings?.width || '', 
-          viewbox = settings?.viewbox || [],
-          sattrs = settings?.sttrs || [],
-          attrs = settings?.attrs || [], 
-          cls = settings?.cls || [];
+    let stroke = settings?.stroke || '', 
+        fill = settings?.fill || '', 
+        height = settings?.height || '', 
+        width = settings?.width || '', 
+        viewbox = settings?.viewbox || [],
+        sattrs = settings?.sttrs || [],
+        attrs = settings?.attrs || [], 
+        cls = settings?.cls || [];
 
     icons.forEach(props => {
       let {name,category,markup,id,cid,isBenched} = props || this;

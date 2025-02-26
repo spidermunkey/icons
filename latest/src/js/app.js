@@ -2,17 +2,18 @@ import { Home } from "./views/home/index.js";
 import { Dashboard } from "./views/dashboard/index.js";
 import { EventEmitterClass } from "./utils/EventEmitter.js";
 import { SvgModel } from "./store.js";
+import { Delegator } from "./utils/Delegator.js";
 export class App extends EventEmitterClass {
     constructor() {
         super();
         this.store = new SvgModel();
+        this.delegator = new Delegator();
         this.routes = [
             {path: '/home', view: new Home(this.store)},
             {path: '/browse', view: new Dashboard(this.store)
             }];
         this.activeView = null;
         window.addEventListener('popstate',this.route.bind(this));
-        console.log('initializing app');
     }
     route() {
         let path = window.location.pathname;

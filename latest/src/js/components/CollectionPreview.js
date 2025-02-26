@@ -5,7 +5,7 @@ import { COSM } from "../utils/Cosm";
 
 const ColorState = (originalColor = '#000') => ({
   original: originalColor,
-  currentColor: originalColor,
+  currentColor: originalColor, 
   history: new Cursor([originalColor]),
 })
 const ShapeModeHtml = () => {
@@ -55,20 +55,11 @@ export class CollectionPreview extends EventEmitterClass {
   constructor() {
     super()
     this.on('close',() => this.revertIconToOriginalHTML())
-    this.on('mode changed',() => {
-      let mode = this.currentMode;
-      let currentColor = mode.currentColor;
-      if (isValidHex(currentColor)){
-        this.canvas.update({hex:currentColor})
-      } else {
-        console.warn('current color invalid using #000',currentColor)
-        this.canvas.update({hex:'#000'})
-      }
-    })
-    this.previewModeActive = false;
-    this.bordersActive = false;
-    this.icons = [];
+    this.previewModeActive = false
+    this.bordersActive = false
+    this.icons = []
     this.element = $('.settings-interface')
+    this.colorInput = $('.collection-color-picker .input input')
     this.vbxInput = $('.input-field.x .input',this.element)
     this.vbyInput = $('.input-field.y .input',this.element)
     this.vbhInput = $('.input-field.h .input',this.element)
@@ -79,6 +70,7 @@ export class CollectionPreview extends EventEmitterClass {
     this.startingViewbox = [0,0,20,20]
     this.defaultHeight = '24'
     this.defaultWidth = '24'
+
     this.defaultSetting = {
       viewbox: [0,0,20,20],
       vbh:20, 
@@ -92,7 +84,7 @@ export class CollectionPreview extends EventEmitterClass {
     this.mode = {
       currentMode: 'shapes',
       currentType: 'fill',
-      'shapes': {
+      shapes: {
         stroke: ColorState(),
         fill: ColorState(),
       },
@@ -100,11 +92,11 @@ export class CollectionPreview extends EventEmitterClass {
         stroke: ColorState(),
         fill: ColorState(),
       },
-      'inverter': {
+      inverter: {
         stroke: InverterState(),
         fill: InverterState(),
       },
-      'selector': {
+      selector: {
         stroke: ColorState(),
         fill: ColorState(),
         icons:[],
@@ -121,10 +113,11 @@ export class CollectionPreview extends EventEmitterClass {
     this.vbh = this.preset['vbh']
 
     this.canvasPreviewColor = $('.preview-color',this.element)
+
     this.hueSlider = new Slider($('.collection-color-picker .hue-bar'), {
       onMouseMove: (state) => this.updateCurrentHue(state),
       onMouseDown: (state) => this.updateCurrentHue(state),
-      onMouseUp: () => this.updateColorState(this.canvas.color.hex)
+      onMouseUp: () => this.handleColorChange(this.canvas.color.hex)
     }, 'vertical' )
 
     this.canvas = new Canvas({
@@ -135,7 +128,7 @@ export class CollectionPreview extends EventEmitterClass {
       actions: {
           mouseMove: color => this.updateSelected(color.hex),
           onClick: color => this.updateSelected(color.hex),
-          mouseUp: color => this.updateColorState(color.hex)
+          mouseUp: color => this.handleColorChange(color.hex)
       }
     })
 
@@ -209,29 +202,15 @@ export class CollectionPreview extends EventEmitterClass {
     $('.editor-action[action="undo"]').addEventListener('click',() => this.undoPreviousAction())
     $('.editor-action[action="redo"]').addEventListener('click',() => this.redoPreviousAction())
     $('.editor-action[action="reset"]').addEventListener('click',() => this.resetAction())
-    $$('.selector').forEach(selector => {
-      let target = selector.getAttribute('selector');
-      let type = selector.getAttribute('sVal')
-      selector.addEventListener('click',() => {
-        this.mode.currentMode = target
-        this.mode.currentType = type
-        $$('.editor-value-container').forEach(selector => selector.classList.remove('active'))
-        $(`[container=${target}][sVal=${type}]`).classList.add('active')
-        this.notify('mode changed')
-      })
-      const initiallyActive = $(`[container=${this.mode.currentMode}][sVal=${this.mode.currentType}]`)
-      initiallyActive.classList.add('active')
-    })
-    $$('.bg-toggle').forEach(toggler => {
-      toggler.addEventListener('click',() => {
-        let cls = toggler.getAttribute('cls')
-        if (cls) this.applyPreviewBackground(cls)
-      })
-    })
-    $('.save-colorset').addEventListener('click',() => {
-      this.notify('save color',this.collection,this.mode)
-      this.toggleSaveMenu();
-    })
+    
+    // fill -- stroke selectors
+    const initialMode = $(`[container=${this.mode.currentMode}][sVal=${this.mode.currentType}]`)
+    initialMode.classList.add('active')
+    $$('.selector').forEach(selector => selector.addEventListener('click',() => this.handleModeChange(selector)))
+    $$('.bg-toggle').forEach(toggler => toggler.addEventListener('click',() => this.handleBackgroundChange(toggler)))
+    $('.save-colorset').addEventListener('click',() => this.toggleSaveMenu())
+    this.colorInput.addEventListener('input',(event) => this.handleInput(event))
+    $('.collection-color-picker .canvas-copy').addEventListener('click',() => this.handleCopy())
     this.cosm = new COSM({
       selectors: ['.settings-interface'],
       exceptions: ['.settings-tab[tab="viewbox"]'],
@@ -245,7 +224,6 @@ export class CollectionPreview extends EventEmitterClass {
   get currentHex() {
     return this.canvas.color.hex;
   }
-
   get currentPreset(){
     return {
         viewbox: this.viewbox,
@@ -257,9 +235,9 @@ export class CollectionPreview extends EventEmitterClass {
         height: this.preset.height,
     }
   }
-
   get currentColorSet() {
     return {
+      colorset_type: 'global',
       shapes: {
         fill: this.mode.shapes.fill.currentColor,
         stroke: this.mode.shapes.stroke.currentColor,
@@ -270,29 +248,24 @@ export class CollectionPreview extends EventEmitterClass {
       }
     }
   }
-
   get currentMode(){
     let mode = this.mode.currentMode
     let targetType = this.mode.currentType
     return this.mode[mode][targetType]
   }
-
   set height(number) {
     this.setHeight(number)
     this.preset.height = number
   }
-
   set width(number) {
     this.preset.height = number
     this.setWidth(number)
   }
-
   setHeight(number) {
     // set icons
       this.svgHeightInput.value = number
       this.setIconDimensions(this.preset)
   }
-
   setWidth(number) {
     // set icons
       this.svgWidthInput.value = number
@@ -316,12 +289,99 @@ export class CollectionPreview extends EventEmitterClass {
   setPreviewColor(hex){
     this.canvasPreviewColor.style.setProperty('background',hex)
   }
+  showBorders(){
+    $$('.db-res .svg-wrapper svg').forEach(icon => icon.style.border = '1px dotted red')
+    this.bordersActive = true
+    return this.bordersActive;
+  }
+  hideBorders(){
+    $$('.db-res .svg-wrapper svg').forEach(icon => icon.style.border = '1px dotted transparent')
+    this.bordersActive = false
+    return this.bordersActive;
+  }
+  toggleBorder(){
+     return this.bordersActive ? this.hideBorders() : this.showBorders()
+  }
+  showSaveMenu(){
+    $('.color-save-menu').classList.add('active')
+    this.saveMenuActive = true
+  }
+  hideSaveMenu(){
+    $('.color-save-menu').classList.remove('active')
+    this.saveMenuActive = false;
+  }
+  toggleSaveMenu(){
+    if (this.saveMenuActive) this.hideSaveMenu()
+    else this.showSaveMenu()
+  }
+  applyPreviewBackground(style){
+    this.iconElements.forEach(element => {
+      element.classList.remove('bg-neutral','bg-dark','bg-default')
+      element.classList.add(style)
+    })
+  }
+  handleInput(event){
+    let hex = event.target.value
+    if (Color.isValidHex(hex)){
+      this.canvas.update({hex:hex})
+      this.updateSelected(hex)
+      this.colorInput.classList.remove('invalid')
+      this.updateColorState(hex)
+    } else if (hex === 'none'){
+      console.warn('setting value to none')
+      this.canvas.update({hex:'#fff'})
+      this.updateSelected(hex)
+      this.updateColorState('none')
+      this.colorInput.classList.remove('invalid')
+    } else {
+      console.warn('invalid color')
+      this.colorInput.classList.add('invalid')
+    }
+  }
+  handleColorChange(hex){
+    this.updateColorState(hex)
+    this.colorInput.value = hex
+    this.colorInput.classList.remove('invalid')
+    const shapeFillReflector = $('.shape-reflector[reflector="fill"]'),
+          shapeStrokeReflector = $('.shape-reflector[reflector="stroke"]'),
+          shapeFill = this.mode.shapes.fill.currentColor,
+          shapeStroke = this.mode.shapes.stroke.currentColor
+          shapeFillReflector.style.backgroundColor = shapeFill
+          shapeStrokeReflector.style.backgroundColor = shapeStroke
+  }
+  handleBackgroundChange(elementClicked){
+    const cls = elementClicked.getAttribute('cls')
+    if (cls) this.applyPreviewBackground(cls)
+  }
+  handleModeChange(selectorClicked){
+    const target = selectorClicked.getAttribute('selector')
+    const type = selectorClicked.getAttribute('sVal')
+    const highlightSelector = () => {
+      $$('.editor-value-container').forEach(selector => selector.classList.remove('active'))
+      $(`[container=${target}][sVal=${type}]`).classList.add('active')
+    }
+    this.mode.currentMode = target
+    this.mode.currentType = type
+    let mode = this.currentMode
+    let currentColor = mode.currentColor
+    if (isValidHex(currentColor)){
+      this.canvas.update({hex:currentColor})
+    } else {
+      console.warn('current color invalid using #000',currentColor)
+      this.canvas.update({hex:'#000'})
+    }
+    highlightSelector()
+  }
+  handleCopy(){
+    let input = this.colorInput
+    toClipboard(input.value)
+  }
   updateColorPicker(parsedColorSet){
     const {elements,shapes} = parsedColorSet;
-    const shapeFill = shapes.matchingFill ? shapes.fill[0] : null;
-    const shapeStroke = shapes.matchingStroke ? shapes.stroke[0] : null;
-    const svgFill = elements.matchingFill ? elements.matchingFill : null;
-    const svgStroke = elements.matchingStroke ? elements.matchingStroke : null;
+    const shapeFill = shapes.matchingFill && shapes.fill[0] !== 'none' ? shapes.fill[0] : null;
+    const shapeStroke = shapes.matchingStroke && shapes.stroke[0] !== 'none' ? shapes.stroke[0] : null;
+    const svgFill = elements.matchingFill && elements.fill[0] !== 'none' ? elements.fill[0] : null;
+    const svgStroke = elements.matchingStroke ? elements.stroke[0] : null;
     if (shapeFill != null) $('.default-fill .cEdit-icon').style.backgroundColor = shapeFill
     else $('.default-fill .cEdit-icon').style.backgroundColor = '#f9f9f9'
     if (shapeStroke != null) $('.default-stroke .cEdit-icon').style.backgroundColor = shapeFill
@@ -334,58 +394,54 @@ export class CollectionPreview extends EventEmitterClass {
   }
   updateAllSvgElements(hex,attr='fill'){
     this.eachElement(element => element.setAttribute(attr,hex))
-    $('.cEdit-icon[s')
   }
   updateColorState(hex){
     let state = this.currentMode
     state.history.addOneAndSkipTo(hex)
     state.currentColor = hex
   }
-
   refreshColorState(parsedColorSet){
     const {elements,shapes} = parsedColorSet;
     const shapeFill = shapes.matchingFill ? shapes.fill[0] : null;
     const shapeStroke = shapes.matchingStroke ? shapes.stroke[0] : null;
-    const svgFill = elements.matchingFill ? elements.matchingFill : null;
-    const svgStroke = elements.matchingStroke ? elements.matchingStroke : null;
-      this.mode['shapes']['fill'] = ColorState(shapeFill ? shapeFill : undefined)
-      this.mode['shapes']['stroke'] = ColorState(shapeStroke ? shapeStroke : undefined)
-      this.mode['element']['fill'] = ColorState(svgFill ? svgFill : undefined)
-      this.mode['element']['stroke'] = ColorState(svgStroke ? svgStroke : undefined)
+    const svgFill = elements.matchingFill ? elements.fill[0] : null;
+    const svgStroke = elements.matchingStroke ? elements.stroke[0] : null;
+      this.mode['shapes']['fill'] = ColorState(shapeFill ? shapeFill : 'none')
+      this.mode['shapes']['stroke'] = ColorState(shapeStroke ? shapeStroke : 'none')
+      this.mode['element']['fill'] = ColorState(svgFill ? svgFill : 'none')
+      this.mode['element']['stroke'] = ColorState(svgStroke ? svgStroke : 'none')
   }
-  
   updateSelected(hex){
     this.setPreviewColor(hex)
     let mode = this.mode.currentMode
     let targetType = this.mode.currentType
-    console.log('updating elements... [MODE]',mode, targetType)
+    let noneHex = '#f9f9f9';
+    let shapeReflector = $(`.reflector[selector="shapes"][sVal=${targetType}]`)
+    let elementReflector = $(`.reflector[selector="element"][sVal=${targetType}]`)
     if (mode === 'shapes'){
       this.updateAllShapes(hex,targetType)
-      $(`.reflector[selector="shapes"][sVal=${targetType}]`).style.backgroundColor = hex
+      if (hex === 'none') shapeReflector.style.backgroundColor = noneHex
+      else shapeReflector.style.backgroundColor = hex
     }
     if (mode === 'element'){
       this.updateAllSvgElements(hex,targetType)
-      $(`.reflector[selector="element"][sVal=${targetType}]`).style.backgroundColor = hex
+      if (hex === 'none') elementReflector.style.backgroundColor = noneHex
+      else elementReflector.style.backgroundColor = hex
     }
-    console.log(this)
   }
-
   updateCurrentHue = (state) => {
     this.canvas.updateHue(state.deg)
     this.setPreviewColor(this.currentHex)
     this.updateSelected(this.currentHex)
  }
-
   resetViewBoxScale(currentViewBox){
     this.startingViewbox = currentViewBox.slice()
     this.viewBoxScale = currentViewBox.slice()
   }
-
   setViewboxBlank(){
     this.setViewbox(this.defaultSetting.viewbox)
     this.resetViewBoxScale(this.defaultSetting.viewbox)
   }
-
   setViewbox(array) {
     let vbx = Number(array[0]),
         vby = Number(array[1]),
@@ -406,14 +462,12 @@ export class CollectionPreview extends EventEmitterClass {
     this.viewbox = [vbx,vby,vbw,vbh]
     this.notify('viewbox changed')
   }
-
   setIconViewboxHTML(viewbox){
     this.icons.forEach(icon => {
       let iconElement = $(`.db-res .svg-wrapper[data-id=${icon.id}] svg`)
       if (iconElement) iconElement.setAttribute('viewBox',viewbox.join(' '))
     })
   }
-
   setIconDimensions({height,width}){
     document.documentElement.style.setProperty('--variable-height', `${height}px`);
     document.documentElement.style.setProperty('--variable-width', `${width}px`);
@@ -425,32 +479,6 @@ export class CollectionPreview extends EventEmitterClass {
       } 
     })
   }
-
-  showBorders(){
-    $$('.db-res .svg-wrapper svg').forEach(icon => icon.style.border = '1px dotted red')
-    this.bordersActive = true
-    return this.bordersActive;
-  }
-
-  hideBorders(){
-    $$('.db-res .svg-wrapper svg').forEach(icon => icon.style.border = '1px dotted transparent')
-    this.bordersActive = false
-    return this.bordersActive;
-  }
-
-  toggleBorder(){
-     return this.bordersActive ? this.hideBorders() : this.showBorders()
-  }
-
-  showSaveMenu(){
-    $('.color-save-menu').classList.add('active')
-  }
-  hideSaveMenu(){
-    $('.color-save-menu').classList.remove('active')
-  }
-  toggleSaveMenu(){
-    $('.color-save-menu').classList.toggle('active')
-  }
   revertIconToOriginalHTML(){
     const {height,width,viewbox} = this.original;
     this.setIconViewboxHTML(viewbox)
@@ -459,7 +487,6 @@ export class CollectionPreview extends EventEmitterClass {
       element.classList.remove('bg-neutral','bg-dark','bg-default')
     })
   }
-
   findMatchingViewbox(icons){
     // return null if all viewboxes are not the same
     let viewbox
@@ -480,14 +507,7 @@ export class CollectionPreview extends EventEmitterClass {
     }
     return original
   }
-  parseColors(icons){
-    let colorsFound = new Set();
-  }
   findMatchingColors(icons){
-    let fill = 'start';
-    let svgFill = 'start';
-    let stroke = 'start';
-    let svgStroke = 'start';
     let parsed = {
       'elements':{
         fill: new Set(),
@@ -514,15 +534,24 @@ export class CollectionPreview extends EventEmitterClass {
       let icon = icons[i];
       let colorSet = icon.colors.original;
       const normalize = (hex)=> {
-        if (!hex.startsWith('#')) return Color.isValidHex(Color.isValidNamedColor(hex)) ? Color.isValidNamedColor(hex) : false
-        else return Color.toSixDigitHex(hex)
+        if (hex === 'none') {
+          return hex
+        }
+        else if (!hex.startsWith('#')) {
+          let convertedName = Color.isValidNamedColor(hex)
+          let validName = convertedName && Color.isValidHex(convertedName)
+          return validName ? convertedName : false
+        }
+        else {
+          return Color.toSixDigitHex(hex)
+        }
       }
       const parseFill = (colorSet) => {
         for(const id in colorSet){
           let iconFill = normalize(colorSet[id][1])
           let tagName = colorSet[id][2]
           if (iconFill != undefined || iconFill != false) {
-            if (tagName == 'svg') parsed.elements.fill.add(iconFill)
+            if (tagName === 'svg') parsed.elements.fill.add(iconFill)
             else parsed.shapes.fill.add(iconFill)
           } else console.warn('something wrong with this hex', this.colorSet[id][1])
         }
@@ -533,8 +562,8 @@ export class CollectionPreview extends EventEmitterClass {
           let iconStroke = normalize(colorSet[id][0])
           let tagName = colorSet[id][2]
           if (iconStroke != undefined || iconStroke != false) {
-            if (tagName == 'svg') parsed.elements.fill.add(iconStroke)
-            else parsed.shapes.fill.add(iconStroke)
+            if (tagName === 'svg') parsed.elements.stroke.add(iconStroke)
+            else parsed.shapes.stroke.add(iconStroke)
           } else console.warn('something wrong with this hex', this.colorSet[id][0])
         }
       }
@@ -553,40 +582,30 @@ export class CollectionPreview extends EventEmitterClass {
       matchingFill: parsed.shapes.matchingFill,
       matchingStroke: parsed.shapes.matchingStroke
     }
-    console.dir('PARSED ELEMENT',elementResult)
-    console.dir('PARSED SHAPES',shapeResult)
     return { shapes: shapeResult, elements: elementResult}
-  }
-  applyPreviewBackground(style){
-      this.iconElements.forEach(element => {
-        element.classList.remove('bg-neutral','bg-dark','bg-default')
-        element.classList.add(style)
-      })
-  }
-  removeStyles(){
-    this.iconElements.forEach(element => element.classList.remove('bg-neutral','bg-dark','bg-default'))
   }
   undoPreviousAction(){
     console.log('REDOING')
     const state = this.currentMode;
-    let previousColor = state.history.prev;
-    console.log(previousColor)
+    let previousColor = state.history.skipToPrev()
+    state.currentColor = previousColor
+    this.updateSelected(previousColor)
     if (isValidHex(previousColor)) {
-      state.history.skipToPrev(previousColor)
-      state.currentColor = previousColor
       this.canvas.update({hex:previousColor})
-      this.updateSelected(previousColor)
+    } else{ // handle none
+      console.warn('setting preview color to none')
+      this.canvas.update({hex:'#fff'})
     }
   }
   redoPreviousAction(){
     const state = this.currentMode;
-    let nextColor = state.history.next;
-    console.log(nextColor)
+    let nextColor = state.history.skipToNext();
+    state.currentColor = nextColor
+    this.updateSelected(nextColor)
     if (isValidHex(nextColor)) {
-      state.history.skipToNext(nextColor)
-      state.currentColor = nextColor
       this.canvas.update({hex:nextColor})
-      this.updateSelected(nextColor)
+    } else { // handle none
+      this.canvas.update({hex:'#fff'})
     }
   }
   resetAction(){
@@ -594,10 +613,13 @@ export class CollectionPreview extends EventEmitterClass {
     const original = state.original;
     let mode = this.mode.currentMode
     let targetType = this.mode.currentType
-    if (isValidHex){
-      this.mode[mode][targetType] = ColorState(original)
+    this.mode[mode][targetType] = ColorState(original)
+    this.updateSelected(original)
+    if (isValidHex(original)){
       this.canvas.update({hex:original})
-      this.updateSelected(original)
+    } else if (original === 'none'){
+      console.warn('setting preview color to none')
+      this.canvas.update({hex:'#fff'})
     }
   }
   update(collection){

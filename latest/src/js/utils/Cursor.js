@@ -45,7 +45,7 @@ export class Cursor {
 
   setPointer(index) {
     if (!this.validIndex(index)) {
-      console.warn('something went wrong here')
+      console.warn('something went wrong here',index)
       return
     }
     if (index >= this.size) this.pointer = this.size - 1

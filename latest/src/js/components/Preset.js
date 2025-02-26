@@ -1,5 +1,5 @@
 import { icons } from "./html/PresetIcons"
-class PresetModule {
+export class PresetModule {
   constructor(dashboard){
     this.dashboard = dashboard
     this.tab = 'icons'
@@ -156,6 +156,7 @@ class PresetModule {
     element.innerHTML = `${presetNotificationsElement}${toolBarElement(presetType)}${presetDataElement}`
     return element
   }
+
   hydratePresetElement(event,setting,element){
     let currentAnimation;
     return (event) => {
@@ -246,7 +247,6 @@ class PresetModule {
       let updated = await this.clearDefault(icon,collectionName,pid)
     }
   }
-
   async setDefault(id,collection,pid){
     return this.dashboard.store.setDefaultIconSetting(id,collection,pid)
   }

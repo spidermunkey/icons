@@ -45,10 +45,43 @@ export class SvgModel extends EventEmitterClass {
         const result = await API.search(query)
         return result;
     }
-    async savePreset(preset){
-        const res = await API.savePreset(preset);
+
+
+    async saveCollectionColorset(cid,colorset){
+        console.log('saving collection colorset',cid)
+        const result = await API.saveCollectionColorset(cid,colorset)
+        return result;
+    }
+    async saveIconColorset(id,colorset){
+        console.log('saving icon colorset')
+        const result = await API.saveIconColorset(cid,colorset)
+        return result;
+    }
+    async deleteIconColorset(id,collection,csid){
+        const res = await API.deleteIconColor(id,collection,csid);
         return res;
     }
+    async setDefaultIconColor(id,collection,csid){
+        console.log('applying icon colorset default')
+        const result = await API.setDefaultIconColor(id,collection,csid);
+        return result;
+    }
+    async applyDefaultCollectionColorset(cid,colorset){
+        console.log('applying default collection colorset')
+        const result = await API.setDefaultCollectionColor(cid,colorset);
+        return result;
+    }
+    async clearCollectionDefaultColor(collection){
+        console.log('clearing collection default')
+        const result = await API.clearCollectionDefaultColor(collection)
+        return result;
+    }
+    async deleteCollectionColor(cid,csid){
+        const res = await API.removeCollectionColor(cid,csid)
+        return res
+    }
+
+
     async saveIconPreset(id,collection,setting){
         const res = await API.saveIconPreset(id,collection,setting);
         return res;

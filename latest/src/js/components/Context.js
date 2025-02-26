@@ -79,7 +79,6 @@ export class ContextMenu {
 
         const {left,top,bottom} = $('.dashboard').getBoundingClientRect();
         const {height} = $('.db-context').getBoundingClientRect();
-
       (height + event.clientY) > bottom
         ? root.style.setProperty('--context-y', `${bottom - height - 40}px`)
         : root.style.setProperty('--context-y', `${event.clientY - top}px`);

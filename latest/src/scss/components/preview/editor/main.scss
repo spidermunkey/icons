@@ -262,8 +262,8 @@
     left: -360px;
     background: white;
     z-index: 100;
+    display: flex;
     flex-direction: column;
-    justify-content: space-between;
     margin-left: 10px;
   //   padding: 16px;
     background-color: #fff;
@@ -274,6 +274,7 @@
     opacity: 0;
     pointer-events: none;
     visibility: hidden;
+    overflow: hidden;
     &.active {
       opacity: 1;
       pointer-events: all;
@@ -683,81 +684,41 @@
   }
 }
 
-// PRESET MENU
-.settings-editor {
-  position: relative;
-  flex-direction: column;
-  z-index: 100000;
-  .settings-modals {
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-  }
-
-  .preset-modal {
-    position: relative;
-    display: flex;
-    flex-grow: 1;
-    height: 100%;
-    top: 0;
-    bottom: 0;
-    margin-bottom: 12px;
-    // overflow: hidden;
-  }
-  [role="tab"]{
-    margin-top: 2px;
-    padding-top: 12px;
-    padding-bottom: 24px;
-    padding-left: 4px;
-    padding-right: 4px;
-    width: 100%;
-    position: absolute;
-    height: 100%;
-    overflow-y: scroll;
-    // overflow-x: auto;
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
-    display: flex;
-    flex-direction: column;
-    transition: all 200ms ease;
-
-    &.active {
-      opacity: 1;
-      pointer-events: inherit;
-      visibility: visible;
-    }
-
-  }
-.preset-display-options {
+.preset-display-options,
+.color-editor .modal-header {
     display: flex;
     flex-direction: column;
     padding-top: 12px;
     margin-left: 4px;
     margin-right: 4px;
     border-bottom: 1px solid #8787874a;
-    .preset-display-options-label {
-      color: #333;
-      margin: 8px;
-    }
-    .pdo-options-container {
-      display: flex;
-      color: #222222c7;
+}
 
-      padding-left: 8px;
-      .preset-option {
-        margin: 4px 8px;
-        cursor: pointer;
-        &.active,
-        &:hover {
-          color: #222222;
-        }
-      }
-    }
+.preset-display-options-label,
+.color-editor .modal-header .modal-label{
+  color: #333;
+  margin: 8px;
+}
+
+.pdo-options-container,
+.color-editor-tab-container {
+  display: flex;
+  color: #222222c7;
+  padding-left: 8px;
+}
+.preset-option,
+.color-editor-tab {
+  margin: 4px 8px;
+  cursor: pointer;
+  &.active,
+  &:hover {
+    color: #222222;
+  }
 
 }
-.preset-preview-element {
+
+.preset-preview-element
+,.colorset {
   position: relative;
   border: 1px solid #8787874a;
   background-color: #e4e4e40d;
@@ -770,7 +731,8 @@
   margin-left: 4px;
   margin-right: 4px;
   transition: all 500ms ease;
-  min-height: 143px;
+  // min-height: 143px;
+  height: 160px;
   min-width: 304px;
   &.deleted {
     opacity: 0;
@@ -927,7 +889,78 @@
       color: #272727d8;
     }
   }
-  &:first-of-type {
-    margin-top: 0;
+  .preset-val.colors-list {
+    display: flex;
+    .inverter-val {
+      display: flex;
+      flex-wrap: nowrap;
+      max-width: 100%;
+      overflow-x: scroll;
+      height: 100%;
+      .inverter-color {
+        margin: 0px 2px;
+        border-radius: 4px;
+        @include widgetBorder();
+        height: 24px;
+        width: 24px;
+        opacity: .95;
+        transition: 250ms ease;
+        cursor: pointer;
+        &:hover {
+          opacity: 1;
+          box-shadow: inset 0px 0px 4px 0px rgba(0, 0, 0, 0.263);
+        }
+      }
+    }
+
   }
+  // &:first-of-type {
+  //   margin-top: 0;
+  // }
+
+// PRESET MENU
+.settings-editor {
+  position: relative;
+  flex-direction: column;
+  z-index: 100000;
+  .settings-modals {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  .preset-modal {
+    position: relative;
+    display: flex;
+    flex-grow: 1;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    margin-bottom: 12px;
+  }
+  [role="tab"]{
+    margin-top: 2px;
+    padding-top: 12px;
+    padding-bottom: 24px;
+    padding-left: 4px;
+    padding-right: 4px;
+    width: 100%;
+    position: absolute;
+    height: 100%;
+    overflow-y: scroll;
+    // overflow-x: auto;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: all 200ms ease;
+    &.active {
+      opacity: 1;
+      pointer-events: inherit;
+      visibility: visible;
+    }
+
+  }
+
 }

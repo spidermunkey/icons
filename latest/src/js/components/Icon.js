@@ -12,6 +12,7 @@ export class Icon {
         this.isBenched = props.isBenched;
         this.rebased = props.rebased;
         this.type = props.type || 'default';
+        this.color = props?.color || {}; 
         this.colors = props.colors;
         this.styles = props.styles;
         this.created_at = props.created_at;
@@ -62,6 +63,7 @@ export class Icon {
             isBenched: this.isBenched,
 
             type: this.type,
+            color: this.color,
             colors: this.colors,
             styles: this.styles,
 
@@ -269,10 +271,32 @@ export class Icon {
         if (!props.colors){
             // create marked version for colors
             this.colors = {
-                original:{},
+                original:{
+                    csid:'original',
+                    colorset_type: 'variable',
+                    name: 'original',
+                },
             }
+            /*
+                per spec:
+                    shapes filled by default #000
+                    currentColor defaults to #000
+                    lines default to stroke #000
+                    if no stroke is specified in svg element no stroke applied even for lines
+                    if no fill is specified in svg element and child is not a line fill of #000 is applied
+
+                per algo:
+                    explicitly apply defaults for control, visibility, and persistence
+                    replace inline styles for attributes for interface compatibility
+                    store attribute styles for persistence
+            */
+            let globalStroke = icon.getAttribute('stroke')
+            let globalFill = icon.getAttribute('fill')
+            if (globalFill === 'currentColor') globalFill = '#000'
+            if (globalStroke === 'currentColor') globalStroke = '#000'
             this.children.forEach((child) => {
-                const id = uuid();
+                const pid = child.getAttribute('pid')
+                const id =  pid ? pid : uuid();
                 const styleAttr = child.getAttribute("style");
                 let inlineFill;
                 let inlineStroke;
@@ -280,34 +304,47 @@ export class Icon {
                 let tagname = child.tagName;
                 let isLine = tagname === 'line'
                 let existingStroke = child.getAttribute('stroke');
-
+                let shouldNotFill = icon.getAttribute('fill') === 'none' || $$('g',icon).some(group => group.getAttribute('fill') === 'none')
                 if (styleAttr) {
                     inlineFill = styleAttr.match(/fill:\s?([^;\s]+)/);
                     inlineStroke = styleAttr.match(/stroke:\s?([^;\s]+)/);
+                    if (tagname == 'svg' && inlineStroke) console.log('INLINE STROKE FOUND',child)
                 }
                     // replace inline style for attribute
                 if (inlineFill){
                     child.setAttribute('fill',inlineFill[1])
                     const updatedStyle = styleAttr.replace(/\s*fill:[^;]+(;|$)/, '')
                     child.setAttribute("style", updatedStyle);
-                } else if (!existingFill && tagname !== 'svg'){
+                    console.log('setting fill', updatedStyle)
+                } else if (!inlineFill && !existingFill && tagname !== 'svg' && !shouldNotFill){
                     child.setAttribute('fill','#000')
+                } else if (existingFill && existingFill === 'currentColor'){
+                    child.setAttribute('fill', '#000')
+                } else if (globalFill && globalFill !== 'none'){
+                    child.setAttribute('fill',globalFill)
                 }
+
                 if (inlineStroke){
                     child.setAttribute('stroke',inlineStroke[1])
                     const updatedStyle = styleAttr.replace(/\s*stroke:[^;]+(;|$)/, '')
                     child.setAttribute("style", updatedStyle);
-                } else if (!existingStroke && isLine){
+                    console.log('setting stroke',updatedStyle)
+                } else if (!inlineStroke && !existingStroke && isLine && tagname !== 'svg'){
                     child.setAttribute('stroke','#000')
-                } 
-
+                } else if (existingStroke && existingStroke === 'currentColor'){
+                    child.setAttribute('stroke', '#000')
+                } else if (globalStroke && globalStroke !== 'none'){
+                    child.setAttribute('stroke',globalStroke)
+                }
+                
                 const marked = child.setAttribute('pid',id)
-                const stroke = child.getAttribute('stroke')
+                const cleaned = styleAttr && styleAttr.trim() === '' ? child.removeAttribute('style') : ''
+                const stroke = child.getAttribute('stroke') || 'none'
                 const fill = child.getAttribute('fill') || 'none'
+
                 this.colors.original[id] = [stroke,fill,tagname]
                 return child
             })
-
         }
         this.markup = icon.outerHTML;
         return el;

@@ -1,5 +1,3 @@
-import { EventEmitterClass } from "./EventEmitter"
-
   /*
     selectors -- registered modal class
     -- > clicked out side of modal => close()/handleClose() => notify()
@@ -7,8 +5,9 @@ import { EventEmitterClass } from "./EventEmitter"
     exceptions -- clicked inside of parent modal but should still notify()
     (closeButton, sibling tab, ...etc)
   */
-export function cosm({selectors,exceptions}){
+import { EventEmitterClass } from "./EventEmitter"
 
+export function cosm({selectors,exceptions}){
   return (handler) => {
     document.addEventListener('click',(event) => {
       const clickOutsideRegistered = selectors && Array.isArray(selectors) && !selectors.some(query => event.target.closest(query))
@@ -25,8 +24,6 @@ export class COSM extends EventEmitterClass {
     this.selectors = selectors;
     this.exceptions = exceptions;
     this.handler = handler;
-    // this.exceptionHandlers => subscribe to self
-    // this.handlers => subscribe to self
     this.eventHandler = this.eventHandler.bind(this);
     document.addEventListener('click', this.eventHandler);
   }
@@ -43,15 +40,12 @@ export class COSM extends EventEmitterClass {
         this.notify('cosm',event,clickedException)
     }
   }
-
   setHandler(fun){
     this.on('cosm',fun)
   }
-
   addSelectors(...newSelectors) {
       this.selectors.push(...newSelectors);
   }
-
   addExceptions(...newExceptions) {
       this.exceptions.push(...newExceptions);
   }

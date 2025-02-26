@@ -61,18 +61,46 @@ export const API = {
     async search(searchQuery){
         return this.post(`http://localhost:${1279}/icons/all`, { query: searchQuery })
     },
-    async savePreset(preset){
-        return this.post(`${endpoint}/settings`, { preset:preset })
-    },
     async saveIconPreset(id,collection,setting){
         return this.post(`${endpoint}/all/settings/${id}`, { id, collection, setting })
     },
     async deleteIconPreset(id,collection,pid){
         return this.delete(`${endpoint}/all/settings/${id}?pid=${encodeURIComponent(pid)}&collection=${collection}`)
     },
+
     async setDefaultIconSetting(id,collection,pid){
         return this.put(`${endpoint}/all/settings/${id}`,{id,collection,pid})
     },
+
+
+
+    async saveCollectionColorset(cid,colorset){
+        return this.post(`${endpoint}/collections/colors`, {cid,colorset})
+    },
+    async saveIconColorset(cid,colorset){
+        return this.post(`${endpoint}/collections/colors`, { cid, colorset })
+    },
+    async deleteIconColor(id,collection,csid){
+        return this.delete(`${endpoint}/all/colors/${id}?csid=${encodeURIComponent(csid)}&collection=${collection}`)
+    },
+    async setDefaultCollectionColor(collection,colorset){
+        return this.put(`${endpoint}/collections/colors`,{collection,colorset})
+    },
+    async setDefaultIconColor(id,collection,csid){
+        return this.put(`${endpoint}/all/colors/${id}`,{id,collection,csid})
+    },
+    async clearCollectionDefaultColor(collection){
+        return this.put(`${endpoint}/collections/colors/${collection}`)
+    },
+    async clearDefaultColor(id,collection){
+        return this.put(`${endpoint}/all/colors/${id}`,{id,collection,csid:0})
+    },
+    async removeCollectionColor(cid,csid){
+        return this.delete(`${endpoint}/collections/colors?csid=${encodeURIComponent(csid)}&cid=${encodeURIComponent(cid)}`)
+    },
+
+
+
     async setCollectionDefault(collection,setting){
         return this.put(`${endpoint}/collections/settings`,{collection,preset:setting})
     },
@@ -85,6 +113,7 @@ export const API = {
     async saveCollectionPreset(cid,setting){
         return this.post(`${endpoint}/collections/settings`, { cid, setting } )
     },
+
     async removeCollectionPreset(cid,pid){
         return this.delete(`${endpoint}/collections/settings?pid=${encodeURIComponent(pid)}&cid=${encodeURIComponent(cid)}`)
     },

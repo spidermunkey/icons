@@ -25,6 +25,7 @@ export class Collection {
     this.filters = filters
     this.preset = meta?.preset || null,
     this.usePreset = meta?.usePreset || false,
+    this.colors = meta?.colors || {}
     this.state = {
     }
     console.dir(`CREATING COLLECTION FROM DATA: `, data)
@@ -34,9 +35,6 @@ export class Collection {
   }
   get settings(){
     return this.meta?.settings || {}
-  }
-  get colors() {
-    return this.meta?.colors || {}
   }
   get recentSettings() {
     return this.meta.recent_settings

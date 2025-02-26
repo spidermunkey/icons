@@ -42,14 +42,19 @@ export const ColorInterface = () => {
               <div class="pv-inp">
                   <input type="text" placeholder="#hexvalue" value="">
               </div>
-              <span class="open-palette icon-label">
+              <span class="open-colors icon-label">
+                <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m7ad06h5-00LLB20E86XA">
+                    <path d="M20.5852 17.1555C21.0276 14.7345 21.0554 12.2559 20.6675 9.8256L20.6034 9.42416C20.4362 8.37679 19.5328 7.60612 18.4722 7.60612L9.75932 7.60612C9.72654 7.60612 9.69997 7.57955 9.69997 7.54677C9.69997 6.55444 8.89553 5.75 7.9032 5.75H5.61164C4.50844 5.75 3.57921 6.57432 3.44768 7.66965L3.17519 9.93877C2.89151 12.3011 2.96472 14.6927 3.39238 17.0333C3.5669 17.9885 4.36574 18.7045 5.33425 18.7738L6.84826 18.8821C10.2784 19.1275 13.7216 19.1275 17.1517 18.8821L18.7896 18.7649C19.6852 18.7008 20.4239 18.0387 20.5852 17.1555Z" fill="#515251" pid="m7ad06h5-01H9BVJSH1GQ" stroke="undefined"></path>
+                </svg>
+              </span>
+              <span class="open-palette icon-label rotate">
                   <!-- <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="10 9 33 33" enable-background="new 0 0 50 50" xml:space="preserve">
                       <path d="M15.243,19.194c0.553,0,1-0.447,1-1s-0.447-1-1-1h-3.77c-0.553,0-1,0.447-1,1v21.951c0,0.553,0.447,1,1,1h21.951
                           c0.553,0,1-0.447,1-1v-3.765c0-0.553-0.447-1-1-1s-1,0.447-1,1v2.765H12.474V19.194H15.243z"></path>
                       <path d="M41.474,9.146H19.522c-0.553,0-1,0.447-1,1v21.951c0,0.553,0.447,1,1,1h21.951c0.553,0,1-0.447,1-1V10.146
                           C42.474,9.593,42.026,9.146,41.474,9.146z M40.474,31.097H20.522V11.146h19.951V31.097z"></path>
                   </svg> -->
-                  <svg version="1.1" id="pall" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve" height="24px" width="24px">
+                  <svg version="1.1" id="pall" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0" y="0" viewBox="0 0 512 512" enable-background="new 0 0 512 512" xml:space="preserve" height="20" width="20">
                       <g id="Icon_12_">
                           <g>
                               <path d="M256,64C150.401,64,64,150.401,64,256c0,105.604,86.401,192,192,192c18.136,0,32-13.864,32-32
@@ -63,15 +68,15 @@ export const ColorInterface = () => {
                       </g>
                   </svg>
               </span>
-              <div class="canvas-undo">
+              <div class="canvas-undo icon-label r-n15">
                   <div class="icon">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px" width="16px" transform="rotate(-15)" data-rotation="undefined">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px" width="16px">
                           <!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M480 256c0 123.4-100.5 223.9-223.9 223.9c-48.86 0-95.19-15.58-134.2-44.86c-14.14-10.59-17-30.66-6.391-44.81c10.61-14.09 30.69-16.97 44.8-6.375c27.84 20.91 61 31.94 95.89 31.94C344.3 415.8 416 344.1 416 256s-71.67-159.8-159.8-159.8C205.9 96.22 158.6 120.3 128.6 160H192c17.67 0 32 14.31 32 32S209.7 224 192 224H48c-17.67 0-32-14.31-32-32V48c0-17.69 14.33-32 32-32s32 14.31 32 32v70.23C122.1 64.58 186.1 32.11 256.1 32.11C379.5 32.11 480 132.6 480 256z"></path></svg>
                   </div>
               </div>
-              <div class="canvas-redo">
+              <div class="canvas-redo icon-label r-15">
                   <div class="icon">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px" width="16px" transform="rotate(15)">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" height="16px" width="16px">
                       <!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc. --><path d="M496 48V192c0 17.69-14.31 32-32 32H320c-17.69 0-32-14.31-32-32s14.31-32 32-32h63.39c-29.97-39.7-77.25-63.78-127.6-63.78C167.7 96.22 96 167.9 96 256s71.69 159.8 159.8 159.8c34.88 0 68.03-11.03 95.88-31.94c14.22-10.53 34.22-7.75 44.81 6.375c10.59 14.16 7.75 34.22-6.375 44.81c-39.03 29.28-85.36 44.86-134.2 44.86C132.5 479.9 32 379.4 32 256s100.5-223.9 223.9-223.9c69.15 0 134 32.47 176.1 86.12V48c0-17.69 14.31-32 32-32S496 30.31 496 48z"></path></svg>
                   </div>
               </div>
