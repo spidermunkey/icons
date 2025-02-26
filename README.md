@@ -30,3 +30,6 @@ localhost:2222
 
 [SIDENOTE]
 if your reading this. I have no idea what i'm doing, i just know it works on my machine... venture futher if you dare.
+
+
+![collection_settings_menu](https://github.com/user-attachments/assets/1dcc7811-c2f2-46cc-b720-84be1ec93dc9)
