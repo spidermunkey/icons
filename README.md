@@ -25,6 +25,8 @@ server/icons/model.js uploads and serves uploaded files for use with editor
 
 ## TODO
 
+**polish and publish prototype**
+
 **fix upload function**
 
 **fix add to collection/create collection functions**
