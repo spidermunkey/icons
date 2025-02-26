@@ -18,15 +18,15 @@ localhost:2222
 
 ## TODO
 
-**fix upload function**
+**-fix upload function**
 
-** fix add to collection/create collection functions **
+**fix add to collection/create collection functions**
 
-** color editor works but setting default colors doesn't **
+**color editor works but setting default colors doesn't**
 
-** create new user flow **
+**create new user flow**
 
-** setup guest flow for demo with default icon set **
+**setup guest flow for demo with default icon set**
 
 ## SIDENOTE
 if your reading this. I have no idea what i'm doing, i just know it works on my machine... venture futher if you dare.
