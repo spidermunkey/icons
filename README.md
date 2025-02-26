@@ -3,12 +3,13 @@ persisted changes in mongo db for use with multiple workspaces.
 
 it's messy (first real project)
 
-
+```
 server/icons/scanner.js parses and serves files in [target directory]
 
 server/icons/monitor.js watches for changes
 
 server/icons/model.js uploads and servers uploaded files for use with editor
+```
 
 `cd ./latest`; `npm run windows`
 
