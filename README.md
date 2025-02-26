@@ -10,15 +10,15 @@ server/icons/monitor.js watches for changes
 
 server/icons/model.js uploads and servers uploaded files for use with editor
 
-cd ./latest; npm run windows
+`cd ./latest`; `npm run windows`
 
-cd ./latest/server; npm start
+`cd ./latest/server`; `npm start`
 
-localhost:2222
+>localhost:2222
 
 ## TODO
 
-**-fix upload function**
+**fix upload function**
 
 **fix add to collection/create collection functions**
 
