@@ -1,5 +1,5 @@
 # Welcome!
-this is pet project for managing svg files all of a web ui. 
+this is pet project for managing svg files inside of a web ui. 
 persisted changes in mongo db for use with multiple workspaces.
 
 it's messy (first real project)
