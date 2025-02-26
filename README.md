@@ -1,5 +1,5 @@
 pet project for managing svg files all inside of web ui. 
-persisted changes in mongo db for use will multiple workspaces.
+persisted changes in mongo db for use with multiple workspaces.
 
 it's messy (first real project)
 
