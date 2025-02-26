@@ -1,5 +1,5 @@
 # Welcome!
-this is pet project for managing svg files all inside of web ui. 
+this is pet project for managing svg files all of a web ui. 
 persisted changes in mongo db for use with multiple workspaces.
 
 it's messy (first real project)
@@ -34,6 +34,16 @@ server/icons/model.js uploads and serves uploaded files for use with editor
 **create new user flow**
 
 **setup guest flow for demo with default icon set**
+
+## GOALS
+
+**Create A Version With Electron**
+
+**Web Facing UI To Safely Drag and Drop Icon Sets**
+
+**Collaboration with Designers to feature new Icon Sets**
+
+**Collaboration with teams to share collections**
 
 ## SIDENOTE
 if your reading this. I have no idea what i'm doing, i just know it works on my machine... venture futher if you dare.
