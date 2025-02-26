@@ -13,6 +13,7 @@ cd ./latest/server; npm start
 localhost:2222
 
 [TODO]
+
 -- fix upload function
 
 -- fix add to collection/create collection functions
