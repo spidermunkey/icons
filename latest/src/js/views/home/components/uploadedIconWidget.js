@@ -67,6 +67,9 @@ export class UploadSection extends AbstractComponent {
           },'')
         }</div>
         <div class="control">
+          <div class="loading-overlay">
+            uploading collection ...
+          </div>
           <div class="opt option-view">View All</div>
           <div class="opt option-settings">Settings</div>
         </div>

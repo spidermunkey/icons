@@ -158,6 +158,7 @@ export class RecentDownloads extends AbstractComponent {
   createWidget(collection){
     let c = collection;
     let widget = document.createElement('div');
+    widget.classList.add('sync-widget')
     const validIcons = []
     const icons = c.icons.slice(0,20)
     icons.forEach( icon => {
@@ -166,7 +167,11 @@ export class RecentDownloads extends AbstractComponent {
         // else console.warn('skipping',i)
     })
     let widgetHTML = `
+
       <div class="recent-collection" cid=${collection.cid}>
+      <div class="sync-success">
+        <div class="txt">Collection Synced</div>
+      </div>
         <div class="collection-info">
         <span class="name">${c.name}</span>
         <span class="divider"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -16 42 42" height="16px" width="16px">
@@ -183,6 +188,9 @@ export class RecentDownloads extends AbstractComponent {
           },'')
         }</div>
         <div class="control">
+          <div class="loading-overlay">
+            uploading collection ...
+          </div>
           <div class="opt option-accept">Upload</div>
           <div class="opt option-ignore">Ignore</div>
         </div>

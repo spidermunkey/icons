@@ -154,9 +154,45 @@
   height: 100%;
   padding: 8px;
   padding-left: 40px;
+  position: relative;
   // & > div:hover .recent-collection {
   //   transform: translate(4a0px,-4px)
   // }
+  .sync-widget {
+    position: relative;
+    transition: 200ms ease;
+    &.destroy {
+      transform: translateX(-1000px);
+      @include hide();
+    }
+  }
+  .sync-widget .sync-success{
+    position: absolute;
+    inset: 0;
+    background-color: var(--success-green);
+    border-radius: inherit;
+    color: #454545;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 24px;
+    letter-spacing: 0.0125rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    @include hide();
+    .txt {
+      transition: 300ms ease;
+      transform: translateY(-1000%);
+    }
+    &.active {
+      @include show();
+      .txt {
+        transform: translateY(0);
+      }
+    }
+
+    // border: 1px solid blue;
+  }
   .recent-collection {
     position: relative;
     cursor: pointer;
@@ -180,6 +216,40 @@
       top: 100%;
       display: flex;
       justify-content: center;
+      .loading-overlay {
+        position: absolute;
+        top:0;
+        z-index: 100;
+        height: 100%;
+        width: 100%;
+        background: linear-gradient(to right,white,var(--success-green));
+        background-size: 200% 200%;
+        background-attachment: fixed;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 12px;
+        border: 2px solid transparent;
+        animation: gradient 2s ease infinite;
+        animation-play-state: paused;
+        @include hide();
+        @keyframes gradient {
+          0% {
+            background-position: 0% 0%;
+          }
+          50% {
+            background-position: 50% 50%;
+          }
+          100% {
+            background-position: 0% 0%;
+          }
+        }
+        &.active {
+          animation-play-state: running;
+          border: 2px solid rgba(0, 255, 0, 0.089);
+          @include show();
+        }
+      }
       .opt {
         margin-top: 12px;
         margin-right:36px;

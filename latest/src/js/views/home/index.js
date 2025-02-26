@@ -25,17 +25,26 @@ export class Home extends AbstractView {
       this.localCollections.active = false;
       this.uploadedCollections.active = false;
     })
-    this.on('upload', async (id) => {
+    this.on('upload', async (id,element) => {
       if (this.uploadingQue.has(id)){
         console.warn('upload already in process',id)
         return;
       }
       console.log('uploading.....',id)
       // animate here
+      $('.loading-overlay',element).classList.add('active')
       this.uploadingQue.add(id);
       const stat = await API.requestSync({cid:id});
       console.log('COLLECTION SYNCED',stat);
       this.uploadingQue.delete(id);
+      $('.loading-overlay',element).classList.remove('active')
+      $('.sync-success',element).classList.add('active')
+      setTimeout(() => {
+        element.classList.add('destroy')
+        setTimeout(() => {
+          element.remove()
+        },200)
+      },1500)
     })
     this.on('ignore',(data) => {
       this.broker.sendMessage(JSON.stringify({
@@ -74,8 +83,7 @@ export class Home extends AbstractView {
           let collection = e.target.closest('.recent-collection')
           console.trace('uploading collection',collection)
           let id = collection.getAttribute('cid');
-          collection.
-          this.notify('upload',id)
+          this.notify('upload',id,collection)
         }
         else if (ignore) {
           let collection = e.target.closest('.recent-collection');
