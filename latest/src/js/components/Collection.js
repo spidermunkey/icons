@@ -190,6 +190,9 @@ export class Collection {
 
 
 export function CollectionWidget(data) {
+  let maxVisiblePageNum = 9;
+  let currentPage = 1;
+  let shiftLength = 36;
 
     const pages = data.pages;
     const name = data.name;
@@ -246,11 +249,6 @@ export function CollectionWidget(data) {
           </div>
     </div>
     `
-    let currentPage = 1;
-    let shiftLength = 36;
-    let maxVisiblePageNum = 9;
-    let children = $('.page-container',panel_footer)
-    let maxLen = children[children.length - 1].getBoundingClientRect().right - children[0].getBoundingClientRect().left
 
     panel_footer.addEventListener('click',async (event) => {
       const pageRequestButton = event.target.closest('.page')
@@ -272,15 +270,13 @@ export function CollectionWidget(data) {
         const elementWidth = element.scrollWidth;
         const windowEnd = $('.paginator',panel_footer).offsetWidth
         const rightShift = maxVisiblePageNum - boundaryNum
-        const maxShiftLen = -(shiftLength * (maxVisiblePageNum + 2)) + (-elementEnd)
-        const maxShiftLen2 = windowEnd - elementWidth
-        console.log(maxShiftLen)
-        console.log(maxShiftLen2)
+        const padding = 24;
+        const maxShiftLen = windowEnd - elementWidth - padding;
         if((boundaryNum) >= maxVisiblePageNum && boundaryNum <= pages){
           element.style.transform = `translateX(${shiftLength * (rightShift)}px)`
         } else if (boundaryNum > pages){
           console.log('pages',pages)
-          element.style.transform = `translateX(${maxShiftLen2}px)`
+          element.style.transform = `translateX(${maxShiftLen}px)`
         } else {
           element.style.transform = `translateX(0px)`
         }
