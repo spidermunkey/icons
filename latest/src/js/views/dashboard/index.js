@@ -1820,16 +1820,14 @@ export class Dashboard extends AbstractView {
                     await this.renderDashboardHome()
                     return
                 } else {
-                    this.dashboard.setLoading()
-                    this.preview.setLoading()
                     const collection = await this.store.getCollection(name)
                     this.state.collection = collection
-                    this.preview.setCollectionPreset(collection.meta?.preset || {})
-                    this.colorPicker.setCollectionColor(collection.meta?.color || {})
+                    this.preview.setCollectionPreset(collection.preset)
+                    this.colorPicker.setCollectionColor(collection.color)
                     this.collectionPreview.update(collection)
                     console.log('COLLECTION PRESET',collection.meta.preset)
                     this.state.context = collection
-                    this.dashboard.render(collection)
+                    this.collection.render()
                     this.preview.update(this.currentIcon)
                     let subtypes = collection.meta.subtypes
                     let subcollections = collection.meta.sub_collections

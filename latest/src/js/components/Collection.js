@@ -20,7 +20,7 @@ export class Collection {
     console.warn('skipped: ', skipped.length,' icons')
     this.icons = validIcons
     this.cursor = new Cursor(validIcons)
-    this.meta = meta 
+    this.meta = meta
     this.ready = true
     this.filters = filters
     this.preset = meta?.preset || null,
@@ -42,7 +42,7 @@ export class Collection {
   find(id){
       return (this.icons.find(icon => icon.id == id))
   }
-  getIcon(id) {
+  Icon(id) {
       return this.find(id)
   }
   update(props){
@@ -55,6 +55,35 @@ export class Collection {
       return this.cursor.current;
   }
   async addIcon(){
+
+  }
+  render(){
+    const destination = $('#DASHBOARD .db-res');
+    destination.innerHTML = `...loading ${this.name}`
+    const frag = document.createDocumentFragment();
+    this.icons.forEach(prop => {
+      let { name , collection , markup , id , cid , isBenched } = prop
+      let el = document.createElement('div');
+          el.dataset.collection = collection;
+          el.dataset.name = name;
+          el.dataset.cid = cid;
+          el.dataset.id = id;
+          el.innerHTML = markup;
+          el.classList.add('svg-wrapper');
+          if (isBenched) {
+            el.classList.add('benched')
+          }
+      frag.append(el);
+    })
+    destination.innerHTML = '';
+    destination.append(frag);
+  }
+
+  renderWidget(destination){
+
+  }
+  
+  renderPreview(destination){
 
   }
 }

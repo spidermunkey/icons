@@ -42,99 +42,72 @@ export class SvgModel extends EventEmitterClass {
         this.ready = false;
     }
     async search(query){
-        const result = await API.search(query)
-        return result;
+        return API.search(query)
     }
-
 
     async saveCollectionColorset(cid,colorset){
         console.log('saving collection colorset',cid)
-        const result = await API.saveCollectionColorset(cid,colorset)
-        return result;
+        return API.saveCollectionColorset(cid,colorset)
     }
-    async saveIconColorset(id,colorset){
+    async saveIconColorset(cid,colorset){
         console.log('saving icon colorset')
-        const result = await API.saveIconColorset(cid,colorset)
-        return result;
+        return API.saveIconColorset(cid,colorset)
     }
+
     async deleteIconColorset(id,collection,csid){
-        const res = await API.deleteIconColor(id,collection,csid);
-        return res;
+        return API.deleteIconColor(id,collection,csid)
     }
     async setDefaultIconColor(id,collection,csid){
         console.log('applying icon colorset default')
-        const result = await API.setDefaultIconColor(id,collection,csid);
-        return result;
+        return API.setDefaultIconColor(id,collection,csid)
     }
     async applyDefaultCollectionColorset(cid,colorset){
         console.log('applying default collection colorset')
-        const result = await API.setDefaultCollectionColor(cid,colorset);
-        return result;
+        return API.setDefaultCollectionColor(cid,colorset);
     }
     async clearCollectionDefaultColor(collection){
         console.log('clearing collection default')
-        const result = await API.clearCollectionDefaultColor(collection)
-        return result;
+        return API.clearCollectionDefaultColor(collection)
     }
     async deleteCollectionColor(cid,csid){
-        const res = await API.removeCollectionColor(cid,csid)
-        return res
+        return API.removeCollectionColor(cid,csid)
     }
-
 
     async saveIconPreset(id,collection,setting){
-        const res = await API.saveIconPreset(id,collection,setting);
-        return res;
+        return API.saveIconPreset(id,collection,setting);
     }
     async deleteIconPreset(id,collection,pid){
-        const res = await API.deleteIconPreset(id,collection,pid);
-        return res;
+        return API.deleteIconPreset(id,collection,pid);
     }
     async updatePresetName(props){
-        const res = await API.updatePresetName(props)
-        return res
+        return API.updatePresetName(props)
     }
     async setCollectionDefault(collection,setting){
-        const res = await API.setCollectionDefault(collection,setting);
-        return res;
+        return API.setCollectionDefault(collection,setting);
     }
     async clearCollectionDefault(cid){
-        const res = await API.clearCollectionDefault(cid)
-        return res;
+        return API.clearCollectionDefault(cid)
     }
     async setDefaultIconSetting(id,collection,pid){
-        const res = await API.setDefaultIconSetting(id,collection,pid)
-        return res
+        return API.setDefaultIconSetting(id,collection,pid)
     }
     async clearDefaultSetting(id,collection){
-        const res = await API.clearDefaultSetting(id,collection)
-        return res
+        return API.clearDefaultSetting(id,collection)
     }
     async saveCollectionPreset(cid,setting){
-        const res = await API.saveCollectionPreset(cid,setting);
-        return res;
+        return API.saveCollectionPreset(cid,setting);
     }
     async deleteCollectionPreset(cid,pid){
-        const res = await API.removeCollectionPreset(cid,pid)
-        return res
+        return API.removeCollectionPreset(cid,pid)
     }
     async dropCollection(collectionName){
-        const res = await API.dropCollection(collectionName);
-        return res;
-    }
-    async addMany(name,icons) {
-        try {
-            let complete = await Promise.all(icons.map(icon => this.addToCollection({destination: name, icon})))
-            return complete
-        } catch(event){
-            console.log(event)
-        }
+        return API.dropCollection(collectionName);
     }
 
     async addToCollection({ destination, icon }) {
         const id = uuid()
         let collection = this.collections[destination]
-        if (!collection) collection = this.createCollection(destination)
+        if (!collection) collection = new Collection(destination)
         else if (collection[id] !== undefined) return console.warn('this id already exists')
         let copy = icon.save()
 
@@ -148,37 +121,22 @@ export class SvgModel extends EventEmitterClass {
         return response;
     }
 
-    removeFromCollection(id, collection) {
-        delete this.collections[collection][id]
-    }
-
-    async getCollectionNames(synced = true) {
-        if (this.ready && this.collectionNames)
-            return this.collectionNames
-
-        const names = await API.getCollectionNames(synced);
-        this.collectionNames = names;
-        return this.collectionNames;
+    async getCollectionNames() {
+        return API.getCollectionNames(synced);
     }
 
     async populateAllIcons() {
         const response = (await API.getCollection('all'))[0];
-        this.all = this.createCollection(response)
+        return response
     }
     async getIcon(id){
-        const icon = await API.getIcon(id);
-        console.log(icon)
+        return API.getIcon(id);
     }
     createCollection( data ) {
-        // console.log('creating collection',data)
-        const collection = new Collection(data)
-        this.notify('collection compiled',collection)
-        this.collections[collection.cid] = collection
-        return collection
+        return new Collection(data)
     }
     async saveCollection(name,icons){
-        const result = await API.createCollection(name,icons)
-        return result
+        return API.createCollection(name,icons)
     }
 
     async getCollectionPaginated(name,page=1,limit=50){
@@ -211,12 +169,12 @@ export class SvgModel extends EventEmitterClass {
         }
         if (!local || local.meta.ready == false){
             const collection = (await API.getCollection(name,filters,useFilters))[0]
-            this.collections[name] = this.createCollection(collection,filters)
+            this.collections[name] = new Collection(collection,filters)
             this.notify('collection retreived')
             return this.collections[name]
         }
         const collection = (await API.getCollection(name,filters,useFilters))[0];
-        this.collections[name] = this.createCollection(collection,filters);
+        this.collections[name] = new Collection(collection,filters);
         this.notify('collection retreived')
         console.log('COLLECTION RETRIEVED',collection)
         return this.collections[name];
@@ -225,36 +183,30 @@ export class SvgModel extends EventEmitterClass {
         const userCollections = await this.getCollectionNames();
         for (const name of userCollections){
             const response = await this.getCollection(name);
-            this.collections[name] = this.createCollection(response);
+            this.collections[name] = new Collection(response);
         }
     }
     async getMeta() {
         const data = await API.getCollectionData();
-        let meta = this.meta = {
+        let meta = {
             uploads: data?.uploads,
             auto: data?.auto,
             projects: data?.projects,
             names: [],
         }
-        for (const x in this.meta.uploads){
-            this.meta.names.push(this.meta.uploads[x].name);
+        for (const x in meta.uploads){
+            meta.names.push(meta.uploads[x].name);
           }
-          for (const x in this.meta.auto){
-            this.meta.names.push(this.meta.auto[x].name);
+          for (const x in meta.auto){
+            meta.names.push(meta.auto[x].name);
           }
-          for (const x in this.meta.projects){
-            this.meta.names.push(this.meta.projects[x].name);
+          for (const x in meta.projects){
+            meta.names.push(meta.projects[x].name);
           }
         return meta
     }
     async getNames() {
-        this.meta = await this.getMeta();
-        return this.meta.names;
-    }
-    async getSettings(context){
-        console.log('GETTING SETTINGS',context)
-        // const settings = this.settings = await API.getSettings();
-        // console.log(settings)
-        return {}
+        const meta = await this.getMeta();
+        return meta.names;
     }
 }

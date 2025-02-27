@@ -31,12 +31,12 @@ module.exports.eventHandlers = {
             rightClick = event.buttons === 2,
             leftClick = event.buttons === 1;
     if (leftClick && ctrlClick && this.state.tabName !== 'pocket'){
-        this.store.pocket.add(this.state.context.getIcon(id))
+        this.store.pocket.add(this.state.context.Icon(id))
     }
     else if (leftClick) {
-        let icon = this.state.context.getIcon(id);
+        let icon = this.state.context.Icon(id);
         if (!icon && this.state.tabName == 'search'){
-            icon = await this.state.searchContext.getIcon(id);
+            icon = await this.state.searchContext.Icon(id);
             if (!icon) {
                 console.warn('error finding icon',icon)
                 return;
@@ -256,7 +256,7 @@ module.exports.eventHandlers = {
   toggleContext(event) {
     const clickedIcon = elementClicked('.dashboard .svg-wrapper',event);
     let icon;
-    if (clickedIcon) icon = this.state.context.getIcon(clickedIcon.dataset.id)
+    if (clickedIcon) icon = this.state.context.Icon(clickedIcon.dataset.id)
     this.state.inspected = icon;
     this.context.handleRightClick(event,icon)
   },
