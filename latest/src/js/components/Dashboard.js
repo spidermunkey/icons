@@ -41,80 +41,11 @@ export class DashboardElement extends EventEmitterClass {
     this.searchPanel = $('.search-cosm');
     // $('.search.passive-search').addEventListener('input',this.throttleInput());
   }
-  throttleInput(){
-    let timeoutId;
-    // debounced
-    return (e) => {
-        this.query = e.target.value;
-        clearTimeout(timeoutId);
-        timeoutId = setTimeout( this.handleSearch.bind(this,e), 400 )
-    }
-  }
-  async handleSearch(event) {
-    const searchQuery = event.target.value;
-    this.query = searchQuery;
-    if (searchQuery === '') return this.hideSearch();
-    console.log(searchQuery,this.query)
-    const res = await axios.post(`http://localhost:${1279}/icons/all`, { query: searchQuery !== undefined ? searchQuery : this.query })
-    const { query,data } = res.data;
-    const queryIsCurrent = this.query === query || this.query === searchQuery;
-    console.log(data)
-    if (queryIsCurrent) this.renderSearch.call(this,data)
-  }
-  hideSearch(){
-    $('.search-cosm').classList.remove('active')
-    $('.db-res').classList.add('active')
-    $('.search-cosm').innerHTML = '';
-  }
-  showSearch(){
-    $('.search-cosm').classList.add('active')
-    $('.db-res').classList.remove('active')
-  }
   setLoading(){
     this.panel.innerHTML = `loading...`
   }
   setReady(){
     this.panel.classList.add('active')
-  }
-  renderSearch(icons){
-    if (!icons) return
-    const frag = document.createDocumentFragment();
-    icons.forEach(prop => {
-      let {name,category,markup,id,cid} = prop || this;
-      let el = document.createElement('div');
-      el.dataset.category = category;
-      el.dataset.name = name;
-      el.dataset.cid = cid;
-      el.dataset.id = id;
-      el.classList.add('svg-wrapper')
-      el.innerHTML = markup;
-      frag.append(el);
-    })
-    this.searchPanel.innerHTML = ''
-    this.searchPanel.append(frag);
-    this.showSearch();
-  }
-  async render(collection={}, filter="none") {
-    const frag = document.createDocumentFragment();
-    // console.log('RENDER',collection)
-    const icons = collection?.icons;
-    if (icons) icons.forEach(prop => {
-      let {name,category,markup,id,cid,isBenched} = prop || this;
-      let el = document.createElement('div');
-      el.dataset.category = category;
-      el.dataset.name = name;
-      el.dataset.cid = cid;
-      el.dataset.id = id;
-      el.classList.add('svg-wrapper');
-      if (isBenched) {
-        el.classList.add('benched')
-      }
-      el.innerHTML = markup;
-      frag.append(el);
-    })
-    this.panel.innerHTML = '';
-    this.panel.append(frag);
-    this.setReady();
   }
   async renderIcons(icons,destination,settings){
     destination.innerHTML = '';

@@ -65,10 +65,12 @@ export class SvgModel extends EventEmitterClass {
         console.log('applying default collection colorset')
         return API.setDefaultCollectionColor(cid,colorset);
     }
+
     async clearCollectionDefaultColor(collection){
         console.log('clearing collection default')
         return API.clearCollectionDefaultColor(collection)
     }
+
     async deleteCollectionColor(cid,csid){
         return API.removeCollectionColor(cid,csid)
     }
@@ -139,9 +141,10 @@ export class SvgModel extends EventEmitterClass {
         return API.createCollection(name,icons)
     }
 
-    async getCollectionPaginated(name,page=1,limit=50){
-        const {meta,icons} = (await API.getPage(name,page,limit))[0];
+    async getCollectionSample(name,page=1,limit=50){
+        const result = await API.getPage(name,page,limit);
         const validIcons = []
+        const {icons,meta} = result;
         icons.forEach( icon => {
             const i = new Icon(icon);
             if (i.isValid) validIcons.push(i)
@@ -155,29 +158,16 @@ export class SvgModel extends EventEmitterClass {
             pages: Math.floor(meta.size/limit),
             currentPage: page,
             icons:validIcons,
-            async getPage(num){
-                return API.getPage(this.name,num,limit)
+            getPage:(num) => {
+                return this.getCollectionSample(meta.name,num,limit)
             }
         }
-
     }
     async getCollection(name, filters = {subtypes:[],sub_collections:[]}, useFilters = false) {
-        let local = this.collections[name];
-        if (name == 'all' && this.ready == true){
-            this.notify('collection retreived')
-            return this.all;
-        }
-        if (!local || local.meta.ready == false){
-            const collection = (await API.getCollection(name,filters,useFilters))[0]
-            this.collections[name] = new Collection(collection,filters)
-            this.notify('collection retreived')
-            return this.collections[name]
-        }
-        const collection = (await API.getCollection(name,filters,useFilters))[0];
-        this.collections[name] = new Collection(collection,filters);
-        this.notify('collection retreived')
-        console.log('COLLECTION RETRIEVED',collection)
-        return this.collections[name];
+        const result = await API.getCollection(name,filters,useFilters)
+        console.log('RESY',result)
+        const collection = new Collection(result)
+        return collection
     }
     async populateCollectionData() {
         const userCollections = await this.getCollectionNames();

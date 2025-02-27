@@ -81,7 +81,7 @@ export const API = {
         return this.post(`${endpoint}/collections/colors`, { cid, colorset })
     },
     async deleteIconColor(id,collection,csid){
-        return this.delete(`${endpoint}/all/colors/${id}?csid=${encodeURIComponent(csid)}&collection=${collection}`)
+        return this.delete(`${endpoint}/all/colors/${id}?csid=${enco}`)
     },
     async setDefaultCollectionColor(collection,colorset){
         return this.put(`${endpoint}/collections/colors`,{collection,colorset})
@@ -132,7 +132,7 @@ export const API = {
         return this.fetch(`${endpoint}/collections/${name}?filter=${useFilters}&st=${subTypesQuery}&sc=${subCollectionsQuery}`)
     },
     async getPage(name,page,limit){
-        const res = await this.fetch(`${endpoint}/collections/${name}?filter=false&page=${page}&limit=${limit}`)
+        const res = await this.fetch(`${endpoint}/collections/${name}?paginated=true&filter=false&page=${page}&limit=${limit}`)
         return res;
     },
     async getCollectionData() {

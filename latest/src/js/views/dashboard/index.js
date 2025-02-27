@@ -6,7 +6,7 @@ import { Preview } from './../../components/Preview.js'
 import { ContextMenu } from '../../components/Context.js'
 import { DashboardElement } from '../../components/Dashboard.js'
 import { Menu } from '../../components/Menu.js'
-import { Collection } from '../../components/Collection.js'
+import { Collection, CollectionWidget } from '../../components/Collection.js'
 import { Settings } from './components/CollectionSettingsInterface.js'
 import { ColorPicker } from '../../components/ColorPicker.js'
 import { CollectionPreview } from '../../components/CollectionPreview.js'
@@ -261,15 +261,12 @@ export class Dashboard extends AbstractView {
             const queryIsCurrent = this.state.query === query || this.state.query === searchQuery
             if (queryIsCurrent) {
                 this.dashboard.setLoading()
-
                 const collection = this.store.createCollection({ 
                     icons: data, 
                     meta: { name: 'search' }
                 })
-
-                this.dashboard.setLoading()
                 this.state.searchView = collection
-                this.dashboard.render(collection)
+                collection.render()
                 this.preview.update(collection.cursor.current)
                 this.setTab('search')
             }
@@ -1735,13 +1732,14 @@ export class Dashboard extends AbstractView {
     }
     renderPocket() {
         this.dashboard.setLoading()
-        this.state.context = this.store.pocket
-        this.state.context.cursor = new Cursor(this.store.pocket.icons)
-        this.dashboard.render({
-            meta: {name:'bench'},
-            icons:this.store.pocket.icons,
-        })
-        this.dashboard.setReady()
+        const collection = new Collection(
+            {
+                meta: {name:'bench'},
+                icons:this.store.pocket.icons,
+            }
+        )
+        this.state.context = collection
+        collection.render()
         this.preview.update(this.currentIcon)
         this.setTab('pocket')
     }
@@ -1789,17 +1787,27 @@ export class Dashboard extends AbstractView {
         }
     }
     async renderDashboardHome(){
-        this.dashboard.setLoading()
-        this.preview.setLoading()
-        const collection = await this.store.getCollection('all')
+        // this could probably be sped up with generator
+        // instead of promise.all
+        const frag = document.createDocumentFragment();
+        const homePanel = $('#DASHBOARD .db-res');
+        homePanel.innerHTML = '... fetching data'
         const collection_names = await this.store.getNames()
-        this.dashboard.renderHome(await Promise.all(collection_names.map(async name => (await this.store.getCollectionPaginated(name,1,39)))))
+        const collection = await this.store.getCollection(collection_names[0])
+        homePanel.innerHTML = '... loading home'
+        const widgetData = await Promise.all(collection_names
+            .map(async name => (await this.store.getCollectionSample(name,1,39))))
+        widgetData.map(CollectionWidget).forEach(widget => frag.appendChild(widget))
+        homePanel.innerHTML = ''
+        homePanel.appendChild(frag)
+
         this.closeCollectionSettingsMenu()
         this.updateCollectionInfo(collection)
         this.state.context = collection
         this.state.collection = collection
         this.state.selected = this.currentIcon
         this.preview.update(this.currentIcon)
+
         this.setTab('home')
         $('.dashboard__header .panel-settings').classList.remove('active')
         $('.collection-menu').innerHTML = `
@@ -1853,7 +1861,8 @@ export class Dashboard extends AbstractView {
     }
     updateCollectionInfo(collection){
             const getAgo = msDate => DateTime.from(msDate).string;
-            let meta = {...collection.meta}
+            console.log('updating collection info',collection)
+            const {meta} = collection
             let {collection_type,subtypes,sub_collections,size,name, uploaded_at = undefined,created_at = null, updated_on = null}  = meta;
             if (collection_type == 'auto') collection_type = 'default'
             let lastUpdate = 
@@ -1872,33 +1881,6 @@ export class Dashboard extends AbstractView {
                 </div>
                 <div class="btn-open">show more</div>
         `
-    }
-    async renderPinnedCollection(event) {
-        const icon = event.target.closest('.pinned-icon')
-        let index = 0
-        await this.ready
-        this.dashboard.setLoading()
-        this.preview.setLoading()
-        this.state.context = await this.store.getCollection(state.pinned)
-        console.log(icon)
-        if (icon){
-            let id = icon.dataset.id;
-            let icons = this.state.context.icons;
-            for (let i = 0; i < icons.length; i++){
-                if (icons[i].id == id){
-                    index = i;
-                    this.cursor.setPointer(index);
-                    console.log(index)
-                    break;
-                }
-            }
-        }
-        this.preview.update(this.currentIcon)
-        this.dashboard.render(this.state.context.icons)
-        this.dashboard.setReady()
-        this.preview.setReady()
-        this.setTab(this.state.pinned)
-        this.selected = this.preview.icon
     }
     async handleDashboardClick(event) {
         await this.ready;
@@ -1951,7 +1933,7 @@ export class Dashboard extends AbstractView {
                     leftClick = event.buttons === 1;
             if (leftClick && ctrlClick && this.state.tabName !== 'pocket') this.store.pocket.add(this.state.context.getIcon(id))
             else if (leftClick) {
-                let icon = this.currentView.getIcon(id)
+                let icon = this.currentView.Icon(id)
                 this.preview.update(icon)
                 this.state.selected = icon
                 this.cursor.skipToElement(icon)

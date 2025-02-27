@@ -130,10 +130,10 @@ export class Collection {
     destination.append(frag)
 
   }
-  renderWidget(destination){
+  renderWidget(){
 
   }
-  renderPreview(destination){
+  renderPreview(){
 
   }
   infoHTML(){
@@ -186,4 +186,137 @@ export class Collection {
         </div>
     `
   }
+}
+
+
+export function CollectionWidget(data) {
+
+    const pages = data.pages;
+    const name = data.name;
+    const icons = data.icons;
+    const getPage = data.getPage;
+    const db_panel = document.createElement('div');
+    const db_container = document.createElement('div');
+    const panel_header = document.createElement('div');
+    const panel_preview = document.createElement('div');
+    const panel_footer = document.createElement('div');
+    const panel_menu = document.createElement('div');
+    db_panel.classList.add('collection-summary');
+    db_container.classList.add('db-container');
+    panel_header.classList.add('panel-header');
+    panel_preview.classList.add('panel-preview');
+    panel_footer.classList.add('panel-footer');
+    panel_menu.classList.add('panel-menu');
+    db_panel.setAttribute('collection',name);
+    db_panel.appendChild(panel_header);
+    db_panel.appendChild(db_container);
+    db_container.appendChild(panel_preview);
+    db_panel.appendChild(panel_footer);
+    panel_header.innerHTML = `
+    <div class="panel-name" collection="${name}">${name}</div>
+    `
+    let pageNumbers = []
+    for (let i = 1; i <= pages; i++){
+      pageNumbers.push(i)
+    }
+    panel_footer.innerHTML = `
+    <div class="paginator">
+        <div class="page-prev page-tggler">
+          <div class="icon">
+            <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m7no30hj-00143G09SR07"><path fill-rule="evenodd" clip-rule="evenodd" d="M14.0303 7.46967C14.3232 7.76256 14.3232 8.23744 14.0303 8.53033L10.5607 12L14.0303 15.4697C14.3232 15.7626 14.3232 16.2374 14.0303 16.5303C13.7374 16.8232 13.2626 16.8232 12.9697 16.5303L8.96967 12.5303C8.67678 12.2374 8.67678 11.7626 8.96967 11.4697L12.9697 7.46967C13.2626 7.17678 13.7374 7.17678 14.0303 7.46967Z" fill="black" pid="m7no30hj-00B9J71AF3II"></path></svg>
+          </div>
+        </div>
+        <div class="page-container">
+          ${ pageNumbers.reduce((a,b) => {
+            return a + `
+                <div class="page" 
+                    page= ${b} 
+                    current= ${ b === currentPage ? 'true' : ''} >
+                <div class="page-icon">
+                    ${b}
+                </div>
+                </div>`
+            },'')}
+        </div>
+
+          <div class="page-next page-tggler">
+            <div class="icon">
+              <svg width="24px" height="24px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m7no2mec-01NZUOGOVPFT"><path fill-rule="evenodd" clip-rule="evenodd" d="M9.96967 7.46967C10.2626 7.17678 10.7374 7.17678 11.0303 7.46967L15.0303 11.4697C15.3232 11.7626 15.3232 12.2374 15.0303 12.5303L11.0303 16.5303C10.7374 16.8232 10.2626 16.8232 9.96967 16.5303C9.67678 16.2374 9.67678 15.7626 9.96967 15.4697L13.4393 12L9.96967 8.53033C9.67678 8.23744 9.67678 7.76256 9.96967 7.46967Z" fill="black" pid="m7no2mec-00QN77HWIAUI"></path></svg>
+            </div>
+          </div>
+    </div>
+    `
+    let currentPage = 1;
+    let shiftLength = 36;
+    let maxVisiblePageNum = 9;
+    let children = $('.page-container',panel_footer)
+    let maxLen = children[children.length - 1].getBoundingClientRect().right - children[0].getBoundingClientRect().left
+
+    panel_footer.addEventListener('click',async (event) => {
+      const pageRequestButton = event.target.closest('.page')
+      const pageNext = event.target.closest('.page-next')
+      const pageLeft = event.target.closest('.page-prev')
+
+      const handlePageRequest = async (page) => {
+        const pageData = (await getPage(page))
+        renderIcons(pageData.icons)
+        const current = $('[current="true"]',panel_footer)
+        if (current) current.setAttribute('current','');
+        $(`.page[page="${page}"]`,panel_footer).setAttribute('current','true')
+        currentPage = Number(page);
+      }
+      const handleShiftDirection = (page) => {
+        // probably should be using getBoundingClientRects for accuracy
+        const element = $('.page-container',panel_footer)
+        const boundaryNum = (page - 1) + maxVisiblePageNum;
+        const elementWidth = element.scrollWidth;
+        const windowEnd = $('.paginator',panel_footer).offsetWidth
+        const rightShift = maxVisiblePageNum - boundaryNum
+        const maxShiftLen = -(shiftLength * (maxVisiblePageNum + 2)) + (-elementEnd)
+        const maxShiftLen2 = windowEnd - elementWidth
+        console.log(maxShiftLen)
+        console.log(maxShiftLen2)
+        if((boundaryNum) >= maxVisiblePageNum && boundaryNum <= pages){
+          element.style.transform = `translateX(${shiftLength * (rightShift)}px)`
+        } else if (boundaryNum > pages){
+          console.log('pages',pages)
+          element.style.transform = `translateX(${maxShiftLen2}px)`
+        } else {
+          element.style.transform = `translateX(0px)`
+        }
+      }
+      if (pageRequestButton){
+        const pageNumber = pageRequestButton.getAttribute('page')
+        await handlePageRequest(pageNumber)
+        handleShiftDirection(pageNumber)
+      } else if (pageNext){
+        let next = Number(currentPage) + 1;
+        let pageNumber = next > pages ? 1 : next
+        console.log('NEXT',pageNumber,next)
+        await handlePageRequest(pageNumber)
+        handleShiftDirection(pageNumber);
+      } else if (pageLeft){
+        let prev = currentPage - 1;
+        let pageNumber = prev < 1 ? pages : prev
+        await handlePageRequest(pageNumber)
+        handleShiftDirection(pageNumber)
+      }
+    })
+    renderIcons(icons)
+    function renderIcons(icons){
+      panel_preview.innerHTML =''
+      icons.forEach(icon => {
+        const {name,category,markup,id,cid,isBenched} = icon
+        const el = document.createElement('div');
+            el.dataset.category = category;
+            el.dataset.name = name;
+            el.dataset.cid = cid;
+            el.dataset.id = id;
+            el.classList.add('svg-wrapper');
+            el.setAttribute('icon-type','preview')
+            el.innerHTML = markup;
+        panel_preview.appendChild(el)
+       })
+    }
+    return db_panel
 }
