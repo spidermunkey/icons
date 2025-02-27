@@ -24,3 +24,5 @@ I say this as the project comes to a close, so close to finish that I have no ch
 
 2/27/25
 As it becomes apparent that a rewrite is out of the question and I stare at the project for hours solutions are popping are beginning to pop out to me about ways to proceed. The main idea is separation of concerns and single responsibility. I've managed to isolate certain patterns in code that can be reorganized for example, why so many classes. I've come to believe that the meat of the application is mainly an api that fetches data, collections that store icons, and icons that may be manipulated. If I can manage to express this in code moving forward should be much simpler. From there I can focus on components that manipulate Icons, components that display them, and components that manipulate where they are stored. This seems like a basic concept but it was apparent during the outset of this application; needless to say I've been feature blind the entire time.
+
+I understand the need for a module that handles api calls, you know where all the api calls are and thats good, but why can't the collection call the api for collection related data?

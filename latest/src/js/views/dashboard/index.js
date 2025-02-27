@@ -182,11 +182,11 @@ export class Dashboard extends AbstractView {
         $('.search.passive-search input').focus()
         $('.btn-cancel').addEventListener('click',() => this.cancelSearch())
 
-        $('.collection-menu').addEventListener('click',(e) => this.delegateCollectionMenuEvents(e))
+        $('.collection-menu').addEventListener('click',(e) => this.handleCollectionFilters(e))
         $('.menu-modals').addEventListener('click',(e) => this.delegateMainMenuEvents(e))
 
         $('.home').addEventListener('click', () => this.renderCollection(this.tab ? this.tab : 'home'))
-        $('.info-bar .info-text').addEventListener('click', () => this.renderCollection('home'))
+        $('.info-bar .info-text').addEventListener('click', () => this.renderDashboardHome())
 
         $('.preview-widget').addEventListener('click',(e) => this.openPreviewFromWidget(e))
         $('.close-preview').addEventListener('click',(e) => this.closePreview(e))
@@ -249,17 +249,16 @@ export class Dashboard extends AbstractView {
         console.log('element copied')
     }
     search(){
+        this.state.searchActive = true;
         const handleSearch = async (event) => {
             const searchQuery = event.target.value
             this.state.query = searchQuery
             if (searchQuery === '') return this.cancelSearch()
-
             $('.btn-cancel').classList.add('active')
             const currentQuery = searchQuery ? searchQuery : this.state.query
             const result = await this.store.search(currentQuery)
             const { query , data } = result
             const queryIsCurrent = this.state.query === query || this.state.query === searchQuery
-
             if (queryIsCurrent) {
                 this.dashboard.setLoading()
 
@@ -288,11 +287,14 @@ export class Dashboard extends AbstractView {
     cancelSearch() {
         $('.passive-search input').value = ''
         const name = this.collection.name
-        if (name == 'all' || name == 'home')
+        if (name == 'all' || name == 'home') {
             this.renderDashboardHome()
-        else
-            this.renderCollection(name)
+        }
+        else {
+            this.collection.render()
+        }
         $('.btn-cancel').classList.remove('active')
+        this.searchActive = false
     }
     // context
     togglePocketFromContext(){
@@ -1825,35 +1827,11 @@ export class Dashboard extends AbstractView {
                     this.preview.setCollectionPreset(collection.preset)
                     this.colorPicker.setCollectionColor(collection.color)
                     this.collectionPreview.update(collection)
-                    console.log('COLLECTION PRESET',collection.meta.preset)
                     this.state.context = collection
                     this.collection.render()
                     this.preview.update(this.currentIcon)
-                    let subtypes = collection.meta.subtypes
-                    let subcollections = collection.meta.sub_collections
-                    $('.collection-menu').innerHTML = `
-                    <div class="menu-controls">
-                        <div class="close-menu">close</div>
-                    </div>
-                        <div class="menu-header">Sub-Filters</div>
-                        <div class="sc-filters c-menu">
-                            <div class="list-label" tab="subcollections"> Sub Collections <span class="c-num sc-num">${collection.meta.sub_collections.length}</span></div>
-                            <div class="sc-list">${!subcollections || subcollections.length == 0 ? 'none' : subcollections.reduce((a,b)=>{
-                                return a + `<div class="list-item sc-item" ftype="sc" filter="${b}">${b}</div>`;
-                                },'')}
-                            </div>
-                        </div>
-                        <div class="st-filters c-menu">
-                            <div class="list-label" tab="subtypes"> Sub Types <span class="c-num st-num">${collection.meta.subtypes.length}</span></div>
-                            <div class="sc-list">${!subtypes || subtypes.length == 0 ? 'none' : subtypes.reduce((a,b)=>{
-                                return a + `<div class="list-item st-item" ftype="st" filter="${b}">${b}</div>`
-                                },'')}
-                            </div>
-                        </div>
-                    `
                     this.state.selected = this.currentIcon
                     this.setTab(name)
-                    this.updateCollectionInfo(collection)
                     $('.dashboard__header .panel-settings').classList.add('active')
                 }
                 this.dashboard.setReady()
@@ -1872,8 +1850,6 @@ export class Dashboard extends AbstractView {
             $('.passive-search input').value = ''
         }
         $('.info-bar .current-tab').textContent = name
-        
-        
     }
     updateCollectionInfo(collection){
             const getAgo = msDate => DateTime.from(msDate).string;
@@ -1940,7 +1916,7 @@ export class Dashboard extends AbstractView {
             console.log('COSM COLOR PICKER')
         }
         if (browseLink){
-            await this.renderCollection('home')
+            await this.renderDashboardHome()
             $('.widget-wrapper.active').classList.remove('active')
             $('.widget-main').classList.remove('active')
             $('.widget-pre').classList.add('active')
@@ -1984,6 +1960,52 @@ export class Dashboard extends AbstractView {
             }
         }
     }
+    async handleCollectionFilters(event){
+        const hotlink = event.target.closest('.hot-link');
+        const closer = event.target.closest('.close-menu');
+        const submenu = event.target.closest('.list-label');
+        const filterLink = event.target.closest('.list-item');
+        if (filterLink){
+            let filter = filterLink.getAttribute('filter');
+            let filter_type = filterLink.getAttribute('ftype');
+            let filters = this.collection.filters;
+            if (filter_type === 'st'){
+                let subtype_filters = filters.subtypes;
+                if (subtype_filters.includes(filter)){
+                    this.collection.filters.subtypes = subtype_filters.filter(f => f != filter)
+                    filterLink.classList.remove('active')
+                } else {
+                    this.collection.filters.subtypes.push(filter)
+                    filterLink.classList.add('active')
+                }
+            } else if (filter_type === 'sc'){
+                let subcollection_filters = filters.sub_collections;
+                if (subcollection_filters.includes(filter)){
+                    this.collection.filters.sub_collections = subcollection_filters.filter(f => f != filter)
+                    filterLink.classList.remove('active')
+                } else {
+                    this.collection.filters.sub_collections.push(filter)
+                    filterLink.classList.add('active')
+                }
+            }
+            console.log('filters pushed',filters)
+            this.collection.renderIcons();
+            return
+        }
+        if (submenu){
+            let tab = submenu.getAttribute('tab')
+            if (tab === 'subtypes'){
+                $('.st-filters .sc-list').classList.toggle('active')
+                submenu.parentElement.classList.toggle('active')
+            } else if (tab === 'subcollections'){
+                $('.sc-filters .sc-list').classList.toggle('active')
+                submenu.parentElement.classList.toggle('active')
+            }
+            return;
+        }
+        if (closer) this.closeCollectionMenu();
+        if(hotlink) this.renderCollection(hotlink.getAttribute('collection'))
+    }
     async delegateAddToCollectionWindowEvents(event) {
         let clicked = event.target.closest('.preview-a2c-item');
         let close = event.target.closest('.close-cc-form');
@@ -2010,62 +2032,7 @@ export class Dashboard extends AbstractView {
         let target = event.target;
 
     }
-    async delegateCollectionMenuEvents(event){
-        const hotlink = event.target.closest('.hot-link');
-        const closer = event.target.closest('.close-menu');
-        const submenu = event.target.closest('.list-label');
-        const filterLink = event.target.closest('.list-item');
-        if (filterLink){
-            let filter = filterLink.getAttribute('filter');
-            let filter_type = filterLink.getAttribute('ftype');
-            let filters = this.currentView.filters;
-            let active = false;
-            if (filter_type === 'st'){
-                let subtype_filters = filters.subtypes;
-                if (subtype_filters.includes(filter)){
-                    this.currentView.filters.subtypes = subtype_filters.filter(f => f != filter)
-                    filterLink.classList.remove('active')
-                } else {
-                    this.currentView.filters.subtypes.push(filter)
-                    filterLink.classList.add('active')
-                }
-            } else if (filter_type === 'sc'){
-                let subcollection_filters = filters.sub_collections;
-                if (subcollection_filters.includes(filter)){
-                    this.currentView.filters.sub_collections = subcollection_filters.filter(f => f != filter)
-                    filterLink.classList.remove('active')
-                } else {
-                    this.currentView.filters.sub_collections.push(filter)
-                    filterLink.classList.add('active')
-                }
-            }
- 
-            console.log(this.currentView,this.currentView.name)
-            console.log('filters pushed',filters)
-            this.dashboard.setLoading();
-            const collection = this.currentView = await this.store.getCollection(this.currentView.meta.name, this.currentView.filters, true)
-            // console.log(this.currentView.filters)
-            if (collection){
-                this.setTab(collection.meta.name)
-                this.dashboard.render(collection)
-            }
-            else this.renderCollection('home')
-            return
-        }
-        if (submenu){
-            let tab = submenu.getAttribute('tab')
-            if (tab === 'subtypes'){
-                $('.st-filters .sc-list').classList.toggle('active')
-                submenu.parentElement.classList.toggle('active')
-            } else if (tab === 'subcollections'){
-                $('.sc-filters .sc-list').classList.toggle('active')
-                submenu.parentElement.classList.toggle('active')
-            }
-            return;
-        }
-        if (closer) this.closeCollectionMenu();
-        if(hotlink) this.renderCollection(hotlink.getAttribute('collection'))
-    }
+
     async delegateMainMenuEvents(event){
         const link = event.target.closest('.menu-list-item[role="tab"]') || event.target.closest('.quick-list-item');
         // const quickLink = event.target.closest('.quick-link')

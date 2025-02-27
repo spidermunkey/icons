@@ -469,7 +469,6 @@ export class ColorPicker {
         let colorset;
         let defaultColors = icon.color
         let useCollectionDefault = !objectIsEmpty(this.currentColorset) && this.currentColorset && this.currentColorset.colorset_type === 'global'
-        console.log('using default...',[!objectIsEmpty(this.currentColorset), this.currentColorset, this.currentColorset.colorset_type === 'global'])
         if (useCollectionDefault){
             colorset = this.currentColorset
         } else {
