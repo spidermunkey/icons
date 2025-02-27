@@ -1,6 +1,5 @@
 # Welcome!
-this is pet project for managing svg files inside of a web ui. 
-persisted changes in mongo db for use with multiple workspaces.
+this is pet project for managing svg files inside of a web ui.
 
 it's messy (first real project)
 
@@ -10,6 +9,8 @@ I'm still new to all of this so if you see something that piques your interest, 
 I want feedback, I want to make friends in the industry, I want to learn from others, I want to hear from you!
 
 ```
+changes persisted mongo db 'icons' for use with multiple workspaces
+
 server/icons/scanner.js parses and serves files in [target directory]
 
 server/icons/monitor.js watches for changes
