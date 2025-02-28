@@ -270,7 +270,7 @@ export function CollectionWidget(data) {
         const elementWidth = element.scrollWidth;
         const windowEnd = $('.paginator',panel_footer).offsetWidth
         const rightShift = maxVisiblePageNum - boundaryNum
-        const padding = 24;
+        const padding = 44;
         const maxShiftLen = windowEnd - elementWidth - padding;
         if((boundaryNum) >= maxVisiblePageNum && boundaryNum <= pages){
           element.style.transform = `translateX(${shiftLength * (rightShift)}px)`

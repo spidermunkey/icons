@@ -340,3 +340,9 @@ $sb-background: hsla( 0deg, 0%, 100%, 85%);
     height: 300px;
     width: 240px;
 }
+
+@media (max-width: 1059px) {
+    .menu .menu-modal .quick-list {
+        display: none !important;
+    }
+}
