@@ -61,12 +61,12 @@ export class DashboardElement extends EventEmitterClass {
     icons.forEach(props => {
       let {name,category,markup,id,cid,isBenched} = props || this;
       let el = document.createElement('div');
-      el.dataset.category = category;
-      el.dataset.name = name;
-      el.dataset.cid = cid;
-      el.dataset.id = id;
-      el.classList.add('svg-wrapper');
-      el.innerHTML = markup;
+          el.dataset.category = category;
+          el.dataset.name = name;
+          el.dataset.cid = cid;
+          el.dataset.id = id;
+          el.classList.add('svg-wrapper');
+          el.innerHTML = markup;
       if (isBenched) {
         el.classList.add('benched')
       }
@@ -83,7 +83,6 @@ export class DashboardElement extends EventEmitterClass {
           $('svg',el).setAttribute('viewbox',viewbox.join(' '))
         if (sattrs && sattrs.length > 0)
           sattrs.forEach(attr => $('svg',el).setAttribute(attr[0],attr[1]))
-
         if (attrs && attrs.length > 0)
           attrs.forEach(attr => el.setAttribute(attr[0],attr[1]))
         if (cls && cls.length > 0)
