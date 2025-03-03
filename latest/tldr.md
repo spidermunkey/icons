@@ -31,3 +31,11 @@ I understand the need for a module that handles api calls, you know where all th
 3/3/25
 
 Running into issues with the speed at which I am recieving icons, it could be due to some bug I introduced on the backend, but that doesn't seem to be the case. I believe that the isp has flagged my route to mongodb for excessive use and thus throttled my transfer speeds, it could also be that the isp is just offering slow tranfer speeds in the general area for what ever reason, I have my suspicions that I may have an intruder of some sort on my machine. In any event it has forced me to shift focus to the way I handle the backend processes. The timing is pretty good because I've just finished the bulk of the fronted updates I wanted to do.
+
+I have some ideas, first I need to finish defining the roles of a collection interface and its relationship to the store and api namely the process for pagination and general data retrieval processes, Next I need to cleanup the code in the server folder with whatever little backend knowledge I currently have. questions to answer this week:
+
+-- how should a structured request, response cycle for a collection/icon look, as I move away  from the fast and rather unefficient methods used in the beginning.
+
+-- when sending multiple icons, do I send only the markup, leaving behind most meta data required for editors to be retrieved on a one off basis?.
+
+-- should I be using redis or some type of cdn
