@@ -1,4 +1,4 @@
-const client = require('../utils/connect.js');
+const client = require('../../utils/connect.js');
 
 const filteredNames = listOfCollectionObjects => listOfCollectionObjects.map( obj => obj.name );
 const existingCollections = async (database) =>  filteredNames(await database.listCollections().toArray());

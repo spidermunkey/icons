@@ -19,14 +19,9 @@ app.use(express.json());
 app.use(cors());
 
 const iconRouter = require('./icons/router.js');
-const colorRouter = require('./routes/colors.js');
-const timerRouter = require('./routes/timers.js');
-const testRouter = require('./icons/local_router.js');
-// const trackerRouter = require('./routes/trackers.js');
+const colorRouter = require('./colors/routes/colors.js');
 app.use('/icons', iconRouter);
 app.use('/colors',colorRouter);
-app.use('/timers', timerRouter);
-// app.use('/trackers', trackerRouter);
 app.get('/', (req,res) => res.json('Hello From The API HOME'));
 app.use((req,res) => {
     res.status(404).json("404 not found")

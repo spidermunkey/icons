@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const services = require('../controllers/userColors.js');
+const services = require('../models/userColors.js');
 
 router.delete('/collection', services.dropCollection)
 

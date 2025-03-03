@@ -3,4 +3,11 @@
 env
 node_modules
 icons/local/fsdb.json
-models/icons/local/fsdb.json
+models/fsmap.json
+models/fsdb.json
+
+fslog.json
+fsignore.json
+fsmap.json
+fstmp.json
+fsdb.json

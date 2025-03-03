@@ -6,5 +6,12 @@ mojo
 development
 .parcel-cache
 node_modules
+
 server/local/fsdb.json
 server/models/icons/local/fsdb.json
+
+fslog.json
+fsignore.json
+fsmap.json
+fstmp.json
+fsdb.json
