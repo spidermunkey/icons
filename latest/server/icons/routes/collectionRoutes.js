@@ -3,9 +3,10 @@ const router = express.Router();
 const { Mongo } = require('../model.js');
 const { Local } = require('../local.js')
 
+
 router.get('/info', async function getCollectionData(request,response){
+  console.log('fetching collection data')
   result = await Mongo.get_data_formated()
-  console.dir(result)
   response.json(result)
 })
 router.get('/info/names', async function getCollectionNames(request,response) {
@@ -61,8 +62,6 @@ router.delete('/colors', async function removeCollectionColorset(request,respons
   const result = await Mongo.delete_collection_color(cid,csid);
   response.json(result);
 })
-
-
 
 router.post('/create', async function createCollection (request,response) {
   const data = await Mongo.create_collection(request.body.payload.props)
@@ -120,32 +119,30 @@ router.delete('/:collectionID', async function dropCollection(request,response){
 router.post('/:collectionID/:id',async function searchCollection(request,response){
   
 })
-router.get('/:collectionID', async function getCollection (request, response) {
-  const cName = request.params.collectionID;
+router.get('/:collection', async function getCollection (request, response) {
+  const cName = request.params.collection;
   const filter = request.query.filter;
+  const paginated = request.query.paginated
   let filters = {subtypes:[],sub_collections:[]};
-  if (filter === 'true'){
+  let data;
+  if (paginated === 'true' || paginated == true || filter === "true"){
       filters['subtypes'] = decodeURIComponent(request.query.st).split(',').filter(i => i != '' && i != null && i != undefined);
       filters['sub_collections'] = decodeURIComponent(request.query.sc).split(',').filter(i => i != '' && i != null && i != undefined);
-      console.log('FILTERS RECIEVED',filters)
+      const page = request.query?.page;
+      const limit = request.query?.limit;
+      data = await Mongo.get_collection_paginated({ page , limit, filters }, cName );
+  } else {
+    data = await Mongo.get_collection( cName );
   }
-  const page = request.query?.page;
-  const limit = request.query?.limit;
-  const data = await Mongo.get_collection({ page , limit, filters }, cName );
-  response.json(data);
+  response.json(data)
 })
 router.put('/:collectionID', async function editCollection(request,response){
   
 })
-router.post('/:collectionID', async function addToCollection (request, response) {
+router.post('/:collectionName', async function addToCollection (request, response) {
   const { payload } = request.body;
-  if (request.params.collectionID == payload.props.collection){
-      const result = await Mongo.addToCollection(payload.props)
-      response.json(result)
-  } else {
-      response.json({message: 'upload failed', success: false, reason: 'invalid collection name'})
-      return
-  }
+  const result = await Mongo.addToCollection(payload)
+  response.json(result)
 })
 router.get('/', async function getCollections(request,response) {
   const result = Local.get_all_collections(true);

@@ -1,4 +1,4 @@
-const client = require('../../utils/connect.js');
+const client = require('../../utils/connect');
 const uri = require('../../.config/env.js');
 
 

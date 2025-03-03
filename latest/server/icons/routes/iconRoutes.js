@@ -23,9 +23,6 @@ router.delete('/colors/:id',async function deleteIconColor(request,response){
   const result = await Mongo.delete_icon_color(id,collection,csid);
   response.json(result);
 })
-
-
-
 router.get('/settings/:id', async function getIconSettings(request,response){
   
 })

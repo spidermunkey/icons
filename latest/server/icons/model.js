@@ -14,6 +14,7 @@ const mongo_db = {
     hasChanged: false,
     meta_alias: '{{meta}}',
     meta_doc_alias: '[[meta_document]]',
+    
     async stat(){
         const {icons} = await this.connect()
         const meta = icons.collection('{{meta}}')
@@ -366,51 +367,34 @@ const mongo_db = {
         const collections = (await icons.listCollections().toArray()).map(c => c.name).filter(name => name !== '{{meta}}');
         return collections;
     },
-    async get_collection({ page = 1 , limit=350, filters = {} }, ...collection_names) {
-        const { icons, meta } = await this.connect();
-        const validFilters = filters?.sub_collections.length > 0  || filters?.subtypes.length > 0
+    async get_collection(collection_name,limit=350) {
+        const { icons } = await this.connect();
+        const limiter = limit
+        if (!(await this.check_collection_name(collection_name))) return {};
+        const collection = icons.collection(collection_name);
+        console.time(`fetching data`)
+        const data = await collection.find().limit(limiter).toArray();
+        const doc = await this.get_data_by_name(collection_name)
+        console.timeEnd(`fetching data`)
+        return {  meta:doc , icons: data};
+    },
+    async get_collection_paginated({ page = 1 , limit=350 }, ...collection_names) {
+        const { icons } = await this.connect();
         const pointer = (page-1) * parseInt(limit);
-        console.log('VALID FILTERS',validFilters)
+        // console.time('fetching paginated data')
         const data = await Promise.all(collection_names.map(async name => {
             if (!(await this.check_collection_name(name))) return {};
             const collection = icons.collection(name);
+            console.log('PAGINATING COLLECTION', name)
             console.log('starting at: ', pointer );
             console.log('limiter : ', limit )
-            console.time(`fetching collection icons ${name}` )
-            let data;
-            if (validFilters){
-                console.log('FILTERS FOUND',filters)
-                data = (await collection.find().toArray()).filter(icon => {
-                    let filterSubCollection = filters?.sub_collections.length > 0;
-                    let filterSubType = filters?.subtypes.length > 0;
-                    let condition = false
-                    if (filterSubCollection && filters?.sub_collections.includes(icon.sub_collection)){
-                        condition = true;
-                        if (filterSubType && !filters?.subtypes.includes(icon.subtype))
-                            condition = false
-                    } else if (filterSubType && filters?.subtypes.includes(icon.subtype))
-                        condition = true
-                    return condition
-                })
-            }
-            else data = await collection.find().limit(parseInt(limit)).skip((parseInt(page)-1) * limit).toArray();
-            console.timeEnd(`fetching collection icons ${name}`)
-            console.time('fetching collection data')
+            const data = await collection.find().limit(parseInt(limit)).skip((parseInt(page)-1) * limit).toArray();
             const doc = await this.get_data_by_name(name)
-            console.timeEnd('fetching collection data')
+            console.log(`returning ${data.length} icons`)
             return {  meta:doc , icons: data};
         }))
-        return data
-        async function paginate(collection,page=1,limit=500){
-            const result = await collection.aggregate([
-                {
-                    $facet:{
-                        meta:[{$count: 'size'}],
-                        icons: [{$skip:(page - 1) * limit}, {$limit: limit}]
-                    }
-                }
-            ])
-        }
+        // console.timeEnd('fetching paginated data')
+        return data[0]
     },
     async get_data(cid,type) {
         const {icons} = await this.connect();
@@ -494,7 +478,7 @@ const mongo_db = {
     async sync_collection(props) {
         const isValid = await validateProperties.call(this,props);
         if (isValid.success == false) return isValid
-        console.log('uploading icons')
+        console.trace('uploading icons')
         const sync_status = await uploadIcons.call(this,props);
         if (sync_status.success == false) {
             return sync_status
@@ -502,7 +486,8 @@ const mongo_db = {
         }
         console.log('creating meta document')
         const meta_synced = await this.createMetaDocument(props,'upload');
-        console.log('document created',meta_synced)
+        const {docname,cid,name,collection_type,suptypes,sub_collections,size,preset,color} = meta_synced
+        console.dir('document created!',{docname,cid,name,collection_type})
         if (meta_synced.success == false) return meta_synced
         return {message: 'proccess complete', success: true, reason: {
             isValid,
@@ -554,7 +539,7 @@ const mongo_db = {
         }
     },
     async create_collection(props = {}) {
-        console.log('creating meta document',props)
+        console.log('creating collection...')
         const {name = null} = props;
         const collection_id = props.cid = uuid();
         const restrictedNames = ['all','favorites','recent','uploads','downloads','{{meta}}'];
@@ -565,30 +550,29 @@ const mongo_db = {
         const {icons} = await this.connect();
         await icons.createCollection(name);
         console.log('collection created',name);
-        console.log('creating meta document');
         let faulty = [];
         if (props.icons) {
             console.log('uploading icons', props.icons.length)
-            let faulty
             await Promise.all(props.icons.map(async icon => {
-                 (await this.addToCollection(icon)).success == false ? faulty.push(result) : null ;
-                console.log(result)
+                const result = (await this.addToCollection(icon))
                 if ( result.success == false) {
+                    faulty.push(icon)
                     return { icon, result };
                 }
             }))
-            if (faulty.length === 1 && faulty[0] === undefined){
-                console.log('creating meta document')
-                this.createMetaDocument(props)
-                console.log('upload process successful');
-                return { message: 'success', success: true, reason: null, failed: faulty };
-            }
-            return { message: 'success', success: false, reason: null, failed: faulty };
+            const doc = this.createMetaDocument(props)
+            console.log('upload process successful');
+            return {success:true,data:doc};
+        } else {
+            return  { message: 'collection not created',success: false, reason:'must include icons with collection'}  
         }
     },
     async createMetaDocument( props, type ) {
         const { icons } = await this.connect();
         const meta = icons.collection(this.meta_alias);
+        console.log('creating meta document',props.name)
+        console.log('creating collection type.....',type)
+        console.log(props.collection_type)
         const doc = {
             docname: this.meta_doc_alias,
             name: props.name,
@@ -601,6 +585,7 @@ const mongo_db = {
             preset: props?.preset || null,
             usePreset: props?.usePreset || false,
             settings: props?.settings || {},
+            color: props?.color || {},
             colors: props?.colors || {}
         }
         let sampleSize = 25;
@@ -612,6 +597,7 @@ const mongo_db = {
         await meta.insertOne(doc);
         return doc;
     },
+
     async remove_collection(name){
         const {icons,meta} = await this.connect();
         const metaDoc = await meta.findOne({docname: "[[collections]]"});
@@ -672,12 +658,12 @@ const mongo_db = {
         return randomDocuments;
     },
     async addToCollection(props) {
-        console.log('PROPERTIES ALOT OF PROPERTIES', props)
         if (props.markup == '') 
             return { message: 'upload failed', success: false , reason:'invalid markup' }
         // if (!(await this.collection_exists(props.name,props.)) ) 
         //     return { message: 'collection no exist',success: false, reason: null}
-
+        const collectionName = props
+        console.log(collectionName)
         const db = await this.connect();
         const collection = db.icons.collection(props.collection);
         const existingDoc = await collection.findOne({ name: props.name, markup: props.markup });
@@ -750,33 +736,20 @@ const mongo_db = {
     },
     async ping(){
         try {
-            const client = new MongoClient(this.uri);
+            const client = new MongoClient(this.uri,{connectTimeoutMS:3000});
             let conn = await Promise.race([
-                new Promise((resolve,reject) => {
-                    setTimeout(() => {
-                        resolve(false)
-                    },3000)
-                }),
+                new Promise((resolve,reject) => setTimeout(() => reject(false),3000)),
                 client.connect(),
-            ]);
-            if (conn) {
-                console.trace('[[ping]]',true);
+            ])
+                console.log('[[ping]]',true);
                 this.status = 'ready';
                 client.close();
                 return this.status;
-            } else if (conn == false) {
-                console.log('[[ping]]',' : "timeout"');
-                this.status = 'offline';
-                throw new Error('[[ping]]',false);
-            }
-            // await client.db('admin').command({ ping: 1 });
         } catch (err) {
-            console.log('[[ping]]', false, err);
+            console.log('[[ping]]',' : "timeout"', err);
+            this.status = 'offline';
             return false;
-        } finally {
-            // await client.close();
         }
-        return this.status;
 
     },
     async connect() {
@@ -792,7 +765,6 @@ const mongo_db = {
                 const metaDoc = await metaData.findOne({docname: "[[collections]]"});
                 const collections = metaDoc.collections;
                 const settings = metaDoc.settings;
-                console.log('here');
                 const meta = {
                     uploads: {},
                     projects:{},
