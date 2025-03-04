@@ -32,10 +32,9 @@ export class UploadSection extends AbstractComponent {
   }
   parseData(collections){
     if (this.active) {
-      const {uploads} = collections;
       $('.test-area').innerHTML = '';
-      for (const cname in uploads)
-        $('.test-area').appendChild(this.createWidget(uploads[cname]))
+      for (const cname in collections)
+        $('.test-area').appendChild(this.createWidget(collections[cname]))
     }
   }
   createWidget(collection){
@@ -43,7 +42,7 @@ export class UploadSection extends AbstractComponent {
     let widget = document.createElement('div');
     console.log(c)
     const validIcons = []
-    const icons = c.sample.slice(0,20)
+    const icons = c.icons.slice(0,20)
     icons.forEach( icon => {
         const i = new Icon(icon);
         if (i.isValid) validIcons.push(i)

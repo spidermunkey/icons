@@ -128,7 +128,7 @@ export const API = {
         return this.put(`${endpoint}/all/settings/edit`,props)
     },
     async getUploads(){
-        return this.fetch(`${endpoint}/collections/info?type=collection`)
+        return this.fetch(`${endpoint}/local/uploads`)
     },
     async getCollectionNames(synced = false) {
         return this.fetch(`${endpoint}/collections/info/names?synced=${synced}`)

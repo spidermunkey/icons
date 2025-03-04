@@ -57,10 +57,35 @@ const local_db = {
       return [];
     }
     let collections = [];
-    // console.log('COLLLLLLECCCTIOOONESSS',this.collections)
     for (const name in this.collections){
       let c = this.collections[name];
       if (!c.ignored && !c.synced)
+        collections.push(c);
+    }
+    return collections;
+  },
+  get_uploads(){
+    if (!this.ready){
+      console.warn('db not ready access denied')
+      return [];
+    }
+    let collections = [];
+    for (const name in this.collections){
+      let c = this.collections[name];
+      if (!c.ignored && c.synced)
+        collections.push(c);
+    }
+    return collections;
+  },
+  get_downloads(){
+    if (!this.ready){
+      console.warn('db not ready access denied')
+      return [];
+    }
+    let collections = [];
+    for (const name in this.collections){
+      let c = this.collections[name];
+      if (!c.ignored)
         collections.push(c);
     }
     return collections;
@@ -231,7 +256,7 @@ const local_db = {
   },
   addToCollection(){},
   upload(){
-    
+
   },
   remove(id){
     if(!this.index_id.hasOwnProperty(id))

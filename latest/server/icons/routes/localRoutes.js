@@ -4,7 +4,11 @@ const {Local} = require('../local.js')
 const {Mongo} = require('../model.js')
 
 router.get('/downloads', async function getLocalDownloads(request,response){
-  response.json(Local.get_recent())
+  response.json(Local.get_downloads())
+})
+
+router.get('/uploads', async function getLocalUploads(request,response){
+  response.json(Local.get_uploads())
 })
 
 router.get('/status', async function getLocalStatus(request,response) {
