@@ -7,7 +7,6 @@ export class AbstractStore extends EventEmitterClass {
     max, 
   }){
     super();
-    
     this.name = name;
     this.min = min || 3000;
     this.max = max || null;
@@ -35,5 +34,6 @@ export class AbstractStore extends EventEmitterClass {
     if (this.data !== null)
       listener(this.data)
   }
+
 
 }

@@ -17,11 +17,15 @@ export class Task {
     this.task = promiseFn;
     this.emitter = new EventEmitter();
     this.ready = false;
+    this.updateNeeded = true;
     onPending.forEach(listener => this.onload(listener))
     onData.forEach(listener => this.ondata(listener))
     onReady.forEach(listener => this.onready(listener))
     this.onload(() => this.ready = false)
     this.onready(() => this.ready = true)
+  }
+  get loading(){
+    return !this.ready
   }
   getData = async () => {
     console.log('running task',this.name)
@@ -49,13 +53,12 @@ export class Task {
       this.state = "ready";
       if (ready != null)
         await ready;
-      // console.log('stat ready')
       this.emit("ready", this.data);
-    null } catch (error) {
-    //   console.log('error');
-    //   this.state = "error";
-    //   this.data = null;
-    //   this.emit("error", error);
+  } catch (error) {
+      console.log('error');
+      this.state = "error";
+      this.data = null;
+      this.emit("error", error);
     // }
   }
 

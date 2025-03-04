@@ -5,10 +5,12 @@ export const API = {
     async fetch(url,method = 'get'){
         try {
             const res = await axios[method](url)
+            res.ok = true;
             return res.data
         } catch (e){
             console.warn('[error]',`[url] : ${url}`,e)
-            return false
+            res.ok = false;
+            return res
         }
     },
     async post(url,payload,log = false){
@@ -47,10 +49,16 @@ export const API = {
     async requestIgnore(data){
         return this.post(`${endpoint}/collections/ignore`, {  cid: data.cid } )
     },
+    async getConnection(){
+        return this.ping('google.com')
+    },
+    async getLocalStatus(){
+        return this.fetch(`${endpoint}/local/status`)
+    },
     async getStatus(){
-        const response = await this.fetch(`${endpoint}/local/status`)
-        if (response) response.connection = await this.ping('google.com')
-        return response
+        const status = await this.fetch(`${endpoint}/local/status`)
+        status.connection = await this.ping('google.com')
+        return true
     },
     async getDownloads(n){
         return this.fetch(`${endpoint}/local/downloads?n=${n}`)
@@ -71,7 +79,6 @@ export const API = {
     async setDefaultIconSetting(id,collection,pid){
         return this.put(`${endpoint}/all/settings/${id}`,{id,collection,pid})
     },
-
 
 
     async saveCollectionColorset(cid,colorset){
@@ -155,4 +162,9 @@ export const API = {
             return false;
         }
     },
+    logSizeOf(data){
+        const size = objectSizeOf(data)
+        console.log("Payload Size:", size.Formatted, "bytes");
+        console.dir(size)
+    }
 }

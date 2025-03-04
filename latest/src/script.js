@@ -2265,6 +2265,28 @@ function objToTuplesArray(obj){
   }
   return arr
 }
+function objectSizeOf(obj){
+  const size = new Blob([JSON.stringify(obj)]).size;
+  return {
+    Bytes: size,
+    KB: (size / 1024).toFixed(2),
+    MB: (size / (1024 ** 2)).toFixed(2),
+    GB: (size / (1024 ** 3)).toFixed(2),
+    Formatted: formatSize(size),
+  }
+}
+
+function formatSize(bytes) {
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let size = bytes;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+  }
+  return `${size.toFixed(2)} ${units[unitIndex]}`;
+}
+
 function objectLength(obj,ignoreList){
 
     const keys = ignoreList ? Object.keys(obj).filter(key => !ignoreList.some(i => i === key)) : Object.keys(obj)

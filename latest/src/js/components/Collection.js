@@ -1,13 +1,12 @@
 import { Icon } from './Icon.js';
 import { Cursor } from '../utils/Cursor';
-
 export class Collection {
   constructor(data){
     const { 
       icons = [], 
-      meta = { name:'empty', cid:'1' ,sub_collections:[] ,subtypes:[] }, 
-    } 
-      = data
+      meta = { name:'empty', cid:'1' ,sub_collections:[] ,subtypes:[] },
+      state = {}
+    } = data
     const validIcons = []
     const skipped = []
     this.sub_collections = []
@@ -17,7 +16,7 @@ export class Collection {
         // quick patch
         // fixing issue with bad data from the server
         const sub_collections = this.sub_collections
-        const subtypes = this.subtypes;
+        const subtypes = this.subtypes
         const sub_collection = icon.sub_collection
         const subtype = icons.subtype
         if (i.isValid) {
@@ -35,7 +34,7 @@ export class Collection {
     this.filters = {
       sub_collections:[],
       subtypes:[],
-    };
+    }
     this.icons = validIcons
     this.cursor = new Cursor(validIcons)
     this.meta = meta
@@ -188,7 +187,6 @@ export class Collection {
   }
 }
 
-
 export function CollectionWidget(data) {
   let maxVisiblePageNum = 9;
   let currentPage = 1;
@@ -250,55 +248,56 @@ export function CollectionWidget(data) {
     </div>
     `
 
-    panel_footer.addEventListener('click',async (event) => {
-      const pageRequestButton = event.target.closest('.page')
-      const pageNext = event.target.closest('.page-next')
-      const pageLeft = event.target.closest('.page-prev')
-
-      const handlePageRequest = async (page) => {
-        const pageData = (await getPage(page))
-        renderIcons(pageData.icons)
-        const current = $('[current="true"]',panel_footer)
-        if (current) current.setAttribute('current','');
-        $(`.page[page="${page}"]`,panel_footer).setAttribute('current','true')
-        currentPage = Number(page);
-      }
-      const handleShiftDirection = (page) => {
-        // probably should be using getBoundingClientRects for accuracy
-        const element = $('.page-container',panel_footer)
-        const boundaryNum = (page - 1) + maxVisiblePageNum;
-        const elementWidth = element.scrollWidth;
-        const windowEnd = $('.paginator',panel_footer).offsetWidth
-        const rightShift = maxVisiblePageNum - boundaryNum
-        const padding = 44;
-        const maxShiftLen = windowEnd - elementWidth - padding;
-        if((boundaryNum) >= maxVisiblePageNum && boundaryNum <= pages){
-          element.style.transform = `translateX(${shiftLength * (rightShift)}px)`
-        } else if (boundaryNum > pages){
-          console.log('pages',pages)
-          element.style.transform = `translateX(${maxShiftLen}px)`
-        } else {
-          element.style.transform = `translateX(0px)`
-        }
-      }
-      if (pageRequestButton){
-        const pageNumber = pageRequestButton.getAttribute('page')
-        await handlePageRequest(pageNumber)
-        handleShiftDirection(pageNumber)
-      } else if (pageNext){
-        let next = Number(currentPage) + 1;
-        let pageNumber = next > pages ? 1 : next
-        console.log('NEXT',pageNumber,next)
-        await handlePageRequest(pageNumber)
-        handleShiftDirection(pageNumber);
-      } else if (pageLeft){
-        let prev = currentPage - 1;
-        let pageNumber = prev < 1 ? pages : prev
-        await handlePageRequest(pageNumber)
-        handleShiftDirection(pageNumber)
-      }
-    })
+    panel_footer.addEventListener('click', handlePagination)
     renderIcons(icons)
+    async function handlePagination(event){
+        const pageRequestButton = event.target.closest('.page')
+        const pageNext = event.target.closest('.page-next')
+        const pageLeft = event.target.closest('.page-prev')
+  
+        const handlePageRequest = async (page) => {
+          const pageData = (await getPage(page))
+          renderIcons(pageData.icons)
+          const current = $('[current="true"]',panel_footer)
+          if (current) current.setAttribute('current','');
+          $(`.page[page="${page}"]`,panel_footer).setAttribute('current','true')
+          currentPage = Number(page);
+        }
+        const handleShiftDirection = (page) => {
+          // probably should be using getBoundingClientRects for accuracy
+          const element = $('.page-container',panel_footer)
+          const boundaryNum = (page - 1) + maxVisiblePageNum;
+          const elementWidth = element.scrollWidth;
+          const windowEnd = $('.paginator',panel_footer).offsetWidth
+          const rightShift = maxVisiblePageNum - boundaryNum
+          const padding = 44;
+          const maxShiftLen = windowEnd - elementWidth - padding;
+          if((boundaryNum) >= maxVisiblePageNum && boundaryNum <= pages){
+            element.style.transform = `translateX(${shiftLength * (rightShift)}px)`
+          } else if (boundaryNum > pages){
+            console.log('pages',pages)
+            element.style.transform = `translateX(${maxShiftLen}px)`
+          } else {
+            element.style.transform = `translateX(0px)`
+          }
+        }
+        if (pageRequestButton){
+          const pageNumber = pageRequestButton.getAttribute('page')
+          await handlePageRequest(pageNumber)
+          handleShiftDirection(pageNumber)
+        } else if (pageNext){
+          let next = Number(currentPage) + 1;
+          let pageNumber = next > pages ? 1 : next
+          console.log('NEXT',pageNumber,next)
+          await handlePageRequest(pageNumber)
+          handleShiftDirection(pageNumber);
+        } else if (pageLeft){
+          let prev = currentPage - 1;
+          let pageNumber = prev < 1 ? pages : prev
+          await handlePageRequest(pageNumber)
+          handleShiftDirection(pageNumber)
+        }
+    }
     function renderIcons(icons){
       panel_preview.innerHTML =''
       icons.forEach(icon => {
@@ -315,4 +314,25 @@ export function CollectionWidget(data) {
        })
     }
     return db_panel
+}
+
+export function CollectionWidgetSkeleton(){
+  const db_panel = document.createElement('div');
+  const db_container = document.createElement('div');
+  const panel_header = document.createElement('div');
+  const panel_preview = document.createElement('div');
+  const panel_footer = document.createElement('div');
+  const panel_menu = document.createElement('div');
+  db_panel.classList.add('collection-summary','collection-summary-skeleton');
+  db_container.classList.add('db-container');
+  panel_header.classList.add('panel-header');
+  panel_preview.classList.add('panel-preview');
+  panel_footer.classList.add('panel-footer');
+  panel_menu.classList.add('panel-menu');
+  db_panel.setAttribute('collection',name);
+  db_panel.appendChild(panel_header);
+  db_panel.appendChild(db_container);
+  db_container.appendChild(panel_preview);
+  db_panel.appendChild(panel_footer);
+  return db_panel;
 }

@@ -10,7 +10,7 @@ router.get('/info', async function getCollectionData(request,response){
   response.json(result)
 })
 router.get('/info/names', async function getCollectionNames(request,response) {
-  response.json(await Mongo.get_collection_names());
+  response.json(await Mongo.get_collection_names())
 })
 router.put('/settings/:collection', async function clearDefaultSetting(request,response){
   const collection = request.params.collection
@@ -62,7 +62,6 @@ router.delete('/colors', async function removeCollectionColorset(request,respons
   const result = await Mongo.delete_collection_color(cid,csid);
   response.json(result);
 })
-
 router.post('/create', async function createCollection (request,response) {
   const data = await Mongo.create_collection(request.body.payload.props)
   response.json(data)

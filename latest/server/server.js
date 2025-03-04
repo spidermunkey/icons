@@ -20,6 +20,7 @@ app.use(cors());
 
 const iconRouter = require('./icons/router.js');
 const colorRouter = require('./colors/routes/colors.js');
+
 app.use('/icons', iconRouter);
 app.use('/colors',colorRouter);
 app.get('/', (req,res) => res.json('Hello From The API HOME'));
@@ -28,11 +29,11 @@ app.use((req,res) => {
 });
 async function run() {
     try {
-        // process.on('uncaughtException',(err) => {
-        //     console.log('[[process]]')
-        //     console.log(err.code)
-        //     console.log(err.reason)
-        // })
+        process.on('uncaughtException',(err) => {
+            console.log(err.code)
+            console.log(err.reason)
+            console.log('[[process]]')
+        })
         await Local.init();
         console.log('local db ready'); // event db ready
         await Mongo.connect(); // event db ready

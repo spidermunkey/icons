@@ -1,31 +1,62 @@
-import { AbstractView } from "../../components/AbstractView.js";
-import { 
-  TestConnectionElement, 
-  TotalIconsElement,
-  AppStatusElement,
-  LastSyncElement,
-  AppStatusWidgetElement 
-} from "./components/statusWidget";
 import { RecentDownloads } from "./components/recentIconWidget.js";
 import { UploadSection } from "./components/uploadedIconWidget.js";
 import { API } from "../../api.js";
-
-export class Home extends AbstractView {
-  constructor(){
-    super();
-    this.statusWidget = new AppStatusWidgetElement();
-    this.appstat = new AppStatusElement();
-    this.lastSync = new LastSyncElement();
-    this.TotalIcons = new TotalIconsElement();
-    this.testconnection = new TestConnectionElement();
-    this.localCollections = new RecentDownloads();
-    this.uploadedCollections = new UploadSection();
-    this.uploadingQue = new Set();
+import { EventEmitterClass } from "../../utils/EventEmitter.js";
+export class Home extends EventEmitterClass {
+  constructor(store) {
+    super()
+    this.store = store
+    this.localCollections = new RecentDownloads()
+    this.uploadedCollections = new UploadSection()
+    this.uploadingQue = new Set()
+    this.on('active',() => this.active = true)
     this.on('inactive',() => {
       this.localCollections.active = false;
       this.uploadedCollections.active = false;
+      this.active = false;
     })
-    this.on('upload', async (id,element) => {
+    this.hydrate()
+  }
+
+  async render(){
+    $('#app').innerHTML = ''
+    $('#app').innerHTML = await this.getHTML();
+    this.localCollections.render($('.col-2.recent-activity'));
+    $('.db-res').classList.add('active');
+  }
+
+  async hydrate() {
+    $('#app').addEventListener('click',async (e) => {
+      if (!this.active){
+        return;
+      }
+      console.log('CLICK HANDLING')
+        // handle upload
+        let upload = e.target.closest('.recent-collection .option-accept');
+        let ignore = e.target.closest('.recent-collection .option-ignore');
+        let downloadsTab = e.target.closest('.rt-downloads');
+        let uploadedTab = e.target.closest('.rt-uploads');
+        if (upload){
+          let collection = e.target.closest('.recent-collection')
+          console.trace('uploading collection',collection)
+          let id = collection.getAttribute('cid');
+          this.handleUpload('upload',id,collection)
+        }
+        else if (ignore) {
+          let collection = e.target.closest('.recent-collection');
+          console.log('ignoring collection',collection);
+          let id = collection.getAttribute('cid');
+          const stat = await API.requestIgnore({cid:id});
+          console.log('IGNORE PROCESS COMPLETE', stat);
+        } // handle tabs 
+        else if (downloadsTab){
+          this.renderLocalCollections()
+        } else if (uploadedTab){
+          this.renderUploadedCollections()
+        }
+    })
+  }
+  async handleUpload(id,element){
       if (this.uploadingQue.has(id)){
         console.warn('upload already in process',id)
         return;
@@ -45,78 +76,6 @@ export class Home extends AbstractView {
           element.remove()
         },200)
       },1500)
-    })
-    this.on('ignore',(data) => {
-      this.broker.sendMessage(JSON.stringify({
-        type: 'ignore',
-        data,
-      }))
-      console.log('message sent');
-    })
-    this.hydrate()
-  }
-
-  async render(){
-    $('#app').innerHTML = ''
-    $('#app').innerHTML = await this.getHTML();
-    this.lastSync.render($('.l-stat'));
-    this.TotalIcons.render($('.t-stat'));
-    this.testconnection.render($('.c-stat'));
-    this.appstat.render($('.m-stat'));
-    this.localCollections.render($('.col-2.recent-activity'));
-    $('.db-res').classList.add('active');
-    // $('.test-area').addEventListener('click',this.handleSync.bind(this))
-  }
-
-  async hydrate() {
-    $('#app').addEventListener('click',async (e) => {
-      if (!this.active){
-        return;
-      }
-      console.log('CLICK HANDLING')
-        // handle upload
-        let upload = e.target.closest('.recent-collection .option-accept');
-        let ignore = e.target.closest('.recent-collection .option-ignore');
-        let downloadsTab = e.target.closest('.rt-downloads');
-        let uploadedTab = e.target.closest('.rt-uploads');
-        if (upload){
-          let collection = e.target.closest('.recent-collection')
-          console.trace('uploading collection',collection)
-          let id = collection.getAttribute('cid');
-          this.notify('upload',id,collection)
-        }
-        else if (ignore) {
-          let collection = e.target.closest('.recent-collection');
-          console.log('ignoring collection',collection);
-          let id = collection.getAttribute('cid');
-          const stat = await API.requestIgnore({cid:id});
-          console.log('IGNORE PROCESS COMPLETE', stat);
-        } // handle tabs 
-        else if (downloadsTab){
-          this.renderLocalCollections()
-        } else if (uploadedTab){
-          this.renderUploadedCollections()
-        }
-    })
-  }
-  async handleSync(event){
-      let target = e.target;
-      if (!target.closest('.recent-collection')) return;
-      let accept = target.closest('.option-accept');
-      let ignore = target.closest('.option-ignore');
-      if (accept){
-        let collection = e.target.closest('.recent-collection')
-        console.trace('uploading collection',collection)
-        let id = collection.getAttribute('cid');
-        // const stat = await API.requestSync({cid:id});
-        console.trace('SYNC PROCESS COMPLETE');
-      } else if (ignore) {
-        let collection = e.target.closest('.recent-collection');
-        console.log('ignoring collection',collection);
-        let id = collection.getAttribute('cid');
-        const stat = await API.requestIgnore({cid:id});
-        console.log('IGNORE PROCESS COMPLETE', stat);
-      }
   }
   renderLocalCollections(){
     this.uploadedCollections.active = false;
@@ -125,9 +84,6 @@ export class Home extends AbstractView {
   renderUploadedCollections(){
     this.localCollections.active = false;
     this.uploadedCollections.renderHTML($('.col-2.recent-activity'))
-  }
-  showUploadingAnimation(cid){
-
   }
   async getHTML() {
     return `<div class="dashboard" location="home">
@@ -165,13 +121,50 @@ export class Home extends AbstractView {
           <div class="db-res">
           <div class="col">
             <div class="info-panels">
-              <div class="m-stat">
+              <div class="m-stat stat-widget local-status-widget">
+                <div class="status-widget panel stat-container">
+                  <div class="db-stat panel-stat">
+                    <span class="label">database status : </span>
+                    <span class="stat">...loading</span>
+                  </div>
+                  <div class="local-stat panel-stat">
+                    <span class="label">local collection status : </span>
+                    <span class="stat">...loading</span>
+                  </div>
+                </div>
+
               </div>
-              <div class="l-stat">
+              <div class="l-stat stat-widget local-sync-widget">
+                <div class="last-sync panel stat-container">
+                  <div class="task-data panel-stat">
+                    <span class="label">Last Sync: </span>
+                    <span class="stat">...Loading</span>
+                  </div>
+                </div>
               </div>
-              <div class="t-stat">
+              <div class="t-stat stat-widget icon-data-widget">
+                <div class="collections-found stat-container panel">
+                  <div class="total">
+                    <span class="label">Total Icons</span>
+                    <span class="stat">... checking local size</span>
+                  </div>
+                  <div class="collections-found">
+                    <span class="label">Collections Found</span>
+                    <span class="stat">... compiling collections</span>
+                  </div>
+                </div>
+
               </div>
-              <div class="c-stat">
+              <div class="c-stat stat-widget connection-widget">
+                <div class="connection-element stat-container panel">
+                  <div class="test-connection">
+                    <div class="conn-stat">
+                      <span class="label">Internet Connection</span>
+                      <span class="stat"> ... checking connection</span>
+                    </div>
+                  </div>
+                </div>
+
               </div>
             </div>
 

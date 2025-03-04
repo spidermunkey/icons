@@ -230,7 +230,9 @@ const local_db = {
     return {}
   },
   addToCollection(){},
-  upload(){},
+  upload(){
+    
+  },
   remove(id){
     if(!this.index_id.hasOwnProperty(id))
       return false;

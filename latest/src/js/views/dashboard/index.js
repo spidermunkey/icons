@@ -6,7 +6,7 @@ import { Preview } from './../../components/Preview.js'
 import { ContextMenu } from '../../components/Context.js'
 import { DashboardElement } from '../../components/Dashboard.js'
 import { Menu } from '../../components/Menu.js'
-import { Collection, CollectionWidget } from '../../components/Collection.js'
+import { Collection, CollectionWidget, CollectionWidgetSkeleton } from '../../components/Collection.js'
 import { Settings } from './components/CollectionSettingsInterface.js'
 import { ColorPicker } from '../../components/ColorPicker.js'
 import { CollectionPreview } from '../../components/CollectionPreview.js'
@@ -1793,13 +1793,26 @@ export class Dashboard extends AbstractView {
         const homePanel = $('#DASHBOARD .db-res');
         homePanel.innerHTML = '... fetching data'
         const collection_names = await this.store.getNames()
-        const collection = await this.store.getCollection(collection_names[0])
-        homePanel.innerHTML = '... loading home'
-        const widgetData = await Promise.all(collection_names
-            .map(async name => (await this.store.getCollectionSample(name,1,39))))
-        widgetData.map(CollectionWidget).forEach(widget => frag.appendChild(widget))
+        const collection = await this.store.getCollectionSample(collection_names[0])
+        // homePanel.innerHTML = '... loading home'
         homePanel.innerHTML = ''
-        homePanel.appendChild(frag)
+        const widgetData = collection_names
+            .map(async name => {
+                // create skeleton
+                const widgetSkeleton = CollectionWidgetSkeleton()
+                homePanel.appendChild(widgetSkeleton)
+                // fetch sample data
+                const data = (await this.store.getCollectionSample(name,1,39))
+                const widget = CollectionWidget(data);
+                widgetSkeleton.replaceWith(widget)
+                console.log(name,'inserted')
+                // insert data
+                return data;
+            })
+        
+        // widgetData.map(CollectionWidget).forEach(widget => frag.appendChild(widget))
+        // homePanel.innerHTML = ''
+        // homePanel.appendChild(frag)
 
         this.closeCollectionSettingsMenu()
         this.updateCollectionInfo(collection)

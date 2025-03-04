@@ -27,7 +27,6 @@ export class AbstractComponent extends EventEmitterClass {
   render(destination){
     destination.appendChild(this.element);
     this.notify('render')
-
   }
   renderHTML(destination){
     destination.innerHTML = this.getHTML();

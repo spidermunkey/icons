@@ -1,27 +1,27 @@
 import { AppStatus } from "../statusBroker.js";
 import { AbstractComponent } from "../../../components/AbstractComponent.js"; 
 
-const appStatusWidgetElementProperties = {
-    tag: 'div',
-    classList: ['status-widget','panel'],
-}
+// const appStatusWidgetElementProperties = {
+//     tag: 'div',
+//     classList: ['status-widget','panel'],
+// }
 
-const lastSyncElementProperties = {
-    tag: 'div',
-    classList: ['last-sync','panel'],
-}
+// const lastSyncElementProperties = {
+//     tag: 'div',
+//     classList: ['last-sync','panel'],
+// }
 
-const collectionsFoundElementProperties = {
-  tag: 'div',
-  classList: ['collections-found','panel'],
-  html: `<div class="load">...loading</div>`
-}
+// const collectionsFoundElementProperties = {
+//   tag: 'div',
+//   classList: ['collections-found','panel'],
+//   html: `<div class="load">...loading</div>`
+// }
 
-const connectionElementProperties = {
-  tag: 'div',
-  classList: ['connection-element', 'panel'],
-  html: '<div class="connection-status"><span class="label">internet connection</span><span class="stat">...checking connection</span></div>'
-}
+// const connectionElementProperties = {
+//   tag: 'div',
+//   classList: ['connection-element', 'panel'],
+//   html: '<div class="connection-status"><span class="label">internet connection</span><span class="stat">...checking connection</span></div>'
+// }
 
 class StatusComponent extends AbstractComponent {
   constructor(props) {
@@ -52,34 +52,59 @@ export class AppStatusWidgetElement extends StatusComponent {
     const status = data
     const { db_status, local_status, last_change, local_size, message , local_collections} = status;
     const html = `
+      <div class="db-stat">
+        <span class="label">database status</span>
+        <span class="stat">${db_status}</span>
+      </div>
+      <div class="local-stat">
+        <span class="label">local collection status</span>
+        <span class="stat">${local_status}</span>
+      </div>
+    <div class="last-sync">
+      <span class="label">last sync</span>
+      <span class="stat">${last_change}</span>
+    </div>
+    <div class="local-size">
+      <span class="label">local icons found</span>
+      <span class="stat">${local_size}</span>
+    </div>
+    <div class="local-collections">
+      <span class="label">local collections found</span>
+      <span class="stat">${local_collections}</span>
+    </div>
+    <div class="connection-status">
+      <span class="label">internet connection</span>
+      <span class="stat">${navigator.onLine ? 'online' : 'offline' }</span>
+    </div>`
+    // this.element.innerHTML = html;
+    return html
+  }
+  getHTML(){
+    return `
     <div class="db-stat">
       <span class="label">database status</span>
       <span class="stat">${db_status}</span>
-
-
-      </div>
+    </div>
     <div class="local-stat">
       <span class="label">local collection status</span>
       <span class="stat">${local_status}</span>
     </div>
-  <div class="last-sync">
-    <span class="label">last sync</span>
-    <span class="stat">${last_change}</span>
-  </div>
-  <div class="local-size">
-    <span class="label">local icons found</span>
-    <span class="stat">${local_size}</span>
-  </div>
-  <div class="local-collections">
-    <span class="label">local collections found</span>
-    <span class="stat">${local_collections}</span>
-  </div>
-  <div class="connection-status">
-    <span class="label">internet connection</span>
-    <span class="stat">${navigator.onLine ? 'online' : 'offline' }</span>
+    <div class="last-sync">
+      <span class="label">last sync</span>
+      <span class="stat">${last_change}</span>
+    </div>
+    <div class="local-size">
+      <span class="label">local icons found</span>
+      <span class="stat">${local_size}</span>
+    </div>
+    <div class="local-collections">
+      <span class="label">local collections found</span>
+      <span class="stat">${local_collections}</span>
+    </div>
+    <div class="connection-status">
+      <span class="label">internet connection</span>
+      <span class="stat">${navigator.onLine ? 'online' : 'offline' }</span>
     </div>`
-    // this.element.innerHTML = html;
-    return html
   }
 }
 

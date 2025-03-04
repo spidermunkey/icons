@@ -2,6 +2,7 @@ import { API } from './api.js';
 import { Icon } from './components/Icon.js';
 import { Collection } from './components/Collection.js';
 import { EventEmitterClass } from './utils/EventEmitter.js';
+import { Task } from './utils/Task.js';
 export class SvgModel extends EventEmitterClass {
     constructor() {
         super();
@@ -39,12 +40,18 @@ export class SvgModel extends EventEmitterClass {
                 $('.bench-count').textContent = this.meta.size;
             }
         }
+        this.status = null;
         this.ready = false;
+        this.statusBroker = new Task(API.getLocalStatus,{})
+        this.connectionBroker = new Task(API.getConnection,{})
+        this.dataBroker = {
+            downloads: new Task(API.getDownloads.bind(API,20),{}),
+            uploads: new Task(API.getUploads.bind(API,20),{})
+        }
     }
     async search(query){
         return API.search(query)
     }
-
     async saveCollectionColorset(cid,colorset){
         console.log('saving collection colorset',cid)
         return API.saveCollectionColorset(cid,colorset)
@@ -53,7 +60,6 @@ export class SvgModel extends EventEmitterClass {
         console.log('saving icon colorset')
         return API.saveIconColorset(cid,colorset)
     }
-
     async deleteIconColorset(id,collection,csid){
         return API.deleteIconColor(id,collection,csid)
     }
@@ -65,16 +71,13 @@ export class SvgModel extends EventEmitterClass {
         console.log('applying default collection colorset')
         return API.setDefaultCollectionColor(cid,colorset);
     }
-
     async clearCollectionDefaultColor(collection){
         console.log('clearing collection default')
         return API.clearCollectionDefaultColor(collection)
     }
-
     async deleteCollectionColor(cid,csid){
         return API.removeCollectionColor(cid,csid)
     }
-
     async saveIconPreset(id,collection,setting){
         return API.saveIconPreset(id,collection,setting);
     }
@@ -105,7 +108,6 @@ export class SvgModel extends EventEmitterClass {
     async dropCollection(collectionName){
         return API.dropCollection(collectionName);
     }
-
     async addToCollection({ destination, icon }) {
         const id = uuid()
         let collection = this.collections[destination]
@@ -122,11 +124,9 @@ export class SvgModel extends EventEmitterClass {
         console.log('a2c response...')
         return response;
     }
-
     async getCollectionNames() {
         return API.getCollectionNames(synced);
     }
-
     async populateAllIcons() {
         const response = (await API.getCollection('all'))[0];
         return response
@@ -140,7 +140,6 @@ export class SvgModel extends EventEmitterClass {
     async saveCollection(name,icons){
         return API.createCollection(name,icons)
     }
-
     async getCollectionSample(name,page=1,limit=50){
         const result = await API.getPage(name,page,limit);
         const validIcons = []
@@ -150,18 +149,15 @@ export class SvgModel extends EventEmitterClass {
             if (i.isValid) validIcons.push(i)
             // else console.warn('skipping',i)
         })
-        return {
-            name: meta.name,
-            sub_collections: meta.sub_collections,
-            sub_types: meta.sub_types,
-            size: meta.size,
-            pages: Math.floor(meta.size/limit),
-            currentPage: page,
-            icons:validIcons,
-            getPage:(num) => {
+        const sampleCollection = new Collection({icons,meta})
+            // lazy decorator
+            sampleCollection.size = meta.size,
+            sampleCollection.pages = Math.floor(meta.size/limit),
+            sampleCollection.currentPage = page,
+            sampleCollection.getPage =(num) => {
                 return this.getCollectionSample(meta.name,num,limit)
             }
-        }
+            return sampleCollection
     }
     async getCollection(name, filters = {subtypes:[],sub_collections:[]}, useFilters = false) {
         const result = await API.getCollection(name,filters,useFilters)
@@ -198,5 +194,9 @@ export class SvgModel extends EventEmitterClass {
     async getNames() {
         const meta = await this.getMeta();
         return meta.names;
+    }
+
+    async getStatus(){
+        return API.getStatus();
     }
 }
