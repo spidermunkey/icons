@@ -4,7 +4,6 @@ const path = require('path');
 function countFilesWithExtension(directory, extension, ignoreDot = true) {
   return new Promise((resolve, reject) => {
     let count = 0;
-
     function readDirRecursive(dir) {
       return new Promise((res, rej) => {
         fs.readdir(dir, { withFileTypes: true }, (err, items) => {

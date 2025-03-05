@@ -25,9 +25,9 @@ router.get('/status', async function getLocalStatus(request,response) {
     last_change: local.lastChange || null,
     local_size: local.count || null,
     local_collections: Local?.collection_names.length || null,
-    added: local.added || null, // paginate
-    changed: local.changed || null, // paginate
-    removed: local.removed || null, // paginate
+    added: local.added || null,
+    changed: local.changed || null,
+    removed: local.removed || null,
     code,
     message,
   }

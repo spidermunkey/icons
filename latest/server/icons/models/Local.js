@@ -1,41 +1,60 @@
 const DateTime = require('../../utils/Datetime.js');
-
 const { uuid } = require('../../utils/uuid.js');
 const { Scanner } = require('../scanner.js');
 
-const fs = require('fs-extra');
-const path = require('path');
-const fileSystemTargets = require('../local/fsconfig.js').scanner_config
-const {
-    targetDirectory,
-    fileSystemMap,
-    fileSytemDB,
-    ignoreList,
-} = fileSystemTargets
 
-module.exports.Local = {
+module.exports = {
     ready: false,
     stats: {},
     last_stat: 0,
     scanner: Scanner,
+    updating: false,
+    loading: false,
+    db: null,
 
-    async init(updateNeeded = false) {
-        if (updateNeeded) await this.update();
-        else if (this.ready && this.status !== 'updating') return this;
-        else await this.map_db();
-        return this;
-    },
-    
-    getDB(){
+    readDB(){
+      console.log('reading local database file...')
       return this.scanner.read()
     },
-    overwrite(store){
-      this.scanner.overwrite(store)
+    async init(updateNeeded = false) {
+        // poorly handles case where init is called while loading db.
+        if (updateNeeded) await this.update();
+        else if (this.ready && !this.updating) return this;
+        else if (this.db !== null) return this.db;
+        else this.loadDB();
+        return this;
     },
+    async loadDB(){
+      if (!this.loading){
+        this.loading = true;
+        console.log('loading filesystem db into memory...');
+        this.db = this.readDB();
+        this.status = await this.get_status();
+        this.ready = true;
+        this.loading = false;
+      } else {
+        console.log('loading process already started!')
+      }
 
+    },
     async get_status(){
+      console.log('scanning for local database statistics...')
         this.last_stat = DateTime.stamp().ms
         return this.scanner.stat()
-    }
+    },
+    async update(){
+      if (!this.updating) {
+        console.log('update triggered... this may take a moment');
+        this.ready = false;
+        this.updating = true;
+        await this.scanner.update();
+        await this.loadDB();
+        return this.db;
+      } else {
+        console.log('update process already started')
+      }
+
+    },
+
 
 }

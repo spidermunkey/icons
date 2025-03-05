@@ -2,6 +2,8 @@ const fs = require('fs-extra');
 const path = require('path');
 const DateTime = require('../utils/Datetime.js');
 const { uuid } = require('../utils/uuid.js');
+const parse = require('../utils/parseSvgFile.js');
+
 const {
   targetDirectory,
   fileSystemMap,
@@ -66,21 +68,25 @@ module.exports.Scanner = {
   },
 
   async update(){
-    this.overwrite(await this.compile_store(await this.compile_map()))
+    this.overwrite(await this.scan())
   },
 
-  async compile_store(map){
+  async scan(){
+    return this.compile_object_store(await this.compile_map())
+  },
+
+  async compile_object_store(file_map = this.fsmap){
     console.log('building local object store')
     const local = {
       collection_names: [],
       collections: {},
-      index_id: {},
-      index_name: {},
+      all: {},
+      name_index: {},
     };
-    for (const file of Object.keys(map)){
+    for (const file of Object.keys(file_map)){
       if (path.extname(file) === '.svg'){
         const entry = await this.parse(file);
-        const {collection,subtype,sub_collection,id,name} = entry;
+        const {collection,subtype,sub_collection,id} = entry;
         const collection_exists = local.collections.hasOwnProperty(collection)
         const hasSubtype = subtype != undefined;
         const hasSubCollection = sub_collection != undefined;
@@ -95,16 +101,16 @@ module.exports.Scanner = {
             size: 0,
             ignored: false,
             synced: false,
+            colors: {},
+            color: {},
+            presets:{},
+            preset:{},
             created_at: DateTime.stamp().ms,
           }
           local.collection_names.push(collection)
         }
   
-        local.index_id[id] = entry;
-        local.index_name.hasOwnProperty(name)
-          ? local.index_name[name].push(entry)
-          : local.index_name[name] = [entry];
-  
+        local.all[id] = entry;
         let _collection = local.collections[collection];
         
         if (hasSubCollection && !_collection.sub_collections.includes(sub_collection))

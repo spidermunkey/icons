@@ -52,7 +52,7 @@ const monitor = {
       this.compileEntry(filepath);
       return;
     }
-    if (this.onUpdateNeeded) this.onUpdateNeeded(entry)
+    if (this.onUpdateNeeded) this.onUpdateNeeded(filepath)
   },
   async createEntry(filepath){
     const collection = getBranch(filepath)[0];
