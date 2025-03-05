@@ -2,7 +2,6 @@ const fs = require('fs-extra');
 const path = require('path');
 const DateTime = require('../utils/Datetime.js');
 const { uuid } = require('../utils/uuid.js');
-
 const {
   targetDirectory,
   fileSystemMap,
@@ -10,7 +9,7 @@ const {
   ignoreList,
 } = require('./local/fsconfig.js')
 
-const scanner = {
+module.exports.Scanner = {
   target: targetDirectory,
   fsmap: fileSystemMap,
   fsdb: fileSystemDB,
@@ -251,6 +250,4 @@ const scanner = {
           .catch(reject);
       });
   }
-}
-
-module.exports.Scanner = scanner;
+};
