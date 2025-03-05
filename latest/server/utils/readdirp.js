@@ -36,15 +36,6 @@ function countFilesWithExtension(directory, extension, ignoreDot = true) {
       .catch(reject);
   });
 }
-    
-// Example usage
-// const directoryPath = "C:/Users/justi/dev/data/icons";
-// const fileExtension = '.svg';
+
 module.exports.countFiles = countFilesWithExtension;
-// countFilesWithExtension(directoryPath, fileExtension)
-//   .then(count => {
-//     console.log(`Number of files with ${fileExtension} extension: ${count}`);
-//   })
-//   .catch(err => {
-//     console.error('Error reading directory:', err);
-//   });
+

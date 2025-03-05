@@ -2,36 +2,53 @@ const fs = require('fs-extra');
 const path = require('path');
 const DateTime = require('../utils/Datetime.js');
 const { uuid } = require('../utils/uuid.js');
-const { countFiles } = require('../utils/readdirp.js');
-const targetDirectory = "C:/Users/justi/dev/data/icons";
-const fileSystemMap = 'C:/Users/justi/dev/project-server/models/icons/local/fsmap.json';
-const fileSystemDB = 'C:/Users/justi/dev/project-server/models/icons/local/fsdb.json';
-const ignoreList = 'C:\Users\justi\dev\project-server\icons\local\fsignore.json'
+
+const {
+  targetDirectory,
+  fileSystemMap,
+  fileSystemDB,
+  ignoreList,
+} = require('./local/fsconfig.js')
+
 const scanner = {
   target: targetDirectory,
   fsmap: fileSystemMap,
   fsdb: fileSystemDB,
   stats:{},
+
   async stat() {
-      let count = await countFiles(targetDirectory , '.svg');
+      let count = await this.count();
       const lastChange = DateTime.from(new Date(fs.statSync(fileSystemMap).mtimeMs));
       const { added , removed , changed } = await this.compare();
       const updateNeeded = [added,removed,changed].some(val => val.length > 0)
       const size = `${Math.floor(fs.statSync(fileSystemDB).size / 1000)} kb`;
-      return { added, removed, changed, size, count, updateNeeded, lastChange: lastChange.string, lastChangeMs:lastChange.milisecondsAgo }
+      return { 
+        added, 
+        removed, 
+        changed, 
+        size, 
+        count, 
+        updateNeeded, 
+        lastChange: lastChange.string, 
+        lastChangeMs:lastChange.milisecondsAgo 
+      }
   },
+
   read(){
     return JSON.parse(fs.readFileSync(this.fsdb,'utf-8'));
   },
+
   read_map(){
     return JSON.parse(fs.readFileSync(this.fsmap));
   },
-  write(store){
+
+  overwrite(store){
     fs.writeFileSync( this.fsdb , JSON.stringify(store) )
   },
-  ignore(name){
 
+  ignore(name){
   },
+
   async compare(){
     const prevState = this.read_map();
     const currState = await this.compile_map();
@@ -48,9 +65,11 @@ const scanner = {
   
     return {added,removed,changed}
   },
+
   async update(){
-    this.write(await this.compile_store(await this.compile_map()))
+    this.overwrite(await this.compile_store(await this.compile_map()))
   },
+
   async compile_store(map){
     console.log('building local object store')
     const local = {
@@ -79,36 +98,6 @@ const scanner = {
             synced: false,
             created_at: DateTime.stamp().ms,
           }
-          Object.defineProperty(local.collections[collection], 'synced', {
-            get() {
-              console.log('Property was accessed!');
-              console.log(`Accessed by: ${new Error().stack.split('\n')[2].trim()}`);
-              console.log(`Accessed at: ${new Date().toISOString()}`);
-              console.log(`Process ID: ${process.pid}`);
-              console.log('-------------------');
-              return this._synced;
-            },
-            set(newValue) {
-              this._synced = newValue;
-              lastModifiedBy = `Changed by: ${new Error().stack.split('\n')[2].trim()}`; // Track who changed it
-              console.log(lastModifiedBy);
-            },
-          });
-          Object.defineProperty(local.collections[collection], 'ignored', {
-            get() {
-              console.log('Property was accessed!');
-              console.log(`Accessed by: ${new Error().stack.split('\n')[2].trim()}`);
-              console.log(`Accessed at: ${new Date().toISOString()}`);
-              console.log(`Process ID: ${process.pid}`);
-              console.log('-------------------');
-              return this._ignored;
-            },
-            set(newValue) {
-              this._ignored = newValue;
-              lastModifiedBy = `Changed by: ${new Error().stack.split('\n')[2].trim()}`; // Track who changed it
-              console.log(lastModifiedBy);
-            },
-          });
           local.collection_names.push(collection)
         }
   
@@ -133,21 +122,18 @@ const scanner = {
     console.log('local object store ready');
     return local;
   },
-  async compile_map(){
+  async compile_map(directory = this.target){
     const state = {};
-    await readDir(this.target)
-    return state;
-    async function readDir(directory){
-      const items = await fs.promises.readdir(directory, {withFileTypes: true});
+    const items = await fs.promises.readdir(directory, {withFileTypes: true});
         for (const item of items) {
           const itemPath = path.join(directory, item.name);
-          if (item.isDirectory()) await readDir(itemPath)
+          if (item.isDirectory()) await this.compile_map(itemPath)
           else if (item.isFile()) {
             const stats = await fs.promises.stat(itemPath);
             state[itemPath] = stats.mtimeMs;
           }
-      }
     }
+    return state;
   },
   async parse(filepath){
     const collection = getBranch(filepath)[0];
@@ -225,12 +211,46 @@ const scanner = {
         //   markup = ''
       }
     }
-    function isValidSVG(markup) {
+    function isValidSVG(markup) { //incomplete
       const trimmedMarkup = markup.trim();
       // Check if it starts with <svg> and contains the xmlns attribute
       return trimmedMarkup.startsWith('<svg') && trimmedMarkup.includes('xmlns="http://www.w3.org/2000/svg"') && trimmedMarkup.endsWith('</svg>');
     }
   },
+  async count(directory = targetDirectory, extension = 'svg', ignoreDot = true){
+      return new Promise((resolve, reject) => {
+        let count = 0;
+        function readDirRecursive(dir) {
+          return new Promise((res, rej) => {
+            fs.readdir(dir, { withFileTypes: true }, (err, items) => {
+              if (err) {
+                return rej(err);
+              }
+    
+              let promises = items.map(item => {
+                if (ignoreDot && item.name.startsWith('.')) {
+                    return Promise.resolve();
+                }
+                let itemPath = path.join(dir, item.name);
+    
+                if (item.isDirectory()) {
+                  return readDirRecursive(itemPath);
+                } else if (item.isFile() && path.extname(item.name) === extension) {
+                  count++;
+                }
+    
+                return Promise.resolve();
+              });
+    
+              Promise.all(promises).then(res).catch(rej);
+            });
+          });
+        }
+        readDirRecursive(directory)
+          .then(() => resolve(count))
+          .catch(reject);
+      });
+  }
 }
 
 module.exports.Scanner = scanner;
