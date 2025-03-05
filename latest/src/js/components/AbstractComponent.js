@@ -1,4 +1,6 @@
 import { EventEmitterClass } from "../utils/EventEmitter";
+import { Task } from "../utils/Task";
+
 export class AbstractComponent extends EventEmitterClass {
   constructor({ tag , classList , html, properties, events }){
     super();
@@ -34,5 +36,19 @@ export class AbstractComponent extends EventEmitterClass {
   }
   getHTML(){
     return this.element.outerHTML
+  }
+}
+
+export class DynamicComponent extends EventEmitterClass {
+  constructor(task){
+    this.componentStore = new Task(task)
+    this.componentStore.ondata( (data) => this.parseData.call(this,data));
+    this.on('render',() => {
+      this.active = true;
+      this.store.getData(true);
+    })
+  }
+  parseData(data){
+    console.trace('DATA RETRIEVED', data)
   }
 }

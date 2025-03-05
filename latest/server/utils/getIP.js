@@ -3,7 +3,7 @@
 
 const os = require('os');
 
-export function getLocalIP() {
+function getLocalIP() {
   const interfaces = os.networkInterfaces();
   for (let interfaceName in interfaces) {
     for (let interfaceDetails of interfaces[interfaceName]) {
@@ -15,3 +15,5 @@ export function getLocalIP() {
   }
   return null; // Return null if no valid IP address is found
 }
+
+module.exports.getLocalIP = getLocalIP

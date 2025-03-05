@@ -7,7 +7,6 @@ const targetDirectory = "C:/Users/justi/dev/data/icons";
 const fileSystemMap = 'C:/Users/justi/dev/project-server/models/icons/local/fsmap.json';
 const fileSystemDB = 'C:/Users/justi/dev/project-server/models/icons/local/fsdb.json';
 const ignoreList = 'C:\Users\justi\dev\project-server\icons\local\fsignore.json'
-const addr = require('../utils/ipStamp.js')
 const scanner = {
   target: targetDirectory,
   fsmap: fileSystemMap,
@@ -78,8 +77,6 @@ const scanner = {
             size: 0,
             ignored: false,
             synced: false,
-            collection_type:'local',
-            src_addr: addr,
             created_at: DateTime.stamp().ms,
           }
           Object.defineProperty(local.collections[collection], 'synced', {
@@ -224,8 +221,14 @@ const scanner = {
         if (markup == '' && attemptRead > 3)
           console.warn('download failed/n attempts: ',attemptRead,filepath);
         // markup = await gzip(markup);
-        return markup;
+        // if (!isValidSVG(markup))
+        //   markup = ''
       }
+    }
+    function isValidSVG(markup) {
+      const trimmedMarkup = markup.trim();
+      // Check if it starts with <svg> and contains the xmlns attribute
+      return trimmedMarkup.startsWith('<svg') && trimmedMarkup.includes('xmlns="http://www.w3.org/2000/svg"') && trimmedMarkup.endsWith('</svg>');
     }
   },
 }

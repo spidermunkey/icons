@@ -26,7 +26,7 @@ export class Icon {
 
          } || {};
         try {
-            const values = Icon.parse(this.element);
+            const values = this.element ? Icon.parse(this.element) : false;
             if (values){
                 const originalPreset = this.createPreset(values)
                 this.values = values
@@ -180,6 +180,10 @@ export class Icon {
     }
     static parse(element) {
         let icon = element.querySelector('svg');
+        if (!icon){
+            console.warn('this is not an svg')
+            return false
+        }
         let viewBox = icon.getAttribute('viewBox');
         let vb = viewBox.split(' ').map(v => Number(v));
         const values = {
@@ -260,7 +264,7 @@ export class Icon {
         // console.log(el)
         let icon = el.querySelector('svg');
         if (!icon) {
-            console.warn(`${props._id} : ${props.name} is an invalid object`)
+            // console.warn(`${props._id} : ${props.name} is an invalid object`)
             return ''
         }
         if (!icon.getAttribute('viewBox')) {

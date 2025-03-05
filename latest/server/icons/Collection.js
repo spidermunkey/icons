@@ -1,0 +1,38 @@
+module.exports.Collection = function(props){
+    const {
+        docname,
+        name,
+        cid,
+        collection_type,
+        subtypes,
+        sub_collections,
+        size,
+        created_at,
+        preset,
+        usePreset,
+        settings,
+        color,
+        colors,
+        src_addr,
+        ignored,
+        synced,
+    } = props;
+    return {
+            docname,
+            name,
+            cid,
+            collection_type,
+            subtypes,
+            sub_collections,
+            size,
+            created_at,
+            preset,
+            usePreset,
+            settings,
+            color,
+            colors,
+            src_addr,
+            ignored,
+            synced,
+        }
+}

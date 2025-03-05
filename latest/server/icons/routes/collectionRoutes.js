@@ -112,7 +112,10 @@ router.post('/ignore', async function ignore_collection(request,response){
 router.delete('/:collectionID', async function dropCollection(request,response){
   const collection = request.params.collectionID;
   const result = await Mongo.remove_collection(collection);
-  if (result.success == true) await Local.update_collection(result.id, {synced:false})
+  if (result.success == true) {
+    await Local.update_collection(result.id, {synced:false})
+  }
+  console.log('delete Result',result)
   response.json(result)
 })
 router.post('/:collectionID/:id',async function searchCollection(request,response){

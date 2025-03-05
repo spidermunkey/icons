@@ -63,19 +63,46 @@ export const API = {
     async getDownloads(n){
         return this.fetch(`${endpoint}/local/downloads?n=${n}`)
     },
+    async getUploads(){
+        return this.fetch(`${endpoint}/local/uploads`)
+    },
+    async getCollectionNames(synced = false) {
+        return this.fetch(`${endpoint}/collections/info/names?synced=${synced}`)
+    },
+    async getCollection(name,filters = {subtypes:[],sub_collections:[]},useFilters=false) {
+        let subTypesQuery = encodeURIComponent(filters.subtypes.join(','))
+        let subCollectionsQuery = encodeURIComponent(filters.sub_collections.join(','))
+        return this.fetch(`${endpoint}/collections/${name}?filter=${useFilters}&st=${subTypesQuery}&sc=${subCollectionsQuery}`)
+    },
+    async getPage(name,page,limit){
+        const res = await this.fetch(`${endpoint}/collections/${name}?paginated=true&filter=false&page=${page}&limit=${limit}`)
+        return res;
+    },
+    async getCollectionData() {
+        return this.fetch(`${endpoint}/collections/info?type=default`)
+    },
+    async createCollection(name,icons) {
+        return this.post(`${endpoint}/collections/create` ,{ props: { name, icons }})
+    },
+    async addToCollection(name,props) {
+        return this.post( `${endpoint}/collections/${name}`, { ...props } )
+    },
+    async dropCollection(id) {
+        return axios.delete(`${endpoint}/collections/${id}`);
+    },
     async getIcon(id){
         return this.fetch(`${endpoint}/all/${id}`)
     },
     async search(searchQuery){
         return this.post(`http://localhost:${1279}/icons/all`, { query: searchQuery })
     },
+
     async saveIconPreset(id,collection,setting){
         return this.post(`${endpoint}/all/settings/${id}`, { id, collection, setting })
     },
     async deleteIconPreset(id,collection,pid){
         return this.delete(`${endpoint}/all/settings/${id}?pid=${encodeURIComponent(pid)}&collection=${collection}`)
     },
-
     async setDefaultIconSetting(id,collection,pid){
         return this.put(`${endpoint}/all/settings/${id}`,{id,collection,pid})
     },
@@ -120,40 +147,14 @@ export const API = {
     async saveCollectionPreset(cid,setting){
         return this.post(`${endpoint}/collections/settings`, { cid, setting } )
     },
-
     async removeCollectionPreset(cid,pid){
         return this.delete(`${endpoint}/collections/settings?pid=${encodeURIComponent(pid)}&cid=${encodeURIComponent(cid)}`)
     },
     async updatePresetName(props){
         return this.put(`${endpoint}/all/settings/edit`,props)
     },
-    async getUploads(){
-        return this.fetch(`${endpoint}/local/uploads`)
-    },
-    async getCollectionNames(synced = false) {
-        return this.fetch(`${endpoint}/collections/info/names?synced=${synced}`)
-    },
-    async getCollection(name,filters = {subtypes:[],sub_collections:[]},useFilters=false) {
-        let subTypesQuery = encodeURIComponent(filters.subtypes.join(','))
-        let subCollectionsQuery = encodeURIComponent(filters.sub_collections.join(','))
-        return this.fetch(`${endpoint}/collections/${name}?filter=${useFilters}&st=${subTypesQuery}&sc=${subCollectionsQuery}`)
-    },
-    async getPage(name,page,limit){
-        const res = await this.fetch(`${endpoint}/collections/${name}?paginated=true&filter=false&page=${page}&limit=${limit}`)
-        return res;
-    },
-    async getCollectionData() {
-        return this.fetch(`${endpoint}/collections/info?type=default`)
-    },
-    async createCollection(name,icons) {
-        return this.post(`${endpoint}/collections/create` ,{ props: { name, icons }})
-    },
-    async addToCollection(name,props) {
-        return this.post( `${endpoint}/collections/${name}`, { ...props } )
-    },
-    async dropCollection(name) {
-        return axios.delete(`${endpoint}/collections/${name}`);
-    },
+
+
     async ping(){
         try {
             (await fetch('https://google.com', { method: 'GET', mode: 'no-cors',}))

@@ -5,3 +5,5 @@ module.exports = function parsePayload(request,response,next){
   }
   next()
 }
+
+module.exports

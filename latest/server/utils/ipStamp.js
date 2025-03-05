@@ -1,4 +1,4 @@
-const ip = require('./getIP.js')();
-const hashed = require('./hashIP.js')(ip)
+const ip = require('./getIP.js').getLocalIP();
+const hashed = require('./hashIP.js').hashIP(ip)
 
 module.exports.ipstamp = hashed

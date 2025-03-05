@@ -30,6 +30,7 @@ app.use((req,res) => {
 async function run() {
     try {
         process.on('uncaughtException',(err) => {
+            console.log(err)
             console.log(err.code)
             console.log(err.reason)
             console.log('[[process]]')

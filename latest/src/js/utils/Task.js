@@ -2,64 +2,54 @@ import { EventEmitter } from "./EventEmitter.js";
 export class Task {
   constructor(promiseFn,{ 
     name = '',
-    min = 3000,
+    min = 1500,
     max = null,
     onData = [],
-    onPending = [],
+    onLoading = [],
     onReady = [],
-  }) {
+    poll = null,
+  } = {}) {
     this.name = name;
     this.min = min;
     this.max = max;
     this.promise = promiseFn;
-    this.state = undefined; // [undefined || pending || ready ]
+    this.state = undefined; // [undefined || loading || ready ]
     this.data = null;
+    this.running = false;
     this.task = promiseFn;
     this.emitter = new EventEmitter();
-    this.ready = false;
     this.updateNeeded = true;
-    onPending.forEach(listener => this.onload(listener))
+    onLoading.forEach(listener => this.onload(listener))
     onData.forEach(listener => this.ondata(listener))
     onReady.forEach(listener => this.onready(listener))
-    this.onload(() => this.ready = false)
-    this.onready(() => this.ready = true)
+    if (poll) setInterval(this.run,poll)
   }
-  get loading(){
-    return !this.ready
+  getData = async (updateNeeded = this.updateNeeded) => {
+    if (updateNeeded) this.run()
+    else {
+      return this.data
+    }
   }
-  getData = async () => {
-    console.log('running task',this.name)
-    if (this.data == null)
-      this.run();
-    else this.emit('ready',this.data)
-  }
-  onload(listener){
-    this.onPending(listener)
-  }
-  ondata(listener){
-    this.onready(listener)
-    if (this.data !== null)
-      listener(this.data)
-  }
-
-  async run(...args) {
-      // console.log('running stat')
-      let ready = null;
-      if (this.min)
-        ready = new Promise((resolve,reject) => {setTimeout(() => resolve(true),this.min)})
-      this.state = "pending";
-      this.emit("pending");
+  run = async (...args) => {
+    // handle minimum task interval
+    if (this.running === true) return this.data;
+    try {
+      const minimum_interval_timer = this.min ? new Promise((resolve,reject) => {setTimeout(() => resolve(true),this.min)}) : 0 ;
+      this.running = true
+      this.state = "loading";
+      this.emit("loading");
       this.data = await this.promise(...args);
+      if (minimum_interval_timer != 0) await minimum_interval_timer;
       this.state = "ready";
-      if (ready != null)
-        await ready;
       this.emit("ready", this.data);
   } catch (error) {
-      console.log('error');
+      console.trace(`error running task: ${error}`);
       this.state = "error";
       this.data = null;
       this.emit("error", error);
-    // }
+    } finally {
+      this.running = false;
+    }
   }
 
   on(event, listener) {
@@ -72,12 +62,10 @@ export class Task {
       listener(this.data)
   }
   onready(listener){
-    // console.log('adding to ready')
     this.on('ready',listener)
   }
   onload(listener){
-    // console.log('adding to pending')
-    this.on('pending',listener);
+    this.on('loading',listener);
   }
   remove(event, listener) {
     this.emitter.off(event, listener);

@@ -42,11 +42,45 @@ export class SvgModel extends EventEmitterClass {
         }
         this.status = null;
         this.ready = false;
-        this.statusBroker = new Task(API.getLocalStatus,{})
-        this.connectionBroker = new Task(API.getConnection,{})
-        this.dataBroker = {
-            downloads: new Task(API.getDownloads.bind(API,20),{}),
-            uploads: new Task(API.getUploads.bind(API,20),{})
+
+        this.statusBroker = new Task(API.getLocalStatus)
+        this.connectionBroker = new Task(API.getConnection)
+        this.data = {
+            connection: {
+                // localHost: new Task(API.getServerConnection),
+                internet: new Task(API.getConnection),
+            },
+            local: {
+                downloads: {
+                    collection_names: new Task(API.getCollectionNames),
+                    collection_data: new Task(API.getDownloads.bind(API,20)),
+                },
+                upload: {
+                    collection_names: new Task(API.getCollectionNames.bind(API,true)),
+                    collection_data: new Task(API.getUploads.bind(API,20)),
+                },
+                meta: {
+                    // totalIcons: new Task(API.getLocalSize)
+                    // totalCollections: new Task(API.getTotalCollectionSize)
+                    // lastSync: new Task(API.getLastSync)
+                    // state: new Task(API.getStatus)
+                }
+            },
+            remote: {
+                synced: {
+                    collection_names: new Task(API.getCollectionNames),
+                    collection_data: new Task(API.getCollectionData)
+                },
+                user: {
+                    // collection_names: new Task(API.getUserCollectionNames),
+                    // collection_data: new Task(API.getUserCollections)
+                },
+                meta: {
+                    // totalIcons: new Task(API.getRemoteSize)
+                    // totalCollections: new Task(API.getRemoteCollectionSize)
+                    // state: new Task(API.getRemoteStatus)
+                }
+            }
         }
     }
     async search(query){
@@ -105,8 +139,8 @@ export class SvgModel extends EventEmitterClass {
     async deleteCollectionPreset(cid,pid){
         return API.removeCollectionPreset(cid,pid)
     }
-    async dropCollection(collectionName){
-        return API.dropCollection(collectionName);
+    async dropCollection(collectionId){
+        return API.dropCollection(collectionId);
     }
     async addToCollection({ destination, icon }) {
         const id = uuid()

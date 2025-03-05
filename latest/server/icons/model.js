@@ -598,54 +598,33 @@ const mongo_db = {
         return doc;
     },
 
-    async remove_collection(name){
-        const {icons,meta} = await this.connect();
-        const metaDoc = await meta.findOne({docname: "[[collections]]"});
-        const collections = metaDoc.collections;
-        const group = collections['uploads'];
-        const collectionExist = this.check_collection_name(name);
-        let collectionFound;
-        for (const id in group){
-            if (group[id].name == name){
-                console.log('foundit')
-                collectionFound = group[id]
-                break;
-            }
-        }
-
-        // if (!collectionExist)
-        //     return {message: 'requested collection not found', success:false, reason: 'invalid name'}
-        if (!collectionFound)
-            return {message: 'requested collection not found', success: false, reason: 'meta data could not be found'}
-        const cid = collectionFound?.cid;
-        console.log('using ', collectionFound?.cid, ' - ', collectionFound?.name, 'to remove collection');
-
+    async remove_collection(id){
+        let result;
+        let success;
+        let message;
+        const {icons} = await this.connect();
         try {
-            console.log('dropping collection');
-            // const collection = icons.collection(name).drop();
-            // collection.drop();
-            console.log('clearing metadata');
-            delete group[cid];
-            const status = await meta.findOneAndReplace({docname: "[[collections]]"},metaDoc);
-            const index = icons.collection('all');
-            // update index;
-            for (let id in collections['auto']){
-                if (collections['auto'][id].name == 'all'){
-                    console.log('updating index count')
-                    let manual_index = collections['auto'][id];
-                    manual_index.size = await index.countDocuments();
-                    manual_index.updated_on = DateTime.stamp().ms;
-                    console.log('re-aggregating sample data');
-                    manual_index.sample = await index.aggregate([
-                        { $sample: { size: 25} }
-                        ]).toArray();
-                    }
+            const meta = icons.collection(this.meta_alias);
+            const document = await meta.findOne({cid:id,docname:this.meta_doc_alias});
+            const name = document?.name;
+            if (name){
+                console.log(`dropping ${name}: ${id}`)
+                const metaDeleted = await meta.deleteMany({cid:id,docname:this.meta_doc_alias})
+                const collectionDropped = await icons.dropCollection(name)
+                result = {collectionDropped,metaDropped:metaDeleted.deletedCount > 0}
+                success = true;
+                message = `Collection "${name}" dropped successfully.`
+                console.log(message);
+            } else {
+                throw new Error('collection not found')
             }
-            return {message: 'i think i dropped it', success: true, id:cid }
-        } catch(e){
-            console.log(e)
-            return {message: 'drop failed', success: false, reason: e}
-
+        } catch (e){
+            result = e
+            success = false;
+            message = `Transaction Failed: ${e.message}`
+            console.log(message)
+        } finally {
+            return {result,success,message,id}
         }
 
     },
@@ -734,6 +713,7 @@ const mongo_db = {
         return { message: `error adding icon`, success:false, result: 'unknown'};
 
     },
+
     async ping(){
         try {
             const client = new MongoClient(this.uri,{connectTimeoutMS:3000});

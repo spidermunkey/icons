@@ -1,5 +1,56 @@
 import { Icon } from './Icon.js';
 import { Cursor } from '../utils/Cursor';
+
+export class LocalCollection{
+  constructor(data) {
+    const validIcons = []
+    const skipped = []
+    this.sub_collections = []
+    this.subtypes = []
+    data.icons.forEach( icon => {
+        const i = new Icon(icon);
+        // quick patch
+        // fixing issue with bad data from the server
+        const sub_collections = this.sub_collections
+        const subtypes = this.subtypes
+        const sub_collection = icon.sub_collection
+        const subtype = icon.subtype
+        if (i.isValid) {
+          validIcons.push(i)
+          if (sub_collection && !sub_collections.includes(sub_collection)) 
+            sub_collections.push(sub_collection)
+          if (subtype && !subtypes.includes(subtype)) 
+            subtypes.push(subtype)
+        }
+        else skipped.push(i)
+    })
+    console.warn('skipped: ', skipped.length,' icons in collection: ', data.name)
+    console.warn('skipped')
+    console.warn(`found ${this.subtypes.length} subtypes`)
+    console.warn(`found ${this.sub_collections.length} subcollections`)
+    this.filters = {
+      sub_collections:[],
+      subtypes:[],
+    }
+    this.icons = validIcons
+    this.sample = validIcons.slice(0,20)
+    this.cursor = new Cursor(validIcons)
+    this.collection_type = data.collection_type
+    this.name = data.name
+    this.size = data.size;
+    this.created_at = data.created_at
+  }
+
+  find(id){
+    return (this.icons.find(icon => icon.id == id))
+  }
+  Icon(id) {
+    return this.find(id)
+  }
+  currentIcon(){
+    return this.cursor.current;
+}
+}
 export class Collection {
   constructor(data){
     const { 
@@ -36,6 +87,7 @@ export class Collection {
       subtypes:[],
     }
     this.icons = validIcons
+    this.sample = icons.slice(0,20)
     this.cursor = new Cursor(validIcons)
     this.meta = meta
     this.ready = true
@@ -43,8 +95,7 @@ export class Collection {
     this.setting = meta?.settings || {}
     this.usePreset = meta?.usePreset || false
     this.colors = meta?.colors || {}
-    this.state = {
-    }
+    this.state = {}
     console.dir(`CREATING COLLECTION FROM DATA: `, data)
   }
   get name(){

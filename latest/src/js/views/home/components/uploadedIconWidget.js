@@ -1,35 +1,12 @@
-import { AbstractComponent } from "../../../components/AbstractComponent";
 import { API } from "../../../api";
 import { Task } from "../../../utils/Task";
 import { Icon } from "../../../components/Icon";
-
-const uploadSectionProperties = {
-  tag: 'div',
-  classList: ['recent-uploads'],
-  html: `<div class="title-header">
-    <span class="tab rt-downloads">Downloads</span>
-    <span class="tab rt-uploads active">Uploads</span>
-    <span class="tab rt-projects">Projects</span>
-  </div>
-
-  <div class="test-area">
-    ...loading uploaded collections
-  </div>`
-}
-
-export class UploadSection extends AbstractComponent {
+export class UploadSection {
   constructor(){
-    super(uploadSectionProperties);
-    this.store = new Task( API.getUploads.bind(API,20), { name:'get uploaded data'})
-    this.store.ondata( (data) => {
-      console.log(data)
-      this.parseData.call(this,data)
-  });
-    this.on('render',() => {
-      this.active = true;
-      this.store.getData();
-    })
+    this.store = new Task(API.getUploads.bind(API,20))
+    this.store.ondata( (data) => this.parseData.call(this,data));
   }
+
   parseData(collections){
     if (this.active) {
       $('.test-area').innerHTML = '';
@@ -78,5 +55,30 @@ export class UploadSection extends AbstractComponent {
     // $('.collection-info',widget).addEventListener('click',this.handlePreview.bind(this,c))
 
     return widget;
+  }
+  render(destination){
+    destination.innerHTML = this.getHTML();
+    this.active = true
+    this.store.getData()
+  }
+  load(destination){
+    destination.innerHTML = this.getLoader();
+  }
+  getLoader(){
+      return '<div class="loader">...loading</div>'
+  }
+  getHTML(){
+    return `
+    <div class="recent-uploads">
+      <div class="title-header">
+        <span class="tab rt-downloads">Downloads</span>
+        <span class="tab rt-uploads active">Uploads</span>
+        <span class="tab rt-projects">Projects</span>
+      </div>
+
+      <div class="test-area">
+        ...loading uploaded collections
+      </div>
+    </div>`
   }
 }

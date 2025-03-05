@@ -215,6 +215,9 @@
       align-items: center;
       cursor: pointer;
     }
+    .isSyncedControl {
+      display: flex;
+    }
     .control {
       position: absolute;
       width: 100%;
@@ -223,6 +226,7 @@
       top: 100%;
       display: flex;
       justify-content: center;
+
       .loading-overlay {
         position: absolute;
         top:0;
