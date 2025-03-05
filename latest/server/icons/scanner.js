@@ -68,6 +68,7 @@ module.exports.Scanner = {
   },
 
   async update(){
+    console.log('overwriting current database...')
     this.overwrite(await this.scan())
   },
 
