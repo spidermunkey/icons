@@ -1,3 +1,4 @@
+
 module.exports.Collection = function(props){
     const {
         docname,
@@ -34,5 +35,30 @@ module.exports.Collection = function(props){
             src_addr,
             ignored,
             synced,
-        }
+    }
+}
+module.exports.Collection = class Collection {
+    constructor(props){
+        // set meta data
+    }
+    get_item(item_id){}
+    get_items(query){}
+    data(){
+        // items + meta document
+    }
+    items(){
+        // items
+    }
+    info(){
+        // meta document
+    }
+    create(props,items){
+        // push to remote db
+    }
+    destroy(){
+        
+    }
+    sync(props,items){
+        // upload from local source
+    }
 }

@@ -25,7 +25,6 @@ export class LocalCollection{
         else skipped.push(i)
     })
     console.warn('skipped: ', skipped.length,' icons in collection: ', data.name)
-    console.warn('skipped')
     console.warn(`found ${this.subtypes.length} subtypes`)
     console.warn(`found ${this.sub_collections.length} subcollections`)
     this.filters = {

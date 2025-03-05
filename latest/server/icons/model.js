@@ -1,12 +1,10 @@
 
-const { MongoClient } = require('mongodb')
-const { CONNECTION_STRING } = require('../.config/env.js')
-const { Icon } = require('./Icon.js')
+const Database = require('./models/Database.js')
 const DateTime = require('../utils/Datetime.js')
 const { uuid } = require('../utils/uuid.js')
-const uri = CONNECTION_STRING
+const { Icon } = require('./models/Icon.js')
+
 const mongo_db = {
-    uri,
     icons: {},
     collection_names: [],
     collections: {},
@@ -40,7 +38,6 @@ const mongo_db = {
         }
     },
 
-    
     async add_collection_colorset( cid, colorset ){
         const {icons} = await this.connect();
         const meta = icons.collection('{{meta}}');
@@ -597,7 +594,6 @@ const mongo_db = {
         await meta.insertOne(doc);
         return doc;
     },
-
     async remove_collection(id){
         let result;
         let success;
@@ -713,84 +709,11 @@ const mongo_db = {
         return { message: `error adding icon`, success:false, result: 'unknown'};
 
     },
-
-    async ping(){
-        try {
-            const client = new MongoClient(this.uri,{connectTimeoutMS:3000});
-            let conn = await Promise.race([
-                new Promise((resolve,reject) => setTimeout(() => reject(false),3000)),
-                client.connect(),
-            ])
-                console.log('[[ping]]',true);
-                this.status = 'ready';
-                client.close();
-                return this.status;
-        } catch (err) {
-            console.log('[[ping]]',' : "timeout"', err);
-            this.status = 'offline';
-            return false;
-        }
-
-    },
     async connect() {
-        if (!this.client && this.hasChanged == false) {
-            try {
-                this.client = new MongoClient(this.uri);
-                console.log('here');
-                const client = await this.client.connect();
-                this.status = 'ready';
-                const icons = this.client.db('icons');
-                const metaData = icons.collection('{{meta}}');
-                const metaDocs = await metaData.find({docname: this.meta_doc_alias})
-                const metaDoc = await metaData.findOne({docname: "[[collections]]"});
-                const collections = metaDoc.collections;
-                const settings = metaDoc.settings;
-                const meta = {
-                    uploads: {},
-                    projects:{},
-                    auto:{},
-                }
-
-                for (const collection_type in collections){
-                    let category = collections[collection_type];
-                    for (const collection_id in category){
-                        let current = category[collection_id];
-                        let collection_type = current.collection_type;
-                        switch (collection_type) {
-                            case 'project': meta['projects'][collection_id] = current; break;
-                            case 'upload': meta['uploads'][collection_id] = current; break;
-                            case 'auto': meta['auto'][collection_id] = current; break;
-                            default: null
-                        }
-                    }
-                }
-                console.log('Connected to MongoDB');
-                this.db = {
-                    icons,
-                    meta,
-                    settings,
-                }
-                return this.db;
-            } catch (error) {
-                // console.error('Failed to connect to MongoDB', error);
-                // use local
-                console.log('db connection error',error);
-                console.log('status offline')
-                this.status = 'offline'
-                return false;
-            }
+        const icons = await Database.getDB('icons');
+        return {
+            icons,
         }
-        return this.db;
-    },
-    async disconnect() {
-        if (this.client && this.client.isConnected()) {
-            await this.client.close();
-            console.log('Disconnected from MongoDB');
-        }
-    },
-    async close() {
-        await client.close();
-        return;
     },
 }
 
