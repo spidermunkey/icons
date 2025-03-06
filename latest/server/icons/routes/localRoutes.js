@@ -4,6 +4,7 @@ const Local = require('../models/Local.js')
 const {Mongo} = require('../model.js')
 
 
+
 router.get('/collections', async function getLocalDownloads(request,response){
   const collection_type = request.query.collectionType;
   collection_type === 'synced' 
@@ -16,8 +17,9 @@ router.get('/collections', async function getLocalDownloads(request,response){
 
 
 router.get('/status', async function getLocalStatus(request,response) {
-  const local = await Local.get_status();
-  const mongo_stat = (await Mongo.ping()) === 'ready'
+  const local_status = await Local.get_status();
+  // const mongo_stat = (await Mongo.ping()) === 'ready'
+  const mongo_stat = true;
   const code = Local.ready && mongo_stat ? 100 : Local.ready && !mongo_stat ?  200 : mongo_stat && !Local.ready ? 300 : 400
   const message = code === 100 ? 'ready' : code === 200 ? 'local db ok' : code === 300 ? 'mongo ready' : 'server not ready'
   const status = {

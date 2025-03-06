@@ -58,7 +58,7 @@ export const API = {
     async getStatus(){
         const status = await this.fetch(`${endpoint}/local/status`)
         status.connection = await this.ping('google.com')
-        return true
+        return status
     },
     async getDownloads(n){
         return this.fetch(`${endpoint}/local/collections?n=${n}`)

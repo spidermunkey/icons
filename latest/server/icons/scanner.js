@@ -3,7 +3,7 @@ const path = require('path');
 const DateTime = require('../utils/Datetime.js');
 const { uuid } = require('../utils/uuid.js');
 const parse = require('../utils/parseSvgFile.js');
-
+const {from} = require('../utils/Date.js')
 const {
   targetDirectory,
   fileSystemMap,
@@ -19,7 +19,8 @@ module.exports.Scanner = {
 
   async stat() {
       let count = await this.count();
-      const lastChange = DateTime.from(new Date(fs.statSync(fileSystemMap).mtimeMs));
+      const last_sync_date = new Date(fs.statSync(fileSystemMap).mtimeMs).getTime();
+      const lastChange = from(new Date(fs.statSync(fileSystemMap).mtimeMs));
       const { added , removed , changed } = await this.compare();
       const updateNeeded = [added,removed,changed].some(val => val.length > 0)
       const size = `${Math.floor(fs.statSync(fileSystemDB).size / 1000)} kb`;
@@ -31,7 +32,7 @@ module.exports.Scanner = {
         count, 
         updateNeeded, 
         lastChange: lastChange.string, 
-        lastChangeMs:lastChange.milisecondsAgo 
+        lastChangeMs:last_sync_date
       }
   },
 
@@ -223,22 +224,21 @@ module.exports.Scanner = {
       return trimmedMarkup.startsWith('<svg') && trimmedMarkup.includes('xmlns="http://www.w3.org/2000/svg"') && trimmedMarkup.endsWith('</svg>');
     }
   },
-  async count(directory = targetDirectory, extension = 'svg', ignoreDot = true){
+
+  async count(directory = targetDirectory, extension = '.svg', ignoreDot = true){
       return new Promise((resolve, reject) => {
-        let count = 0;
+      let count = 0;
         function readDirRecursive(dir) {
           return new Promise((res, rej) => {
             fs.readdir(dir, { withFileTypes: true }, (err, items) => {
               if (err) {
                 return rej(err);
               }
-    
               let promises = items.map(item => {
-                if (ignoreDot && item.name.startsWith('.')) {
+                if (ignoreDot && item.name.startsWith('.'))
                     return Promise.resolve();
-                }
+
                 let itemPath = path.join(dir, item.name);
-    
                 if (item.isDirectory()) {
                   return readDirRecursive(itemPath);
                 } else if (item.isFile() && path.extname(item.name) === extension) {
@@ -247,7 +247,6 @@ module.exports.Scanner = {
     
                 return Promise.resolve();
               });
-    
               Promise.all(promises).then(res).catch(rej);
             });
           });

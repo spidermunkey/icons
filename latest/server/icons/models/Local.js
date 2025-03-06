@@ -57,7 +57,13 @@ module.exports = {
       }
 
     },
-
+    count(){
+      const db = this.readDB();
+      let count = 0;
+      for (const id in db.all)
+        count++;
+      return count;
+    },
     get_collections(){
       const db = this.readDB();
       let collections = [];
@@ -68,7 +74,6 @@ module.exports = {
       }
       return collections
     },
-
     get_synced_collections(){
       const db = this.readDB();
       let collections = [];

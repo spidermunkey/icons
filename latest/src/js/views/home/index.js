@@ -1,11 +1,13 @@
 import { RecentDownloads } from "./components/recentIconWidget.js";
 import { UploadSection } from "./components/uploadedIconWidget.js";
+import { StatusWidget } from "./components/statusWidget.js";
 import { API } from "../../api.js";
 import { EventEmitterClass } from "../../utils/EventEmitter.js";
 export class Home extends EventEmitterClass {
   constructor(store) {
     super()
     this.store = store
+    this.appStatus = new StatusWidget();
     this.localCollections = new RecentDownloads()
     this.localCollections.on('preview', (collection) => this.renderPreview(collection))
     this.uploadedCollections = new UploadSection()

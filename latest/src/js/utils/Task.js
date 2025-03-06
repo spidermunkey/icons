@@ -39,6 +39,7 @@ export class Task {
       this.state = "loading";
       this.emit("loading");
       this.data = await this.promise(...args);
+      console.log('TASK DATA',this.data)
       if (minimum_interval_timer != 0) await minimum_interval_timer;
       this.state = "ready";
       this.emit("ready", this.data);
