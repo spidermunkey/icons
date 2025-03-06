@@ -1,5 +1,4 @@
 const DateTime = require('../../utils/Datetime.js');
-const { uuid } = require('../../utils/uuid.js');
 const { Scanner } = require('../scanner.js');
 
 
@@ -13,6 +12,9 @@ module.exports = {
     db: null,
 
     readDB(){
+      if (this.db !== null){
+        return this.db
+      }
       console.log('reading local database file...')
       return this.scanner.read()
     },
@@ -35,7 +37,7 @@ module.exports = {
       } else {
         console.log('loading process already started!')
       }
-
+      return this.db
     },
     async get_status(){
       console.log('scanning for local database statistics...')
@@ -56,5 +58,26 @@ module.exports = {
 
     },
 
+    get_collections(){
+      const db = this.readDB();
+      let collections = [];
+      for (const name in db.collections){
+        let collection = db.collections[name];
+        if (!collection.ignored)
+          collections.push(collection)
+      }
+      return collections
+    },
+
+    get_synced_collections(){
+      const db = this.readDB();
+      let collections = [];
+      for (const name in db.collections){
+        let collection = db.collections[name];
+        if (!collection.ignored && collection.synced)
+          collections.push(collection)
+      }
+      return collections
+    }
 
 }

@@ -61,10 +61,10 @@ export const API = {
         return true
     },
     async getDownloads(n){
-        return this.fetch(`${endpoint}/local/downloads?n=${n}`)
+        return this.fetch(`${endpoint}/local/collections?n=${n}`)
     },
     async getUploads(){
-        return this.fetch(`${endpoint}/local/uploads`)
+        return this.fetch(`${endpoint}/local/collections?collectionType=synced`)
     },
     async getCollectionNames(synced = false) {
         return this.fetch(`${endpoint}/collections/info/names?synced=${synced}`)

@@ -4,7 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 
 const { Mongo } = require('./icons/model.js');
-const { Local } = require('./icons/local.js');
+const Local = require('./icons/models/Local.js');
 
 app.use(require('morgan')('tiny'));
 app.use(bodyParser.urlencoded({extended:true}));
