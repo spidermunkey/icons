@@ -3,6 +3,7 @@ import { UploadSection } from "./components/uploadedIconWidget.js";
 import { StatusWidget } from "./components/statusWidget.js";
 import { API } from "../../api.js";
 import { EventEmitterClass } from "../../utils/EventEmitter.js";
+import { ago } from "../../utils/DateTime.js";
 export class Home extends EventEmitterClass {
   constructor(store) {
     super()
@@ -97,7 +98,7 @@ export class Home extends EventEmitterClass {
                     <span class="c-prop c-size">total icons : ${collection.size}</span>
                   </div>
                   <div class="prop date">
-                    <span class="c-prop c-date">updated : ${(DateTime.from(new Date(collection.created_at))).string}</span>
+                    <span class="c-prop c-date">updated : ${(ago(new Date(collection.created_at))).string}</span>
                   </div>
                 </div>
                 <div class="ctrl">upload</div>

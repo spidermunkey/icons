@@ -1,7 +1,7 @@
 import { Icon } from './Icon.js';
 import { Cursor } from '../utils/Cursor';
-
-export class LocalCollection{
+import { ago } from '../utils/DateTime.js'
+export class LocalCollection {
   constructor(data) {
     const validIcons = []
     const skipped = []
@@ -186,7 +186,7 @@ export class Collection {
 
   }
   infoHTML(){
-      const getAgo = msDate => DateTime.from(msDate).string;
+      const getAgo = msDate => ago(msDate).string;
       let {
         collection_type,
         size,

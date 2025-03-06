@@ -224,7 +224,6 @@ module.exports.from = function from(since) {
 
     msAgo = Math.abs(msAgo);
     const years = msAgo / msnYear;
-    const februariesBetween = (years * ((month + 1) > 2))
 
     const monthsAgo = getRemainder(years);
     const months = monthsAgo / monthsInYear;
