@@ -1,5 +1,5 @@
 import { API } from "../api.js";
-import { DateTime } from "../utils/DateTime.js";
+import { ago, DateTime } from "../utils/DateTime.js";
 export class Menu {
   constructor(){
     this.collectionsMenu = $('.collections-list')
@@ -102,7 +102,7 @@ function CollectionMenu(props) { // get list of names from db
       .sort((a,b) => a.name > b.name )
       .map(props => {
         const {name,collection_type = '',size, uploaded_at = undefined, sample = [], created_at = null, updated_on = null} = props
-        const getAgo = msDate => DateTime.from(msDate).string;
+        const getAgo = msDate => ago(msDate).string;
         return `
         <div class="menu-list-item md" role="tab" modal=${name}>
         ${collection_type !== 'auto' ? `<div class="item-header">

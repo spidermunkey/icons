@@ -1086,7 +1086,7 @@ class DateTime {
   }
 
   static compareStamps(current, prev) {
-    return DateTime.from(new Date(current.ms), prev.ms);
+    return ago(new Date(current.ms), prev.ms);
   }
 
   static weekOf(stamp) {}

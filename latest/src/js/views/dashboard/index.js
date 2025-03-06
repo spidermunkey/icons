@@ -1,5 +1,5 @@
 import { Cursor } from '../../utils/Cursor.js'
-import { DateTime } from '../../utils/DateTime.js'
+import { ago, DateTime } from '../../utils/DateTime.js'
 
 import { AbstractView } from '../../components/AbstractView.js'
 import { Preview } from './../../components/Preview.js'
@@ -1873,7 +1873,7 @@ export class Dashboard extends AbstractView {
         $('.info-bar .current-tab').textContent = name
     }
     updateCollectionInfo(collection){
-            const getAgo = msDate => DateTime.from(msDate).string;
+            const getAgo = msDate => ago(msDate).string;
             console.log('updating collection info',collection)
             const {meta} = collection
             let {collection_type,subtypes,sub_collections,size,name, uploaded_at = undefined,created_at = null, updated_on = null}  = meta;

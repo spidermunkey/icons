@@ -63,7 +63,7 @@ export class SvgModel extends EventEmitterClass {
                     // totalIcons: new Task(API.getLocalSize)
                     // totalCollections: new Task(API.getTotalCollectionSize)
                     // lastSync: new Task(API.getLastSync)
-                    // state: new Task(API.getStatus)
+                    state: new Task(API.getStatus)
                 }
             },
             remote: {
