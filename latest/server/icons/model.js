@@ -515,7 +515,7 @@ const mongo_db = {
                         ...props,
                         synced: true,
                         collection: props.collection,
-                        uploaded_at: DateTime.stamp().ms,
+                        uploaded_at: Date.now(),
                     })
                     const added = await collection.insertOne(schema);
                     const indexed = await index.insertOne(schema);
@@ -578,7 +578,7 @@ const mongo_db = {
             subtypes: props?.subtypes || [],
             sub_collections: props?.sub_collections || [],
             size: props?.size || 0,
-            created_at: props?.created_at || DateTime.stamp().ms,
+            created_at: props?.created_at || Date.now(),
             preset: props?.preset || null,
             usePreset: props?.usePreset || false,
             settings: props?.settings || {},
@@ -655,7 +655,7 @@ const mongo_db = {
             ...props,
             // cid,
             collection: props.collection,
-            created_at: DateTime.stamp(),
+            created_at: Date.now(),
         })
         const result = await collection.insertOne(schema);
         if (result?.acknowledged == true)
@@ -671,7 +671,7 @@ const mongo_db = {
             sub_collection: properties.sub_collection,
             markup: properties.markup, // !== ''
             subtype: properties.subtype, // null || [duotone,bold,fill,light,regular,solid,outlined,thin,medium];
-            created_at: DateTime.stamp(),
+            created_at: Date.now(),
         }
         let icon = new Icon(entry);
         let status1 = await this.updateIndex(icon);
@@ -701,7 +701,7 @@ const mongo_db = {
             ...props,
             // cid,
             collection: props.collection,
-            created_at: DateTime.stamp(),
+            created_at: Date.now(),
         })
         const result = await collection.insertOne(schema);
         if (result?.acknowledged == true)

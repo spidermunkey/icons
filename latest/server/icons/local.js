@@ -14,7 +14,7 @@ const local_db = {
   },
   async stat() {
     const stats = await Scanner.stat();
-    this.last_stat = DateTime.stamp().ms;
+    this.last_stat = Date.now();
     return stats;
   },
   async save() {
@@ -44,7 +44,7 @@ const local_db = {
     this.collections = db.collections;
     this.ready = true;
     this.status = 'online';
-    this.started = DateTime.stamp().ms;
+    this.started = Date.now();
     this.stats = await this.stat();
     // this.update_each({synced:false,ignored: false})
     return db;
@@ -245,7 +245,7 @@ const local_db = {
         sub_collections: [],
         icons: [],
         size: 0,
-        created_at: DateTime.stamp().ms,
+        created_at: Date.now(),
       }
       this.collection_names.push(name);
       return this.collections[name];
@@ -278,7 +278,7 @@ const local_db = {
       }
       console.log(`changing ${property} of ${item.name} from ${item[property]} to ${props[property]}`)
       item[property] = props[property];
-      item.stamp = DateTime.stamp().ms
+      item.stamp = Date.now()
       if (nameChange)
         this.index_name.hasOwnProperty(item.name)
         ? this.index_name[item.name].push(item)

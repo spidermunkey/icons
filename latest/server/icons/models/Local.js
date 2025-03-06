@@ -1,4 +1,3 @@
-const DateTime = require('../../utils/Datetime.js');
 const { Scanner } = require('../scanner.js');
 
 
@@ -41,7 +40,7 @@ module.exports = {
     },
     async get_status(){
       console.log('scanning for local database statistics...')
-        this.last_stat = DateTime.stamp().ms
+        this.last_stat = Date.now()
         return this.scanner.stat()
     },
     async update(){

@@ -202,7 +202,6 @@ const msnYear = msnDay * 365;
 module.exports.from = function from(since) {
     const now = Date.now();
     const then = since.getTime();
-    const month = since.getMonth();
     const monthsInYear = 1/12;
 
     const msInWeek = 604800000;

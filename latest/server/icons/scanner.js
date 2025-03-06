@@ -1,6 +1,5 @@
 const fs = require('fs-extra');
 const path = require('path');
-const DateTime = require('../utils/Datetime.js');
 const { uuid } = require('../utils/uuid.js');
 const parse = require('../utils/parseSvgFile.js');
 const {from} = require('../utils/Date.js')
@@ -107,7 +106,7 @@ module.exports.Scanner = {
             color: {},
             presets:{},
             preset:{},
-            created_at: DateTime.stamp().ms,
+            created_at: Date.now(),
           }
           local.collection_names.push(collection)
         }
