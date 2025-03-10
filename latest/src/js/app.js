@@ -27,7 +27,6 @@ export class App extends EventEmitterClass {
       }
     navigateTo(url){
         history.pushState(null,null,url);
-        console.trace('routing')
         this.route();
     }
     async init() {
@@ -37,7 +36,6 @@ export class App extends EventEmitterClass {
               this.navigateTo(e.target.closest("[data-link]").href);
             }
           })
-        console.trace('routing')
         this.route();
     }
     async render() {

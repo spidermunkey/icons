@@ -2,8 +2,9 @@
 const Database = require('./models/Database.js')
 const DateTime = require('../utils/Datetime.js')
 const { uuid } = require('../utils/uuid.js')
-const { Icon } = require('./models/Icon.js')
-
+// const { Icon } = require('./models/Icon.js')
+const {Icon} = require('./Icon.js')
+const { print } = require('../utils/print.js')
 const mongo_db = {
     icons: {},
     collection_names: [],
@@ -441,8 +442,9 @@ const mongo_db = {
         const {icons} = await this.connect();
         const meta = icons.collection(this.meta_alias);
         const metaDoc = await meta.findOne({docname:'[[collections]]'});
-        const idInUse = Object.hasOwn( metaDoc.collections, collection_id );
-        return idInUse;
+        if (metaDoc)
+            return idInUse = Object.hasOwn( metaDoc.collections, collection_id );
+        return false;
     },
     async check_collection_name(name){
         const names = await this.get_collection_names();
@@ -475,7 +477,7 @@ const mongo_db = {
     async sync_collection(props) {
         const isValid = await validateProperties.call(this,props);
         if (isValid.success == false) return isValid
-        console.trace('uploading icons')
+        console.log('uploading icons')
         const sync_status = await uploadIcons.call(this,props);
         if (sync_status.success == false) {
             return sync_status
@@ -502,38 +504,44 @@ const mongo_db = {
             return { success: true };
         }
         async function uploadIcons(props){
-                async function upload(props){
-                    const {meta,icons} = await this.connect();
-                    const collection = icons.collection(props?.collection);
-                    const index = icons.collection('all');
-                    const iconExists = await collection.findOne({ id: props.id }) || await index.findOne({id: props.id})
-                    if (!props.collection) return { message: 'upload failed', success: false, reason: 'invalid destination', code: 22}
-                    if (!props.id) return {message: 'upload failed', success: false, reason: 'invalid id', code: 24}
-                    if (props.markup == '') return { message: 'upload failed', success: false , reason:'invalid markup', code: 21}
-                    if (iconExists) return { message: 'upload failed', success: false, reason: 'id already in use', code: 23 } 
-                    const schema = new Icon({
-                        ...props,
-                        synced: true,
-                        collection: props.collection,
-                        uploaded_at: Date.now(),
-                    })
-                    const added = await collection.insertOne(schema);
-                    const indexed = await index.insertOne(schema);
-                    const res_1 = added?.acknowledged == true;
-                    const res_2 = indexed?.acknowledged == true;
-                    return {
-                        message: 'process complete', 
-                        success: res_1 && res_2,
-                        reason: [!res_1 ? added : true, !res_2 ? indexed : true],
-                        code: 0,
-                    }
+            const {icons} = await this.connect();
+            let count = 0
+            const length = props.icons.length
+            async function upload(props){
+                const collection = icons.collection(props?.collection);
+                const index = icons.collection('all');
+                const iconExists = await collection.findOne({ id: props.id }) || await index.findOne({id: props.id})
+                if (!props.collection) return { message: 'upload failed', success: false, reason: 'invalid destination', code: 22}
+                if (!props.id) return {message: 'upload failed', success: false, reason: 'invalid id', code: 24}
+                if (props.markup == '') return { message: 'upload failed', success: false , reason:'invalid markup', code: 21}
+                if (iconExists) return { message: 'upload failed', success: false, reason: 'id already in use', code: 23 } 
+                const schema = new Icon({
+                    ...props,
+                    synced: true,
+                    collection: props.collection,
+                    uploaded_at: Date.now(),
+                })
+                const added = await collection.insertOne(schema);
+                const indexed = await index.insertOne(schema);
+                const res_1 = added?.acknowledged == true;
+                const res_2 = indexed?.acknowledged == true;
+                return {
+                    message: 'process complete', 
+                    success: res_1 && res_2,
+                    reason: [!res_1 ? added : true, !res_2 ? indexed : true],
+                    code: 0,
                 }
-                console.log('uploading icons', props.icons.length)
-                let faulty = [];
-                await Promise.all( props.icons.map(async icon => { let result = (await upload.call(this,icon)); result == false ? faulty.push(result) : null }) )
-                console.log('error(s) found', faulty.length)
-                return { message: 'proccess complete', success: true, reason: faulty.length };
-        }
+            }
+            console.log('uploading icons', length)
+            let faulty = [];
+            await Promise.all( props.icons.map(async icon => { 
+                let result = (await upload.call(this,icon)); 
+                print(`uploaded icon [${++count}/${length}]`)
+                result == false ? faulty.push(result) : null 
+            }) )
+            console.log('error(s) found', faulty.length)
+            return { message: 'proccess complete', success: true, reason: faulty.length };
+    }
     },
     async create_collection(props = {}) {
         console.log('creating collection...')

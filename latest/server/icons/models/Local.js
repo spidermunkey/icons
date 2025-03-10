@@ -25,6 +25,12 @@ module.exports = {
         else this.loadDB();
         return this;
     },
+    async save() {
+      console.log('saving all changes to local db')
+      this.scanner.write(this.readDB());
+      console.log('updating...')
+      await this.loadDB()
+    },
     async loadDB(){
       if (!this.loading){
         this.loading = true;
@@ -63,6 +69,11 @@ module.exports = {
         count++;
       return count;
     },
+
+    get_collection(collection_name){ // { icons | name | meta }
+      const db = this.readDB();
+      return db.collections[collection_name]
+    },
     get_collections(){
       const db = this.readDB();
       let collections = [];
@@ -82,6 +93,74 @@ module.exports = {
           collections.push(collection)
       }
       return collections
-    }
+    },
+    getCollectionById(cid){
+      console.log('finding local collection')
+      const db = this.readDB();
+      let found = null;
+      for (const collection_name in db.collections){
+        let collection = db.collections[collection_name]
+        if (collection.cid === cid) {
+          return collection;
+        }
+      }
+      return found
+    },
 
+    async sync(id){
+      const collection = this.getCollectionById(id)
+      if (collection){
+        console.log('setting collection synced: ',id)
+        collection.synced = true;
+        return true;
+      } else {
+        console.log('collection not found... ')
+        return false;
+      }
+    },
+    async unsync(id){
+      const collection = this.getCollectionById(id)
+      if (collection){
+        console.log('setting collection synced: ',id)
+        collection.synced = false;
+        await this.save();
+
+        return true;
+      } else {
+        console.log('collection not found... ')
+        return false;
+      }
+    },
+    async update_each(props){
+      const db = this.readDB();
+      for (const collection_name in db.collections){
+        let collection = db.collections[collection_name]
+        console.log(`updating local collection...: ${{name:collection_name,...props}} `);
+        db.collections[collection_name] = {
+          ...collection,
+          ...props
+        }
+      }
+      await this.save();
+    },
+    async update_collection(id,props){
+      const db = this.readDB()
+      let found = null;
+      let name;
+      for (const collection_name in db.collections){
+        if (db.collections[collection_name]?.cid === id) {
+          found = db.collections[collection_name];
+          name = collection_name;
+          break;
+        }
+      }
+        if (found){
+          console.log('updating collection',name,'with', props)
+          db.collections[name] = {
+            ...found,
+            ...props
+          }
+          await this.save();
+      }
+    },
 }

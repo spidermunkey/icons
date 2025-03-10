@@ -8,7 +8,7 @@ export class Home extends EventEmitterClass {
   constructor(store) {
     super()
     this.store = store
-    this.appStatus = new StatusWidget();
+    this.appStatus = new StatusWidget(store);
     this.localCollections = new RecentDownloads()
     this.localCollections.on('preview', (collection) => this.renderPreview(collection))
     this.uploadedCollections = new UploadSection()
@@ -26,6 +26,7 @@ export class Home extends EventEmitterClass {
     $('#app').innerHTML = ''
     $('#app').innerHTML = await this.getHTML();
     this.localCollections.render($('.col-2.recent-activity'));
+    this.appStatus.render($('.info-panels'))
     $('.db-res').classList.add('active');
   }
 
@@ -34,7 +35,6 @@ export class Home extends EventEmitterClass {
       if (!this.active){
         return;
       }
-      console.log('CLICK HANDLING')
         // handle upload
         let collectionPreview = e.target.closest('.collection-info');
         let upload = e.target.closest('.recent-collection .option-accept');
@@ -45,7 +45,7 @@ export class Home extends EventEmitterClass {
         if (upload){
           let collection = e.target.closest('.recent-collection')
           console.trace('uploading collection',collection)
-          let id = collection.getAttribute('cid');
+          let id = $('.collection-info',collection).getAttribute('cid');
           this.handleUpload(id,collection)
         }
         else if (ignore) {
@@ -181,21 +181,28 @@ export class Home extends EventEmitterClass {
         console.warn('upload already in process',id)
         return;
       }
-      console.log('uploading.....',id)
       // animate here
       $('.loading-overlay',element).classList.add('active')
-      this.uploadingQue.add(id);
-      const stat = await API.requestSync({cid:id});
-      console.log('COLLECTION SYNCED',stat);
-      this.uploadingQue.delete(id);
-      $('.loading-overlay',element).classList.remove('active')
-      $('.sync-success',element).classList.add('active')
-      setTimeout(() => {
-        element.classList.add('destroy')
-        setTimeout(() => {
-          element.remove()
-        },200)
-      },1500)
+      try {
+        this.uploadingQue.add(id);
+        const stat = await API.requestSync({cid:id});
+        if (stat.success){
+          console.log('COLLECTION SYNCED',stat);
+          this.uploadingQue.delete(id);
+          $('.loading-overlay',element).classList.remove('active')
+          $('.sync-success',element).classList.add('active')
+          setTimeout(() => {
+            element.classList.add('destroy')
+            setTimeout(() => {
+              element.remove()
+            },200)
+          },1500)
+        }
+
+      } catch(e){
+        console.log('error uploading collection')
+      }
+
   }
   async handleDrop(id,element){
       // console.log(id)

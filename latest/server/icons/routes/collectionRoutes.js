@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { Mongo } = require('../model.js');
-const { Local } = require('../local.js')
+const Local = require('../models/Local.js')
+
 
 
 router.get('/info', async function getCollectionData(request,response){
@@ -72,27 +73,35 @@ router.post('/sync', async function sync_collection(request,response){
   if (!payload?.cid)
       return response.json({message: 'upload failed', success: false, reason: 'invalid collection id'})
   let cid = payload.cid;
+  console.log('searching in local db')
   let collection = Local.getCollectionById(cid);
   if (collection) {
-    console.log('collection found',collection)
+    console.log('collection found')
     console.log('checking mongo')
     const isSync = await Mongo.check_collection_id(collection.cid)
     console.log('cloud sync status', isSync)
     if (!isSync){
       console.log('syncing collection',collection.name,collection.cid)
       try {
-        const data = Local.get_collection(collection.name)[0]
+        const data = Local.get_collection(collection.name)
         const status = await Mongo.sync_collection( data )
         console.log('STAT',status)
         if (status.success == true) {
-          Local.update_collection(data.cid, {synced:true})
+          const result = await Local.sync(cid);
+          if (result){ console.log('local update success!')}
+          else {
+            console.log('error syncing local collection')
+            response.json({message: 'local sync failed', success: false, reason: 'unknown'})
+          }
         }
         console.log('upload status done',status)
         response.json(status)
       } catch(e) {
         console.log(e)
-        response.json(e)
+        response.json({message: 'local sync failed', success: false, reason: 'unknown'})
       }
+    } else {
+      response.json({message: 'upload failed', success: false, reason: 'collection is synced in mongo db'})
     }
   }
 })

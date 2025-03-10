@@ -695,7 +695,6 @@ class Slider {
     this.orientation = orientation;
     this.start = start;
     this.container = targetElement;
-    console.log(targetElement)
     this.track = targetElement.querySelector(".slider-track") || targetElement;
     this.handle = targetElement.querySelector(".slider-handle");
     this.label = targetElement.querySelector('.label')

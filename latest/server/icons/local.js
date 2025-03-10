@@ -1,4 +1,3 @@
-const DateTime = require('../utils/Datetime.js');
 const { uuid } = require('../utils/uuid.js');
 const { Scanner } = require('./scanner.js');
 
@@ -42,6 +41,7 @@ const local_db = {
   async map_db(db = Scanner.read()) {
     this.collection_names = db.collection_names;
     this.collections = db.collections;
+    console.log(this.collections)
     this.ready = true;
     this.status = 'online';
     this.started = Date.now();
@@ -109,9 +109,11 @@ const local_db = {
     return collection_names.map( name => this.collection(name,false)) 
   },
   getCollectionById(cid){
+    console.log('finding local collection')
     let found = null;
     for (const collection_name in this.collections){
       let collection = this.collection(collection_name)
+      console.log('checking collection', collection)
       if (collection.cid === cid) {
         found = collection;
         break;

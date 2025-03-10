@@ -264,11 +264,9 @@ export class Icon {
         // console.log(el)
         let icon = el.querySelector('svg');
         if (!icon) {
-            // console.warn(`${props._id} : ${props.name} is an invalid object`)
             return ''
         }
         if (!icon.getAttribute('viewBox')) {
-            console.warn('setting default viewbox for', this.collection );
             icon.setAttribute('viewBox','0 0 24 24');
         }
         this.children = [icon,...Icon.crawl(icon)]

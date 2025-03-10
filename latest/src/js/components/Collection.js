@@ -1,64 +1,16 @@
 import { Icon } from './Icon.js';
 import { Cursor } from '../utils/Cursor';
 import { ago } from '../utils/DateTime.js'
-export class LocalCollection {
-  constructor(data) {
-    const validIcons = []
-    const skipped = []
-    this.sub_collections = []
-    this.subtypes = []
-    data.icons.forEach( icon => {
-        const i = new Icon(icon);
-        // quick patch
-        // fixing issue with bad data from the server
-        const sub_collections = this.sub_collections
-        const subtypes = this.subtypes
-        const sub_collection = icon.sub_collection
-        const subtype = icon.subtype
-        if (i.isValid) {
-          validIcons.push(i)
-          if (sub_collection && !sub_collections.includes(sub_collection)) 
-            sub_collections.push(sub_collection)
-          if (subtype && !subtypes.includes(subtype)) 
-            subtypes.push(subtype)
-        }
-        else skipped.push(i)
-    })
-    console.warn('skipped: ', skipped.length,' icons in collection: ', data.name)
-    console.warn(`found ${this.subtypes.length} subtypes`)
-    console.warn(`found ${this.sub_collections.length} subcollections`)
-    this.filters = {
-      sub_collections:[],
-      subtypes:[],
-    }
-    this.icons = validIcons
-    this.sample = validIcons.slice(0,20)
-    this.cursor = new Cursor(validIcons)
-    this.collection_type = data.collection_type
-    this.name = data.name
-    this.size = data.size;
-    this.created_at = data.created_at
-  }
 
-  find(id){
-    return (this.icons.find(icon => icon.id == id))
-  }
-  Icon(id) {
-    return this.find(id)
-  }
-  currentIcon(){
-    return this.cursor.current;
-}
-}
 export class Collection {
   constructor(data){
     const { 
       icons = [], 
-      meta = { name:'empty', cid:'1' ,sub_collections:[] ,subtypes:[] },
+      meta = { name:'empty', cid:'1' ,sub_collections:[] ,subtypes:[], },
       state = {}
     } = data
     const validIcons = []
-    const skipped = []
+    this.skipped = []
     this.sub_collections = []
     this.subtypes = []
     icons.forEach( icon => {
@@ -76,43 +28,44 @@ export class Collection {
           if (subtype && !subtypes.includes(subtype)) 
             subtypes.push(subtype)
         }
-        else skipped.push(i)
+        else this.skipped.push(i)
     })
-    console.warn('skipped: ', skipped.length,' icons')
-    console.warn(`found ${this.subtypes.length} subtypes`)
-    console.warn(`found ${this.sub_collections.length} subcollections`)
     this.filters = {
       sub_collections:[],
       subtypes:[],
     }
+    this.meta = meta
+
+    this.name = meta.name
+    this.cid = meta.cid;
     this.icons = validIcons
     this.sample = icons.slice(0,20)
     this.cursor = new Cursor(validIcons)
-    this.meta = meta
     this.ready = true
+
     this.collection_type = meta.collection_type
-    this.setting = meta?.settings || {}
-    this.usePreset = meta?.usePreset || false
+    this.size = meta.size
+    this.created_at = meta.created_at
+
+    this.preset = meta?.preset || {}
+    this.presets = meta?.preset || {}
+    this.color = meta?.preset || {}
     this.colors = meta?.colors || {}
     this.state = {}
-    console.dir(`CREATING COLLECTION FROM DATA: `, data)
+    // console.dir(`CREATING COLLECTION FROM DATA: `, data)
   }
-  get name(){
-      return this.meta.name
+  debugFaultyIcons(){
+    console.log(this.skipped)
   }
-  get settings(){
-    return this.meta?.settings || {}
+  debugCollection(id){
+    if (this.id === id) console.log(this)
+  }
+  debugIcon(id){
+    console.log(this.find(id))
   }
   get recentSettings() {
     return this.meta.recent_settings
   }
-  get color(){
-    return this.meta.color
-  }
-  get preset(){
-    return this.meta.preset
-  }
-
   find(id){
       return (this.icons.find(icon => icon.id == id))
   }
@@ -385,4 +338,10 @@ export function CollectionWidgetSkeleton(){
   db_container.appendChild(panel_preview);
   db_panel.appendChild(panel_footer);
   return db_panel;
+}
+
+export class LocalCollection extends Collection {
+  constructor(data) {
+    super({ meta:data, icons:data?.icons || []})
+  }
 }

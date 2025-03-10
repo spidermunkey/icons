@@ -7,10 +7,13 @@ export class RecentDownloads extends EventEmitterClass {
     super()
     this.active = false;
     this.store = new Task( API.getDownloads.bind(API,20) )
-    this.store.ondata( (data) => this.parseData.call(this,data))
+    this.store.ondata( (data) => {
+      this.parseData.call(this,data)
+      console.log('recent downloads...')
+      console.dir(data)
+  })
   }
   createWidget(collection){
-    console.log('here')
     let c = collection;
     let widget = document.createElement('div');
     widget.classList.add('sync-widget')
@@ -20,7 +23,7 @@ export class RecentDownloads extends EventEmitterClass {
         <div class="sync-success">
           <div class="txt">Collection Synced</div>
         </div>
-        <div class="collection-info" cid=${collection.cid}>
+        <div class="collection-info" name=${collection.name} cid=${collection.cid}>
         <span class="name">${c.name}</span>
         <span class="divider"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -16 42 42" height="16px" width="16px">
         <path d="M12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg></span>

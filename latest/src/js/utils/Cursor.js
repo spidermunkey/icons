@@ -4,8 +4,7 @@ export class Cursor {
       throw new Error(`expecting an array you passed ${array}`);
     if (isNaN(startingIndex))
       throw new Error(`expecting a number for startingIndex you passed ${startingIndex}`);
-    if (array.length == 0) 
-      console.warn('cursor initializing with empty array');
+    
       this.items = array;
       this.setPointer(startingIndex);
   }
