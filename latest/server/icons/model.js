@@ -718,10 +718,19 @@ const mongo_db = {
 
     },
     async connect() {
-        const icons = await Database.getDB('icons');
-        return {
-            icons,
+        try {
+            const icons = await Database.getDB('icons');
+            return {
+                icons,
+            }
+        } catch(error){
+            if (error.code === 'ECONNREFUSED'){
+                console.log('error accessing model...')
+                console.log('database not connected')
+            }
+            return {}
         }
+
     },
 }
 

@@ -3,8 +3,8 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 
-const { Mongo } = require('./icons/model.js');
 const Local = require('./icons/models/Local.js');
+const Database = require('./icons/models/Database.js');
 
 app.use(require('morgan')('tiny'));
 app.use(bodyParser.urlencoded({extended:true}));
@@ -21,7 +21,7 @@ async function run() {
         process.on('uncaughtException',(error) => console.log('[[ process ]]', error ))
         await Local.init();
         console.log('local db ready');
-        await Mongo.connect();
+        await Database.connect();
         app.listen(PORT, (error) => {
             if (error) console.log('error starting server:', error)
             else console.log(`icon server running on port:${PORT}`)

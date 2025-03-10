@@ -13,7 +13,7 @@ class Database {
     async getDB(name){
         if (!this.client) {
             console.log('No client found, attempting to reconnect...');
-            await this.connect(); 
+            await this.connect();
         }
         if (!this.client) {
             console.error('Failed to connect to MongoDB.');
@@ -34,7 +34,7 @@ class Database {
     async stat(){
     try {
         console.log('checking mongodb stats....')
-        if (!this.client){
+        if (!this.client || this.status === 'offline'){
             this.connections = 0;
             throw new Error('no active client...')
         }

@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Local = require('../models/Local.js')
-const {Mongo} = require('../model.js')
+const {Mongo} = require('../model.js');
+const Database = require('../models/Database.js')
+const { read } = require('fs-extra');
 
 
 
@@ -18,10 +20,15 @@ router.get('/collections', async function getLocalDownloads(request,response){
 
 router.get('/status', async function getLocalStatus(request,response) {
   const local_status = await Local.get_status();
-  // const mongo_stat = (await Mongo.ping()) === 'ready'
-  const mongo_stat = true;
+  const mongo_stat = (await Database.ping()) === 'ready'
+  // const mongo_stat = true;
+  const ready  = Local.ready && mongo_stat
+  const localOnly = Local.ready && !mongo_stat
+  const onlineOnly = mongo_stat && !Local.ready
+  const offline = !ready && !localOnly && !onlineOnly
+  const message = ready ? 'ready' : localOnly ? 'local only' : onlineOnly ? 'online only' : 'server fault'
   const code = Local.ready && mongo_stat ? 100 : Local.ready && !mongo_stat ?  200 : mongo_stat && !Local.ready ? 300 : 400
-  const message = code === 100 ? 'ready' : code === 200 ? 'local db ok' : code === 300 ? 'mongo ready' : 'server not ready'
+  
   const status = {
     db_status: mongo_stat ? 'online' : 'offline',
     local_status: Local.ready ? 'online' : 'offline',

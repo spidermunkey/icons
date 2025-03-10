@@ -17,12 +17,12 @@ module.exports.Scanner = {
   stats:{},
 
   async stat() {
-      let count = await this.count();
-      const last_sync_date = new Date(fs.statSync(fileSystemMap).mtimeMs).getTime();
-      const lastChange = from(new Date(fs.statSync(fileSystemMap).mtimeMs));
-      const { added , removed , changed } = await this.compare();
+      let count = await this.count()
+      const last_sync_date = new Date(fs.statSync(fileSystemMap).mtimeMs).getTime()
+      const lastChange = from(new Date(fs.statSync(fileSystemMap).mtimeMs))
+      const { added , removed , changed } = await this.compare()
       const updateNeeded = [added,removed,changed].some(val => val.length > 0)
-      const size = `${Math.floor(fs.statSync(fileSystemDB).size / 1000)} kb`;
+      const size = `${Math.floor(fs.statSync(fileSystemDB).size / 1000)} kb`
       return { 
         added, 
         removed, 
@@ -36,11 +36,11 @@ module.exports.Scanner = {
   },
 
   read(){
-    return JSON.parse(fs.readFileSync(this.fsdb,'utf-8'));
+    return JSON.parse(fs.readFileSync(this.fsdb,'utf-8'))
   },
 
   read_map(){
-    return JSON.parse(fs.readFileSync(this.fsmap));
+    return JSON.parse(fs.readFileSync(this.fsmap))
   },
 
   overwrite(store){

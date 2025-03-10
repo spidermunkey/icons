@@ -1,10 +1,35 @@
-const express = require('express');
-const router = express.Router();
-const { Mongo } = require('../model.js');
+const express = require('express')
+const router = express.Router()
+const { Mongo } = require('../model.js')
+const Database = require('../models/Database');
+
 const Local = require('../models/Local.js')
+async function getConnection(){
+        
+  const db_connection = await Database.ping()
+  const ready  = Local.ready && db_connection
+  const localOnly = Local.ready && !db_connection
+  const onlineOnly = db_connection && !Local.ready
+  const offline = !ready && !localOnly && !onlineOnly
+  const message = ready ? 'ready' : localOnly ? 'local only' : onlineOnly ? 'online only' : 'server fault'
+  const status = {
+      mongo: db_connection,
+      local: Local.ready,
+      message,
+  }
+  return status
+}
 
-
-
+router.get('/*',async (request,response,next)=>{
+  const status = await getConnection()
+  if (!status.mongo){
+    console.log('database not active...')
+    console.log('blocking traffic...')
+    response.status(500).send('db not connected...')
+  } else {
+    next()
+  }
+})
 router.get('/info', async function getCollectionData(request,response){
   console.log('fetching collection data')
   result = await Mongo.get_data_formated()

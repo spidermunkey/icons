@@ -1,7 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const { Mongo } = require('../model.js');
-
+router.get('/*',async (request,response,next)=>{
+  const status = await getConnection()
+  if (!status.mongo){
+    console.log('database not active...')
+    console.log('blocking traffic...')
+    response.json({success:false,message:'db not connected...'})
+  } else {
+    next()
+  }
+})
 router.post('/colors/:id', async function addIconColrset(request,response){
   const payload = request.body
   const {id,collection,colorset} = payload;
