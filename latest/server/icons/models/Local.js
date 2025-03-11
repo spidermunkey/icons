@@ -111,7 +111,7 @@ module.exports = {
       const collection = this.getCollectionById(id)
       if (collection){
         console.log('setting collection synced: ',id)
-        collection.synced = true;
+        collection.synced = Date.now();
         return true;
       } else {
         console.log('collection not found... ')

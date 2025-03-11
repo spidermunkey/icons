@@ -575,8 +575,8 @@ const mongo_db = {
     async createMetaDocument( props, type ) {
         const { icons } = await this.connect();
         const meta = icons.collection(this.meta_alias);
-        console.log('creating meta document',props.name)
-        console.log('creating collection type.....',type)
+        console.log('creating meta document', props.name)
+        console.log('creating collection type.....', type)
         console.log(props.collection_type)
         const doc = {
             docname: this.meta_doc_alias,
@@ -652,7 +652,7 @@ const mongo_db = {
         const existingDoc = await collection.findOne({ name: props.name, markup: props.markup });
         if (existingDoc) return { 
             message: `A document with the name "${props.name}" already exists.`, 
-            success: false, 
+            success: false,
             reason:'duplicate name'
         };
         // USE TRACE ID to link existing icons back to the orginial;

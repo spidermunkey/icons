@@ -1,5 +1,5 @@
 export const ComponentInterface = () => {
-  return `        <div class="preview-group">
+  return `<div class="preview-group">
   <div class="label"><span>Logos</span></div>
   <div class="preview-components logo">
       <div class="logo--lg comp pb-component showcase">

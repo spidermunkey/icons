@@ -52,7 +52,7 @@ module.exports.Scanner = {
 
   async compare(){
     const prevState = this.read_map();
-    const currState = await this.compile_map();
+    const currState = await this.create_file_map();
     const added = [];
     const removed = [];
     const changed = [];
@@ -73,7 +73,7 @@ module.exports.Scanner = {
   },
 
   async scan(){
-    return this.compile_object_store(await this.compile_map())
+    return this.compile_object_store(await this.create_file_map())
   },
 
   async compile_object_store(file_map = this.fsmap){
@@ -98,6 +98,7 @@ module.exports.Scanner = {
             cid: uuid(),
             subtypes: [],
             sub_collections: [],
+            collection_type: 'local',
             icons: [],
             size: 0,
             ignored: false,
@@ -128,12 +129,16 @@ module.exports.Scanner = {
     console.log('local object store ready');
     return local;
   },
-  async compile_map(directory = this.target){
+  async create_file_map(directory = this.target){
     const state = {};
+
     const items = await fs.promises.readdir(directory, {withFileTypes: true});
         for (const item of items) {
           const itemPath = path.join(directory, item.name);
-          if (item.isDirectory()) await this.compile_map(itemPath)
+          if (item.isDirectory()) {
+            // set cid here
+            await this.create_file_map(itemPath)
+          }
           else if (item.isFile()) {
             const stats = await fs.promises.stat(itemPath);
             state[itemPath] = stats.mtimeMs;
@@ -159,7 +164,7 @@ module.exports.Scanner = {
     let symlink = filepath;
     return { 
       name, 
-      collection, 
+      collection,
       sub_collection, 
       subtype, 
       fileType, 

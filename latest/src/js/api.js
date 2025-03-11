@@ -6,6 +6,7 @@ export const API = {
         try {
             const res = await axios[method](url)
             res.ok = true;
+            console.log(res.code)
             return res.data
         } catch (e){
             console.warn('[error]',`[url] : ${url}`,e)
