@@ -4,7 +4,9 @@ const DateTime = require('../utils/Datetime.js')
 const { uuid } = require('../utils/uuid.js')
 // const { Icon } = require('./models/Icon.js')
 const {Icon} = require('./Icon.js')
+const Collection = require('./models/Collection.js');
 const { print } = require('../utils/print.js')
+
 const mongo_db = {
     icons: {},
     collection_names: [],
@@ -122,8 +124,6 @@ const mongo_db = {
             return {success:false, message: 'no action was taken',reason:'no setting found'}
         }
     },
-
-
     async add_recent_preset(collection,preset){
         const {icons} = await this.connect();
         const meta = icons.collection(this.meta_alias);
@@ -220,8 +220,8 @@ const mongo_db = {
             { id: id },
             update)
             return icon.value;
-        
     },
+
     async delete_icon_color(id,collection,csid){
         const {icons} = await this.connect()
         const coll = icons.collection(collection)
@@ -360,40 +360,40 @@ const mongo_db = {
         if (data) return data.value
         else return {success: false,message:'no action was taken',reason: 'no setting found'}
     },
-    async get_collection_names() {
-        const {icons} = await this.connect();
-        const collections = (await icons.listCollections().toArray()).map(c => c.name).filter(name => name !== '{{meta}}');
-        return collections;
+
+    paginate(limit,filter,page = 1){
+        const query = {}
+        const validSubCollectionFilter = filter?.sub_collections && Array.isArray(filter.sub_collections) && filter.sub_collections.length > 0
+        const validSubtypeFilter = filter?.subtypes && Array.isArray(filter.subtypes) && filter.subtypes.length > 0
+        const validLimit = !isNaN(parseInt(limit)) && parseInt(limit) > 0
+        const validPage = !isNaN(parseInt(page)) && parseInt(page) > 0
+        if (validSubCollectionFilter){
+            query.sub_collections = {$in: filter.sub_collections}
+        }
+        if (validSubtypeFilter){
+            query.subtypes = {$in: filter.subtypes}
+        }
+        const options = {}
+        if (limit && validLimit && validPage ) {
+            options.limit = parseInt(limit);
+            options.skip = (parseInt(page) - 1) * parseInt(limit)
+        }
+        return {query,options}
     },
-    async get_collection(collection_name,limit=350) {
+    async get_collection({collection_name,limit,page,filters}) {
         const { icons } = await this.connect();
-        const limiter = limit
-        if (!(await this.check_collection_name(collection_name))) return {};
+        const {query,options} = this.paginate(limit,filters,page)
+        const collectionExist = await this.check_collection_name(collection_name)
+        if (!collectionExist) { 
+            return {} 
+        }
         const collection = icons.collection(collection_name);
-        console.time(`fetching data`)
-        const data = await collection.find().limit(limiter).toArray();
         const doc = await this.get_data_by_name(collection_name)
-        console.timeEnd(`fetching data`)
+        const data = await collection.find(query,options).toArray();
+        console.log(`returning -- ${data.length} -- icons`)
         return {  meta:doc , icons: data};
     },
-    async get_collection_paginated({ page = 1 , limit=350 }, ...collection_names) {
-        const { icons } = await this.connect();
-        const pointer = (page-1) * parseInt(limit);
-        // console.time('fetching paginated data')
-        const data = await Promise.all(collection_names.map(async name => {
-            if (!(await this.check_collection_name(name))) return {};
-            const collection = icons.collection(name);
-            console.log('PAGINATING COLLECTION', name)
-            console.log('starting at: ', pointer );
-            console.log('limiter : ', limit )
-            const data = await collection.find().limit(parseInt(limit)).skip((parseInt(page)-1) * limit).toArray();
-            const doc = await this.get_data_by_name(name)
-            console.log(`returning ${data.length} icons`)
-            return {  meta:doc , icons: data};
-        }))
-        // console.timeEnd('fetching paginated data')
-        return data[0]
-    },
+
     async get_data(cid,type) {
         const {icons} = await this.connect();
         const meta = icons.collection(this.meta_alias);
@@ -438,6 +438,12 @@ const mongo_db = {
         })
         return data;
     },
+
+    async get_collection_names() {
+        const {icons} = await this.connect();
+        const collections = (await icons.listCollections().toArray()).map(c => c.name).filter(name => name !== '{{meta}}');
+        return collections;
+    },
     async check_collection_id(collection_id){
         const {icons} = await this.connect();
         const meta = icons.collection(this.meta_alias);
@@ -453,6 +459,7 @@ const mongo_db = {
     async collection_exists(name,collection_id) {
         return (await this.check_collection_name(name)) || (await this.check_collection_id(collection_id));
     },
+
     async find(query,collection = 'all') {
         const { icons } = await this.connect();
         const icon = await icons.collection(collection).findOne(query)
@@ -507,10 +514,13 @@ const mongo_db = {
             const {icons} = await this.connect();
             let count = 0
             const length = props.icons.length
+            console.log(props.icons[0])
             async function upload(props){
+                const collectionName = props?.collection;
                 const collection = icons.collection(props?.collection);
                 const index = icons.collection('all');
-                const iconExists = await collection.findOne({ id: props.id }) || await index.findOne({id: props.id})
+                const iconExists = await collection.findOne({ id: props.id }) 
+                const indexExists = await index.findOne({id: props.id})
                 if (!props.collection) return { message: 'upload failed', success: false, reason: 'invalid destination', code: 22}
                 if (!props.id) return {message: 'upload failed', success: false, reason: 'invalid id', code: 24}
                 if (props.markup == '') return { message: 'upload failed', success: false , reason:'invalid markup', code: 21}
@@ -521,8 +531,8 @@ const mongo_db = {
                     collection: props.collection,
                     uploaded_at: Date.now(),
                 })
-                const added = await collection.insertOne(schema);
-                const indexed = await index.insertOne(schema);
+                const added = !iconExists ? await collection.insertOne(schema) : false;
+                const indexed = !indexExists ? await index.insertOne(schema) : false;
                 const res_1 = added?.acknowledged == true;
                 const res_2 = indexed?.acknowledged == true;
                 return {
@@ -530,17 +540,20 @@ const mongo_db = {
                     success: res_1 && res_2,
                     reason: [!res_1 ? added : true, !res_2 ? indexed : true],
                     code: 0,
+                    item: added
                 }
             }
             console.log('uploading icons', length)
             let faulty = [];
             await Promise.all( props.icons.map(async icon => { 
                 let result = (await upload.call(this,icon)); 
-                print(`uploaded icon [${++count}/${length}]`)
-                result == false ? faulty.push(result) : null 
+                result.success 
+                ? print(`uploaded icon [${++count}/${length}, -- ${icon.collection}]`)
+                : print(`${result.message} -- ${result.reason} -- [success] -- ${result.success}]`)
+                result.success == false ? faulty.push(result) : null 
             }) )
             console.log('error(s) found', faulty.length)
-            return { message: 'proccess complete', success: true, reason: faulty.length };
+            return { message: 'proccess complete', success: faulty.length === 0, reason: faulty.length };
     }
     },
     async create_collection(props = {}) {
@@ -687,6 +700,7 @@ const mongo_db = {
         // update meta docs
         return { 1:status1, 2:status2 };
     },
+
     async updateIndex(props) {
         if (props.markup == '')
             return { message: 'upload failed', success: false , reason:'invalid markup' }

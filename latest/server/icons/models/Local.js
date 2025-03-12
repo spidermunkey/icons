@@ -27,7 +27,7 @@ module.exports = {
     },
     async save() {
       console.log('saving all changes to local db')
-      this.scanner.write(this.readDB());
+      this.scanner.overwrite(this.readDB());
       console.log('updating...')
       await this.loadDB()
     },

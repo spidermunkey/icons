@@ -39,3 +39,9 @@ I have some ideas, first I need to finish defining the roles of a collection int
 -- when sending multiple icons, do I send only the markup, leaving behind most meta data required for editors to be retrieved on a one off basis?.
 
 -- should I be using redis or some type of cdn
+
+
+3/12/25
+
+  After spending some time on the server, reoganizing and refactoring for a more modular design. It appears that a simpler approach to managing this application would be to allowing components to fetch their own data from the api...
+  instead of forcing index.js to manage all of the relationships with the api/store, instead index.js can just create the components and listen in only when needed.

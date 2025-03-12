@@ -3,37 +3,6 @@ const Database = require('./Database.js');
 const { getCollection } = require('./Collection.js');
 // missing added uploaded_at prop
 // can't figure out if spread may leave out some properties
-
-module.exports.Icon = function(props) {
-  const {
-    tags,
-    cid,
-    id,
-    vid,
-    trace,
-    colors,
-    settings,
-    isBenched,
-    isFavorite,
-    rebased,
-    collection,
-    logs,
-    html,
-    markup,
-    name,
-    created_at,
-    updated_at,
-    subtype,
-    sub_collection,
-    del_status,
-
-} = props;
-    return {
-        cid,id,vid,trace,colors,isBenched,isFavorite,rebased,logs,tags,html,markup,name,subtype,collection,sub_collection,
-        del_status,settings,created_at,updated_at
-    }
-}
-
 class Icon {
     constructor(props){
         this.properties = configure(props)
@@ -108,4 +77,8 @@ function filterProperties(props){
         }
     }
     return configurable;
+}
+
+module.exports = {
+    Icon,
 }

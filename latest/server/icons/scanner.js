@@ -77,13 +77,16 @@ module.exports.Scanner = {
   },
 
   async compile_object_store(file_map = this.fsmap){
+    // needs refactoring to store objects as [cid]:{collection}
+    // for to match shape of remote db
     console.log('building local object store')
     const local = {
       collection_names: [],
       collections: {},
-      all: {},
-      name_index: {},
     };
+    
+    let cids = new Map();
+
     for (const file of Object.keys(file_map)){
       if (path.extname(file) === '.svg'){
         const entry = await this.parse(file);
@@ -112,7 +115,6 @@ module.exports.Scanner = {
           local.collection_names.push(collection)
         }
   
-        local.all[id] = entry;
         let _collection = local.collections[collection];
         
         if (hasSubCollection && !_collection.sub_collections.includes(sub_collection))

@@ -5,6 +5,9 @@ const iconRoutes = require('./routes/iconRoutes.js')
 const localRoutes = require('./routes/localRoutes.js')
 
 router.use(require('./middleware/parsePayload.js'))
+
+router.use(require('./middleware/connManager.js'))
+
 router.use('/collections', collectionRoutes )
 router.use('/local', localRoutes )
 router.use('/all', iconRoutes )

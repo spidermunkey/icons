@@ -42,7 +42,6 @@ export class SvgModel extends EventEmitterClass {
         }
         this.status = null;
         this.ready = false;
-
         this.statusBroker = new Task(API.getLocalStatus)
         this.connectionBroker = new Task(API.getConnection)
         this.data = {
@@ -83,6 +82,8 @@ export class SvgModel extends EventEmitterClass {
             }
         }
     }
+
+    // commands
     async search(query){
         return API.search(query)
     }
@@ -158,6 +159,8 @@ export class SvgModel extends EventEmitterClass {
         console.log('a2c response...')
         return response;
     }
+
+    // queries
     async getCollectionNames() {
         return API.getCollectionNames(synced);
     }
@@ -167,9 +170,6 @@ export class SvgModel extends EventEmitterClass {
     }
     async getIcon(id){
         return API.getIcon(id);
-    }
-    createCollection( data ) {
-        return new Collection(data)
     }
     async saveCollection(name,icons){
         return API.createCollection(name,icons)
@@ -229,8 +229,8 @@ export class SvgModel extends EventEmitterClass {
         const meta = await this.getMeta();
         return meta.names;
     }
-
     async getStatus(){
         return API.getStatus();
     }
+
 }

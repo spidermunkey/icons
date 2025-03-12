@@ -3,9 +3,6 @@ const router = express.Router();
 const Local = require('../models/Local.js')
 const {Mongo} = require('../model.js');
 const Database = require('../models/Database.js')
-const { read } = require('fs-extra');
-
-
 
 router.get('/collections', async function getLocalDownloads(request,response){
   const collection_type = request.query.collectionType;
@@ -15,8 +12,6 @@ router.get('/collections', async function getLocalDownloads(request,response){
   else 
     response.json(Local.get_collections())
 })
-
-
 
 router.get('/status', async function getLocalStatus(request,response) {
   const local_status = await Local.get_status();

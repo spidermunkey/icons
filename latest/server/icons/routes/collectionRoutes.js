@@ -1,43 +1,19 @@
 const express = require('express')
 const router = express.Router()
 const { Mongo } = require('../model.js')
-const Database = require('../models/Database');
-
 const Local = require('../models/Local.js')
-async function getConnection(){
-        
-  const db_connection = await Database.ping()
-  const ready  = Local.ready && db_connection
-  const localOnly = Local.ready && !db_connection
-  const onlineOnly = db_connection && !Local.ready
-  const offline = !ready && !localOnly && !onlineOnly
-  const message = ready ? 'ready' : localOnly ? 'local only' : onlineOnly ? 'online only' : 'server fault'
-  const status = {
-      mongo: db_connection,
-      local: Local.ready,
-      message,
-  }
-  return status
-}
 
-router.get('/*',async (request,response,next)=>{
-  const status = await getConnection()
-  if (!status.mongo){
-    console.log('database not active...')
-    console.log('blocking traffic...')
-    response.status(500).send('db not connected...')
-  } else {
-    next()
-  }
-})
+
 router.get('/info', async function getCollectionData(request,response){
   console.log('fetching collection data')
   result = await Mongo.get_data_formated()
   response.json(result)
 })
+
 router.get('/info/names', async function getCollectionNames(request,response) {
   response.json(await Mongo.get_collection_names())
 })
+
 router.put('/settings/:collection', async function clearDefaultSetting(request,response){
   const collection = request.params.collection
   const result = await Mongo.clear_collectionDefault_setting(collection)
@@ -67,8 +43,6 @@ router.put('/settings', async function applySettingDefault(request,response){
     const result = await Mongo.set_collectionDefault_setting(collection,preset)
     response.json(result)
 })
-
-
 router.post('/colors', async function add_collection_colorset(request,response) {
   const { payload } = request.body
   // needs better sanitization
@@ -101,8 +75,7 @@ router.post('/sync', async function sync_collection(request,response){
   console.log('searching in local db')
   let collection = Local.getCollectionById(cid);
   if (collection) {
-    console.log('collection found')
-    console.log('checking mongo')
+    console.log('collection found... checking remote database...')
     const isSync = await Mongo.check_collection_id(collection.cid)
     console.log('cloud sync status', isSync)
     if (!isSync){
@@ -157,19 +130,17 @@ router.post('/:collectionID/:id',async function searchCollection(request,respons
 })
 router.get('/:collection', async function getCollection (request, response) {
   const cName = request.params.collection;
-  const filter = request.query.filter;
-  const paginated = request.query.paginated
+  const filter = request.query?.filter;
+  const paginated = request.query?.paginated
+  const page = request.query?.page;
+  const limit = request.query?.limit;
+  const filterSubType = request.query?.st
+  const filterSubCollection = request.query?.sc
+
   let filters = {subtypes:[],sub_collections:[]};
-  let data;
-  if (paginated === 'true' || paginated == true || filter === "true"){
-      filters['subtypes'] = decodeURIComponent(request.query.st).split(',').filter(i => i != '' && i != null && i != undefined);
-      filters['sub_collections'] = decodeURIComponent(request.query.sc).split(',').filter(i => i != '' && i != null && i != undefined);
-      const page = request.query?.page;
-      const limit = request.query?.limit;
-      data = await Mongo.get_collection_paginated({ page , limit, filters }, cName );
-  } else {
-    data = await Mongo.get_collection( cName );
-  }
+  filters['subtypes'] = !filterSubType || filterSubType === '' ? [] : decodeURIComponent(request.query.st).split(',').filter(i => i != '' && i != null && i != undefined);
+  filters['sub_collections'] = !filterSubCollection || filterSubCollection === '' ? [] : decodeURIComponent(request.query.sc).split(',').filter(i => i != '' && i != null && i != undefined);
+  let data =  await Mongo.get_collection( { page , limit, filters, collection_name:cName } );
   response.json(data)
 })
 router.put('/:collectionID', async function editCollection(request,response){

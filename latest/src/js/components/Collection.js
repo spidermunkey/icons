@@ -1,7 +1,7 @@
 import { Icon } from './Icon.js';
 import { Cursor } from '../utils/Cursor';
-import { ago } from '../utils/DateTime.js'
-
+import { ago } from '../utils/DateTime.js';
+import { API } from '../api.js';
 export class Collection {
   constructor(data){
     const { 
@@ -199,6 +199,7 @@ export function CollectionWidget(data) {
     const name = data.name;
     const icons = data.icons;
     const getPage = data.getPage;
+    const cid = data.cid;
     const db_panel = document.createElement('div');
     const db_container = document.createElement('div');
     const panel_header = document.createElement('div');
@@ -212,12 +213,27 @@ export function CollectionWidget(data) {
     panel_footer.classList.add('panel-footer');
     panel_menu.classList.add('panel-menu');
     db_panel.setAttribute('collection',name);
+    db_panel.setAttribute('cid',cid)
     db_panel.appendChild(panel_header);
     db_panel.appendChild(db_container);
     db_container.appendChild(panel_preview);
     db_panel.appendChild(panel_footer);
+
     panel_header.innerHTML = `
-    <div class="panel-name" collection="${name}">${name}</div>
+    <div class="panel-name" collection=${name}>${name}</div>
+    <div class="panel-options">
+      <div class="dropdown-icon">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m85vg8jg-01S9PHENZ0PX">
+          <path d="M6 10.5C5.17157 10.5 4.5 11.1716 4.5 12C4.5 12.8284 5.17157 13.5 6 13.5C6.82843 13.5 7.5 12.8284 7.5 12C7.5 11.1716 6.82843 10.5 6 10.5Z" fill="black" pid="m85vg8jg-00JREAP4XC8Z"></path>
+          <path d="M10.5 12C10.5 11.1716 11.1716 10.5 12 10.5C12.8284 10.5 13.5 11.1716 13.5 12C13.5 12.8284 12.8284 13.5 12 13.5C11.1716 13.5 10.5 12.8284 10.5 12Z" fill="black" pid="m85vg8jg-01U1OM0YNVHN"></path>
+          <path d="M16.5 12C16.5 11.1716 17.1716 10.5 18 10.5C18.8284 10.5 19.5 11.1716 19.5 12C19.5 12.8284 18.8284 13.5 18 13.5C17.1716 13.5 16.5 12.8284 16.5 12Z" fill="black" pid="m85vg8jg-00MIE1K9JHJQ"></path>
+        </svg>
+      </div>
+      <div class="dropdown-menu">
+        <span class="dropdown-option" opt="delete-collection" cid="${cid}">delete collection</span>
+        <span class="dropdown-option" opt="open-settings" cid="${cid}">open settings</span>
+      </div>
+    </div>
     `
     let pageNumbers = []
     for (let i = 1; i <= pages; i++){
@@ -250,7 +266,7 @@ export function CollectionWidget(data) {
           </div>
     </div>
     `
-
+    panel_header.addEventListener('click', handleDropdown)
     panel_footer.addEventListener('click', handlePagination)
     renderIcons(icons)
     async function handlePagination(event){
@@ -301,6 +317,19 @@ export function CollectionWidget(data) {
           handleShiftDirection(pageNumber)
         }
     }
+    async function handleDropdown(event){
+      if (event.target.closest('.dropdown-icon')){
+        $('.dropdown-menu',panel_header).classList.toggle('active')
+      }
+      else if (event.target.closest('[opt="delete-collection"]')){
+        console.log('deleting collection')
+        const result = await API.dropCollection(cid);
+        if (result){
+          console.log('API RESPONSE: DELETE', result)
+          db_panel.remove();
+        }
+      }
+    }
     function renderIcons(icons){
       panel_preview.innerHTML =''
       icons.forEach(icon => {
@@ -339,7 +368,6 @@ export function CollectionWidgetSkeleton(){
   db_panel.appendChild(panel_footer);
   return db_panel;
 }
-
 export class LocalCollection extends Collection {
   constructor(data) {
     super({ meta:data, icons:data?.icons || []})

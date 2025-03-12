@@ -195,7 +195,6 @@ export class Dashboard extends AbstractView {
         $('.collection-menu .close-menu').addEventListener('click',(e) => this.closeCollectionMenu(e))
         $('.pinned-widget').addEventListener('click',(e) => this.renderPinnedCollection(e))
         // collection settings menu
-
         $('.preview .btn-bench.toggler').addEventListener('click',() => this.selected ? this.state.bench.add(this.selected): null)
         $('.preview__window--navigator.btn-next').addEventListener('click',() => this.togglePreviewNext())
         $('.preview__window--navigator.btn-prev').addEventListener('click',() => this.togglePreviewPrevious())

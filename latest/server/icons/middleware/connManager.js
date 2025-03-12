@@ -1,8 +1,7 @@
 const Database = require('../models/Database');
 const Local = require('../models/Local');
 
-async function getConnection(){
-        
+async function db_connection(){
     const db_connection = await Database.ping()
     const ready  = Local.ready && db_connection
     const localOnly = Local.ready && !db_connection
@@ -18,10 +17,17 @@ async function getConnection(){
 }
 
 module.exports = async function(request,response,next){
-    // app.locals.status = await getConnection();
-    const status = await getConnection();
-    if (!status.mongo){
-        response.json({success:false,message:'db offline'})
+    // app.locals.status = await db_connection();
+    try {
+        const status = await db_connection();
+        if (!status.mongo){
+            console.log('database not active...')
+            console.log('blocking traffic...')
+            return response.json({success:false,message:'db offline'})
+        }
+        next()
+    } catch(error){
+        console.log('Error checking DB connection',error);
+        return response.json({success:false,message:'Error checking DB connection'})
     }
-    next()
 }

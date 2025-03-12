@@ -1,8 +1,9 @@
 
 const Database = require('./Database.js')
 const { Meta, findMetaDocument, findMetaDocumentByName, createMetaDocument } = require('./Meta.js')
-
+const { Icon } = require('./Icon.js')
 class Collection {
+    
     constructor(cid){
         this.cid = cid
     }
@@ -43,7 +44,13 @@ class Collection {
         const db = connect();
         if (icons && Array.isArray(icons) && icons.length > 0){
             const collectionData = createMetaDocument(props);
-
+            if (collectionData){
+                console.log(collectionData)
+                icons.forEach(props => {
+                    let icon = new Icon(props)
+                    icon.add()
+                })
+            }
         }
     }
     destroy(){
