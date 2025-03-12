@@ -1872,7 +1872,7 @@ export class Dashboard extends AbstractView {
         $('.info-bar .current-tab').textContent = name
     }
     updateCollectionInfo(collection){
-            const getAgo = msDate => ago(msDate).string;
+            const getAgo = msDate => ago(new Date(msDate)).string;
             console.log('updating collection info',collection)
             const {meta} = collection
             let {collection_type,subtypes,sub_collections,size,name, uploaded_at = undefined,created_at = null, updated_on = null}  = meta;

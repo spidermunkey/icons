@@ -361,28 +361,9 @@ const mongo_db = {
         else return {success: false,message:'no action was taken',reason: 'no setting found'}
     },
 
-    paginate(limit,filter,page = 1){
-        const query = {}
-        const validSubCollectionFilter = filter?.sub_collections && Array.isArray(filter.sub_collections) && filter.sub_collections.length > 0
-        const validSubtypeFilter = filter?.subtypes && Array.isArray(filter.subtypes) && filter.subtypes.length > 0
-        const validLimit = !isNaN(parseInt(limit)) && parseInt(limit) > 0
-        const validPage = !isNaN(parseInt(page)) && parseInt(page) > 0
-        if (validSubCollectionFilter){
-            query.sub_collections = {$in: filter.sub_collections}
-        }
-        if (validSubtypeFilter){
-            query.subtypes = {$in: filter.subtypes}
-        }
-        const options = {}
-        if (limit && validLimit && validPage ) {
-            options.limit = parseInt(limit);
-            options.skip = (parseInt(page) - 1) * parseInt(limit)
-        }
-        return {query,options}
-    },
     async get_collection({collection_name,limit,page,filters}) {
         const { icons } = await this.connect();
-        const {query,options} = this.paginate(limit,filters,page)
+        const {query,options} = paginate(limit,filters,page)
         const collectionExist = await this.check_collection_name(collection_name)
         if (!collectionExist) { 
             return {} 
@@ -391,7 +372,28 @@ const mongo_db = {
         const doc = await this.get_data_by_name(collection_name)
         const data = await collection.find(query,options).toArray();
         console.log(`returning -- ${data.length} -- icons`)
+        
         return {  meta:doc , icons: data};
+        
+        function paginate(limit,filter,page = 1){
+            const query = {}
+            const validSubCollectionFilter = filter?.sub_collections && Array.isArray(filter.sub_collections) && filter.sub_collections.length > 0
+            const validSubtypeFilter = filter?.subtypes && Array.isArray(filter.subtypes) && filter.subtypes.length > 0
+            const validLimit = !isNaN(parseInt(limit)) && parseInt(limit) > 0
+            const validPage = !isNaN(parseInt(page)) && parseInt(page) > 0
+            if (validSubCollectionFilter){
+                query.sub_collections = {$in: filter.sub_collections}
+            }
+            if (validSubtypeFilter){
+                query.subtypes = {$in: filter.subtypes}
+            }
+            const options = {}
+            if (limit && validLimit && validPage ) {
+                options.limit = parseInt(limit);
+                options.skip = (parseInt(page) - 1) * parseInt(limit)
+            }
+            return {query,options}
+        }
     },
 
     async get_data(cid,type) {
