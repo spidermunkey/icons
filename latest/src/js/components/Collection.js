@@ -46,12 +46,13 @@ export class Collection {
     this.collection_type = meta.collection_type
     this.size = meta.size
     this.created_at = meta.created_at
-
+    this.synced = meta.synced
     this.preset = meta?.preset || {}
     this.presets = meta?.preset || {}
     this.color = meta?.preset || {}
     this.colors = meta?.colors || {}
     this.state = {}
+    console.log(meta.synced,data.synced)
     // console.dir(`CREATING COLLECTION FROM DATA: `, data)
   }
   debugFaultyIcons(){

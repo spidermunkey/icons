@@ -4,7 +4,6 @@ const DateTime = require('../utils/Datetime.js')
 const { uuid } = require('../utils/uuid.js')
 // const { Icon } = require('./models/Icon.js')
 const {Icon} = require('./Icon.js')
-const Collection = require('./models/Collection.js');
 const { print } = require('../utils/print.js')
 
 const mongo_db = {
@@ -372,7 +371,7 @@ const mongo_db = {
         const doc = await this.get_data_by_name(collection_name)
         const data = await collection.find(query,options).toArray();
         console.log(`returning -- ${data.length} -- icons`)
-        
+
         return {  meta:doc , icons: data};
         
         function paginate(limit,filter,page = 1){
@@ -484,24 +483,24 @@ const mongo_db = {
   
     },
     async sync_collection(props) {
-        const isValid = await validateProperties.call(this,props);
-        if (isValid.success == false) return isValid
-        console.log('uploading icons')
-        const sync_status = await uploadIcons.call(this,props);
-        if (sync_status.success == false) {
-            return sync_status
-            console.log(sync_status)
+        try {
+            const isValid = await validateProperties.call(this,props);
+            if (isValid.success == false) return isValid
+            console.log('uploading icons')
+            const sync_status = await uploadIcons.call(this,props);
+            console.log('creating meta document')
+            const meta_synced = await this.createMetaDocument(props,'upload');
+            if (meta_synced.success == false) return meta_synced
+            return {message: 'proccess complete', success: true, reason: {
+                isValid,
+                sync_status,
+                meta_synced,
+            }}
+        } catch(error){
+            console.log('upload process interupted...',error)
+            return { message: 'process interupted...', success: false, reason: error }
         }
-        console.log('creating meta document')
-        const meta_synced = await this.createMetaDocument(props,'upload');
-        const {docname,cid,name,collection_type,suptypes,sub_collections,size,preset,color} = meta_synced
-        console.dir('document created!',{docname,cid,name,collection_type})
-        if (meta_synced.success == false) return meta_synced
-        return {message: 'proccess complete', success: true, reason: {
-            isValid,
-            sync_status,
-            meta_synced,
-        }}
+
         async function validateProperties(props){
             const restrictedNames = ['all','favorites','recent','uploads','downloads','{{meta}}'];
             if (!props.name) return { message: 'collection not created', success: false, reason: 'invalid name property', code: 11}
@@ -516,7 +515,6 @@ const mongo_db = {
             const {icons} = await this.connect();
             let count = 0
             const length = props.icons.length
-            console.log(props.icons[0])
             async function upload(props){
                 const collectionName = props?.collection;
                 const collection = icons.collection(props?.collection);
@@ -545,7 +543,7 @@ const mongo_db = {
                     item: added
                 }
             }
-            console.log('uploading icons', length)
+            console.log('uploading icons...', length)
             let faulty = [];
             await Promise.all( props.icons.map(async icon => { 
                 let result = (await upload.call(this,icon)); 
@@ -555,7 +553,7 @@ const mongo_db = {
                 result.success == false ? faulty.push(result) : null 
             }) )
             console.log('error(s) found', faulty.length)
-            return { message: 'proccess complete', success: faulty.length === 0, reason: faulty.length };
+            return { message: 'proccess complete', success: true, reason: faulty.length };
     }
     },
     async create_collection(props = {}) {
@@ -614,7 +612,7 @@ const mongo_db = {
         doc.sample = await collection.aggregate([
             { $sample: { size: sampleSize} }
             ]).toArray();
-        await meta.insertOne(doc);
+        await meta.findOneAndReplace({docname:this.meta_doc_alias,cid:props.cid},doc,{upsert:true});
         return doc;
     },
     async remove_collection(id){

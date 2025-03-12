@@ -19,7 +19,7 @@ app.use((req,res) => res.status(404).json("404 not found"));
 async function run() {
     try {
         process.on('uncaughtException',(error) => console.log('[[ process ]]', error ))
-        await Local.init(true);
+        await Local.init();
         console.log('local db ready');
         await Database.connect();
         app.listen(PORT, (error) => {

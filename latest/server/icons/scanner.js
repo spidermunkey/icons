@@ -36,9 +36,7 @@ module.exports.Scanner = {
   },
 
   read(){
-    const db = JSON.parse(fs.readFileSync(this.fsdb,'utf-8'))
-    console.log(db);
-    return db
+    return JSON.parse(fs.readFileSync(this.fsdb,'utf-8'))
   },
 
   read_map(){

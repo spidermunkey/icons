@@ -15,6 +15,7 @@ export class RecentDownloads extends EventEmitterClass {
   }
   createWidget(collection){
     let c = collection;
+    console.log(collection, collection.synced)
     let widget = document.createElement('div');
     widget.classList.add('sync-widget')
     const sampleIcons = collection.sample
