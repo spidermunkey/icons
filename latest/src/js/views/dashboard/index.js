@@ -2044,12 +2044,16 @@ export class Dashboard extends AbstractView {
             return;
         }
         if (dropRequest){
-            const collectionName = $('.item-menu-window.active').getAttribute('modal');
+            const id = $('.item-menu-window.active').getAttribute('cid');
+            
             const confirmed = $('.option-delete',event.target.closest('.item-menu-window.active'))
+            
             let response;
-            if (collectionName && confirmed)
-                response = await this.store.dropPreset(collectionName);
-            console.log('DROPPED',response)
+            if (id && confirmed){
+                response = await this.store.dropCollection(id);
+                console.log('DROPPED',response)
+
+            }
             return response;
         }
         if (settings){

@@ -101,10 +101,10 @@ function CollectionMenu(props) { // get list of names from db
   return props
       .sort((a,b) => a.name > b.name )
       .map(props => {
-        const {name,collection_type = '',size, uploaded_at = undefined, sample = [], created_at = null, updated_on = null} = props
+        const {cid,name,collection_type = '',size, uploaded_at = undefined, sample = [], created_at = null, updated_on = null} = props
         const getAgo = msDate => ago(new Date(msDate)).string;
         return `
-        <div class="menu-list-item md" role="tab" modal=${name}>
+        <div class="menu-list-item md" role="tab" modal=${name} cid=${cid}>
         ${collection_type !== 'auto' ? `<div class="item-header">
           <div class="item-menu">
             <div class="btn-menu">
@@ -114,7 +114,7 @@ function CollectionMenu(props) { // get list of names from db
                 <path d="M16.5 12C16.5 11.1716 17.1716 10.5 18 10.5C18.8284 10.5 19.5 11.1716 19.5 12C19.5 12.8284 18.8284 13.5 18 13.5C17.1716 13.5 16.5 12.8284 16.5 12Z" fill="black" pid="m1grjzmg-00RDOKP0EOPM"></path>
               </svg>
             </div>
-            <div class="item-menu-window" modal=${name}>
+            <div class="item-menu-window" modal=${name} cid=${cid}>
     
               <div class="option-delete">
                 <div class="option-label">
