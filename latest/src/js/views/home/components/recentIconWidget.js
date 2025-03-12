@@ -64,7 +64,7 @@ export class RecentDownloads extends EventEmitterClass {
   render(destination){
     destination.innerHTML = this.getHTML();
     this.active = true;
-    this.store.getData()
+    this.store.getData(true)
   }
   getHTML(){
     return `

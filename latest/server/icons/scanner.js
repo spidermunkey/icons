@@ -1,8 +1,8 @@
 const fs = require('fs-extra');
 const path = require('path');
 const { uuid } = require('../utils/uuid.js');
-const parse = require('../utils/parseSvgFile.js');
 const {from} = require('../utils/Date.js')
+const {print} = require('../utils/print.js')
 const {
   targetDirectory,
   fileSystemMap,
@@ -36,7 +36,9 @@ module.exports.Scanner = {
   },
 
   read(){
-    return JSON.parse(fs.readFileSync(this.fsdb,'utf-8'))
+    const db = JSON.parse(fs.readFileSync(this.fsdb,'utf-8'))
+    console.log(db);
+    return db
   },
 
   read_map(){
@@ -51,6 +53,7 @@ module.exports.Scanner = {
   },
 
   async compare(){
+    console.log('comparing changes...')
     const prevState = this.read_map();
     const currState = await this.create_file_map();
     const added = [];
@@ -76,7 +79,7 @@ module.exports.Scanner = {
     return this.compile_object_store(await this.create_file_map())
   },
 
-  async compile_object_store(file_map = this.fsmap){
+  async compile_object_store(file_map){
     // needs refactoring to store objects as [cid]:{collection}
     // for to match shape of remote db
     console.log('building local object store')
@@ -84,10 +87,10 @@ module.exports.Scanner = {
       collection_names: [],
       collections: {},
     };
-    
-    let cids = new Map();
-
-    for (const file of Object.keys(file_map)){
+    let progress = 0
+    let files = Object.keys(file_map)
+    for (const file of files){
+      print(`processing file [${++progress}/${files.length}]`)
       if (path.extname(file) === '.svg'){
         const entry = await this.parse(file);
         const {collection,subtype,sub_collection,id} = entry;
@@ -133,18 +136,20 @@ module.exports.Scanner = {
   },
   async create_file_map(directory = this.target){
     const state = {};
-
-    const items = await fs.promises.readdir(directory, {withFileTypes: true});
-        for (const item of items) {
-          const itemPath = path.join(directory, item.name);
-          if (item.isDirectory()) {
-            // set cid here
-            await this.create_file_map(itemPath)
-          }
-          else if (item.isFile()) {
-            const stats = await fs.promises.stat(itemPath);
-            state[itemPath] = stats.mtimeMs;
-          }
+    await readDirRecursive(directory)
+    async function readDirRecursive(directory){
+      const items = await fs.promises.readdir(directory, {withFileTypes: true});
+      for (const item of items) {
+            const itemPath = path.join(directory, item.name);
+            if (item.isDirectory()) {
+              // set cid here
+              await readDirRecursive(itemPath)
+            }
+            else if (item.isFile() && path.extname(itemPath) === '.svg') {
+              const stats = await fs.promises.stat(itemPath);
+              state[itemPath] = stats.mtimeMs;
+            }
+      }
     }
     return state;
   },

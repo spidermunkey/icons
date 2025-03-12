@@ -6,11 +6,17 @@ const Database = require('../models/Database.js')
 
 router.get('/collections', async function getLocalDownloads(request,response){
   const collection_type = request.query.collectionType;
-  collection_type === 'synced' 
-  if (collection_type === 'synced')
+  if (collection_type === 'synced'){
+    console.log('fetching synced collections')
+    const synced = Local.get_synced_collections();
+    console.log(synced)
     response.json(Local.get_synced_collections())
-  else 
+  }
+  else {
+    console.log('fetching all collections')
     response.json(Local.get_collections())
+
+  }
 })
 
 router.get('/status', async function getLocalStatus(request,response) {

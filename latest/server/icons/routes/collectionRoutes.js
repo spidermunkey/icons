@@ -130,19 +130,17 @@ router.post('/:collectionID/:id',async function searchCollection(request,respons
 })
 router.get('/:collection', async function getCollection (request, response) {
   const cName = request.params.collection;
-  const filter = request.query?.filter;
-  const paginated = request.query?.paginated
   const page = request.query?.page;
   const limit = request.query?.limit;
   const filterSubType = request.query?.st
   const filterSubCollection = request.query?.sc
-
   let filters = {subtypes:[],sub_collections:[]};
   filters['subtypes'] = !filterSubType || filterSubType === '' ? [] : decodeURIComponent(request.query.st).split(',').filter(i => i != '' && i != null && i != undefined);
   filters['sub_collections'] = !filterSubCollection || filterSubCollection === '' ? [] : decodeURIComponent(request.query.sc).split(',').filter(i => i != '' && i != null && i != undefined);
   let data =  await Mongo.get_collection( { page , limit, filters, collection_name:cName } );
   response.json(data)
 })
+
 router.put('/:collectionID', async function editCollection(request,response){
   
 })

@@ -59,7 +59,7 @@ export class UploadSection {
   render(destination){
     destination.innerHTML = this.getHTML();
     this.active = true
-    this.store.getData()
+    this.store.getData(true)
   }
   load(destination){
     destination.innerHTML = this.getLoader();

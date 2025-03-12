@@ -39,6 +39,7 @@ module.exports = {
         this.status = await this.get_status();
         this.ready = true;
         this.loading = false;
+        console.log(this.db)
       } else {
         console.log('loading process already started!')
       }
@@ -77,8 +78,10 @@ module.exports = {
     get_collections(){
       const db = this.readDB();
       let collections = [];
+      console.log(this.db)
       for (const name in db.collections){
         let collection = db.collections[name];
+        console.log(collection.ignored)
         if (!collection.ignored)
           collections.push(collection)
       }
@@ -89,6 +92,9 @@ module.exports = {
       let collections = [];
       for (const name in db.collections){
         let collection = db.collections[name];
+        console.log(collection.synced)
+        const coll = {...collection,icons: []}
+          console.log(coll)
         if (!collection.ignored && collection.synced)
           collections.push(collection)
       }
