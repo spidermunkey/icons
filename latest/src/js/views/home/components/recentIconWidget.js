@@ -15,12 +15,11 @@ export class RecentDownloads extends EventEmitterClass {
   }
   createWidget(collection){
     let c = collection;
-    console.log(collection, collection.synced)
     let widget = document.createElement('div');
     widget.classList.add('sync-widget')
     const sampleIcons = collection.sample
     let widgetHTML = `
-      <div class="recent-collection">
+      <div class="recent-collection" name=${collection.name}>
         <div class="sync-success">
           <div class="txt">Collection Synced</div>
         </div>
@@ -43,7 +42,7 @@ export class RecentDownloads extends EventEmitterClass {
           <div class="loading-overlay">
             uploading collection ...
           </div>
-          ${c.synced ? '<div class="isSyncedControl"><div class="opt opt-view">view</div><div class="opt opt-remove">remove</div></div>': '<div class="opt option-accept">Upload</div><div class="opt option-ignore">Ignore</div>'}
+          ${c.synced ? `<div class="isSyncedControl"><div class="opt opt-view" href="/browse/${collection.name}" data-link="">view</div><div class="opt opt-remove">remove</div></div>` : '<div class="opt option-accept">Upload</div><div class="opt option-ignore">Ignore</div>'}
         </div>
       </div>
     `

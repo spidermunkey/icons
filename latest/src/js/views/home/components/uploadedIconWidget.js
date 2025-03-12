@@ -26,7 +26,7 @@ export class UploadSection {
         // else console.warn('skipping',i)
     })
     let widgetHTML = `
-      <div class="recent-collection" cid=${collection.cid}>
+      <div class="recent-collection" cid=${collection.cid} data-link="" href="/browse/${collection.name}">
         <div class="collection-info">
         <span class="name">${c.name}</span>
         <span class="divider"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -16 42 42" height="16px" width="16px">
@@ -46,7 +46,7 @@ export class UploadSection {
           <div class="loading-overlay">
             uploading collection ...
           </div>
-          <div class="opt option-view">View All</div>
+          <div class="opt option-view" data-link="" href="/browse/${collection.name}">View All</div>
           <div class="opt option-settings">Settings</div>
         </div>
       </div>

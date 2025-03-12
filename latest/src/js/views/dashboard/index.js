@@ -88,12 +88,11 @@ export class Dashboard extends AbstractView {
         return this.state.pocket
     }
 
-    async render(collection){
-        if (collection) this.setTab(collection)
+    async render(collection = 'home'){
         $('#app').innerHTML = this.getHTML()
         this.notify('rendered')
         await this.hydrate()
-        await this.load()
+        await this.load(collection)
         return this
     }
     async init() {
@@ -231,10 +230,10 @@ export class Dashboard extends AbstractView {
         this.notify('hydrated')
         return this;
     }
-    async load() {
+    async load(collection) {
         this.preview.close()
         if (this.tab === 'pocket') this.renderPocket()
-        else await this.renderCollection( this.tab ) 
+        else await this.renderCollection( collection ? collection : this.tab ) 
         this.notify('loaded')
         return this.state
     }
@@ -1844,7 +1843,9 @@ export class Dashboard extends AbstractView {
                     await this.renderDashboardHome()
                     return
                 } else {
+                    console.log('rendering collection...',name)
                     const collection = await this.store.getCollection(name)
+                    console.log(collection)
                     this.state.collection = collection
                     this.preview.setCollectionPreset(collection.preset)
                     this.colorPicker.setCollectionColor(collection.color)
@@ -1861,7 +1862,9 @@ export class Dashboard extends AbstractView {
                 this.loadPresetMenu()
             } catch(e){
                 console.log('error rendering collection',e)
-        }
+        } 
+        } else {
+        console.log('try rendering from app');
     }
     }
     setTab(name){
