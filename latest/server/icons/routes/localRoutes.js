@@ -19,7 +19,7 @@ router.get('/collections', async function getLocalDownloads(request,response){
 
 router.get('/status', async function getLocalStatus(request,response) {
   const local_status = await Local.get_status();
-  const mongo_stat = (await Database.ping()) === 'ready'
+  const mongo_stat = (await Database.ping())
   // const mongo_stat = true;
   const ready  = Local.ready && mongo_stat
   const localOnly = Local.ready && !mongo_stat
