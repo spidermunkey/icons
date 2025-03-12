@@ -554,7 +554,7 @@ const mongo_db = {
             }) )
             console.log('error(s) found', faulty.length)
             return { message: 'proccess complete', success: true, reason: faulty.length };
-    }
+        }
     },
     async create_collection(props = {}) {
         console.log('creating collection...')
