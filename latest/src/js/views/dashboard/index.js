@@ -63,6 +63,7 @@ export class Dashboard extends AbstractView {
         searchView: {},
         preset: {},
     }
+
   }
     get collection(){
         return this.state.collection
@@ -87,7 +88,8 @@ export class Dashboard extends AbstractView {
         return this.state.pocket
     }
 
-    async render(){
+    async render(collection){
+        if (collection) this.setTab(collection)
         $('#app').innerHTML = this.getHTML()
         this.notify('rendered')
         await this.hydrate()
@@ -2045,14 +2047,12 @@ export class Dashboard extends AbstractView {
         }
         if (dropRequest){
             const id = $('.item-menu-window.active').getAttribute('cid');
-            
             const confirmed = $('.option-delete',event.target.closest('.item-menu-window.active'))
             
             let response;
             if (id && confirmed){
                 response = await this.store.dropCollection(id);
                 console.log('DROPPED',response)
-
             }
             return response;
         }

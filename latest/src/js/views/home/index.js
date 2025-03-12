@@ -40,6 +40,7 @@ export class Home extends EventEmitterClass {
         let upload = e.target.closest('.recent-collection .option-accept');
         let ignore = e.target.closest('.recent-collection .option-ignore');
         let drop = e.target.closest('.recent-collection .opt-remove');
+        let view = e.target.closest('.opt.opt-view')
         let downloadsTab = e.target.closest('.rt-downloads');
         let uploadedTab = e.target.closest('.rt-uploads');
         if (upload){
@@ -59,6 +60,8 @@ export class Home extends EventEmitterClass {
           let id = collection.getAttribute('cid');
           console.warn('droping collection',id)
           this.handleDrop(id,collection)
+        } else if (view){
+          console.log(app)
         }
         
         // handle tabs 

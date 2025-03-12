@@ -52,7 +52,6 @@ export class Collection {
     this.color = meta?.preset || {}
     this.colors = meta?.colors || {}
     this.state = {}
-    console.log(meta.synced,data.synced)
     // console.dir(`CREATING COLLECTION FROM DATA: `, data)
   }
   debugFaultyIcons(){

@@ -12,6 +12,7 @@ export class App extends EventEmitterClass {
             }];
         this.activeView = null;
         window.addEventListener('popstate',this.route.bind(this));
+        window.app = this;
     }
     route() {
         let path = window.location.pathname;
