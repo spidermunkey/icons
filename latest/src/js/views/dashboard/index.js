@@ -1905,6 +1905,7 @@ export class Dashboard extends AbstractView {
         let homeLink = event.target.closest('.collection-summary');
         let browseLink = event.target.closest('.info-text');
         let settingsLink = event.target.closest('.settings-label');
+        let settingsWidgetLink = event.target.closest('.dropdown-option[opt="open-settings"]')
         // handle cosms
         const cosmPreviewSettings = this.preview.settingsActive == true && (!event.target.closest('#PREVIEW'));
         const cosmColorSettings = (this.colorPicker.fsActive == true || this.colorPicker.active == true) && (!event.target.closest('#PREVIEW'));
@@ -1936,10 +1937,13 @@ export class Dashboard extends AbstractView {
                 // hide settings breadcrumb
                 $('.breadcrumb').classList.remove('active')
                 return;
+            } else if (settingsWidgetLink){
+                    await this.renderCollection(name);
+                    this.openCollectionSettingsMenu();
+                    return;
             }
-            return
+            return;
         }
-
         if (!wrapper) return
         onWrapper.call(this)
         function onWrapper(){
@@ -2038,7 +2042,6 @@ export class Dashboard extends AbstractView {
         const settings = event.target.closest('.menu-list-item[role="tab"] .btn-menu');
         const menu_actions = event.target.closest('.btn-menu');
         const dropRequest = event.target.closest('.item-menu-window .option-delete');
-
         if (menu_actions){
             console.log('ACTION',menu_actions)
             let current = $('.item-menu-window',menu_actions.parentElement);
