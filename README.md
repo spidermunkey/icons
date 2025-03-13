@@ -30,15 +30,11 @@ server/icons/model.js uploads and serves uploaded files for use with editor
 
 **use file api to add target directory from user interface**
 
-**fix upload function**
-
-**fix add to collection/create collection functions**
-
-**color editor works but setting default colors doesn't**
-
 **create new user flow**
 
 **setup guest flow for demo with default icon set**
+
+**create landing page**
 
 ## GOALS
 
