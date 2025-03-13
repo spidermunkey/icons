@@ -23,10 +23,8 @@ const config = {
 async function connect(){
     return (await Database.getDB('icons')).collection(config.collection_alias);
 }
-async function info(){
-    return find(properties.cid);
-}
-async function configure(props){
+
+function configure(props){
     return {
         docname: config.document_alias,
         name: props.name,
@@ -48,48 +46,109 @@ async function configure(props){
         }
     }
 }
+
+async function info(){
+    try {
+        return await find(properties.cid);
+    } catch (error) {
+        console.error("Error fetching meta info: ", error);
+        throw error;
+    }
+}
+
+
 async function create(props){
-    return (await connect()).findOneAndUpdate(
-        {cid:props.cid},
-        {$set:{
-            ...config.filterProperties(props),
-            created_at: Date.now()
-        }
-        },
-        {upsert:true})
+    try {
+        return (await connect()).findOneAndUpdate(
+            {cid:props.cid},
+            {$set:{
+                ...configure(props),
+                created_at: Date.now()
+            }
+            },
+            {upsert:true})
+    } catch (error) {
+        console.error("Error creating meta document: ", error);
+        throw error;
+    }
 }
 async function find(cid){
-    return (await connect()).findOne({cid:cid})
+    try {
+        return await (await connect()).findOne({ cid: cid });
+    } catch (error) {
+        console.error("Error finding meta document by cid: ", error);
+        throw error;
+    }
 }
 async function findByName({name,cid}){
-    return (await connect()).findOne({name:name, cid:cid});
+    try {
+        return await (await connect()).findOne({ name: name, cid: cid });
+    } catch (error) {
+        console.error("Error finding meta document by name: ", error);
+        throw error;
+    }
 }
 async function update(cid,props){
-    return (await connect()).findOneAndUpdate({cid:cid}, { 
-        $set:{
-            ...config.filterProperties(props),
-            updated_on: Date.now(),
-        }
-    })
+    try {
+        const configuredProps = await configure(props);  // Ensuring the structure is correct
+        return await (await connect()).findOneAndUpdate(
+            { cid: cid },
+            {
+                $set: {
+                    ...config.filterProperties(configuredProps),
+                    updated_on: Date.now()
+                }
+            }
+        );
+    } catch (error) {
+        console.error("Error updating meta document: ", error);
+        throw error;
+    }
 }
+
 async function destroy(cid){
-    return (await connect()).deleteMany({
-        cid:cid,
-        docname:config.document_alias
-    })
+    try {
+        return await (await connect()).deleteMany({
+            cid: cid,
+            docname: config.document_alias
+        });
+    } catch (error) {
+        console.error("Error destroying meta document: ", error);
+        throw error;
+    }
 }
 
 async function addColor(cid,colorset){
-    return Color.add(cid,colorset)
+    try {
+        return await Color.add(cid, colorset);
+    } catch (error) {
+        console.error("Error adding color to meta document: ", error);
+        throw error;
+    }
 }
 async function removeColor(cid,csid){
-    return Color.destroy(cid,csid)
+    try {
+        return await Color.destroy(cid, csid);
+    } catch (error) {
+        console.error("Error removing color from meta document: ", error);
+        throw error;
+    }
 }
 async function setColorDefault(cid,colorset){
-    return Color.update(cid,colorset)
+    try {
+        return await Color.update(cid, colorset);
+    } catch (error) {
+        console.error("Error setting default color in meta document: ", error);
+        throw error;
+    }
 }
 async function clearColorDefault(cid){
-    return Color.clearDefault(cid)
+    try {
+        return await Color.clearDefault(cid);
+    } catch (error) {
+        console.error("Error clearing default color in meta document: ", error);
+        throw error;
+    }
 }
 
 module.exports = {

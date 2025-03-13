@@ -4,7 +4,7 @@ const config = {
     document_alias: '[[meta_doc]]',
     collection_alias: '{{meta}}',
     configurable: ['color','colors'],
-    filterProperties(props){
+    configure(props){
         const configurable = {};
         for (const prop in props){
             if (config.configurable.includes(prop)){
@@ -24,44 +24,76 @@ async function find(cid){
 }
 
 async function add(cid,colorset){
-    return (await connect()).findOneAndUpdate(
-        {cid:cid},
-        { $set:{
-            [`colors.${colorset?.csid || uuid()}`]:colorset,
-            updated_on: Date.now(),
-        }},{returnDocument: 'after'})
+    try {
+        return await (await connect()).findOneAndUpdate(
+            { cid: cid },
+            { $set: {
+                [`colors.${colorset?.csid || uuid()}`]: colorset,
+                updated_on: Date.now(),
+            }},
+            { returnDocument: 'after' }
+        );
+    } catch (error) {
+        console.error("Error adding color: ", error);
+        throw error;
+    }
 }
 
 async function destroy(cid,csid){
-    const data = (await find(cid));
-    const colorIsDefault = data?.color && data.color?.csid === csid;
-    return (await connect()).findOneAndUpdate(
-        {cid:cid},
-        {
-            $unset:{ [`colors.${csid}`]: "" },
-            $set:{
-                color: colorIsDefault ? {} : data.color,
-                updated_on: Date.now(),
-        }
-        },
-        {returnDocument:'after'})
+    try {
+        const data = await find(cid);
+        const colorIsDefault = data?.color && data.color?.csid === csid;
+        
+        return await (await connect()).findOneAndUpdate(
+            { cid: cid },
+            {
+                $unset: { [`colors.${csid}`]: "" },
+                $set: {
+                    color: colorIsDefault ? {} : data.color,
+                    updated_on: Date.now(),
+                }
+            },
+            { returnDocument: 'after' }
+        );
+    } catch (error) {
+        console.error("Error removing color: ", error);
+        throw error;
+    }
 }
 
 async function update(cid,props){
-    return (await connect()).findOneAndUpdate({cid:cid}, { 
-        $set:{
-            ...config.filterProperties(props),
-            updated_on: Date.now(),
-        }
-    })
+    try {
+        return await (await connect()).findOneAndUpdate(
+            { cid: cid },
+            { 
+                $set: {
+                    ...config.configure(props),
+                    updated_on: Date.now(),
+                }
+            }
+        );
+    } catch (error) {
+        console.error("Error updating color: ", error);
+        throw error;
+    }
 }
 
 async function setDefault(cid,colorset){
-    return update( cid, { color:colorset } )
+    try {
+        return await update(cid, { color: colorset });
+    } catch (error) {
+        console.error("Error setting default color: ", error);
+        throw error;
+    }
 }
 
 async function clearDefault(cid){
-    return setDefault(cid,{ color: {} })
+    try {
+        return await setDefault(cid, { color: {} });
+    } catch (error) {
+        console.error("Error clearing default color: ", error);
+        throw error;
+    }
 }
 
 module.exports = {

@@ -1,16 +1,16 @@
 
 const Database = require('./Database.js')
-const { Meta, findMetaDocument, findMetaDocumentByName, createMetaDocument } = require('./Meta.js')
+const { Meta, findMetaDocument, findMetaDocumentByName, createMetaDocument, updateMetaDocument } = require('./Meta.js')
 const { Icon } = require('./Icon.js')
-
+const { Color } = require('./Color.js');
 
 
 class Collection {
     
-    constructor(cid){
+    constructor(properties){
         this.cid = cid
     }
-
+    
     async icon(id){
         const icons = await getCollection(this.id);
         return icons.findOne({id:id})
@@ -64,6 +64,10 @@ class Collection {
     }
     sync(props){
 
+    }
+
+    add_color(colorset){
+        updateMetaDocument(this.id,)
     }
 }
 
