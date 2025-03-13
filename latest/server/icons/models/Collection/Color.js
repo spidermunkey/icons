@@ -1,5 +1,5 @@
-const Database = require('./Database.js')
-const {uuid} = require('../../utils/uuid.js')
+const Database = require('../Database.js')
+const {uuid} = require('../../../utils/uuid.js')
 const config = {
     document_alias: '[[meta_doc]]',
     collection_alias: '{{meta}}',

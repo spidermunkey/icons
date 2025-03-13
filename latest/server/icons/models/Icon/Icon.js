@@ -1,6 +1,6 @@
 
-const Database = require('./Database.js');
-const { getCollection } = require('./Collection.js');
+const Database = require('../Database.js');
+const { getCollection } = require('./C.js');
 // missing added uploaded_at prop
 // can't figure out if spread may leave out some properties
 class Icon {

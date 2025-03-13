@@ -1,8 +1,8 @@
 // missing error handlers
-const Database = require('./Database.js');
+const Database = require('../Database.js');
 const Color = require('./Color.js');
 
-const { uuid } = require('../../utils/uuid.js');
+const { uuid } = require('../../../utils/uuid.js');
 
 const config = {
     document_alias: '[[meta_doc]]',

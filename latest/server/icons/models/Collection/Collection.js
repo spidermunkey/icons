@@ -1,9 +1,12 @@
 
-const Database = require('./Database.js')
+const Database = require('../Database.js')
 const { Meta, findMetaDocument, findMetaDocumentByName, createMetaDocument, updateMetaDocument } = require('./Meta.js')
-const { Icon } = require('./Icon.js')
-const { Color } = require('./Color.js');
+const { Icon } = require('../Icon/Icon.js')
+const { Meta } = require('./Meta.js')
 
+async function getIcon(cid,id){
+
+}
 
 class Collection {
     
@@ -74,6 +77,7 @@ class Collection {
 async function connect(){
     return Database.icons('icons');
 }
+
 function paginate(limit,filter,page = 1){
     const query = {}
     const validSubCollectionFilter = filter?.sub_collections && Array.isArray(filter.sub_collections) && filter.sub_collections.length > 0
