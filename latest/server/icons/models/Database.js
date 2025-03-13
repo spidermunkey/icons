@@ -8,22 +8,35 @@ class Database {
         this.status = 'offline';
         this.connection = false;
         this.connections = 0;
+        this.meta_alias = '{{meta}}'
     }
 
     async getDB(name){
-        if (!this.client) {
-            console.log('No client found, attempting to reconnect...');
-            await this.connect();
+        try {
+            if (!this.client) {
+                console.log('No client found, attempting to reconnect...');
+                await this.connect();
+            }
+            if (!this.client) {
+                console.error('Failed to connect to MongoDB.');
+                return null
+            }
+            console.log(`Retrieving database: ${name}...`);
+            const database = this.client.db(name)
+            return database;
+        } catch(error){
+            console.error('error retrieving database...',error)
+            throw (error);
         }
-        if (!this.client) {
-            console.error('Failed to connect to MongoDB.');
-            return null
-        }
-        console.log(`Retrieving database: ${name}...`);
-        const database = this.client.db(name)
-        return database;
     }
-
+    async meta(){
+        try {
+            return (await this.getDB('icons')).collection(config.meta_alias);
+        } catch(error){
+            console.error('error retrieving icon meta data...',error)
+            throw(error)
+        }
+    }
     icons() {
         return this.getDB('icons')
     }
@@ -55,11 +68,11 @@ class Database {
     }
     }
     async ping() {
-        if (!this.client) {
-            console.log('ping!')
-            await this.connect(); // Ensure the client is connected before pinging
-        }
         try {
+            if (!this.client) {
+                console.log('ping!')
+                await this.connect(); // Ensure the client is connected before pinging
+            }
             const result = await this.client.db('admin').command({ ping: 1 });
             if (result.ok === 1) {
                 console.log('MongoDB is responsive.');
@@ -71,17 +84,22 @@ class Database {
         }
     }
     async connection(){
-        console.log('checking mongodb connection...')
-        const isResponsive = await this.ping();
-        if (isResponsive){
-            this.connection = true
-        } else {
-            this.connection = false
-            this.db = null;
-        }
-        return {
-            connected: this.connection,
-            status: this.status,
+        try {
+            console.log('checking mongodb connection...')
+            const isResponsive = await this.ping();
+            if (isResponsive){
+                this.connection = true
+            } else {
+                this.connection = false
+                this.db = null;
+            }
+            return {
+                connected: this.connection,
+                status: this.status,
+            }
+        } catch (error){
+            console.error('error establishing db connection', error);
+            throw(error);
         }
     }
     async connect(){
@@ -103,12 +121,16 @@ class Database {
             }
         }
         return this.client;
-
     }
     async disconnect() {
         if (this.client) {
-            await this.client.close();
-            console.log('Disconnected from MongoDB');
+            try {
+                await this.client.close();
+                console.log('Disconnected from MongoDB');
+            } catch (error){
+                console.error('something went wrong disconnecting with mongodb...', error)
+            }
+
         }
     }
 

@@ -21,7 +21,7 @@ const config = {
 }
 
 async function connect(){
-    return (await Database.getDB('icons')).collection(config.collection_alias);
+    return await Database.meta();
 }
 
 function configure(props){

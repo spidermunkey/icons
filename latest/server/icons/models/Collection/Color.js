@@ -1,5 +1,6 @@
 const Database = require('../Database.js')
 const {uuid} = require('../../../utils/uuid.js')
+
 const config = {
     document_alias: '[[meta_doc]]',
     collection_alias: '{{meta}}',
@@ -16,7 +17,7 @@ const config = {
 }
 
 async function connect(){
-    return (await Database.getDB('icons')).collection(config.collection_alias);
+    return await Database.meta()
 }
 
 async function find(cid){
