@@ -1,10 +1,102 @@
 
-const Database = require('../Database.js')
-const { Meta, findMetaDocument, findMetaDocumentByName, createMetaDocument, updateMetaDocument } = require('./Meta.js')
-const { Icon } = require('../Icon/Icon.js')
-const { Meta } = require('./Meta.js')
+const Database = require('./Database.js')
 
-async function getIcon(cid,id){
+const { Icon } = require('./Collection/Icon.js')
+const { Meta } = require('./Collection/Meta.js')
+
+async function find(cid){
+    return (await connect()).collection((await Meta.find(cid)).name)
+}
+
+async function findByName(name){
+    return (await connect()).collection(((await Meta.findByName(name)).name))
+}
+
+async function size(cid){
+
+}
+
+async function addIcon(icon){
+
+}
+
+async function removeIcon(icon){
+
+}
+
+async function updateIcon(icon){
+
+}
+
+async function icons(cid){
+
+}
+
+async function info(cid){
+    return await Meta.info(cid)
+}
+
+async function data(cid){
+
+}
+
+async function search(cid, query){
+
+}
+
+async function sample(cid){
+
+}
+
+async function create(props){
+
+}
+
+async function sync(props){ 
+
+}
+
+async function destroy(cid){
+
+}
+
+async function addColor(){
+
+}
+
+async function removeColor(){
+
+}
+
+async function setColorDefault(){
+
+}
+
+async function clearColorDefault(){
+
+}
+
+async function addPreset(){
+
+}
+
+async function removePreset(){
+
+}
+
+async function setPreset(){
+
+}
+
+async function removePreset(){
+
+}
+
+async function setPresetDefault(){
+
+}
+
+async function clearPresetDefault(){
 
 }
 
@@ -98,17 +190,10 @@ function paginate(limit,filter,page = 1){
     return {query,options}
 }
 
-async function getCollection(cid){
-    return (await connect()).collection((await findMetaDocument(cid)).name)
-}
 
-async function getCollectinByName(name){
-    return (await connect()).collection(((await findMetaDocumentByName(name)).name))
-}
 
 module.exports = {
-    Collection,
-    getCollection,
-    getCollectinByName,
+    find,
+    findByName,
 
 }

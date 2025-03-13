@@ -1,26 +1,40 @@
 const Database = require('../Database.js')
-const {uuid} = require('../../../utils/uuid.js')
+const {uuid} = require('../../../utils/uuid.js');
+const { objectIsEmpty } = require('../../../utils/objectIsEmpty.js');
 
 const config = {
     document_alias: '[[meta_doc]]',
     collection_alias: '{{meta}}',
-    configurable: ['color','colors'],
-    configure(props){
+    configurable: ['name','elements','shapes'],
+    filterProperties(props){
         const configurable = {};
         for (const prop in props){
             if (config.configurable.includes(prop)){
                 configurable[prop] = props[prop]
             }
         }
-        return configurable;
+        if (!objectIsEmpty(configurable))
+            return configurable
+        new Error('no properties to configure');
     },
+}
+
+// doesn't validate if colorset_type is really global but it should
+function configure(props){
+    return {
+        csid: props?.csid || uuid(),
+        colorset_type: 'global',
+        name: props?.name || 'untitled',
+        elements: props?.elements || {},
+        shapes: props?.shapes || {},
+    }
 }
 
 async function connect(){
     return await Database.meta()
 }
 
-async function find(cid){
+async function meta(cid){
     return (await connect()).findOne({cid:cid})
 }
 
@@ -29,21 +43,21 @@ async function add(cid,colorset){
         return await (await connect()).findOneAndUpdate(
             { cid: cid },
             { $set: {
-                [`colors.${colorset?.csid || uuid()}`]: colorset,
+                [`colors.${colorset?.csid || uuid()}`]: configure(colorset),
                 updated_on: Date.now(),
             }},
             { returnDocument: 'after' }
         );
     } catch (error) {
-        console.error("Error adding color: ", error);
+        console.error("Error adding color: ");
         throw error;
     }
 }
 
 async function destroy(cid,csid){
     try {
-        const data = await find(cid);
-        const colorIsDefault = data?.color && data.color?.csid === csid;
+        const data = await meta(cid);
+        const colorIsDefault = data && data?.color && data.color?.csid === csid;
         
         return await (await connect()).findOneAndUpdate(
             { cid: cid },
@@ -57,7 +71,7 @@ async function destroy(cid,csid){
             { returnDocument: 'after' }
         );
     } catch (error) {
-        console.error("Error removing color: ", error);
+        console.error("Error removing color: ");
         throw error;
     }
 }
@@ -65,34 +79,55 @@ async function destroy(cid,csid){
 async function update(cid,props){
     try {
         return await (await connect()).findOneAndUpdate(
-            { cid: cid },
+            { cid: cid,
+                [`colors.${props?.csid}`]: { $exists: true }
+             },
             { 
                 $set: {
-                    ...config.configure(props),
+                    [`colors.${props.csid}`]:config.filterProperties(props),
                     updated_on: Date.now(),
                 }
-            }
+            },
+            {returnDocument:'after'}
         );
     } catch (error) {
-        console.error("Error updating color: ", error);
+        console.error("Error updating color: ");
         throw error;
     }
 }
 
 async function setDefault(cid,colorset){
     try {
-        return await update(cid, { color: colorset });
+        return (await connect()).findOneAndUpdate(
+            { cid: cid,
+             },
+            { 
+                $set: {
+                    color: configure(colorset),
+                    updated_on: Date.now(),
+                }
+            },
+            {returnDocument:'after'})
     } catch (error) {
-        console.error("Error setting default color: ", error);
+        console.error("Error setting default color: ");
         throw error;
     }
 }
 
 async function clearDefault(cid){
     try {
-        return await setDefault(cid, { color: {} });
+        (await connect()).findOneAndUpdate(
+            { cid: cid,
+             },
+            { 
+                $set: {
+                    color: {},
+                    updated_on: Date.now(),
+                }
+            },
+            {returnDocument:'after'})
     } catch (error) {
-        console.error("Error clearing default color: ", error);
+        console.error("Error clearing default color: ");
         throw error;
     }
 }

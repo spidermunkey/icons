@@ -123,20 +123,6 @@ const mongo_db = {
             return {success:false, message: 'no action was taken',reason:'no setting found'}
         }
     },
-    async add_recent_preset(collection,preset){
-        const {icons} = await this.connect();
-        const meta = icons.collection(this.meta_alias);
-        const updated = await meta.findOneAndUpdate({docname:this.meta_doc_alias, name:collection},{
-            $push: {
-                'recent_settings': {
-                    $each:[preset],
-                    $slice:-10
-                }
-            }},{returnDocument:'after'}
-        )
-        console.log(collection,'SETTING ADDED TO RECENT',preset,updated?.value)
-        return updated.value
-    },
     async delete_collection_preset(cid,pid){
         const {icons} = await this.connect()
         const meta = icons.collection(this.meta_alias)
@@ -183,6 +169,21 @@ const mongo_db = {
 
 
     },
+
+    async add_recent_preset(collection,preset){
+        const {icons} = await this.connect();
+        const meta = icons.collection(this.meta_alias);
+        const updated = await meta.findOneAndUpdate({docname:this.meta_doc_alias, name:collection},{
+            $push: {
+                'recent_settings': {
+                    $each:[preset],
+                    $slice:-10
+                }
+            }},{returnDocument:'after'}
+        )
+        console.log(collection,'SETTING ADDED TO RECENT',preset,updated?.value)
+        return updated.value
+    },
     async add_icon_preset(id,collection,setting) {
         const { icons } = await this.connect();
         const coll = icons.collection(collection);
@@ -220,7 +221,6 @@ const mongo_db = {
             update)
             return icon.value;
     },
-
     async delete_icon_color(id,collection,csid){
         const {icons} = await this.connect()
         const coll = icons.collection(collection)

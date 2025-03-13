@@ -1,8 +1,10 @@
 // missing error handlers
 const Database = require('../Database.js');
 const Color = require('./Color.js');
+const Preset = require('./Preset.js');
 
 const { uuid } = require('../../../utils/uuid.js');
+const { objectIsEmpty} = require('../../../utils/objectIsEmpty.js')
 
 const config = {
     document_alias: '[[meta_doc]]',
@@ -16,7 +18,9 @@ const config = {
                 configurable[prop] = props[prop]
             }
         }
-        return configurable;
+        if (!objectIsEmpty(configurable))
+            return configurable
+        new Error('no properties to configure');
     },
 }
 
@@ -51,7 +55,7 @@ async function info(){
     try {
         return await find(properties.cid);
     } catch (error) {
-        console.error("Error fetching meta info: ", error);
+        console.error("Error fetching meta info: ");
         throw error;
     }
 }
@@ -68,30 +72,30 @@ async function create(props){
             },
             {upsert:true})
     } catch (error) {
-        console.error("Error creating meta document: ", error);
+        console.error("Error creating meta document: ");
         throw error;
     }
 }
 async function find(cid){
     try {
-        return await (await connect()).findOne({ cid: cid });
+        return (await connect()).findOne({ cid: cid });
     } catch (error) {
-        console.error("Error finding meta document by cid: ", error);
+        console.error("Error finding meta document by cid: ");
         throw error;
     }
 }
-async function findByName({name,cid}){
+async function findByName(name){
     try {
-        return await (await connect()).findOne({ name: name, cid: cid });
+        return (await connect()).findOne( { name:name });
     } catch (error) {
-        console.error("Error finding meta document by name: ", error);
+        console.error("Error finding meta document by name: ");
         throw error;
     }
 }
 async function update(cid,props){
     try {
-        const configuredProps = await configure(props);  // Ensuring the structure is correct
-        return await (await connect()).findOneAndUpdate(
+        const configuredProps = configure(props);  // Ensuring the structure is correct
+        return (await connect()).findOneAndUpdate(
             { cid: cid },
             {
                 $set: {
@@ -101,19 +105,19 @@ async function update(cid,props){
             }
         );
     } catch (error) {
-        console.error("Error updating meta document: ", error);
+        console.error("Error updating meta document: ");
         throw error;
     }
 }
 
 async function destroy(cid){
     try {
-        return await (await connect()).deleteMany({
+        return (await connect()).deleteMany({
             cid: cid,
             docname: config.document_alias
         });
     } catch (error) {
-        console.error("Error destroying meta document: ", error);
+        console.error("Error destroying meta document: ");
         throw error;
     }
 }
@@ -122,7 +126,6 @@ async function addColor(cid,colorset){
     try {
         return await Color.add(cid, colorset);
     } catch (error) {
-        console.error("Error adding color to meta document: ", error);
         throw error;
     }
 }
@@ -130,7 +133,6 @@ async function removeColor(cid,csid){
     try {
         return await Color.destroy(cid, csid);
     } catch (error) {
-        console.error("Error removing color from meta document: ", error);
         throw error;
     }
 }
@@ -138,7 +140,6 @@ async function setColorDefault(cid,colorset){
     try {
         return await Color.update(cid, colorset);
     } catch (error) {
-        console.error("Error setting default color in meta document: ", error);
         throw error;
     }
 }
@@ -146,12 +147,43 @@ async function clearColorDefault(cid){
     try {
         return await Color.clearDefault(cid);
     } catch (error) {
-        console.error("Error clearing default color in meta document: ", error);
         throw error;
     }
 }
 
+async function addPreset(cid,preset){
+    try {
+        return await Preset.add(cid,preset)
+    } catch (error){
+        throw error
+    }
+}
+
+async function removePreset(cid,pid){
+    try{
+        return await Preset.destroy(cid,pid);
+    } catch (error){
+        throw error;
+    }
+}
+
+async function setPresetDefault(cid,preset){
+    try {
+        return await Preset.setDefault(cid,preset)
+    } catch (error){
+        throw error;
+    }
+}
+
+async function clearPresetDefault(cid){
+    try {
+        return await Preset.clearDefault(cid)
+    } catch (error){
+        throw error
+    }
+}
 module.exports = {
+    
     info,
     configure,
     create,
@@ -159,8 +191,15 @@ module.exports = {
     findByName,
     update,
     destroy,
+
     addColor,
     removeColor,
     setColorDefault,
     clearColorDefault,
+
+    addPreset,
+    removePreset,
+    setPresetDefault,
+    clearPresetDefault,
+
 }
