@@ -1,6 +1,8 @@
 // missing error handlers
-// missing added uploaded_at prop
-// can't figure out if spread may leave out some properties
+const Database = require('./Database.js');
+const Color = require('./Color.js');
+
+const { uuid } = require('../../utils/uuid.js');
 
 const config = {
     document_alias: '[[meta_doc]]',
@@ -18,27 +20,13 @@ const config = {
     },
 }
 
-class Meta {
-    constructor(props){
-        this.properties = configure(props)
-    }
-
-    async info(){
-        return find(this.properties.cid);
-    }
-    async create(){
-        return create(this.properties);
-    }
-    async edit(props){
-        return update(this.properties.cid,props)
-    }
-    async destroy(){
-        return destroy(this.properties.cid);
-    }
- 
+async function connect(){
+    return (await Database.getDB('icons')).collection(config.collection_alias);
 }
-
-function configure(props){
+async function info(){
+    return find(properties.cid);
+}
+async function configure(props){
     return {
         docname: config.document_alias,
         name: props.name,
@@ -60,39 +48,30 @@ function configure(props){
         }
     }
 }
-
-async function connect(){
-    return (await Database.getDB('icons')).collection(config.collection_alias);
+async function create(props){
+    return (await connect()).findOneAndUpdate(
+        {cid:props.cid},
+        {$set:{
+            ...config.filterProperties(props),
+            created_at: Date.now()
+        }
+        },
+        {upsert:true})
 }
-
-async function findByName({name,cid}){
-    const items = (await connect()).find({name:name}).toArray();
-    if (items.length > 0 && cid){
-        return items.filter(item => item.cid === cid)[0]
-    }
-    return items;
-}
-
 async function find(cid){
     return (await connect()).findOne({cid:cid})
 }
-
-async function create(props){
-    return (await connect()).findOneAndUpdate(
-        {cid:this.cid},
-        {$set:configure(props)},
-        {upsert:true})
+async function findByName({name,cid}){
+    return (await connect()).findOne({name:name, cid:cid});
 }
-
 async function update(cid,props){
-    return (await connect()).findOneAndUpdate({cid:cid},{ 
+    return (await connect()).findOneAndUpdate({cid:cid}, { 
         $set:{
             ...config.filterProperties(props),
             updated_on: Date.now(),
         }
     })
 }
-
 async function destroy(cid){
     return (await connect()).deleteMany({
         cid:cid,
@@ -100,12 +79,29 @@ async function destroy(cid){
     })
 }
 
+async function addColor(cid,colorset){
+    return Color.add(cid,colorset)
+}
+async function removeColor(cid,csid){
+    return Color.destroy(cid,csid)
+}
+async function setColorDefault(cid,colorset){
+    return Color.update(cid,colorset)
+}
+async function clearColorDefault(cid){
+    return Color.clearDefault(cid)
+}
 
 module.exports = {
-    Meta,
-    createMetaDocument: create,
-    updateMetaDocument: update,
-    destroyMetaDocument: destroy,
-    findMetaDocument: find,
-    findMetaDocumentByName: findByName,
+    info,
+    configure,
+    create,
+    find,
+    findByName,
+    update,
+    destroy,
+    addColor,
+    removeColor,
+    setColorDefault,
+    clearColorDefault,
 }

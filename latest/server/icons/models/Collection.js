@@ -2,6 +2,9 @@
 const Database = require('./Database.js')
 const { Meta, findMetaDocument, findMetaDocumentByName, createMetaDocument } = require('./Meta.js')
 const { Icon } = require('./Icon.js')
+
+
+
 class Collection {
     
     constructor(cid){

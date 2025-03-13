@@ -1,27 +1,73 @@
-module.exports.Color = class Color {
-    constructor(props){
-        // data logic 
-    }
+const Database = require('./Database.js')
+const {uuid} = require('../../utils/uuid.js')
+const config = {
+    document_alias: '[[meta_doc]]',
+    collection_alias: '{{meta}}',
+    configurable: ['color','colors'],
+    filterProperties(props){
+        const configurable = {};
+        for (const prop in props){
+            if (config.configurable.includes(prop)){
+                configurable[prop] = props[prop]
+            }
+        }
+        return configurable;
+    },
+}
 
-    addToCollection(collection_id){}
-    addToItem(){}
+async function connect(){
+    return (await Database.getDB('icons')).collection(config.collection_alias);
+}
 
-    removeFromCollection(collection_id){}
-    removeFromItem(collection_id){}
+async function find(cid){
+    return (await connect()).findOne({cid:cid})
+}
 
-    update(collection_id){}
-    update_item(){}
+async function add(cid,colorset){
+    return (await connect()).findOneAndUpdate(
+        {cid:cid},
+        { $set:{
+            [`colors.${colorset?.csid || uuid()}`]:colorset,
+            updated_on: Date.now(),
+        }},{returnDocument: 'after'})
+}
 
-    set_collection_default(collection_id){}
-    set_item_default(){}
+async function destroy(cid,csid){
+    const data = (await find(cid));
+    const colorIsDefault = data?.color && data.color?.csid === csid;
+    return (await connect()).findOneAndUpdate(
+        {cid:cid},
+        {
+            $unset:{ [`colors.${csid}`]: "" },
+            $set:{
+                color: colorIsDefault ? {} : data.color,
+                updated_on: Date.now(),
+        }
+        },
+        {returnDocument:'after'})
+}
 
-    clear_collection_default(collection_id){}
-    clear_item_default(){}
+async function update(cid,props){
+    return (await connect()).findOneAndUpdate({cid:cid}, { 
+        $set:{
+            ...config.filterProperties(props),
+            updated_on: Date.now(),
+        }
+    })
+}
 
-    static async get_collection_colors(collection_id){
+async function setDefault(cid,colorset){
+    return update( cid, { color:colorset } )
+}
 
-    }
-    static async get_item_colors(collection_id){
-        
-    }
+async function clearDefault(cid){
+    return setDefault(cid,{ color: {} })
+}
+
+module.exports = {
+    add,
+    destroy,
+    update,
+    setDefault,
+    clearDefault,
 }

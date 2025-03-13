@@ -37,6 +37,34 @@ class Icon {
             $set:filterProperties(properties)
         })
     }
+
+    async add_color(properties){
+
+    }
+
+    async set_color_default(properties){
+        // findoneandupdate() => upsert
+    }
+    
+    async remove_color(color_id){
+
+    }
+
+    async add_preset(properties){
+
+    }
+    
+    async set_preset_default(properties){
+        
+    }
+
+    async remove_preset(properties){
+
+    }
+
+
+
+
 }
 
 function configure(props){
