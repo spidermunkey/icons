@@ -3,6 +3,7 @@ const Database = require('./Database.js')
 
 const { Icon } = require('./Collection/Icon.js')
 const { Meta } = require('./Collection/Meta.js')
+const { print } = require('../../utils/print.js')
 
 async function find(cid){
     return (await connect()).collection((await Meta.find(cid)).name)
@@ -13,157 +14,131 @@ async function findByName(name){
 }
 
 async function size(cid){
-
+    return (await find(cid)).countDocuments();
 }
 
-async function addIcon(icon){
-
-}
-
-async function removeIcon(icon){
-
-}
-
-async function updateIcon(icon){
-
-}
-
-async function icons(cid){
-
+async function icons(cid, {limit,filter,page = 1}){
+    return (await find(cid))
+    .find(
+    {},
+    {...paginate(limit,filter,page)})
+    .toArray();
 }
 
 async function info(cid){
     return await Meta.info(cid)
 }
 
-async function data(cid){
-
+async function data(cid, paginateOptions = {}){
+    return {
+        icons: (await icons(cid,paginateOptions)),
+        meta: (await info(cid))
+    }
 }
 
-async function search(cid, query){
-
+async function search(cid,{query, limit, page }){
+    const validQuery = typeof query === 'string' && query.trim().length > 0
+    if (validQuery){
+        const icons = await find(cid);
+        const escaped = query.replace(/[.*+?^=!:${}()|\[\]\/\\]/g,'\\$&');
+        return icons.find(
+            { name: {$regex: escaped, $options: 'i'} },
+            {...paginate(limit,filter,page)})
+            .toArray()
+    }
+    return []
 }
 
-async function sample(cid){
-
+async function sample( cid, n , random = false ){
+    const collection = await find(cid)
+    let sampleSize = !isNaN(n) ? Number(n) : 20
+    const randomDocuments = await collection.aggregate([
+        { $sample: { size: sampleSize} }
+        ]).toArray();
+    return randomDocuments;
 }
 
 async function create(props){
+    try {
+        const {icons} = props;
+        if (icons && Array.isArray(icons) && icons.length > 0){
+            const collectionData = Meta.create(props);
+            if (collectionData){
+                await Promise.all(icons.map(async props => {
+                    await Icon.add(props)
+                }))
+            }
+        }
+    } catch (error){
+        console.error('error creating collection', error);
+        throw error;
+    }
 
 }
 
 async function sync(props){ 
+    try {
+        const {icons} = props;
+        if (icons && Array.isArray(icons) && icons.length > 0){
+            const collectionData = await Meta.create(props);
+            if (collectionData){
+                const faulty = []
+                await Promise.all(icons.map(async props => {
+                    try {
+                        await Icon.sync(props)
+                    } catch (error){
+                        faulty.push(props.name)
+                        print('error syncing icon' )
+                    }
+                }))
+            }
+        }
+    } catch (error){
+        console.error('error syncing collection', error);
+        throw error;
+    }
+
+}
+
+async function unsync(props){
+    try {
+        const {icons} = props;
+        if (icons && Array.isArray(icons) && icons.length > 0){
+            const collectionData = await Meta.destroy(props.cid);
+            if (collectionData){
+                const faulty = []
+                await Promise.all(icons.map(async props => {
+                    try {
+                        await Icon.unsyc(props)
+                    } catch(error){
+                        faulty.push(props)
+                        print('error unsyncing icon' )
+                    }
+                }))
+            }
+        }
+        return {success:true,message:'collection unsynced'}
+    } catch (error){
+        console.error('error unsyncing collection',error)
+        throw error
+    }
 
 }
 
 async function destroy(cid){
-
-}
-
-async function addColor(){
-
-}
-
-async function removeColor(){
-
-}
-
-async function setColorDefault(){
-
-}
-
-async function clearColorDefault(){
-
-}
-
-async function addPreset(){
-
-}
-
-async function removePreset(){
-
-}
-
-async function setPreset(){
-
-}
-
-async function removePreset(){
-
-}
-
-async function setPresetDefault(){
-
-}
-
-async function clearPresetDefault(){
-
-}
-
-class Collection {
-    
-    constructor(properties){
-        this.cid = cid
-    }
-    
-    async icon(id){
-        const icons = await getCollection(this.id);
-        return icons.findOne({id:id})
-    }
-    async icons({limit,filter,page = 1}){
-        return (await getCollection(this.cid))
-        .find(...paginate(limit,filter,page))
-        .toArray();
-
-    }
-    async search({query, limit, page }){
-        const validQuery = typeof query === 'string' && query.trim().length > 0
-        if (validQuery){
-            const icons = await getCollection(this.cid);
-            const escaped = query.replace(/[.*+?^=!:${}()|\[\]\/\\]/g,'\\$&');
-            return icons.find({
-                name: {$regex: escaped, $options: 'i'}
-            }).toArray()
-        }
-        return []
-    }
-    async info(){
-        return findMetaDocument(this.cid)
-    }
-    async data(paginateOptions = {}){
-        return {
-            icons: (await this.icons(paginateOptions)),
-            meta: (await this.info())
-        }
+    try {
+        const dropped = await (await find(cid)).drop();
+        if (dropped){
+           const meta_dropped = await Meta.destroy(cid);
+           if (meta_dropped){
+            return {success:true,message:'collection dropped'}
+           } else throw new Error('error cleaning up meta data')
+        } else throw new Error('error dropping collection')
+    } catch (error){
+        console.error('error removing collection', error);
+        throw error;
     }
 
-    create(props){
-        const {icons} = props;
-        const db = connect();
-        if (icons && Array.isArray(icons) && icons.length > 0){
-            const collectionData = createMetaDocument(props);
-            if (collectionData){
-                console.log(collectionData)
-                icons.forEach(props => {
-                    let icon = new Icon(props)
-                    icon.add()
-                })
-            }
-        }
-    }
-    destroy(){
-        
-    }
-    sample(n , random = false){
-
-    }
-    sync(props){
-
-    }
-
-    add_color(colorset){
-        updateMetaDocument(this.id,)
-    }
 }
 
 async function connect(){
@@ -195,5 +170,15 @@ function paginate(limit,filter,page = 1){
 module.exports = {
     find,
     findByName,
+    size,
+    icons,
+    info,
+    data,
+    search,
+    sample,
+    create,
+    sync,
+    unsync,
+    destroy,
 
 }
