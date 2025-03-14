@@ -12,6 +12,7 @@ I want feedback, I want to make friends in the industry, I want to learn from ot
 changes persisted mongo db 'icons' for use with multiple workspaces
 
 server/icons/scanner.js parses and serves files in [target directory]
+  -- server/icons/local/fsconfig.js
 
 server/icons/monitor.js watches for changes
 
