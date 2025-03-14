@@ -27,7 +27,11 @@ server/icons/model.js uploads and serves uploaded files for use with editor
 
 ## TODO
 
-**polish and publish prototype**
+**set up wrapper that logs back to the messages ui**
+
+**define collection settings on upload**
+
+**polish and publish prototype (motion/animations)**
 
 **use file api to add target directory from user interface**
 
