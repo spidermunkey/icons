@@ -1002,13 +1002,13 @@ function resolveEP(ep) {
     return `http://localhost:${API_PORT}/icons/${ep}`;
 }
 function resolveCategoryEndpoint(categoryName) {
-    return resolveEP(`categories/${categoryName}`);
+    return resolveEP(`collections/${categoryName}`);
 }
 function resolveCollectionEndpoint(collectionName) {
     return resolveEP(`collections/${collectionName}`);
 }
 
-},{"./js/utils/DOM-helpers.js":"e6U0L","ramda":"2eWAO","./store.js":"d8qyu","./js/utils//Structs.js":"62IGe","./js/components/preview.js":"6CzCI","./js/components/panel.js":"jYair","./js/components/MenuListItem.js":"34b3R","./js/utils/DOM.js":"eC8U0","./js/utils/Observers.js":"4cTQY"}],"d8qyu":[function(require,module,exports) {
+},{"./store.js":"d8qyu","./js/components/preview.js":"6CzCI","./js/components/panel.js":"jYair","./js/components/MenuListItem.js":"34b3R","./js/utils/DOM.js":"eC8U0","./js/utils/DOM-helpers.js":"e6U0L","ramda":"2eWAO","./js/utils//Structs.js":"62IGe","./js/utils/Observers.js":"4cTQY"}],"d8qyu":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "SvgModel", ()=>SvgModel) // function deepClone(obj, hash = new WeakMap()) {
@@ -1145,30 +1145,38 @@ class SvgModel {
         return (0, _apiJsDefault.default).getCategoryNames();
     }
     async getCollectionNames() {
-        return (0, _apiJsDefault.default).getCollectionNames();
+        const names = await (0, _apiJsDefault.default).getCollectionNames();
+        console.log("NAMES", names);
+        return names;
     }
     async init() {
         var data;
-        const conn = await (0, _apiJsDefault.default).ping();
-        console.log(conn);
-        if (!conn) {
-            console.log("%cICONS -- PORT=OFFLINE ... connection refused", "color: orange; font-family: arial; font-size:20px");
-            var data = await fetch("./data/icons.json").then((res)=>{
-                return res.json();
-            }).then((data)=>{
-                data.forEach((el)=>{
-                    list.push(el);
-                // console.log(el);
-                });
-            });
-            console.log(data, "here");
-            return {};
-        }
+        // const conn = await API.ping();
+        // console.log(conn)
+        // if (!conn) {
+        //     console.log('%cICONS -- PORT=OFFLINE ... connection refused', "color: orange; font-family: arial; font-size:20px")
+        //     var data = await fetch('./data/icons.json')            
+        //         .then((res) => { 
+        //             console.log(res)
+        //             const data = JSON.parse(res);
+        //             console.log('DATA',data)
+        //             return res.json()})
+        //         .then((data) => {
+        //             console.log('DATA',data)
+        //             data.forEach(el => {
+        //                 list.push(el)
+        //                 // console.log(el);
+        //             })})
+        //     console.log(data,'here')
+        //     return {}
+        // }
         var { data  } = await (0, _apiJsDefault.default).getCategory("all");
+        let icons = data[0].icons;
+        console.log("DATA", data);
         // setting static properties
         // and building the dataset
-        for(let i = 0; i < data.length; i++){
-            let backpack = data[i];
+        for(let i = 0; i < icons.length; i++){
+            let backpack = icons[i];
             // element props
             let key = backpack.name;
             // let obj = Object.create(IconProto)
@@ -1230,9 +1238,13 @@ class SvgModel {
             const collection = new (0, _collectionDefault.default)();
             this.collections[name] = collection;
             const { data  } = await (0, _apiJsDefault.default).getCollection(name);
-            this.addManyToCollection(name, data);
+            if (data[0]?.icons.length > 0) {
+                console.log("DAT", data[0].icons);
+                this.addManyToCollection(name, data[0].icons);
+            }
         }
         this.ready = true;
+        console.log(this);
         return this;
     }
     async update() {
@@ -1511,14 +1523,14 @@ function resolveEP(ep) {
     return `http://localhost:${PORT}/icons/${ep}`;
 }
 function resolveCategoryEndpoint(categoryName) {
-    return resolveEP(`categories/${categoryName}`);
+    return resolveEP(`collections/${categoryName}`);
 }
 function resolveCollectionEndpoint(collectionName) {
     return resolveEP(`collections/${collectionName}`);
 }
 async function getCategoryNames() {
     try {
-        const collections = await (0, _axiosDefault.default).get(`http://localhost:${PORT}/icons/meta/collections`);
+        const collections = await (0, _axiosDefault.default).get(`http://localhost:${PORT}/icons/info/collections`);
         console.log(collections.data);
         return [
             ...collections.data
@@ -1531,7 +1543,7 @@ async function getCategoryNames() {
 }
 async function getCollectionNames() {
     try {
-        const collections = await (0, _axiosDefault.default).get(`http://localhost:${PORT}/icons/meta/collections`);
+        const collections = await (0, _axiosDefault.default).get(`http://localhost:${PORT}/icons/info/collections`);
         console.log(collections.data);
         return [
             ...collections.data
@@ -2531,7 +2543,7 @@ var _axiosErrorJsDefault = parcelHelpers.interopDefault(_axiosErrorJs);
 // temporary hotfix to avoid circular references until AxiosURLSearchParams is refactored
 var _formDataJs = require("../platform/node/classes/FormData.js");
 var _formDataJsDefault = parcelHelpers.interopDefault(_formDataJs);
-var Buffer = require("7fd1f6a0ccf3840b").Buffer;
+var Buffer = require("23101cef20ba98ac").Buffer;
 "use strict";
 /**
  * Determines if the given thing is a array or js object.
@@ -2686,15 +2698,15 @@ const predicates = (0, _utilsJsDefault.default).toFlatObject((0, _utilsJsDefault
 }
 exports.default = toFormData;
 
-},{"7fd1f6a0ccf3840b":"fCgem","../utils.js":"5By4s","../core/AxiosError.js":"3u8Tl","../platform/node/classes/FormData.js":"aFlee","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fCgem":[function(require,module,exports) {
+},{"23101cef20ba98ac":"fCgem","../utils.js":"5By4s","../core/AxiosError.js":"3u8Tl","../platform/node/classes/FormData.js":"aFlee","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"fCgem":[function(require,module,exports) {
 /*!
  * The buffer module from node.js, for the browser.
  *
  * @author   Feross Aboukhadijeh <https://feross.org>
  * @license  MIT
  */ /* eslint-disable no-proto */ "use strict";
-var base64 = require("62e71c7e7c7f4514");
-var ieee754 = require("fce31b1d6088aa09");
+var base64 = require("4ed775aa2d0004e8");
+var ieee754 = require("fd939025d2b2794a");
 var customInspectSymbol = typeof Symbol === "function" && typeof Symbol["for"] === "function" // eslint-disable-line dot-notation
  ? Symbol["for"]("nodejs.util.inspect.custom") // eslint-disable-line dot-notation
  : null;
@@ -3916,7 +3928,7 @@ var hexSliceLookupTable = function() {
     return table;
 }();
 
-},{"62e71c7e7c7f4514":"eIiSV","fce31b1d6088aa09":"cO95r"}],"eIiSV":[function(require,module,exports) {
+},{"4ed775aa2d0004e8":"eIiSV","fd939025d2b2794a":"cO95r"}],"eIiSV":[function(require,module,exports) {
 "use strict";
 exports.byteLength = byteLength;
 exports.toByteArray = toByteArray;
@@ -6174,228 +6186,7 @@ class IconNode {
     }
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"62IGe":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-parcelHelpers.export(exports, "Bucket", ()=>Bucket);
-parcelHelpers.export(exports, "Bench", ()=>Bench);
-parcelHelpers.export(exports, "Collection", ()=>Collection);
-var _cursor = require("./structs/Cursor");
-var _cursorDefault = parcelHelpers.interopDefault(_cursor);
-class Bucket {
-    constructor(id, type){
-        this.items = new Map();
-        this.identity = "bucket";
-        this.id = id || "none";
-        this.type = type || "none";
-        this.idn = 0;
-    }
-    get size() {
-        return this.items.size;
-    }
-    copyNode(node) {
-        let copy = structuredClone(node);
-        return copy;
-    }
-    copyValues() {
-        const copies = Array.from(this.items.entries()).map(copyNode);
-        return copies;
-    }
-    copyAll() {
-        const copy = new Map();
-        this.useKeys().forEach((key)=>{
-            copy.set(key, copyNode(this.items.get(key)));
-        });
-        return copy;
-    }
-    push(key, value1, opts = {
-        useRef: true,
-        quiet: true
-    }) {
-        let obj = value1;
-        if (this.type == "index") value1.cid = this.idn++;
-        if (this.type == "collection") value1.id = this.idn++;
-        if (!opts.useRef) obj = structuredClone(value1);
-        if (key && !this.items.has(key)) {
-            this.items.set(key, obj);
-            if (!opts.quiet) console.log(`item ${key} was successfully pushed`);
-            return true;
-        }
-        console.log("item was not pushed...", key, "already exists in you bucket");
-        return false;
-    }
-    pluck(key) {
-        if (this.items.has(key)) {
-            this.items.delete(key);
-            console.log(key, "successfully plucked");
-            return true;
-        } else {
-            console.log(key, "its not here");
-            return false;
-        }
-    }
-    has(key) {
-        return this.items.has(key);
-    }
-    use(key, opts = {
-        useRef: true
-    }) {
-        if (!opts.useRef) return structuredClone(this.items.get(key));
-        return this.items.get(key);
-    }
-    useValues(map = this.items) {
-        const values = Array.from(map.values());
-        return values;
-    }
-    useKeys(map = this.items) {
-        const keyset = Array.from(map.keys());
-        return keyset;
-    }
-    spread(map, opts) {
-        let duplicates = this.compare(map);
-        // prevent duplicates
-        if (duplicates.length > 0) {
-            console.log(`${duplicates.length} duplicates found in the keyset`);
-            console.log("no items were added");
-            console.log(duplicates);
-            return false;
-        }
-        map.forEach(value, (key)=>{
-            this.push(key, value, {
-                quiet: true,
-                ...opts
-            });
-        });
-        return true;
-    }
-    compare(map) {
-        let keys = this.useKeys(map);
-        let keycheck = keys.map((key)=>{
-            if (this.has(key)) return key;
-        });
-        return keycheck;
-    }
-    wipe() {
-        this.items = new Map();
-    }
-}
-class Bench {
-    constructor(){
-        this.refs = new Map();
-    }
-    get que() {
-        const copies = Array.from(this.refs.entries()).map((index)=>{
-            index = structuredClone(index);
-            index["isCopy"] = true;
-            return index;
-        });
-        return copies;
-    }
-    use(id, useCopy = false) {
-        if (useCopy) return structuredClone(this.refs.get(id));
-        return this.refs.get(id);
-    }
-    useValues() {
-        return Array.from(this.refs.values());
-    }
-    useEntries() {
-        return Array.from(this.refs.entries());
-    }
-    useCopies() {
-        const copies = Array.from(this.refs.entries()).map((index)=>{
-            index = structuredClone(index);
-            index["isCopy"] = true;
-            return index;
-        });
-        return copies;
-    }
-    push(key, value1) {
-        if (!this.refs.has(key)) {
-            this.refs.set(key, value1);
-            return true;
-        }
-        console.log("this is already in your bench");
-        return false;
-    }
-    pluck(id) {
-        if (this.refs.has(id)) {
-            this.refs.delete(id);
-            return true;
-        } else {
-            console.log("its not here");
-            return false;
-        }
-    }
-    get size() {
-        return this.refs.size;
-    }
-    has(id) {
-        return this.refs.has(id);
-    }
-    wipe() {
-        this.refs = new Map();
-    }
-}
-class Collection {
-    constructor(id, type){
-        this.bucket = new Bucket(id, type);
-        this.items = this.bucket.items;
-        this.cursor = new (0, _cursorDefault.default)([]);
-        this.indexes = {};
-    }
-    get size() {
-        return this.bucket.size;
-    }
-    get keys() {
-        return this.bucket.useKeys();
-    }
-    get values() {
-        return this.bucket.useValues();
-    }
-    use(key) {
-        return this.bucket.use(key, {
-            useRef: true
-        });
-    }
-    useCopy(key) {
-        return this.bucket.use(key);
-    }
-    addOne(key, value1, opts) {
-        let status = this.bucket.push(key, value1, opts);
-        if (status) this.cursor.addOne(key);
-        return status;
-    }
-    addMany(map, opts) {
-        let status = this.bucket.spread(map, opts);
-        if (status) this.cursor.addMany(Array.from(map.keys()));
-        return status;
-    }
-    updateValues(map, opts = {
-        startingIndex: undefined
-    }) {
-        this.bucket.wipe();
-        this.bucket.spread(map);
-        this.cursor.update(this.bucket.useKeys(), opts.startingIndex);
-        return this.items;
-    }
-    updateIndex() {}
-    updateId(id) {
-        this.id = id;
-    }
-    has(key) {
-        return this.bucket.has(key);
-    }
-    remove(key) {
-        let status = this.bucket.pluck(key);
-        if (status) this.cursor.pluck(this.items.useKeys().indexOf(key));
-    }
-    drop() {
-        this.items = new Bucket();
-        this.cursor = new (0, _cursorDefault.default)([]);
-    }
-}
-
-},{"./structs/Cursor":"lvUnV","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6CzCI":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"6CzCI":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "preview", ()=>preview);
@@ -6615,7 +6406,7 @@ const preview = {
     }
 };
 
-},{"../utils/slider.js":"ck1Ki","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"ck1Ki":[function(require,module,exports) {
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3","../utils/slider.js":"ck1Ki"}],"ck1Ki":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Slider", ()=>Slider);
@@ -7656,6 +7447,227 @@ class Task {
     }
 }
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["gcbWt","gLLPy"], "gLLPy", "parcelRequire35ce")
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"62IGe":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Bucket", ()=>Bucket);
+parcelHelpers.export(exports, "Bench", ()=>Bench);
+parcelHelpers.export(exports, "Collection", ()=>Collection);
+var _cursor = require("./structs/Cursor");
+var _cursorDefault = parcelHelpers.interopDefault(_cursor);
+class Bucket {
+    constructor(id, type){
+        this.items = new Map();
+        this.identity = "bucket";
+        this.id = id || "none";
+        this.type = type || "none";
+        this.idn = 0;
+    }
+    get size() {
+        return this.items.size;
+    }
+    copyNode(node) {
+        let copy = structuredClone(node);
+        return copy;
+    }
+    copyValues() {
+        const copies = Array.from(this.items.entries()).map(copyNode);
+        return copies;
+    }
+    copyAll() {
+        const copy = new Map();
+        this.useKeys().forEach((key)=>{
+            copy.set(key, copyNode(this.items.get(key)));
+        });
+        return copy;
+    }
+    push(key, value1, opts = {
+        useRef: true,
+        quiet: true
+    }) {
+        let obj = value1;
+        if (this.type == "index") value1.cid = this.idn++;
+        if (this.type == "collection") value1.id = this.idn++;
+        if (!opts.useRef) obj = structuredClone(value1);
+        if (key && !this.items.has(key)) {
+            this.items.set(key, obj);
+            if (!opts.quiet) console.log(`item ${key} was successfully pushed`);
+            return true;
+        }
+        console.log("item was not pushed...", key, "already exists in you bucket");
+        return false;
+    }
+    pluck(key) {
+        if (this.items.has(key)) {
+            this.items.delete(key);
+            console.log(key, "successfully plucked");
+            return true;
+        } else {
+            console.log(key, "its not here");
+            return false;
+        }
+    }
+    has(key) {
+        return this.items.has(key);
+    }
+    use(key, opts = {
+        useRef: true
+    }) {
+        if (!opts.useRef) return structuredClone(this.items.get(key));
+        return this.items.get(key);
+    }
+    useValues(map = this.items) {
+        const values = Array.from(map.values());
+        return values;
+    }
+    useKeys(map = this.items) {
+        const keyset = Array.from(map.keys());
+        return keyset;
+    }
+    spread(map, opts) {
+        let duplicates = this.compare(map);
+        // prevent duplicates
+        if (duplicates.length > 0) {
+            console.log(`${duplicates.length} duplicates found in the keyset`);
+            console.log("no items were added");
+            console.log(duplicates);
+            return false;
+        }
+        map.forEach(value, (key)=>{
+            this.push(key, value, {
+                quiet: true,
+                ...opts
+            });
+        });
+        return true;
+    }
+    compare(map) {
+        let keys = this.useKeys(map);
+        let keycheck = keys.map((key)=>{
+            if (this.has(key)) return key;
+        });
+        return keycheck;
+    }
+    wipe() {
+        this.items = new Map();
+    }
+}
+class Bench {
+    constructor(){
+        this.refs = new Map();
+    }
+    get que() {
+        const copies = Array.from(this.refs.entries()).map((index)=>{
+            index = structuredClone(index);
+            index["isCopy"] = true;
+            return index;
+        });
+        return copies;
+    }
+    use(id, useCopy = false) {
+        if (useCopy) return structuredClone(this.refs.get(id));
+        return this.refs.get(id);
+    }
+    useValues() {
+        return Array.from(this.refs.values());
+    }
+    useEntries() {
+        return Array.from(this.refs.entries());
+    }
+    useCopies() {
+        const copies = Array.from(this.refs.entries()).map((index)=>{
+            index = structuredClone(index);
+            index["isCopy"] = true;
+            return index;
+        });
+        return copies;
+    }
+    push(key, value1) {
+        if (!this.refs.has(key)) {
+            this.refs.set(key, value1);
+            return true;
+        }
+        console.log("this is already in your bench");
+        return false;
+    }
+    pluck(id) {
+        if (this.refs.has(id)) {
+            this.refs.delete(id);
+            return true;
+        } else {
+            console.log("its not here");
+            return false;
+        }
+    }
+    get size() {
+        return this.refs.size;
+    }
+    has(id) {
+        return this.refs.has(id);
+    }
+    wipe() {
+        this.refs = new Map();
+    }
+}
+class Collection {
+    constructor(id, type){
+        this.bucket = new Bucket(id, type);
+        this.items = this.bucket.items;
+        this.cursor = new (0, _cursorDefault.default)([]);
+        this.indexes = {};
+    }
+    get size() {
+        return this.bucket.size;
+    }
+    get keys() {
+        return this.bucket.useKeys();
+    }
+    get values() {
+        return this.bucket.useValues();
+    }
+    use(key) {
+        return this.bucket.use(key, {
+            useRef: true
+        });
+    }
+    useCopy(key) {
+        return this.bucket.use(key);
+    }
+    addOne(key, value1, opts) {
+        let status = this.bucket.push(key, value1, opts);
+        if (status) this.cursor.addOne(key);
+        return status;
+    }
+    addMany(map, opts) {
+        let status = this.bucket.spread(map, opts);
+        if (status) this.cursor.addMany(Array.from(map.keys()));
+        return status;
+    }
+    updateValues(map, opts = {
+        startingIndex: undefined
+    }) {
+        this.bucket.wipe();
+        this.bucket.spread(map);
+        this.cursor.update(this.bucket.useKeys(), opts.startingIndex);
+        return this.items;
+    }
+    updateIndex() {}
+    updateId(id) {
+        this.id = id;
+    }
+    has(key) {
+        return this.bucket.has(key);
+    }
+    remove(key) {
+        let status = this.bucket.pluck(key);
+        if (status) this.cursor.pluck(this.items.useKeys().indexOf(key));
+    }
+    drop() {
+        this.items = new Bucket();
+        this.cursor = new (0, _cursorDefault.default)([]);
+    }
+}
+
+},{"./structs/Cursor":"lvUnV","@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}]},["gcbWt","gLLPy"], "gLLPy", "parcelRequire35ce")
 
 //# sourceMappingURL=index.ffc03c4e.js.map

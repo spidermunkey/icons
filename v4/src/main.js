@@ -630,7 +630,7 @@ function resolveEP(ep) {
 };
 
 function resolveCategoryEndpoint(categoryName) {
-    return resolveEP(`categories/${categoryName}`)
+    return resolveEP(`collections/${categoryName}`)
 };
 
 function resolveCollectionEndpoint(collectionName) {

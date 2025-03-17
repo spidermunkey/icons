@@ -1,0 +1,33 @@
+@import './editor/main.scss';
+@import './notifications/main.scss';
+@import './widgets/main.scss';
+
+.interface {
+    position: relative;
+    height: 100%;
+    width: 305px;
+    background: white;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    border-top-right-radius: 8px;
+    border-bottom-right-radius: 8px;
+    z-index: 100;
+    overflow-x: visible;
+    .widget-wrapper {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        top: 0;
+        left: 0;
+        @include hide();
+        &.active {
+            @include show();
+        }
+    }
+}
+  @media screen and (max-width: 1000px) {
+    #preview {
+      display: none;
+    }
+}

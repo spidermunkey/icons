@@ -344,7 +344,6 @@ export class IconNode {
             return;
         }
         let icon = element.querySelector('svg');
-
         let values = new Map([
             ['height',icon.getAttribute('height')],
             ['width',icon.getAttribute('width')],

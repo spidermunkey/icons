@@ -18,7 +18,7 @@ function resolveEP(ep) {
 }
 
 function resolveCategoryEndpoint(categoryName) {
-    return resolveEP(`categories/${categoryName}`)
+    return resolveEP(`collections/${categoryName}`)
 }
 
 function resolveCollectionEndpoint(collectionName) {
@@ -28,7 +28,7 @@ function resolveCollectionEndpoint(collectionName) {
 async function getCategoryNames() 
 {
     try {
-        const collections = await axios.get(`http://localhost:${PORT}/icons/meta/collections`)
+        const collections = await axios.get(`http://localhost:${PORT}/icons/info/collections`)
         console.log(collections.data)
         return [...collections.data].filter(name => name !== 'test');
     } catch(e) {
@@ -41,7 +41,7 @@ async function getCategoryNames()
 async function getCollectionNames() {
     try {
 
-    const collections = await axios.get(`http://localhost:${PORT}/icons/meta/collections`)
+    const collections = await axios.get(`http://localhost:${PORT}/icons/info/collections`)
     console.log(collections.data)
     return [...collections.data].filter(name => name !== 'test');
 

@@ -23,7 +23,7 @@ Bug #003
 
 CAUSE 'Missing heights and withs on almost all svgs that are pulled from the database
 MAYBE create an adapter for the json model that creates renders and reads the element properties on the client side
-SOLUTION 'Recompile JSON with a better cmd script' || ? add default heights and widths before rendering
+SOLUTION add default heights and widths before rendering
 
 
 Bug #005

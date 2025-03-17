@@ -131,36 +131,41 @@ export class SvgModel {
         return API.getCategoryNames();
     }
     async getCollectionNames() {
-        return API.getCollectionNames();
+        const names = await API.getCollectionNames();
+        console.log('NAMES',names)
+        return names
     }
 
     async init() {
         var data;
+        // const conn = await API.ping();
+        // console.log(conn)
+        // if (!conn) {
+        //     console.log('%cICONS -- PORT=OFFLINE ... connection refused', "color: orange; font-family: arial; font-size:20px")
+        //     var data = await fetch('./data/icons.json')            
+        //         .then((res) => { 
+        //             console.log(res)
+        //             const data = JSON.parse(res);
+        //             console.log('DATA',data)
+        //             return res.json()})
+        //         .then((data) => {
+        //             console.log('DATA',data)
+        //             data.forEach(el => {
+        //                 list.push(el)
+        //                 // console.log(el);
+        //             })})
 
+        //     console.log(data,'here')
+        //     return {}
+        // }
 
-        const conn = await API.ping();
-        console.log(conn)
-        if (!conn) {
-            console.log('%cICONS -- PORT=OFFLINE ... connection refused', "color: orange; font-family: arial; font-size:20px")
-            
-            var data = await fetch('./data/icons.json')            
-                        .then((res) => { return res.json()})
-                .then((data) => {
-                    data.forEach(el => {
-                        list.push(el)
-                        // console.log(el);
-                    })})
-
-            console.log(data,'here')
-            return {}
-        }
-
-         var {data} = await API.getCategory('all')
-
+         var {data} = await API.getCategory('all');
+         let icons = data[0].icons;
+        console.log('DATA',data)
         // setting static properties
         // and building the dataset
-        for (let i = 0; i < data.length; i++) {
-            let backpack = data[i];
+        for (let i = 0; i < icons.length; i++) {
+            let backpack = icons[i];
             
             // element props
             let key = backpack.name;
@@ -215,7 +220,6 @@ export class SvgModel {
                 this.categories[meta.category].add(key,meta);
             }
         }
-
         // set property indicating if svgs of the same name exist
         if (this.dupeCount > 0) {
             for (let name in this.duplicates) {
@@ -232,20 +236,19 @@ export class SvgModel {
                 // console.log('here they are', this.duplicates);
             }
         }
-
         const userCollections = await this.getCollectionNames();
-        
         for (const name of userCollections){
             this.collectionSet.add(name);
             const collection = new Collection();
             this.collections[name] = collection;
-
             const {data} = await API.getCollection(name);
-            this.addManyToCollection(name,data);
-
+            if (data[0]?.icons.length > 0){
+                console.log('DAT',data[0].icons)
+                this.addManyToCollection(name,data[0].icons);
+            }
         }
-
         this.ready = true;
+        console.log(this)
         return this;
     }
     async update() {

@@ -1,0 +1,218 @@
+.preview__modals--modal.position {
+    //   border: 1px solid #1414140d;
+      border-radius: 10px;
+    .position__inputs {
+        // border: 1px solid $border-super-light;
+        padding: 4px 8px;
+        border-radius: 10px;
+        .input-header {
+            margin-left: 8px;
+            margin-top: 4px;
+        }
+    }
+
+  .input-group .inputs {
+    //   border: 1px solid #1414140d;
+      border-radius: 10px;
+  }
+  .input-header {
+      color: #505050ae;
+      width: 100%;
+    //   margin: 4px 0;
+      margin-right: 4px;
+      font-size: 14px;
+      margin-left: 18px;
+    //   scale: .9;
+    //   transform: translateX(-4px) scale(.9);
+  }
+  .dimension__inputs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    // padding: 6px;
+    .input-field.height,
+    .input-field.width {
+        display: flex;
+        align-items: center;
+        padding: 4px 16px;
+        // width: 50%;
+        margin: 8px;
+        .label {
+            width: 40px;
+            margin-right: 8px;
+            font-size: 14px;
+        }
+        .input {
+
+            width: 30px;
+            padding: 6px;
+        }
+    }
+
+}
+
+  .viewbox .input-field {
+      margin-right: 20px;
+      margin-bottom: 10px;
+      max-width: 50%;
+
+      &:last-of-type {
+          margin-right: 0;
+      }
+      .label {
+          user-select: none;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              cursor: pointer;
+              font-size: 14px;
+              width: 16px;
+              padding: 0.5rem 1.25rem;
+            //   border-radius: 8px;
+              margin-right: 4px;
+              border-right: 1px solid  rgba(20, 20, 20, 0.0727);
+      color: #1414148a;
+
+            //   box-shadow: 0 0 2px 1px rgba(20, 20, 20, 0.0727);
+          .input {
+              display: flex;
+              justify-content: flex-start;
+              align-items: center;
+      color: #1414148a;
+
+          }
+          &:hover {
+              cursor: ew-resize;
+          }
+      }
+  }
+  .input-field {
+      position: relative;
+      display: flex;
+      flex: 1;
+      color: #505050de;
+      color: #1414148a;
+
+      border: 1px solid rgba(20, 20, 20, 0.05);
+      border-radius: 8px;
+    //   padding: 6px;
+      font-size: 14px;
+      font-family: Arial, Helvetica, sans-serif;
+      .input {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          padding-left: 4px;
+      }
+  }
+  .input-group {
+      position: relative;
+      display: flex;
+      padding: 4px 0;
+      flex-wrap: wrap;
+      justify-content: flex-start;
+  }
+  .sliding-group {
+      position: relative;
+      width: 100%;
+      margin-bottom: 10px;
+      .input-header {
+          color: #505050de;
+          width: 100%;
+          margin: 4px 0;
+          font-size: 14px;
+          color: #505050ae;
+          width: 100%;
+          margin-left: 24px;
+        //   font-size: 12px;
+      }
+      .input-field {
+          position: relative;
+          margin-right: 0;
+          // ITS WIERD HOW WHEN I TAKE THIS OUT IT WILL SHRINK
+          // max-width: none;
+          width: 100%;
+          justify-content: flex-start;
+          padding: 6px;
+          border-radius: 10px;
+          .label {
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              cursor: pointer;
+              padding: 0.65rem;
+              width: fit-content;
+              margin-right: 4px;
+              border-radius: 8px;
+              box-shadow: 0 0 2px 1px rgba(20, 20, 20, 0.0727);
+          }
+          .slider {
+              // SHRINKS EVEN WITH ???
+              
+              width: 100%;
+              flex: 1;
+              cursor: pointer;
+              display: flex;
+              flex-direction: column;
+              justify-content: center;
+              align-items: center;
+              padding: 0px 10px;
+              height: 100%;
+              &-track {
+                  position: relative;
+                  border-radius: 16px;
+                  height: 8px;
+                  width: 100%;
+                  background: #f4f4f4;
+                  box-shadow: inset -1px 1px 4px 2px rgba(107, 107, 107, 0.1238);
+              }
+
+              &-handle {
+                  position: absolute;
+                  border-radius: 100%;
+                  will-change: transform;
+                  transition: ease;
+                  top: -4px;
+                  left: 0;
+                  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.137), 0px 1px 8px -1px rgba(0, 0, 0, 0.0837);
+                  height: 16px;
+                  width: 16px;
+                  background: #888888;
+              }
+          }
+          svg {
+              height: 16px;
+              width: 16px;
+              stroke: rgba(51, 51, 51, 0.87);
+          }
+      }
+  }
+  .input-field {
+      .input {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          outline: 0;
+          border: 0;
+          padding-left: 12px;
+          color: rgba(51, 51, 51, 0.687);
+      color: #1414148a;
+
+          letter-spacing: 0.075em;
+          border-radius: 4px;
+
+          &::placeholder {
+              color: rgba(80, 80, 80, 0.67);
+          }
+
+          &:focus {
+              background-color: rgba(204, 204, 204, 0.433);
+          }
+      }
+      svg {
+          height: 20px;
+          width: 20px;
+          stroke: rgba(51, 51, 51, 0.87);
+      }
+  }
+}

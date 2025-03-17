@@ -558,8 +558,6 @@ const app = {
             _find(id) {
                 return this.element.querySelector(`[data-id="${id}"]`)
             },
-
-
             getIconStatus(id) {
                 return this.bucket.has(id);
             },
@@ -591,6 +589,7 @@ const app = {
                 let element = this._find(id);
                 this.element.removeChild(element)
             },
+            
             removeHighlightFromDashboardElement(id) {
                 let binding = this._bind(id)
                 if (binding.classList.contains('benched'))
