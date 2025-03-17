@@ -67,8 +67,8 @@ export const API = {
     async getUploads(){
         return this.fetch(`${endpoint}/local/collections?collectionType=synced`)
     },
-    async getCollectionNames(synced = false) {
-        return this.fetch(`${endpoint}/collections/info/names?synced=${synced}`)
+    async getCollectionNames(collection_type) {
+        return this.fetch(`${endpoint}/collections/info/names?collectionType=${collection_type ? collection_type : ''}`)
     },
     async getCollection(name,filters = {subtypes:[],sub_collections:[]},useFilters=false) {
         let subTypesQuery = encodeURIComponent(filters.subtypes.join(','))

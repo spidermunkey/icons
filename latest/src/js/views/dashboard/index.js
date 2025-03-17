@@ -2164,7 +2164,7 @@ export class Dashboard extends AbstractView {
                 ...loading collections
             </div>
         `
-        const names = await this.store.getCollectionNames();
+        const names = await this.store.getCollectionNames('projects');
         console.log('NAMES',names)
         if (names.length > 0)
             $('.synced-collection-names').innerHTML = `${names.reduce((acc,red)=> acc + `<div class="preview-a2c-item" collection=${red}>${red}</div>`, '' )}`

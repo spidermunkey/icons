@@ -2287,9 +2287,12 @@ function formatSize(bytes) {
 }
 
 function objectLength(obj,ignoreList){
-
+  if (!objectIsFalsey(obj)){
     const keys = ignoreList ? Object.keys(obj).filter(key => !ignoreList.some(i => i === key)) : Object.keys(obj)
     return keys.length
+  } else {
+    return 0;
+  }
 }
 function objectIsEmpty(obj){
     for (const prop in obj) 

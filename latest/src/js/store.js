@@ -161,8 +161,8 @@ export class SvgModel extends EventEmitterClass {
     }
 
     // queries
-    async getCollectionNames() {
-        return API.getCollectionNames(synced);
+    async getCollectionNames(collection_type) {
+        return API.getCollectionNames(collection_type);
     }
     async populateAllIcons() {
         const response = (await API.getCollection('all'))[0];

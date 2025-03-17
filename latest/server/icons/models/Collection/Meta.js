@@ -80,7 +80,7 @@ async function info(){
             // collection types             
             uploads: {},
             projects:{},
-            auto:{}
+            index:{}
         })
         return formated;
     } catch (error) {
@@ -89,6 +89,26 @@ async function info(){
     }
 }
 
+async function names(collection_type){
+    const info = await this.info()
+    const names = [];
+        if (collection_type && info[collection_type]){
+            const collection = info[collection_type]
+            for (const id in collection){
+                names.push(collection[id].name)
+            }
+        } else {
+            for (const collection_type in info){
+                const collections = info[collection_type]
+                for (const id in collections){
+                    const collection = collections[id]
+                    names.push(collection.name)
+                }
+            }
+        }
+    
+        return names
+}
 async function create(props){
     const collection_id = props?.cid || uuid();
     try {
@@ -117,7 +137,7 @@ async function find(cid){
 
 async function findByName(name){
     try {
-        return (await connect()).findOne( { name:name });
+        return await (await connect()).findOne( { name:name });
     } catch (error) {
         console.error("Error finding meta document by name: ");
         throw error;
@@ -218,6 +238,7 @@ async function clearPresetDefault(cid){
 module.exports = {
     
     info,
+    names,
     configure,
     create,
     find,

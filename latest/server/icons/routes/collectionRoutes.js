@@ -19,57 +19,18 @@ router.get('/info', async function getCollectionData(request,response){
 })
 
 router.get('/info/names', async function getCollectionNames(request,response) {
-  response.json(await Mongo.get_collection_names())
+  try {
+    const collection_type = request.query.collectionType;
+    console.log('fetching collection data')
+    result = await App.get_collection_names(collection_type);
+    response.json(result)
+  } catch (error){
+    console.log(error)
+    response.status(500).send({success:false,code:500,message:'error processing request'})
+  }
 })
 
-router.put('/settings/:collection', async function clearDefaultSetting(request,response){
-  const collection = request.params.collection
-  const result = await Mongo.clear_collectionDefault_setting(collection)
-  response.json(result)
-})
-router.get('/settings/:collection', async function getCollectionSettings(request,response){
-  
-})
-router.post('/settings',async function addCollectionSetting(request,response){
-  const { payload } = request.body;
-  // needs better sanitization
-  const {cid,setting} = payload;
-  console.log('PAYLOAD', cid , setting )
-  const result = await Mongo.add_collection_preset(cid,setting);
-  response.json(result);
-})
-router.delete('/settings',async function deleteCollectionSetting(request,response){
-  let cid = decodeURIComponent(request.query.cid)
-  let pid = decodeURIComponent(request.query.pid)
-  const result = await Mongo.delete_collection_preset(cid,pid)
-  response.json(result);
-})
-router.put('/settings', async function applySettingDefault(request,response){
-    const { payload } = request.body
-    // needs better sanitization
-    const {collection,preset} = payload;
-    const result = await Mongo.set_collectionDefault_setting(collection,preset)
-    response.json(result)
-})
-router.post('/colors', async function add_collection_colorset(request,response) {
-  const { payload } = request.body
-  // needs better sanitization
-  const {cid,colorset} = payload
-  console.log('ADDING COLORSET', colorset )
-  const result = await Mongo.add_collection_colorset(cid,colorset);
-  response.json(result);
-})
-router.put('/colors/:collection', async function clear_default_color(request,response){
-  const collection = request.params.collection;
-  const result = await Mongo.clear_collectionDefault_color(collection);
-  response.json(result)
-})
-router.delete('/colors', async function removeCollectionColorset(request,response){
-  let cid = decodeURIComponent(request.query.cid);
-  let csid = decodeURIComponent(request.query.csid);
-  const result = await Mongo.delete_collection_color(cid,csid);
-  response.json(result);
-})
+
 router.post('/create', async function createCollection (request,response) {
   const data = await Mongo.create_collection(request.body.payload.props)
   response.json(data)
@@ -157,8 +118,58 @@ router.post('/:collectionName', async function addToCollection (request, respons
   const result = await Mongo.addToCollection(payload)
   response.json(result)
 })
+
+router.put('/settings/:collection', async function clearDefaultSetting(request,response){
+  const collection = request.params.collection
+  const result = await Mongo.clear_collectionDefault_setting(collection)
+  response.json(result)
+})
+router.get('/settings/:collection', async function getCollectionSettings(request,response){
+  
+})
+router.post('/settings',async function addCollectionSetting(request,response){
+  const { payload } = request.body;
+  // needs better sanitization
+  const {cid,setting} = payload;
+  console.log('PAYLOAD', cid , setting )
+  const result = await Mongo.add_collection_preset(cid,setting);
+  response.json(result);
+})
+router.delete('/settings',async function deleteCollectionSetting(request,response){
+  let cid = decodeURIComponent(request.query.cid)
+  let pid = decodeURIComponent(request.query.pid)
+  const result = await Mongo.delete_collection_preset(cid,pid)
+  response.json(result);
+})
+router.put('/settings', async function applySettingDefault(request,response){
+    const { payload } = request.body
+    // needs better sanitization
+    const {collection,preset} = payload;
+    const result = await Mongo.set_collectionDefault_setting(collection,preset)
+    response.json(result)
+})
+router.post('/colors', async function add_collection_colorset(request,response) {
+  const { payload } = request.body
+  // needs better sanitization
+  const {cid,colorset} = payload
+  console.log('ADDING COLORSET', colorset )
+  const result = await Mongo.add_collection_colorset(cid,colorset);
+  response.json(result);
+})
+router.put('/colors/:collection', async function clear_default_color(request,response){
+  const collection = request.params.collection;
+  const result = await Mongo.clear_collectionDefault_color(collection);
+  response.json(result)
+})
+router.delete('/colors', async function removeCollectionColorset(request,response){
+  let cid = decodeURIComponent(request.query.cid);
+  let csid = decodeURIComponent(request.query.csid);
+  const result = await Mongo.delete_collection_color(cid,csid);
+  response.json(result);
+})
+
 router.get('/', async function getCollections(request,response) {
-  const result = Local.get_all_collections(true);
+  const result = Local.get_collections(true);
   response.json(result);
 })
 

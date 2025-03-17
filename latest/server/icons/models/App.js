@@ -30,8 +30,33 @@ class App extends EventEmitter {
         return documents;
     }
 
-    async get_collection_names(){
+    async get_collection_names(collection_type){
         // find collection that also has meta data (properly synced)
+        console.log(collection_type)
+        const info = await this.get_collection_info()
+        const names = [];
+            if (collection_type && info[collection_type]){
+                const collection = info[collection_type]
+                for (const id in collection){
+                    names.push(collection[id].name)
+                }
+            } else {
+                for (const collection_type in info){
+                    const collections = info[collection_type]
+                    for (const id in collections){
+                        const collection = collections[id]
+                        names.push(collection.name)
+                    }
+                }
+            }
+        
+            return names
+        const collections = (await icons.listCollections().toArray())
+            .map(c => c.name)
+            .filter(name => name !== '{{meta}}');
+
+        return collections;
+
 
     }
 
