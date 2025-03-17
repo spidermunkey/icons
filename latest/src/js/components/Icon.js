@@ -55,7 +55,6 @@ export class Icon {
     get props() {
         return {
             name: this.name,
-            category: this.category,
             markup: this.markup,
             rebased: this.rebased,
             collection: this.collection,

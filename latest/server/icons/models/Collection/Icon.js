@@ -93,6 +93,7 @@ function configurePreset(props){
         created_at: props?.created_at || DateTime.stamp().ms,
     }
 }
+
 function configureColor(props){
     return {
         ...props,
@@ -101,6 +102,7 @@ function configureColor(props){
         name: props?.name || 'untitled',
     }
 }
+
 async function connect() {
     return Database.icons()
 }

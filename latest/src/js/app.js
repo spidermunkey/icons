@@ -14,7 +14,6 @@ export class App extends EventEmitterClass {
             }];
         this.activeView = null;
         window.addEventListener('popstate',this.route.bind(this));
-        window.app = this;
     }
     route(url = window.location.pathname) {
         // let path = window.location.pathname;
@@ -42,9 +41,11 @@ export class App extends EventEmitterClass {
       const pathSegments = pathname.split('/').filter(segment => segment.length > 0);
       const root = pathSegments[0]
       const subpath = pathSegments[1]
+      const resource = pathSegments[2]
       return {
         root: root ? root : '',
         subpath: subpath ? subpath : '',
+        resource: resource ? resource : '',
       }
       // return pathSegments.length > 1 ? pathSegments[1] : ''; // Default to '' if no subpath
     }
@@ -53,12 +54,7 @@ export class App extends EventEmitterClass {
           const link = e.target.closest('[data-link]')
             if (link) {
               e.preventDefault();
-
               const location = link.getAttribute('href');
-              console.log('link',link)
-              console.log('location',location)
-              console.log(this.subpath(location))
-              console.log(new URL(location, window.location.origin));
               this.navigateTo(location);
             }
           })

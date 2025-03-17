@@ -3,11 +3,19 @@ const router = express.Router()
 const { Mongo } = require('../model.js')
 const Local = require('../models/Local.js')
 
+const App = require('../models/App.js')
+
 
 router.get('/info', async function getCollectionData(request,response){
-  console.log('fetching collection data')
-  result = await Mongo.get_data_formated()
-  response.json(result)
+  try {
+    console.log('fetching collection data')
+    result = await App.get_collection_info();
+    response.json(result)
+  } catch (error){
+    console.log(error)
+    response.status(500).send({success:false,code:500,message:'error processing request'})
+  }
+
 })
 
 router.get('/info/names', async function getCollectionNames(request,response) {

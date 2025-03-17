@@ -11,6 +11,7 @@ const config = {
     collection_alias: '{{meta}}',
     // should probably be a map that also verifies specific type
     configurable: ['name','size','preset','presets','color','colors','filters'],
+    searchable: ['name','size','cid','synced','collection_type'],
     filterProperties(props){
         const configurable = {};
         for (const prop in props){
@@ -22,6 +23,9 @@ const config = {
             return configurable
         new Error('no properties to configure');
     },
+    handleQuery(query = {}){
+
+    }
 }
 
 async function connect(){
@@ -53,18 +57,43 @@ function configure(props){
 
 async function info(){
     try {
-        return await find(properties.cid);
+        const meta = await connect();
+        const info = await meta.find({
+            docname:'[[meta_document]]'
+        }).toArray();
+        const formated = info.reduce((result,document) => {
+            const collection_id = document.cid;
+            switch (document.collection_type) {
+                case 'project': 
+                    result['projects'][collection_id] = document; 
+                    break;
+                case 'upload': 
+                    result['uploads'][collection_id] = document; 
+                    break;
+                case 'index': 
+                    result['index'][collection_id] = document; 
+                    break;
+                default: null
+            }
+            return result;
+        },{       
+            // collection types             
+            uploads: {},
+            projects:{},
+            auto:{}
+        })
+        return formated;
     } catch (error) {
         console.error("Error fetching meta info: ");
         throw error;
     }
 }
 
-
 async function create(props){
+    const collection_id = props?.cid || uuid();
     try {
         return (await connect()).findOneAndUpdate(
-            {cid:props.cid},
+            {cid:collection_id},
             {$set:{
                 ...configure(props),
                 created_at: Date.now()
@@ -76,6 +105,7 @@ async function create(props){
         throw error;
     }
 }
+
 async function find(cid){
     try {
         return (await connect()).findOne({ cid: cid });
@@ -84,6 +114,7 @@ async function find(cid){
         throw error;
     }
 }
+
 async function findByName(name){
     try {
         return (await connect()).findOne( { name:name });
@@ -92,6 +123,7 @@ async function findByName(name){
         throw error;
     }
 }
+
 async function update(cid,props){
     try {
         const configuredProps = configure(props);  // Ensuring the structure is correct
@@ -129,6 +161,7 @@ async function addColor(cid,colorset){
         throw error;
     }
 }
+
 async function removeColor(cid,csid){
     try {
         return await Color.destroy(cid, csid);

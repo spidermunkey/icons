@@ -2,13 +2,13 @@ const { MongoClient } = require('mongodb')
 const {CONNECTION_STRING} = require('../../.config/env')
 
 class Database {
-    constructor(){
+    constructor() {
         this.uri = CONNECTION_STRING;
         this.client = null;
         this.status = 'offline';
         this.connection = false;
         this.connections = 0;
-        this.meta_alias = '{{meta}}'
+        this.meta_alias = '{{meta}}';
     }
 
     async getDB(name){
@@ -29,44 +29,44 @@ class Database {
             throw (error);
         }
     }
+
     async meta(){
         try {
-            return (await this.getDB('icons')).collection(config.meta_alias);
+            return (await this.getDB('icons')).collection(this.meta_alias);
         } catch(error){
             console.error('error retrieving icon meta data...',error)
             throw(error)
         }
     }
+
     icons() {
         return this.getDB('icons')
     }
 
-    colors(){
-        return this.getDB('colors')
-    }
     async stat(){
-    try {
-        console.log('checking mongodb stats....')
-        if (!this.client || this.status === 'offline'){
-            this.connections = 0;
-            throw new Error('no active client...')
-        }
-        const adminDB = this.client.db('admin');
-        const serverStatus = await adminDB.command({serverStatus:1});
-        this.connections = serverStatus.connections;
-    } catch(error){
-        console.error('Error fetching connection info:',error.message)
-    } finally {
-        console.log('Database Connection:', this.status)
-        console.log('Internet Reponse:', this.connection)
-        console.log('Active Connections:', this.connections)
-        return {
-            db_status: this.status,
-            internet: this.connection,
-            connections: this.connections,
+        try {
+            console.log('checking mongodb stats....')
+            if (!this.client || this.status === 'offline'){
+                this.connections = 0;
+                throw new Error('no active client...')
+            }
+            const adminDB = this.client.db('admin');
+            const serverStatus = await adminDB.command({serverStatus:1});
+            this.connections = serverStatus.connections;
+        } catch(error){
+            console.error('Error fetching connection info:',error.message)
+        } finally {
+            console.log('Database Connection:', this.status)
+            console.log('Internet Reponse:', this.connection)
+            console.log('Active Connections:', this.connections)
+            return {
+                db_status: this.status,
+                internet: this.connection,
+                connections: this.connections,
+            }
         }
     }
-    }
+
     async ping() {
         try {
             if (!this.client) {
@@ -83,6 +83,7 @@ class Database {
             return false; // Database is offline or unreachable
         }
     }
+
     async connection(){
         try {
             console.log('checking mongodb connection...')
@@ -102,6 +103,7 @@ class Database {
             throw(error);
         }
     }
+
     async connect(){
         if (!this.client){
             try {
@@ -122,6 +124,7 @@ class Database {
         }
         return this.client;
     }
+
     async disconnect() {
         if (this.client) {
             try {
@@ -130,7 +133,6 @@ class Database {
             } catch (error){
                 console.error('something went wrong disconnecting with mongodb...', error)
             }
-
         }
     }
 

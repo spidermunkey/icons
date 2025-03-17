@@ -81,6 +81,7 @@ const mongo_db = {
             else return { success:'false', message:'no action taken', reason:'no collection found' }
     }
     },
+    
     async add_icon_colorset(id,collection,colorset){
       const {icons} = await this.connect();
       const coll = icons.collection(collection);
@@ -99,6 +100,7 @@ const mongo_db = {
         {returnDocument:'after'})
         return icon;
     },
+
     async set_default_color(id,collection,csid){
         if (csid === 'original') return {result:null,reason:'original colors not yet supported',success:false}
         const {icons} = await this.connect();
@@ -623,7 +625,7 @@ const mongo_db = {
         try {
             const meta = icons.collection(this.meta_alias);
             const document = await meta.findOne({cid:id,docname:this.meta_doc_alias});
-            const name = document?.name;
+            const name = document?.name;    
             if (name){
                 console.log(`dropping ${name}: ${id}`)
                 const metaDeleted = await meta.deleteMany({cid:id,docname:this.meta_doc_alias})

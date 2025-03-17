@@ -26,7 +26,7 @@ async function icons(cid, {limit,filter,page = 1}){
 }
 
 async function info(cid){
-    return await Meta.info(cid)
+    return await Meta.find(cid)
 }
 
 async function data(cid, paginateOptions = {}){
@@ -47,15 +47,6 @@ async function search(cid,{query, limit, page }){
             .toArray()
     }
     return []
-}
-
-async function sample( cid, n , random = false ){
-    const collection = await find(cid)
-    let sampleSize = !isNaN(n) ? Number(n) : 20
-    const randomDocuments = await collection.aggregate([
-        { $sample: { size: sampleSize} }
-        ]).toArray();
-    return randomDocuments;
 }
 
 async function create(props){
@@ -165,8 +156,6 @@ function paginate(limit,filter,page = 1){
     return {query,options}
 }
 
-
-
 module.exports = {
     find,
     findByName,
@@ -175,7 +164,6 @@ module.exports = {
     info,
     data,
     search,
-    sample,
     create,
     sync,
     unsync,
