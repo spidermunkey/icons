@@ -61,8 +61,8 @@ export class Menu {
   async getMeta() {
     const data = await API.getCollectionData();
     let meta = this.meta = {
-        uploads: data?.uploads,
-        auto: data?.auto,
+        locals: data?.locals,
+        index: data?.index,
         projects: data?.projects,
     }
     return meta
@@ -73,22 +73,22 @@ export class Menu {
   }
   async init() {
     this.meta = await this.getMeta();
-    let uploads = [];
-    let auto = [];
+    let locals = [];
+    let indexed = [];
     let projects = [];
-    for (const x in this.meta.uploads){
-      uploads.push(this.meta.uploads[x]);
+    for (const x in this.meta.locals){
+      locals.push(this.meta.locals[x]);
     }
-    for (const x in this.meta.auto){
-      auto.push(this.meta.auto[x]);
+    for (const x in this.meta.indexed){
+      indexed.push(this.meta.indexed[x]);
     }
     for (const x in this.meta.projects){
       projects.push(this.meta.projects[x]);
     }
-    this.collectionsMenu.innerHTML = CollectionMenu(uploads);
-    this.collectionsModal.appendChild(MenuList(uploads));
-    this.defaultMenu.innerHTML = CollectionMenu(auto);
-    this.defaultModal.appendChild(MenuList(auto));
+    this.collectionsMenu.innerHTML = CollectionMenu(locals);
+    this.collectionsModal.appendChild(MenuList(locals));
+    this.defaultMenu.innerHTML = CollectionMenu(indexed);
+    this.defaultModal.appendChild(MenuList(indexed));
     this.projectMenu.innerHTML = CollectionMenu(projects);
     this.projectModal.appendChild(MenuList(projects));
 

@@ -16,11 +16,17 @@ app.use('/icons', require('./icons/router.js'));
 app.get('/', (req,res) => res.json('Hello From The API HOME'));
 app.use((req,res) => res.status(404).json("404 not found"));
 
+async function reset(){
+    await Database.reset();
+    await Local.reset();
+    // await Local.update();
+}
+
 async function run() {
     try {
         process.on('uncaughtException',(error) => console.log('[[ process ]]', error ))
-        await Local.init();
         console.log('local db ready');
+        // await reset();
         await Database.connect();
         app.listen(PORT, (error) => {
             if (error) console.log('error starting server:', error)

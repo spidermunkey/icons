@@ -225,13 +225,13 @@ export class SvgModel extends EventEmitterClass {
     async getMeta() {
         const data = await API.getCollectionData();
         let meta = {
-            uploads: data?.uploads,
+            locals: data?.locals,
             projects: data?.projects,
             index: data?.index,
             names: [],
         }
-        for (const x in meta.uploads){
-            meta.names.push(meta.uploads[x].name);
+        for (const x in meta.locals){
+            meta.names.push(meta.locals[x].name);
           }
           for (const x in meta.index){
             meta.names.push(meta.index[x].name);

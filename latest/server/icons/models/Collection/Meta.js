@@ -68,20 +68,20 @@ async function info(){
                 case 'project': 
                     result['projects'][collection_id] = document; 
                     break;
-                case 'upload': 
-                    result['uploads'][collection_id] = document; 
+                case 'local': 
+                    result['locals'][collection_id] = document; 
                     break;
-                case 'index': 
-                    result['index'][collection_id] = document; 
+                case 'indexed': 
+                    result['indexed'][collection_id] = document; 
                     break;
                 default: null
             }
             return result;
         },{       
             // collection types             
-            uploads: {},
+            locals: {},
             projects:{},
-            index:{}
+            indexed:{}
         })
         return formated;
     } catch (error) {

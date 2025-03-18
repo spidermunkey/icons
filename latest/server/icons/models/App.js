@@ -25,6 +25,7 @@ class App extends EventEmitter {
 
         this.local = Local.init()
         this.database = Database
+
     }
 
     async collection_id_exists(cid){
@@ -60,10 +61,10 @@ class App extends EventEmitter {
         }
         async function validate_collection(props){
             const name = props?.name;
-            const collection_id = props?.cid || uuid();
+            const collection_id = props?.cid || uuid()
             const restrictedNames = ['all','favorites','recent','uploads','downloads','{{meta}}']
             const collection_exists = await this.collection_id_exists(collection_id)
-            const collection_name_exists = await this.collection_name_exists(name) || restrictedNames.includes(name) ;
+            const collection_name_exists = await this.collection_name_exists(name) || restrictedNames.includes(name)
             if (!name) return { message: 'collection not created', success: false, reason: 'invalid name property' }
             if (collection_exists) return { message: 'collection not created',success: false, reason:'collection id exists'}
             if (collection_name_exists) return {message: 'collection not created', success:false, reason: 'name already exists'}

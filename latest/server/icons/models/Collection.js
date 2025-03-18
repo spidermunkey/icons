@@ -73,7 +73,6 @@ async function sync(props){
     try {
         const {icons} = props;
         if (icons && Array.isArray(icons) && icons.length > 0){
-            props.collection_type = 'upload'
             const collectionData = await Meta.create(props);
             if (collectionData){
                 const faulty = []

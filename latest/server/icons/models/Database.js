@@ -42,7 +42,12 @@ class Database {
     icons() {
         return this.getDB('icons')
     }
-
+    async reset(){
+        const collectionNames = (await (await this.icons()).listCollections().toArray()).map(collection => collection.name)
+        const dropped = collectionNames.map(async name => {
+            (await this.icons()).collection(name).drop();
+        })
+    }
     async stat(){
         try {
             console.log('checking mongodb stats....')

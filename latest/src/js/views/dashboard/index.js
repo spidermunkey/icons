@@ -2081,13 +2081,11 @@ export class Dashboard extends AbstractView {
         let result;
         console.log('adding to new collection',name);
         console.log('using state',this.state)
-        console.log(this.state.selected)
         try {
             if (!name) throw new Error('invalid input name value');
             if (!this.state.selected) throw new Error('invalid icon selection')
 
             this.store.ready = false;
-            console.log(this.state.selected)
             result = await this.store.saveCollection(name, [this.state.selected] )
         } catch(e){ console.log(e) }
         if (result.success == true) {
