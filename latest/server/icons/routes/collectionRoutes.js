@@ -32,7 +32,10 @@ router.get('/info/names', async function getCollectionNames(request,response) {
 
 
 router.post('/create', async function createCollection (request,response) {
-  const data = await Mongo.create_collection(request.body.payload.props)
+  const data = await App.create_collection(request.body.payload.props)
+  if (data?.success === false){
+    console.log(data)
+  }
   response.json(data)
 })
 router.post('/sync', async function sync_collection(request,response){

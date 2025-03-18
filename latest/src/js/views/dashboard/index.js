@@ -2101,28 +2101,6 @@ export class Dashboard extends AbstractView {
         this.preview.toggleWindow('collections');
         this.loadCollectionNames();
     }
-    async createA2CPreviewList() {
-        const collectionNames = this.store.getCollectionNames();
-        (await collectionNames).forEach(name => {
-            const element = document.createElement('div');
-            element.textContent = name;
-            element.classList.add('preview-a2c-item');
-            element.dataset.collection = name;
-            $('[data-tab="collections"][data-role="window"]').appendChild(element)
-            element.addEventListener('click',async () => {
-                console.log('adding to collection')
-                const response = await this.store.addToCollection({ destination:name , icon:preview.icon })
-                if (response.success){
-                    this.tab == name ? null : null;
-                }
-            })
-        })
-        const createCollectionButton = document.createElement('div');
-        createCollectionButton.textContent = 'Create Collection';
-        createCollectionButton.classList.add('btn-create-collection');
-        $('[data-tab="collections"][data-role="window"]').appendChild(createCollectionButton)
-    }
-
 
     async loadCreateCollectionForm(){
         let addToCollectionWindow = $('[data-role="window"][data-tab="collections"]')

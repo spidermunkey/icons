@@ -47,29 +47,6 @@ function configure(props){
 
         created_at: props?.create_at || Date.now(),
         updated_at: props?.updated_at || null,
-
-        name: this.name,
-        category: this.category,
-        markup: this.markup,
-        rebased: this.rebased,
-        collection: this.collection,
-        isFavorite: this.isFavorite,
-        isBenched: this.isBenched,
-
-        type: this.type,
-        color: this.color,
-        colors: this.colors,
-        styles: this.styles,
-
-        id: this.id,
-        vid: this.vid,
-        cid: this.cid,
-        trace: this.trace,
-        values: this.values,
-        created_at: this.created_at,
-        preset: this.preset,
-        usePreset: this.usePreset,
-        settings: this.settings,
     }
 }
 
@@ -120,7 +97,9 @@ async function getCollectionNameById(cid){
 }
 
 async function getCollectionTypeById(cid){
-    return (await Meta.find(cid))?.collection_type
+    const collectionType =  (await Meta.find(cid))?.collection_type
+    console.log(collectionType);
+    return collectionType
 }
 
 async function sync(props) { // upload from local => <collection_type> : 'remote' || <collection_type> : 'index'
@@ -164,13 +143,20 @@ async function add(props){ // copy from remote db => <collection_type>: 'project
     try {
 
         const schema = configure(props);
-        if (!schema.collection) throw new Error('add to collection failed invalid collection id or name')
-        else if (!schema.cid) throw new Error('add to collection failed.... invalid collection id')
+        if (!schema.collection) {
+            console.log('invalid', schema)
+            throw new Error('add to collection failed invalid collection id or name')
+        }
+        else if (!schema.cid) {
+            console.log('invalid', schema)
+            throw new Error('add to collection failed.... invalid collection id',schema)
+        }
         else if (await getCollectionTypeById(schema.cid) !== 'project') throw new Error('add to collection failed... invalid collection type')
         
         const collection = await getCollection(schema.collection);
         const added = await collection.findOneAndReplace({id:schema.id},{...schema},{ upsert:true, returnDocument:'after'});
-
+        console.log('added',added)
+        console.log('schema',schema)
         return {success: added, reason:'acknowledged', message:'process complete'}
 
     } catch (error){

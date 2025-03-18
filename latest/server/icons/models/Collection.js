@@ -1,8 +1,8 @@
 
 const Database = require('./Database.js')
+const Icon = require('./Collection/Icon.js')
+const Meta = require('./Collection/Meta.js')
 
-const { Icon } = require('./Collection/Icon.js')
-const { Meta } = require('./Collection/Meta.js')
 const { print } = require('../../utils/print.js')
 
 async function find(cid){
@@ -52,14 +52,20 @@ async function search(cid,{query, limit, page }){
 async function create(props){
     try {
         const {icons} = props;
-        if (icons && Array.isArray(icons) && icons.length > 0){
-            const collectionData = Meta.create(props);
+        if (icons && Array.isArray(icons) && icons.length > 0) {
+            const collectionData = await Meta.create(props);
+            console.log(collectionData)
             if (collectionData){
                 await Promise.all(icons.map(async props => {
+                    props.collection = collectionData.name;
+                    props.cid = collectionData.cid;
                     await Icon.add(props)
+                    console.log('done',props)
                 }))
             }
-        }
+            return collectionData
+        } else throw new Error('collection not created... invalid icons param')
+
     } catch (error){
         console.error('error creating collection', error);
         throw error;

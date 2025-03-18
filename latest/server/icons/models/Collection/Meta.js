@@ -7,7 +7,7 @@ const { uuid } = require('../../../utils/uuid.js');
 const { objectIsEmpty} = require('../../../utils/objectIsEmpty.js')
 
 const config = {
-    document_alias: '[[meta_doc]]',
+    document_alias: '[[meta_document]]',
     collection_alias: '{{meta}}',
     // should probably be a map that also verifies specific type
     configurable: ['name','size','preset','presets','color','colors','filters'],
@@ -112,14 +112,15 @@ async function names(collection_type){
 async function create(props){
     const collection_id = props?.cid || uuid();
     try {
-        return (await connect()).findOneAndUpdate(
+        const created = await (await connect()).findOneAndUpdate(
             {cid:collection_id},
             {$set:{
                 ...configure(props),
                 created_at: Date.now()
             }
             },
-            {upsert:true})
+            {upsert:true, returnDocument:'after'})
+        return created.value;
     } catch (error) {
         console.error("Error creating meta document: ");
         throw error;

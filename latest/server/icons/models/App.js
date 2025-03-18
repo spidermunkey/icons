@@ -3,6 +3,8 @@ const EventEmitter = require("events");
 const Local = require('./Local.js')
 const Database = require('./Database.js');
 const Meta = require('./Collection/Meta.js')
+const Collection = require('./Collection.js')
+const { uuid } = require('../../utils/uuid.js');
 
 class App extends EventEmitter {
 
@@ -31,34 +33,30 @@ class App extends EventEmitter {
     }
 
     async get_collection_names(collection_type){
-        // find collection that also has meta data (properly synced)
-        console.log(collection_type)
-        const info = await this.get_collection_info()
-        const names = [];
-            if (collection_type && info[collection_type]){
-                const collection = info[collection_type]
-                for (const id in collection){
-                    names.push(collection[id].name)
-                }
-            } else {
-                for (const collection_type in info){
-                    const collections = info[collection_type]
-                    for (const id in collections){
-                        const collection = collections[id]
-                        names.push(collection.name)
-                    }
-                }
-            }
-        
-            return names
-        const collections = (await icons.listCollections().toArray())
-            .map(c => c.name)
-            .filter(name => name !== '{{meta}}');
-
-        return collections;
-
-
+        const names = await Meta.names(collection_type);
+        return names;
     }
+
+    async create_collection(props){
+        const name = props?.name;
+        const collection_id = props?.collection_id || uuid();
+        const restrictedNames = ['all','favorites','recent','uploads','downloads','{{meta}}'];
+        const collection_exists = await Meta.find(collection_id)
+        const collection_name_exists = await Meta.findByName(name);
+
+        if (!name) return { message: 'collection not created', success: false, reason: 'invalid name property' }
+        if (collection_exists) return { message: 'collection not created',success: false, reason:'collection id exists'}
+        if (collection_name_exists) return {message: 'collection not created', success:false, reason: 'name already exists'}
+        if (restrictedNames.includes(name)) return  { message: 'collection not created',success: false, reason:'restricted collection name'}        
+        if (!props.icons && !Array.isArray(props.icons) && props.icons.length <= 0)  return {message:'collection not created', success: false, reason: 'invalid icons param'}
+        try {
+            return await Collection.create(props)
+        } catch(error){
+            console.log('error creating collection', error)
+        }
+    }
+
+
 
     async get_sample(n){
 
