@@ -83,8 +83,8 @@ export const API = {
     async getCollectionData() {
         return this.fetch(`${endpoint}/collections/info?type=default`)
     },
-    async createCollection(name,icons) {
-        return this.post(`${endpoint}/collections/create` ,{ props: { name, icons }})
+    async createCollection(collection) {
+        return this.post(`${endpoint}/collections/create` ,{ props: { ...collection }})
     },
     async addToCollection(name,props) {
         return this.post( `${endpoint}/collections/${name}`, { ...props } )

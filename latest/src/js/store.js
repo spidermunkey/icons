@@ -172,7 +172,15 @@ export class SvgModel extends EventEmitterClass {
         return API.getIcon(id);
     }
     async saveCollection(name,icons){
-        return API.createCollection(name,icons)
+        const cid = uuid();
+        const destination = name;
+        const renamed = icons.map(icon => {
+            const copy = icon.save();
+            copy.cid = cid;
+            copy.collection = destination;
+            return copy
+        })
+        return API.createCollection({cid,name,icons:renamed})
     }
     async getCollectionSample(name,page=1,limit=50){
         try {
@@ -197,7 +205,7 @@ export class SvgModel extends EventEmitterClass {
         } catch (error){
             console.log('error fetching collection data',name)
             console.log('should probably flag for cleanup')
-            return null;
+            throw new Error('error loading collection...')
         }
 
     }
@@ -225,8 +233,8 @@ export class SvgModel extends EventEmitterClass {
         for (const x in meta.uploads){
             meta.names.push(meta.uploads[x].name);
           }
-          for (const x in meta.projects){
-            meta.names.push(meta.projects[x].name);
+          for (const x in meta.index){
+            meta.names.push(meta.index[x].name);
           }
           for (const x in meta.index){
             meta.names.push(meta.index[x].name);

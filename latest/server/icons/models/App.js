@@ -48,19 +48,22 @@ class App extends EventEmitter {
 
     async create_collection(props){
         try {
-            const isValid = (await validate_collection.call(this,props))?.success === true;
-            if (isValid)
+            const validation_status = await validate_collection.call(this,props)
+            const isValid = validation_status?.success === true;
+            if (isValid){
             return await Collection.create(props)
+            } else {
+                throw new Error(validation_status.reason)
+            }
         } catch(error){
             console.log('error creating collection', error)
         }
         async function validate_collection(props){
             const name = props?.name;
-            const collection_id = props?.collection_id || uuid();
+            const collection_id = props?.cid || uuid();
             const restrictedNames = ['all','favorites','recent','uploads','downloads','{{meta}}']
-            const collection_exists = this.collection_id_exists(collection_id)
+            const collection_exists = await this.collection_id_exists(collection_id)
             const collection_name_exists = await this.collection_name_exists(name) || restrictedNames.includes(name) ;
-
             if (!name) return { message: 'collection not created', success: false, reason: 'invalid name property' }
             if (collection_exists) return { message: 'collection not created',success: false, reason:'collection id exists'}
             if (collection_name_exists) return {message: 'collection not created', success:false, reason: 'name already exists'}

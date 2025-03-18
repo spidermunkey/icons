@@ -32,6 +32,7 @@ router.get('/info/names', async function getCollectionNames(request,response) {
 
 router.post('/create', async function createCollection (request,response) {
   const data = await App.create_collection(request.body.payload.props)
+  console.log('why tho',data)
   response.json(data)
 })
 

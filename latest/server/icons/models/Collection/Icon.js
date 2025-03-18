@@ -106,7 +106,6 @@ async function sync(props) { // upload from local => <collection_type> : 'remote
     try {
         const schema = configure(props);
         if (!schema.collection) throw new Error('sync failed invalid collection  name')
-
         const collection = await getCollection(schema.collection);
         const all = await index();
         const added = await collection.findOneAndReplace({id:schema.id},{...schema},{upsert:true, returnDocument:'after'});
