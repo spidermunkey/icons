@@ -117,6 +117,26 @@ class App extends EventEmitter {
         }
     }
 
+    async drop_collection(cid){
+        try {
+            const collection = await Meta.find(cid);
+            const collection_type = collection?.collection_type
+            const dropped = await Collection.destroy(cid);
+            let unsynced
+            if (dropped?.success == true && collection_type === 'local'){
+                unsynced = await Local.unsync(cid)
+            }
+            const result = {
+                ...dropped,
+                unsynced,
+            }
+            console.log('delete Result', dropped)
+        } catch(error){
+            console.log('error dropping collection',error)
+            return {success:false,reason:error,message: 'error dropping collection'}
+        }
+
+    }
 
     async get_sample(n){
 

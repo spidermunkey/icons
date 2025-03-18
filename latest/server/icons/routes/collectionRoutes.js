@@ -8,22 +8,16 @@ const App = require('../models/App.js')
 
 router.get('/info', async function getCollectionData(request,response){
   try {
-    console.log('fetching collection data')
-    result = await App.get_collection_info();
-    response.json(result)
+    response.json(await App.get_collection_info())
   } catch (error){
     console.log(error)
     response.status(500).send({success:false,code:500,message:'error processing request'})
   }
-
 })
 
 router.get('/info/names', async function getCollectionNames(request,response) {
   try {
-    const collection_type = request.query.collectionType;
-    console.log('fetching collection data')
-    result = await App.get_collection_names(collection_type);
-    response.json(result)
+    response.json(await App.get_collection_names(request.query.collectionType))
   } catch (error){
     console.log(error)
     response.status(500).send({success:false,code:500,message:'error processing request'})
@@ -31,13 +25,21 @@ router.get('/info/names', async function getCollectionNames(request,response) {
 })
 
 router.post('/create', async function createCollection (request,response) {
-  const data = await App.create_collection(request.body.payload.props)
-  response.json(data)
+  try {
+    response.json(await App.create_collection(request.body.payload.props))
+  } catch (error) {
+    console.log(error)
+    response.status(500).send({success:false,code:500,message:'error processing request'})
+  }
 })
 
 router.post('/sync', async function sync_collection(request,response){
-  const synced = await App.sync_collection(request.body.payload.props)
-  response.json(synced)
+  try {
+    response.json(await App.sync_collection(request.body.payload.props))
+  } catch (error) {
+    console.log(error)
+    response.status(500).send({success:false,code:500,message:'error processing request'})
+  }
 })
 
 router.post('/ignore', async function ignore_collection(request,response){
@@ -55,24 +57,19 @@ router.post('/ignore', async function ignore_collection(request,response){
 })
 
 router.delete('/:collectionID', async function dropCollection(request,response){
-  const collection = request.params.collectionID;
-  const result = await Mongo.remove_collection(collection);
-  if (result.success == true) {
-    await Local.update_collection(result.id, {synced:false})
-  }
-  console.log('delete Result',result)
-  response.json(result)
+  response.json(App.drop_collection(request.params.collectionID))
 })
 
 router.post('/:collectionID/:id',async function searchCollection(request,response){
   
 })
+
 router.get('/:collection', async function getCollection (request, response) {
   const cName = request.params.collection;
   const page = request.query?.page;
   const limit = request.query?.limit;
-  const filterSubType = request.query?.st
-  const filterSubCollection = request.query?.sc
+  const filterSubType = request.query?.st;
+  const filterSubCollection = request.query?.sc;
   let filters = {subtypes:[],sub_collections:[]};
   filters['subtypes'] = !filterSubType || filterSubType === '' ? [] : decodeURIComponent(request.query.st).split(',').filter(i => i != '' && i != null && i != undefined);
   filters['sub_collections'] = !filterSubCollection || filterSubCollection === '' ? [] : decodeURIComponent(request.query.sc).split(',').filter(i => i != '' && i != null && i != undefined);
