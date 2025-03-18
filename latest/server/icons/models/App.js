@@ -75,17 +75,26 @@ class App extends EventEmitter {
         }
     }
 
-    async sync_collection(cid){
+    async sync_collection(collection){
         // allows duplicate names... must be distinguished by collection_type
         try {
+            console.log(collection)
+            const { cid,colors, presets, icons } = collection;
             console.log('syncing local collection')
             const props = Local.getCollectionById(cid);
+                    // applying default settings from ui
+                    props.colors = colors
+                    props.presets = presets
+                    // syncing validated icons from ui
+                    props.icons = icons
+                    props.synced = Date.now()
+
             const validation_status = ( await validate.call(this,props))
             const isValid = validation_status.success === true;
             if (isValid){
                 const synced = await Collection.sync(props)
                 if (synced?.success === true){
-                    await Local.sync(cid)
+                    await Local.update_collection(cid,props);
                 }
                 return synced;
             } else {

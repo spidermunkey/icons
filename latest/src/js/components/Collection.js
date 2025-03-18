@@ -2,6 +2,7 @@ import { Icon } from './Icon.js';
 import { Cursor } from '../utils/Cursor';
 import { ago } from '../utils/DateTime.js';
 import { API } from '../api.js';
+import { Color } from './Color.js'
 export class Collection {
   constructor(data){
     const { 
@@ -35,9 +36,8 @@ export class Collection {
       subtypes:[],
     }
     this.meta = meta
-
     this.name = meta.name
-    this.cid = meta.cid;
+    this.cid = meta.cid
     this.icons = validIcons
     this.sample = icons.slice(0,20)
     this.cursor = new Cursor(validIcons)
@@ -47,12 +47,117 @@ export class Collection {
     this.size = meta.size
     this.created_at = meta.created_at
     this.synced = meta.synced
+    this.presets = meta?.presets || {}
+    this.presets.original = this.presets.original ? this.presets.original : this.findMatchingViewbox(validIcons)
     this.preset = meta?.preset || {}
-    this.presets = meta?.preset || {}
-    this.color = meta?.preset || {}
     this.colors = meta?.colors || {}
+    this.colors.original = this.colors.original ? this.colors.original : {
+      csid:'original',
+      colorset_type:'global',
+      name: 'original',
+      ...this.findMatchingColors(validIcons)
+    }
+    this.color = meta?.color || {}
+
     this.state = {}
     // console.dir(`CREATING COLLECTION FROM DATA: `, data)
+  }
+  findMatchingViewbox(icons){
+    // return null if all viewboxes are not the same
+    let viewbox
+    let original
+    for (let i = 0; i < icons.length; i++){
+      let icon = icons[i]
+      let og = icon.presets.original.viewbox
+      let originalViewbox = og.join(' ')
+      original = icon.presets.original;
+      if (i === 0) {
+        viewbox = originalViewbox
+        continue
+      }
+      if (originalViewbox !== viewbox) {
+        original = this.defaultSetting;
+        return original
+      } 
+    }
+    return original
+  }
+  findMatchingColors(icons){
+    let parsed = {
+      'elements':{
+        fill: new Set(),
+        stroke: new Set(),
+        get matchingFill() {
+          return this.fill.size === 1
+        },
+        get matchingStroke() {
+          return this.stroke.size === 1
+        }
+      },
+      'shapes':{
+        fill: new Set(),
+        stroke: new Set(),
+        get matchingFill() {
+          return this.fill.size === 1
+        },
+        get matchingStroke() {
+          return this.stroke.size === 1
+        }
+      },
+    }
+    for (let i = 0; i < icons.length; i++){
+      let icon = icons[i];
+      let colorSet = icon.colors.original;
+      const normalize = (hex)=> {
+        if (hex === 'none') {
+          return hex
+        }
+        else if (!hex.startsWith('#')) {
+          let convertedName = Color.isValidNamedColor(hex)
+          let validName = convertedName && Color.isValidHex(convertedName)
+          return validName ? convertedName : false
+        }
+        else {
+          return Color.toSixDigitHex(hex)
+        }
+      }
+      const parseFill = (colorSet) => {
+        for(const id in colorSet){
+          let iconFill = normalize(colorSet[id][1])
+          let tagName = colorSet[id][2]
+          if (iconFill != undefined || iconFill != false) {
+            if (tagName === 'svg') parsed.elements.fill.add(iconFill)
+            else parsed.shapes.fill.add(iconFill)
+          } else console.warn('something wrong with this hex', this.colorSet[id][1])
+        }
+      }
+      const parseStroke = (colorSet) => {
+        for(const id in colorSet){
+          if (colorSet[id][0] == null) continue
+          let iconStroke = normalize(colorSet[id][0])
+          let tagName = colorSet[id][2]
+          if (iconStroke != undefined || iconStroke != false) {
+            if (tagName === 'svg') parsed.elements.stroke.add(iconStroke)
+            else parsed.shapes.stroke.add(iconStroke)
+          } else console.warn('something wrong with this hex', this.colorSet[id][0])
+        }
+      }
+      parseFill(colorSet)
+      parseStroke(colorSet)
+    }
+    let elementResult = {
+      fill: parsed.elements.matchingFill ? parsed.elements.fill.values().toArray()[0] : null,
+      stroke: parsed.elements.matchingStroke ? parsed.elements.stroke.values().toArray()[0] : null,
+      matchingFill: parsed.elements.matchingFill,
+      matchingStroke: parsed.elements.matchingStroke
+    }
+    let shapeResult = {
+      fill: parsed.shapes.matchingFill ? parsed.shapes.fill.values().toArray()[0] : null,
+      stroke: parsed.shapes.matchingStroke ? parsed.shapes.stroke.values().toArray()[0] : null,
+      matchingFill: parsed.shapes.matchingFill,
+      matchingStroke: parsed.shapes.matchingStroke
+    }
+    return { shapes: shapeResult, elements: elementResult}
   }
   debugFaultyIcons(){
     console.log(this.skipped)

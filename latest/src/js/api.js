@@ -45,7 +45,7 @@ export const API = {
         }
     },
     async requestSync(data){
-        return this.post(`${endpoint}/collections/sync`, {  cid: data.cid } )
+        return this.post(`${endpoint}/collections/sync`, { props:{ ...data } })
     },
     async requestIgnore(data){
         return this.post(`${endpoint}/collections/ignore`, {  cid: data.cid } )

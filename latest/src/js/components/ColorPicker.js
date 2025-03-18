@@ -467,6 +467,7 @@ export class ColorPicker {
     update(icon,target){
         // if (this.state.icon) this.state.icon.colors.temp = this.iconColors
         let colorset;
+        console.log(icon.colors,icon)
         let defaultColors = icon.color
         let useCollectionDefault = !objectIsEmpty(this.currentColorset) && this.currentColorset && this.currentColorset.colorset_type === 'global'
         if (useCollectionDefault){

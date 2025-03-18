@@ -21,8 +21,8 @@ export class Icon {
         this.preset = props?.preset || null;
         this.usePreset = props?.preset && props.usePreset == true ? props.usePreset : false;
         this.element = this.createWrapper(props);
-        this.settings = {
-            ...props?.settings,
+        this.presets = {
+            ...props?.presets,
 
          } || {};
         try {
@@ -30,7 +30,7 @@ export class Icon {
             if (values){
                 const originalPreset = this.createPreset(values)
                 this.values = values
-                this.settings['original'] = {
+                this.presets['original'] = {
                     ...originalPreset,
                     get viewbox() {
                         return [this.vbx,this.vby,this.vbw,this.vbh].map(Number)
@@ -40,7 +40,7 @@ export class Icon {
                 // invalid/legacy preset generation
                 let presetHasId = this.preset?.pid
                 if (!defaultPresetExists || !presetHasId) 
-                    this.preset = this.settings['original']
+                    this.preset = this.presets['original']
             }
             else 
                 this.isValid = false;
@@ -74,7 +74,7 @@ export class Icon {
             created_at: this.created_at,
             preset: this.preset,
             usePreset: this.usePreset,
-            settings: this.settings,
+            presets: this.presets,
         }
     }
     get html() {
@@ -269,7 +269,7 @@ export class Icon {
             icon.setAttribute('viewBox','0 0 24 24');
         }
         this.children = [icon,...Icon.crawl(icon)]
-        if (!props.colors){
+        if (objectIsFalsey(props.colors)){
             // create marked version for colors
             this.colors = {
                 original:{
@@ -377,13 +377,13 @@ export class Icon {
     }
     addPreset(setting){
         if (!setting.pid){
-            console.warn('error updating settings... invalid pid')
+            console.warn('error updating presets... invalid pid')
             return null
-        } else if(Object.hasOwn(this.settings,setting.pid)) {
-            console.warn('error updating settings... this id already exists')
+        } else if(Object.hasOwn(this.presets,setting.pid)) {
+            console.warn('error updating presets... this id already exists')
             return null
         }
-        this.settings[setting.pid] = setting;
+        this.presets[setting.pid] = setting;
         return this;
     }
     setPresetDefault(setting){
@@ -393,14 +393,14 @@ export class Icon {
 
         if (isDefault && defaultIsActive){
             console.log('preset already active....')
-            this.preset = this.settings.original
+            this.preset = this.presets.original
             console.log('... current default toggled off')
             return false
         }
-        else if(Object.hasOwn(this.settings,pid)){
+        else if(Object.hasOwn(this.presets,pid)){
             console.log('... preset is not default.. setting default')
-            const settingFound = this.settings[pid]
-            this.settings.current = settingFound.pid
+            const settingFound = this.presets[pid]
+            this.presets.current = settingFound.pid
             this.preset = settingFound
             return true
         } else {

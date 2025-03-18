@@ -4,6 +4,9 @@ import { StatusWidget } from "./components/statusWidget.js";
 import { API } from "../../api.js";
 import { EventEmitterClass } from "../../utils/EventEmitter.js";
 import { ago } from "../../utils/DateTime.js";
+
+import { LocalCollection } from "../../components/Collection.js";
+
 export class Home extends EventEmitterClass {
   constructor(store) {
     super()
@@ -11,6 +14,7 @@ export class Home extends EventEmitterClass {
     this.appStatus = new StatusWidget(store);
     this.localCollections = new RecentDownloads()
     this.localCollections.on('preview', (collection) => this.renderPreview(collection))
+    this.localCollections.on('upload',(collection,element)=> this.handleUpload(collection,element))
     this.uploadedCollections = new UploadSection()
     this.uploadingQue = new Set()
     this.on('active',() => this.active = true)
@@ -44,10 +48,10 @@ export class Home extends EventEmitterClass {
         let downloadsTab = e.target.closest('.rt-downloads');
         let uploadedTab = e.target.closest('.rt-uploads');
         if (upload){
-          let collection = e.target.closest('.recent-collection')
-          console.trace('uploading collection',collection)
-          let id = $('.collection-info',collection).getAttribute('cid');
-          this.handleUpload(id,collection)
+          // let collection = e.target.closest('.recent-collection')
+          // console.trace('uploading collection',collection)
+          // let id = $('.collection-info',collection).getAttribute('cid');
+          // this.handleUpload(id,collection)
         }
         else if (ignore) {
           let collection = e.target.closest('.recent-collection');
@@ -179,7 +183,10 @@ export class Home extends EventEmitterClass {
         $('.collection-preview').classList.remove('active');
       }
   }
-  async handleUpload(id,element){
+  async handleUpload(collection,element){
+    console.log(element,'upload triggered')
+    console.log('uploading...',collection)
+    const id = collection.id;
       if (this.uploadingQue.has(id)){
         console.warn('upload already in process',id)
         return;
@@ -188,7 +195,14 @@ export class Home extends EventEmitterClass {
       $('.loading-overlay',element).classList.add('active')
       try {
         this.uploadingQue.add(id);
-        const stat = await API.requestSync({cid:id});
+        const stat = await API.requestSync({
+          cid:collection.cid,
+          color:collection.color,
+          colors:collection.colors,
+          preset: collection.preset,
+          presets:collection.presests,
+          icons: collection.icons,
+        });
         if (stat.success){
           console.log('COLLECTION SYNCED',stat);
           this.uploadingQue.delete(id);

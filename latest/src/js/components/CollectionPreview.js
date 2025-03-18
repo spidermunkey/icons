@@ -495,9 +495,9 @@ export class CollectionPreview extends EventEmitterClass {
     let original
     for (let i = 0; i < icons.length; i++){
       let icon = icons[i]
-      let og = icon.settings.original.viewbox
+      let og = icon.presets.original.viewbox
       let originalViewbox = og.join(' ')
-      original = icon.settings.original;
+      original = icon.presets.original;
       if (i === 0) {
         viewbox = originalViewbox
         continue

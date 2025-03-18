@@ -478,7 +478,7 @@ export class Preview extends EventEmitterClass {
         (icon?.preset && this.presetType === 'icon') 
           ? this.applySetting(icon.preset)
           : this.applySetting(this.collectionPreset)
-        this.original = icon.settings.original
+        this.original = icon.presets.original
     }
     update(icon) {
         if (!icon) return this.setLoading();

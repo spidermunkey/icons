@@ -7,8 +7,8 @@ const Local = require('./icons/models/Local.js');
 const Database = require('./icons/models/Database.js');
 
 app.use(require('morgan')('tiny'));
-app.use(bodyParser.urlencoded({extended:true}));
-app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({limit:'10mb',extended:true}));
+app.use(bodyParser.json({limit:'10mb'}));
 app.use(express.json());
 app.use(require('cors')());
 
@@ -17,9 +17,13 @@ app.get('/', (req,res) => res.json('Hello From The API HOME'));
 app.use((req,res) => res.status(404).json("404 not found"));
 
 async function reset(){
-    await Database.reset();
-    await Local.reset();
-    // await Local.update();
+    await Database.reset(); // drop all collections
+    await Local.reset(); // unsync all collections
+}
+
+async function hardReset(){
+    await Database.reset(); // drop all collections
+    Local.update(); // recompile from file system state
 }
 
 async function run() {

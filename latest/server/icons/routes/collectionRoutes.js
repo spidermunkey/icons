@@ -32,14 +32,14 @@ router.get('/info/names', async function getCollectionNames(request,response) {
 
 router.post('/create', async function createCollection (request,response) {
   const data = await App.create_collection(request.body.payload.props)
-  console.log('why tho',data)
   response.json(data)
 })
 
 router.post('/sync', async function sync_collection(request,response){
-  const synced = await App.sync_collection(request.body.payload.cid)
+  const synced = await App.sync_collection(request.body.payload.props)
   response.json(synced)
 })
+
 router.post('/ignore', async function ignore_collection(request,response){
   console.log('ignoring collection')
   const { payload } = request.body
@@ -53,6 +53,7 @@ router.post('/ignore', async function ignore_collection(request,response){
   if (confirmed) console.log('CONFIRMED')
   response.json({message: 'proccess complete', success: confirmed, reason: null})
 })
+
 router.delete('/:collectionID', async function dropCollection(request,response){
   const collection = request.params.collectionID;
   const result = await Mongo.remove_collection(collection);
@@ -62,6 +63,7 @@ router.delete('/:collectionID', async function dropCollection(request,response){
   console.log('delete Result',result)
   response.json(result)
 })
+
 router.post('/:collectionID/:id',async function searchCollection(request,response){
   
 })
