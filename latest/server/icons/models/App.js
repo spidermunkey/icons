@@ -2,9 +2,11 @@ const EventEmitter = require("events");
 
 const Local = require('./Local.js')
 const Database = require('./Database.js');
-const Meta = require('./Collection/Meta.js')
-const Collection = require('./Collection.js')
+const Meta = require('./Collection/Meta.js');
+const Collection = require('./Collection.js');
+const Icon = require('./Collection/Icon.js');
 const { uuid } = require('../../utils/uuid.js');
+const { print } = require('../../utils/print.js')
 
 class App extends EventEmitter {
 
@@ -78,7 +80,6 @@ class App extends EventEmitter {
     async sync_collection(collection){
         // allows duplicate names... must be distinguished by collection_type
         try {
-            console.log(collection)
             const { cid,colors, presets, icons } = collection;
             console.log('syncing local collection')
             const props = Local.getCollectionById(cid);
@@ -137,7 +138,59 @@ class App extends EventEmitter {
         }
 
     }
+    // should be refactored to accept cids
+    async get_collection({ collection, limit, page, filters}){
+        try {
+            const meta = await Meta.findByName(collection)
+            if(meta){
+                const result = await Collection.data(meta.cid,{limit,page,filters})
+                return result
+            } else throw new Error('collection not found')
+        } catch (error){
+            return {success:false,reason:error,message:'error retrieving collection'}
+        }
 
+    }
+
+    async addToCollection({collection,icons}){
+        try {
+            const meta = await Meta.findByName(collection)
+            if (meta){
+                const faulty = [];
+                const added = await Promise.all(icons.map(async props => {
+                    console.log(props)
+                    const updated = {
+                        ...props,
+                        collection: meta.name,
+                        cid: meta.cid,
+                        id: uuid(),
+                    }
+                    try {
+                        print('updating icon...')
+                        const added =  await Icon.add(updated)
+                        print(`added ${updated.name} to ${updated.collection}`)
+                        return added;
+                    } catch (error){
+                        print(`error adding ${updated.name} to ${updated.collection}`)
+                        faulty.push(props)
+                    }
+                }))
+                // not async
+                update_size(meta);
+                return {success:true, message:'process complete', reason: faulty.length,}
+            } else throw new Error('collection not found');
+        } catch (error){
+            return {success:false,reason:error,message:'error adding to collection'}
+        }
+        async function update_size(meta){
+            // this feels dangerous
+            const cid = meta.cid;
+            const size = await Collection.size(meta.cid);
+            const updated = await Meta.update(cid,{size:size})
+            console.log('size updated')
+            console.log(updated.value)
+        }
+    }
     async get_sample(n){
 
     }

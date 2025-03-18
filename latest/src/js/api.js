@@ -86,8 +86,8 @@ export const API = {
     async createCollection(collection) {
         return this.post(`${endpoint}/collections/create` ,{ props: { ...collection }})
     },
-    async addToCollection(name,props) {
-        return this.post( `${endpoint}/collections/${name}`, { ...props } )
+    async addToCollection(name,icons) {
+        return this.post( `${endpoint}/collections/${name}`, { icons:[...icons] } )
     },
     async dropCollection(id) {
         return axios.delete(`${endpoint}/collections/${id}`);

@@ -154,7 +154,7 @@ async function add(props){ // copy from remote db => <collection_type>: 'project
         return {success: added.value, reason:'acknowledged', message:'process complete'}
 
     } catch (error){
-        throw error
+        return {succes:false,reason:error,message:'error adding icon'}
     }
 }
 

@@ -18,10 +18,9 @@ async function size(cid){
 }
 
 async function icons(cid, {limit,filter,page = 1}){
+    const {query,options} = paginate(limit,filter,page)
     return (await find(cid))
-    .find(
-    {},
-    {...paginate(limit,filter,page)})
+    .find(query,options)
     .toArray();
 }
 

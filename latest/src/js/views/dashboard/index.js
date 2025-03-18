@@ -261,7 +261,7 @@ export class Dashboard extends AbstractView {
             const queryIsCurrent = this.state.query === query || this.state.query === searchQuery
             if (queryIsCurrent) {
                 this.dashboard.setLoading()
-                const collection = this.store.createCollection({ 
+                const collection = new Collection({ 
                     icons: data, 
                     meta: { name: 'search' }
                 })
@@ -1787,8 +1787,12 @@ export class Dashboard extends AbstractView {
         }
     }
     async renderDashboardHome(){
-        // this could probably be sped up with generator
-        // instead of promise.all
+        // should refactor for hotlinks to have cids
+            // indexes [...names]
+            // collections [...names]
+            // projects [...names]
+        // render collection should be refactored for greater specificity
+        // collection.render() => store.getCollection(collection.cid)
         const frag = document.createDocumentFragment();
         const homePanel = $('#DASHBOARD .db-res');
         homePanel.innerHTML = '... fetching data'
@@ -1881,11 +1885,10 @@ export class Dashboard extends AbstractView {
             console.log('updating collection info',collection)
             const {meta} = collection
             let {collection_type,subtypes,sub_collections,size,name, uploaded_at = undefined,created_at = null, updated_on = null}  = meta;
-            if (collection_type == 'auto') collection_type = 'default'
             let lastUpdate = 
                 updated_on ? getAgo(updated_on)
-                : uploaded_at ? getAgo(uploaded_at)
                 : created_at ? getAgo(created_at)
+                : uploaded_at ? getAgo(uploaded_at)
                 : 'never'
             $('.current-collection-widget .content-title').textContent = name;
             $('.current-collection-widget .widget-content').innerHTML = `
@@ -2073,7 +2076,7 @@ export class Dashboard extends AbstractView {
     }
     async addToCollection(collection,icon) {
         let result
-        if (collection && icon) result = await this.store.addToCollection({ destination: collection, icon:icon })
+        if (collection && icon) result = await this.store.addToCollection({ destination: collection, icons:[icon] })
         this.notify('icon added',{ icon,collection,result })
     }
     async addToNewCollection(){

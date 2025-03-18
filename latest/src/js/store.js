@@ -85,29 +85,30 @@ export class SvgModel extends EventEmitterClass {
 
     // commands
     async search(query){
+        // should parsed for sorting
+            // by name
+            // by created on
+            // by subtype
+            // by default
+
         return API.search(query)
     }
     async saveCollectionColorset(cid,colorset){
-        console.log('saving collection colorset',cid)
         return API.saveCollectionColorset(cid,colorset)
     }
     async saveIconColorset(cid,colorset){
-        console.log('saving icon colorset')
         return API.saveIconColorset(cid,colorset)
     }
     async deleteIconColorset(id,collection,csid){
         return API.deleteIconColor(id,collection,csid)
     }
     async setDefaultIconColor(id,collection,csid){
-        console.log('applying icon colorset default')
         return API.setDefaultIconColor(id,collection,csid)
     }
     async applyDefaultCollectionColorset(cid,colorset){
-        console.log('applying default collection colorset')
         return API.setDefaultCollectionColor(cid,colorset);
     }
     async clearCollectionDefaultColor(collection){
-        console.log('clearing collection default')
         return API.clearCollectionDefaultColor(collection)
     }
     async deleteCollectionColor(cid,csid){
@@ -143,23 +144,10 @@ export class SvgModel extends EventEmitterClass {
     async dropCollection(collectionId){
         return API.dropCollection(collectionId);
     }
-    async addToCollection({ destination, icon }) {
-        const id = uuid()
-        let collection = this.collections[destination]
-        if (!collection) collection = new Collection(destination)
-        else if (collection[id] !== undefined) return console.warn('this id already exists')
-        let copy = icon.save()
-
-        copy.collection = destination
-        copy.trace = icon.id
-        copy.id = id
-        collection[id] = icon
-        console.log('optimistic update successful... asynchronously adding to database now')
-        const response = await API.addToCollection( destination, copy.props )
-        console.log('a2c response...')
+    async addToCollection({ destination, icons }) {
+        const response = await API.addToCollection( destination, icons )
         return response;
     }
-
     // queries
     async getCollectionNames(collection_type) {
         return API.getCollectionNames(collection_type);
@@ -209,9 +197,8 @@ export class SvgModel extends EventEmitterClass {
         }
 
     }
-    async getCollection(name, filters = {subtypes:[],sub_collections:[]}, useFilters = false) {
-        const result = await API.getCollection(name,filters,useFilters)
-        console.log('RESY',result)
+    async getCollection(name, filters = {subtypes:[],sub_collections:[]}) {
+        const result = await API.getCollection(name,filters)
         const collection = new Collection(result)
         return collection
     }
@@ -233,8 +220,8 @@ export class SvgModel extends EventEmitterClass {
         for (const x in meta.locals){
             meta.names.push(meta.locals[x].name);
           }
-          for (const x in meta.index){
-            meta.names.push(meta.index[x].name);
+          for (const x in meta.projects){
+            meta.names.push(meta.projects[x].name);
           }
           for (const x in meta.index){
             meta.names.push(meta.index[x].name);
@@ -243,6 +230,8 @@ export class SvgModel extends EventEmitterClass {
     }
     async getNames() {
         const meta = await this.getMeta();
+        console.log(meta)
+        console.log(meta.names)
         return meta.names;
     }
     async getStatus(){

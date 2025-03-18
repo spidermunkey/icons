@@ -11,7 +11,6 @@ const config = {
     collection_alias: '{{meta}}',
     // should probably be a map that also verifies specific type
     configurable: ['name','size','preset','presets','color','colors','filters'],
-    searchable: ['name','size','cid','synced','collection_type'],
     filterProperties(props){
         const configurable = {};
         for (const prop in props){
@@ -40,13 +39,13 @@ function configure(props){
         collection_type: props?.collection_type || 'project',
         subtypes: props?.subtypes || [],
         sub_collections: props?.sub_collections || [],
-        size: props?.size || undefined,
+        size: props?.size || props?.icons.length || undefined,
         created_at: props?.created_at || Date.now(),
         preset: props?.preset || null,
         presets: props?.presets || {},
         color: props?.color || null,
         colors: props?.colors || {},
-        sample: props?.icons.slice(0,25) || [],
+        sample: props?.sample || props?.icons?.slice(0,25) || [],
         src_addr:props?.src_addr || undefined,
         synced: props?.collection_type === 'local' ? props?.synced : null, // should be date stamp
         filters: {
@@ -109,6 +108,7 @@ async function names(collection_type){
         }
         return names
 }
+
 async function create(props){
     const collection_id = props?.cid || uuid();
     try {
@@ -136,9 +136,9 @@ async function find(cid){
     }
 }
 
-async function findByName(name){
+async function findByName(name,collection_type){
     try {
-        return await (await connect()).findOne( { name:name });
+        return await (await connect()).findOne( { name:name, collection_type: collection_type ? collection_type : {$exists: true}});
     } catch (error) {
         console.error("Error finding meta document by name: ");
         throw error;
@@ -147,15 +147,14 @@ async function findByName(name){
 
 async function update(cid,props){
     try {
-        const configuredProps = configure(props);  // Ensuring the structure is correct
         return (await connect()).findOneAndUpdate(
             { cid: cid },
             {
                 $set: {
-                    ...config.filterProperties(configuredProps),
+                    ...config.filterProperties(props),
                     updated_on: Date.now()
                 }
-            }
+            },{returnDocument:'after'}
         );
     } catch (error) {
         console.error("Error updating meta document: ");
@@ -190,6 +189,7 @@ async function removeColor(cid,csid){
         throw error;
     }
 }
+
 async function setColorDefault(cid,colorset){
     try {
         return await Color.update(cid, colorset);
@@ -197,6 +197,7 @@ async function setColorDefault(cid,colorset){
         throw error;
     }
 }
+
 async function clearColorDefault(cid){
     try {
         return await Color.clearDefault(cid);
@@ -236,6 +237,7 @@ async function clearPresetDefault(cid){
         throw error
     }
 }
+
 module.exports = {
     
     info,

@@ -325,7 +325,7 @@ export function CollectionWidget(data) {
     db_panel.appendChild(panel_footer);
 
     panel_header.innerHTML = `
-    <div class="panel-name" collection=${name}>${name}</div>
+    <div class="panel-name" cid=${data.cid} collection=${name}>${name}</div>
     <div class="panel-options">
       <div class="dropdown-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m85vg8jg-01S9PHENZ0PX">

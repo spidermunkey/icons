@@ -471,6 +471,7 @@ const mongo_db = {
         return icon
     },
     async search(query,collection = 'all') {
+        console.log('searching...')
         const { icons } = await this.connect();
         try {
             const result = await icons.collection(collection).find({
@@ -479,6 +480,7 @@ const mongo_db = {
                     { category: { $regex: query, $options: 'i' } } // Case-insensitive regex search on the 'category' field
                 ]
             }).toArray();
+            console.log(result)
             return result
         } catch(e){
             console.log(e)

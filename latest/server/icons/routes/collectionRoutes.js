@@ -43,48 +43,60 @@ router.post('/sync', async function sync_collection(request,response){
 })
 
 router.post('/ignore', async function ignore_collection(request,response){
-  console.log('ignoring collection')
-  const { payload } = request.body
-  if (!payload?.cid){
-     response.json({message: 'upload failed', success: false, reason: 'invalid collection id'})
-     return
+  try {
+    response.json(Local.ignore(request.payload.cid))
+  } catch (error) {
+    console.log(error)
+    response.status(500).send({success:false,code:500,message:'error processing request'})
   }
-  let cid = payload.cid
-  let done = Local.ignore(cid)
-  let confirmed = Local.getCollectionById(cid).ignored == true
-  if (confirmed) console.log('CONFIRMED')
-  response.json({message: 'proccess complete', success: confirmed, reason: null})
 })
 
 router.delete('/:collectionID', async function dropCollection(request,response){
-  response.json(App.drop_collection(request.params.collectionID))
+  try {
+    response.json(App.drop_collection(request.params.collectionID))
+  } catch (error) {
+    console.log(error)
+    response.status(500).send({success:false,code:500,message:'error processing request'})
+  }
 })
 
-router.post('/:collectionID/:id',async function searchCollection(request,response){
-  
-})
-
+// refactor to accept collection ids instead of names or collection type in addition to name
+// to support duplicate names (local.name, project.name)
 router.get('/:collection', async function getCollection (request, response) {
-  const cName = request.params.collection;
-  const page = request.query?.page;
-  const limit = request.query?.limit;
-  const filterSubType = request.query?.st;
-  const filterSubCollection = request.query?.sc;
-  let filters = {subtypes:[],sub_collections:[]};
-  filters['subtypes'] = !filterSubType || filterSubType === '' ? [] : decodeURIComponent(request.query.st).split(',').filter(i => i != '' && i != null && i != undefined);
-  filters['sub_collections'] = !filterSubCollection || filterSubCollection === '' ? [] : decodeURIComponent(request.query.sc).split(',').filter(i => i != '' && i != null && i != undefined);
-  let data =  await Mongo.get_collection( { page , limit, filters, collection_name:cName } );
-  response.json(data)
+  try {
+    response.json(await App.get_collection({
+      collection: request.params.collection,
+      page: request.query?.page, 
+      limit: request.query?.limit,
+      filters: {
+        subtypes: !(request.query?.st) || request.query?.st === '' ? [] : decodeURIComponent(request.query.st).split(',').filter(i => i != '' && i != null && i != undefined),
+        sub_collections: !(request.query?.sc) || request.query?.sc === '' ? [] :  decodeURIComponent(request.query.sc).split(',').filter(i => i != '' && i != null && i != undefined),
+      }
+    }))
+  } catch(error){
+    console.log(error)
+    response.status(500).send({success:false,code:500,message:'error processing request'})
+  }
 })
 
 router.put('/:collectionID', async function editCollection(request,response){
   
 })
-router.post('/:collectionName', async function addToCollection (request, response) {
-  const { payload } = request.body;
-  const result = await Mongo.addToCollection(payload)
-  response.json(result)
+
+
+router.post('/:collection', async function addToCollection (request, response) {
+  try {
+    response.json(await App.addToCollection({
+      collection: request.params.collection,
+      icons: request.body.payload.icons
+    }))
+  } catch(error){
+    console.log(error)
+    response.status(500).send({success:false,code:500,message:'error processing request'})
+  }
 })
+
+
 
 router.put('/settings/:collection', async function clearDefaultSetting(request,response){
   const collection = request.params.collection
@@ -132,11 +144,6 @@ router.delete('/colors', async function removeCollectionColorset(request,respons
   let cid = decodeURIComponent(request.query.cid);
   let csid = decodeURIComponent(request.query.csid);
   const result = await Mongo.delete_collection_color(cid,csid);
-  response.json(result);
-})
-
-router.get('/', async function getCollections(request,response) {
-  const result = Local.get_collections(true);
   response.json(result);
 })
 
