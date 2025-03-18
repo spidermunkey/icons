@@ -1,6 +1,6 @@
 const { MongoClient } = require('mongodb')
 const {CONNECTION_STRING} = require('../../.config/env')
-
+const {print} = require('../../utils/print.js')
 class Database {
     constructor() {
         this.uri = CONNECTION_STRING;
@@ -14,14 +14,14 @@ class Database {
     async getDB(name){
         try {
             if (!this.client) {
-                console.log('No client found, attempting to reconnect...');
+                print('No client found, attempting to reconnect...');
                 await this.connect();
             }
             if (!this.client) {
-                console.error('Failed to connect to MongoDB.');
+                print('Failed to connect to MongoDB.');
                 return null
             }
-            console.log(`Retrieving database: ${name}...`);
+            print(`Retrieving database: ${name}...`);
             const database = this.client.db(name)
             return database;
         } catch(error){

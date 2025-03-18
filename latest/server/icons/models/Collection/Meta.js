@@ -46,6 +46,7 @@ function configure(props){
         presets: props?.presets || {},
         color: props?.color || null,
         colors: props?.colors || {},
+        sample: props?.icons.slice(0,25) || [],
         src_addr:props?.src_addr || undefined,
         synced: props?.collection_type === 'local' ? props?.synced : null, // should be date stamp
         filters: {
@@ -106,7 +107,6 @@ async function names(collection_type){
                 }
             }
         }
-    
         return names
 }
 async function create(props){

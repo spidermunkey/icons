@@ -30,50 +30,14 @@ router.get('/info/names', async function getCollectionNames(request,response) {
   }
 })
 
-
 router.post('/create', async function createCollection (request,response) {
   const data = await App.create_collection(request.body.payload.props)
-  if (data?.success === false){
-    console.log(data)
-  }
   response.json(data)
 })
+
 router.post('/sync', async function sync_collection(request,response){
-  console.log('syncing local collection')
-  const { payload } = request.body
-  if (!payload?.cid)
-      return response.json({message: 'upload failed', success: false, reason: 'invalid collection id'})
-  let cid = payload.cid;
-  console.log('searching in local db')
-  let collection = Local.getCollectionById(cid);
-  if (collection) {
-    console.log('collection found... checking remote database...')
-    const isSync = await Mongo.check_collection_id(collection.cid)
-    console.log('cloud sync status', isSync)
-    if (!isSync){
-      console.log('syncing collection',collection.name,collection.cid)
-      try {
-        const data = Local.get_collection(collection.name)
-        const status = await Mongo.sync_collection( data )
-        console.log('STAT',status)
-        if (status.success == true) {
-          const result = await Local.sync(cid);
-          if (result){ console.log('local update success!')}
-          else {
-            console.log('error syncing local collection')
-            response.json({message: 'local sync failed', success: false, reason: 'unknown'})
-          }
-        }
-        console.log('upload status done',status)
-        response.json(status)
-      } catch(e) {
-        console.log(e)
-        response.json({message: 'local sync failed', success: false, reason: 'unknown'})
-      }
-    } else {
-      response.json({message: 'upload failed', success: false, reason: 'collection is synced in mongo db'})
-    }
-  }
+  const synced = await App.sync_collection(request.body.payload.cid)
+  response.json(synced)
 })
 router.post('/ignore', async function ignore_collection(request,response){
   console.log('ignoring collection')

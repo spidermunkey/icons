@@ -5,8 +5,8 @@ const { uuid } = require('../utils/uuid.js')
 // const { Icon } = require('./models/Icon.js')
 const {Icon} = require('./Icon.js')
 const { print } = require('../utils/print.js')
-
 const mongo_db = {
+
     icons: {},
     collection_names: [],
     collections: {},
@@ -81,7 +81,7 @@ const mongo_db = {
             else return { success:'false', message:'no action taken', reason:'no collection found' }
     }
     },
-    
+
     async add_icon_colorset(id,collection,colorset){
       const {icons} = await this.connect();
       const coll = icons.collection(collection);
@@ -367,6 +367,7 @@ const mongo_db = {
         const {query,options} = paginate(limit,filters,page)
         const collectionExist = await this.check_collection_name(collection_name)
         if (!collectionExist) { 
+            console.log('no collection exists')
             return {} 
         }
         const collection = icons.collection(collection_name);
@@ -457,6 +458,7 @@ const mongo_db = {
     },
     async check_collection_name(name){
         const names = await this.get_collection_names();
+        console.log(names)
         return names.includes(name);
     },
     async collection_exists(name,collection_id) {
@@ -624,11 +626,11 @@ const mongo_db = {
         const {icons} = await this.connect();
         try {
             const meta = icons.collection(this.meta_alias);
-            const document = await meta.findOne({cid:id,docname:this.meta_doc_alias});
+            const document = await meta.findOne({cid:id});
             const name = document?.name;    
             if (name){
                 console.log(`dropping ${name}: ${id}`)
-                const metaDeleted = await meta.deleteMany({cid:id,docname:this.meta_doc_alias})
+                const metaDeleted = await meta.deleteMany({cid:id})
                 const collectionDropped = await icons.dropCollection(name)
                 result = {collectionDropped,metaDropped:metaDeleted.deletedCount > 0}
                 success = true;

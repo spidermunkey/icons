@@ -140,8 +140,8 @@ function CollectionMenu(props) { // get list of names from db
           <div class="label count">saved icons: ${size}</div>
           <div class="label updated_on"> last updated: ${
             updated_on ? getAgo(updated_on)
-            : uploaded_at ? getAgo(uploaded_at)
             : created_at ? getAgo(created_at)
+            : uploaded_at ? getAgo(uploaded_at)
             : 'never'
           }</div>
           <div class="label dashboard-link">open preview</div>

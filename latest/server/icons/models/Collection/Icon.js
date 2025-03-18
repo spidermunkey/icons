@@ -2,7 +2,7 @@
 const Database = require('../Database.js');
 const Meta = require('./Meta.js');
 const { objectIsEmpty } = require('../../../utils/objectIsEmpty.js');
-
+const { print } = require('../../../utils/print.js')
 config = {
     configurable_collection_type: 'project', // can add / delete to projects.
     configurables:[ 'favorite','benched','name','ignored','updated_at','preset','color' ],
@@ -109,12 +109,12 @@ async function sync(props) { // upload from local => <collection_type> : 'remote
 
         const collection = await getCollection(schema.collection);
         const all = await index();
-        const added = await collection.findOneAndReplace({id:schema.id},{...schema},{upsert:'true', ReturnDocument:'after'});
-        const indexed = await all.findOneAndReplace({id:schema.id},{...schema},{upsert:'true', ReturnDocument:'after'});
-        
-        return {success: { added , indexed }, reason:'', message:'process complete' }
+        const added = await collection.findOneAndReplace({id:schema.id},{...schema},{upsert:true, returnDocument:'after'});
+        const indexed = await all.findOneAndReplace({id:schema.id},{...schema},{upsert:true, returnDocument:'after'});
+        return {success: { added:added.value , indexed:indexed.value }, reason:'', message:'process complete' }
 
     } catch (error){
+        console.log(error)
         throw error
     }
 }
@@ -144,20 +144,15 @@ async function add(props){ // copy from remote db => <collection_type>: 'project
 
         const schema = configure(props);
         if (!schema.collection) {
-            console.log('invalid', schema)
             throw new Error('add to collection failed invalid collection id or name')
         }
         else if (!schema.cid) {
-            console.log('invalid', schema)
             throw new Error('add to collection failed.... invalid collection id',schema)
         }
         else if (await getCollectionTypeById(schema.cid) !== 'project') throw new Error('add to collection failed... invalid collection type')
-        
         const collection = await getCollection(schema.collection);
         const added = await collection.findOneAndReplace({id:schema.id},{...schema},{ upsert:true, returnDocument:'after'});
-        console.log('added',added)
-        console.log('schema',schema)
-        return {success: added, reason:'acknowledged', message:'process complete'}
+        return {success: added.value, reason:'acknowledged', message:'process complete'}
 
     } catch (error){
         throw error

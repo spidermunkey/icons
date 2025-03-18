@@ -31,6 +31,10 @@ module.exports = {
       console.log('updating...')
       await this.loadDB()
     },
+    async reset() {
+      this.update_each({ignored: false, synced: false})
+      return this.db;
+    },
     async loadDB(){
       if (!this.loading){
         this.loading = true;

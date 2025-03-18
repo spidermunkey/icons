@@ -27,6 +27,15 @@ class App extends EventEmitter {
         this.database = Database
     }
 
+    async collection_id_exists(cid){
+        return await Meta.find(cid)
+    }
+
+    async collection_name_exists(name){
+        return await Meta.findByName(name);
+
+    }
+
     async get_collection_info(){
         const documents = await Meta.info();
         return documents;
@@ -38,24 +47,62 @@ class App extends EventEmitter {
     }
 
     async create_collection(props){
-        const name = props?.name;
-        const collection_id = props?.collection_id || uuid();
-        const restrictedNames = ['all','favorites','recent','uploads','downloads','{{meta}}'];
-        const collection_exists = await Meta.find(collection_id)
-        const collection_name_exists = await Meta.findByName(name);
-
-        if (!name) return { message: 'collection not created', success: false, reason: 'invalid name property' }
-        if (collection_exists) return { message: 'collection not created',success: false, reason:'collection id exists'}
-        if (collection_name_exists) return {message: 'collection not created', success:false, reason: 'name already exists'}
-        if (restrictedNames.includes(name)) return  { message: 'collection not created',success: false, reason:'restricted collection name'}        
-        if (!props.icons && !Array.isArray(props.icons) && props.icons.length <= 0)  return {message:'collection not created', success: false, reason: 'invalid icons param'}
         try {
+            const isValid = (await validate_collection.call(this,props))?.success === true;
+            if (isValid)
             return await Collection.create(props)
         } catch(error){
             console.log('error creating collection', error)
         }
+        async function validate_collection(props){
+            const name = props?.name;
+            const collection_id = props?.collection_id || uuid();
+            const restrictedNames = ['all','favorites','recent','uploads','downloads','{{meta}}']
+            const collection_exists = this.collection_id_exists(collection_id)
+            const collection_name_exists = await this.collection_name_exists(name) || restrictedNames.includes(name) ;
+
+            if (!name) return { message: 'collection not created', success: false, reason: 'invalid name property' }
+            if (collection_exists) return { message: 'collection not created',success: false, reason:'collection id exists'}
+            if (collection_name_exists) return {message: 'collection not created', success:false, reason: 'name already exists'}
+            if (!props.icons && !Array.isArray(props.icons) && props.icons.length <= 0)  return {message:'collection not created', success: false, reason: 'invalid icons param'}
+            else {
+                return { success:true }
+            }
+        }
     }
 
+    async sync_collection(cid){
+        // allows duplicate names... must be distinguished by collection_type
+        try {
+            console.log('syncing local collection')
+            const props = Local.getCollectionById(cid);
+            const validation_status = ( await validate.call(this,props))
+            const isValid = validation_status.success === true;
+            if (isValid){
+                const synced = await Collection.sync(props)
+                if (synced?.success === true){
+                    await Local.sync(cid)
+                }
+                return synced;
+            } else {
+                console.log('error finding local collection',validation_status.reason)
+                return validation_status
+            } 
+        } catch(error){
+            console.log('error syncing collection',error)
+        }
+        async function validate(props){
+            const name = props?.name
+            const restrictedNames = ['{{meta}}']
+            if (!props) return {message: 'collection not created', success: false, reason: 'invalid properties'}
+            if (!name) return { message: 'collection not created', success: false, reason: 'invalid name property' }
+            if (restrictedNames.includes(name)) return { message: 'collection not created', success:false, reason:'restricted name'}
+            if (!props.icons && !Array.isArray(props.icons) && props.icons.length <= 0)  return {message:'collection not created', success: false, reason: 'invalid icons param'}
+            else {
+                return { success:true }
+            }
+        }
+    }
 
 
     async get_sample(n){

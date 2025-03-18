@@ -175,23 +175,31 @@ export class SvgModel extends EventEmitterClass {
         return API.createCollection(name,icons)
     }
     async getCollectionSample(name,page=1,limit=50){
-        const result = await API.getPage(name,page,limit);
-        const validIcons = []
-        const {icons,meta} = result;
-        icons.forEach( icon => {
-            const i = new Icon(icon);
-            if (i.isValid) validIcons.push(i)
-            // else console.warn('skipping',i)
-        })
-        const sampleCollection = new Collection({icons,meta})
-            // lazy decorator
-            sampleCollection.size = meta.size,
-            sampleCollection.pages = Math.floor(meta.size/limit),
-            sampleCollection.currentPage = page,
-            sampleCollection.getPage =(num) => {
-                return this.getCollectionSample(meta.name,num,limit)
-            }
-            return sampleCollection
+        try {
+            const result = await API.getPage(name,page,limit);
+            const validIcons = []
+            console.log(result,name)
+            const {icons,meta} = result;
+            icons.forEach( icon => {
+                const i = new Icon(icon);
+                if (i.isValid) validIcons.push(i)
+                // else console.warn('skipping',i)
+            })
+            const sampleCollection = new Collection({icons,meta})
+                // lazy decorator
+                sampleCollection.size = meta.size,
+                sampleCollection.pages = Math.floor(meta.size/limit),
+                sampleCollection.currentPage = page,
+                sampleCollection.getPage =(num) => {
+                    return this.getCollectionSample(meta.name,num,limit)
+                }
+                return sampleCollection
+        } catch (error){
+            console.log('error fetching collection data',name)
+            console.log('should probably flag for cleanup')
+            return null;
+        }
+
     }
     async getCollection(name, filters = {subtypes:[],sub_collections:[]}, useFilters = false) {
         const result = await API.getCollection(name,filters,useFilters)
@@ -210,18 +218,18 @@ export class SvgModel extends EventEmitterClass {
         const data = await API.getCollectionData();
         let meta = {
             uploads: data?.uploads,
-            auto: data?.auto,
             projects: data?.projects,
+            index: data?.index,
             names: [],
         }
         for (const x in meta.uploads){
             meta.names.push(meta.uploads[x].name);
           }
-          for (const x in meta.auto){
-            meta.names.push(meta.auto[x].name);
-          }
           for (const x in meta.projects){
             meta.names.push(meta.projects[x].name);
+          }
+          for (const x in meta.index){
+            meta.names.push(meta.index[x].name);
           }
         return meta
     }

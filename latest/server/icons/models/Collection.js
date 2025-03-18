@@ -54,17 +54,13 @@ async function create(props){
         const {icons} = props;
         if (icons && Array.isArray(icons) && icons.length > 0) {
             const collectionData = await Meta.create(props);
-            console.log(collectionData)
             if (collectionData){
                 await Promise.all(icons.map(async props => {
-                    props.collection = collectionData.name;
-                    props.cid = collectionData.cid;
                     await Icon.add(props)
-                    console.log('done',props)
                 }))
-            }
+            } else throw new Error('meta data invalid')
             return collectionData
-        } else throw new Error('collection not created... invalid icons param')
+        } else throw new Error('invalid icons param')
 
     } catch (error){
         console.error('error creating collection', error);
@@ -77,19 +73,24 @@ async function sync(props){
     try {
         const {icons} = props;
         if (icons && Array.isArray(icons) && icons.length > 0){
+            props.collection_type = 'upload'
             const collectionData = await Meta.create(props);
             if (collectionData){
                 const faulty = []
+                const progress = icons.length;
+                let count = 0;
                 await Promise.all(icons.map(async props => {
                     try {
                         await Icon.sync(props)
+                        print(`icon synced -- [${++count}/${progress}]`)
                     } catch (error){
                         faulty.push(props.name)
-                        print('error syncing icon' )
+                        print(`error syncing icon`)
                     }
                 }))
-            }
-        }
+                return { success:true, message:'sync process complete'}
+            } else throw new Error('meta data invalid')
+        } else throw new Error('invalid icons param')
     } catch (error){
         console.error('error syncing collection', error);
         throw error;
@@ -106,7 +107,7 @@ async function unsync(props){
                 const faulty = []
                 await Promise.all(icons.map(async props => {
                     try {
-                        await Icon.unsyc(props)
+                        await Icon.unsync(props)
                     } catch(error){
                         faulty.push(props)
                         print('error unsyncing icon' )
