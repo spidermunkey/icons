@@ -3,10 +3,8 @@ this is pet project for managing svg files inside of a web ui.
 
 it's messy (first real project)
 
-this started as a learning project. I'm about 3years in and I'm ready to learn new things, meet new people and see where it takes me.
-I'm still new to all of this so if you see something that piques your interest, or notice something I can learn from pretty please reach out on twitter!
-
-I want feedback, I want to make friends in the industry, I want to learn from others, I want to hear from you!
+this started as a learning project.
+I'm still new to all of this so if you see something that piques your interest, or notice something I can learn from pretty please reach out
 
 ```
 changes persisted mongo db 'icons' for use with multiple workspaces
