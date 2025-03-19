@@ -4,11 +4,7 @@ import { Collection } from './components/Collection.js';
 export class SvgModel extends EventEmitter {
     constructor() {
         super();
-        this.all = {};
-        this.collectionNames = []
-        this.collections = {}
         this.state = {}
-        this.meta = null
         this.pocket = {
             name: 'bench',
             updated_on: null,
@@ -38,49 +34,7 @@ export class SvgModel extends EventEmitter {
                 $('.bench-count').textContent = this.meta.size;
             }
         }
-        this.status = null;
-        this.ready = false;
-        this.statusBroker = new Task(API.getLocalStatus)
-        this.connectionBroker = new Task(API.getConnection)
-        this.data = {
-            connection: {
-                // localHost: new Task(API.getServerConnection),
-                internet: new Task(API.getConnection),
-            },
-            local: {
-                downloads: {
-                    collection_names: new Task(API.getCollectionNames),
-                    collection_data: new Task(API.getDownloads.bind(API,20)),
-                },
-                upload: {
-                    collection_names: new Task(API.getCollectionNames.bind(API,true)),
-                    collection_data: new Task(API.getUploads.bind(API,20)),
-                },
-                meta: {
-                    // totalIcons: new Task(API.getLocalSize)
-                    // totalCollections: new Task(API.getTotalCollectionSize)
-                    // lastSync: new Task(API.getLastSync)
-                    state: new Task(API.getStatus.bind(API))
-                }
-            },
-            remote: {
-                synced: {
-                    collection_names: new Task(API.getCollectionNames),
-                    collection_data: new Task(API.getCollectionData)
-                },
-                user: {
-                    // collection_names: new Task(API.getUserCollectionNames),
-                    // collection_data: new Task(API.getUserCollections)
-                },
-                meta: {
-                    // totalIcons: new Task(API.getRemoteSize)
-                    // totalCollections: new Task(API.getRemoteCollectionSize)
-                    // state: new Task(API.getRemoteStatus)
-                }
-            }
-        }
     }
-
     // commands
     async search(query){
         // should parsed for sorting
@@ -150,10 +104,6 @@ export class SvgModel extends EventEmitter {
     async getCollectionNames(collection_type) {
         return API.getCollectionNames(collection_type);
     }
-    async populateAllIcons() {
-        const response = (await API.getCollection('all'))[0];
-        return response
-    }
     async getIcon(id){
         return API.getIcon(id);
     }
@@ -200,13 +150,6 @@ export class SvgModel extends EventEmitter {
         const collection = new Collection(result)
         return collection
     }
-    async populateCollectionData() {
-        const userCollections = await this.getCollectionNames();
-        for (const name of userCollections){
-            const response = await this.getCollection(name);
-            this.collections[name] = new Collection(response);
-        }
-    }
     async getMeta() {
         const data = await API.getCollectionData();
         let meta = {
@@ -235,5 +178,4 @@ export class SvgModel extends EventEmitter {
     async getStatus(){
         return API.getStatus();
     }
-
 }
