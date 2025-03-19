@@ -1,9 +1,7 @@
 import { API } from './api.js';
 import { Icon } from './components/Icon.js';
 import { Collection } from './components/Collection.js';
-import { EventEmitterClass } from './utils/EventEmitter.js';
-import { Task } from './utils/Task.js';
-export class SvgModel extends EventEmitterClass {
+export class SvgModel extends EventEmitter {
     constructor() {
         super();
         this.all = {};

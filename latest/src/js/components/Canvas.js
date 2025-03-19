@@ -1,6 +1,4 @@
 import { Color } from "./Color.js";
-import { MouseTrackingSlider } from "../utils/MouseTrackingSlider.js";
-
 export class Canvas extends MouseTrackingSlider {
     constructor({ canvas, pointer, hueBar, actions = {} }) {
         super( canvas, {});

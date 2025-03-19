@@ -1,13 +1,8 @@
-import { RecentDownloads } from "./components/recentIconWidget.js";
-import { UploadSection } from "./components/uploadedIconWidget.js";
-import { StatusWidget } from "./components/statusWidget.js";
+import { RecentDownloads } from "../../components/recentIconWidget.js";
+import { UploadSection } from "../../components/uploadedIconWidget.js";
+import { StatusWidget } from "../../components/statusWidget.js";
 import { API } from "../../api.js";
-import { EventEmitterClass } from "../../utils/EventEmitter.js";
-import { ago } from "../../utils/DateTime.js";
-
-import { LocalCollection } from "../../components/Collection.js";
-
-export class Home extends EventEmitterClass {
+export class Home extends EventEmitter {
   constructor(store) {
     super()
     this.store = store

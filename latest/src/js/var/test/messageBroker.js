@@ -1,19 +1,17 @@
-import { ClientSideSocketServer } from "./socket_server";
-import { EventEmitterClass } from "../../utils/EventEmitter";
-
-export class ClientSideSocketServer extends EventEmitterClass {
-  constructor(){
+export class MessageBroker extends EventEmitter {
+  constructor(host = 'ws://localhost:1279'){
     super();
     this.shouldReconnect = true;
     this.max_retry_attempts = 5;
     this.retry_attempts = 0;
     this.reconnecting = false;
     this.socket = this.createWebSocket();
+    this.host = host;
   }
   createWebSocket() {
     this.cancelReconnect()
     try {
-      let sock = new WebSocket('ws://localhost:1279');
+      let sock = new WebSocket(this.host);
       sock.onopen = this.handleConnection.bind(this);
       sock.onmessage = this.parseMessage.bind(this);
       sock.onclose = this.handleDisconnect.bind(this);
@@ -83,4 +81,3 @@ export class ClientSideSocketServer extends EventEmitterClass {
     this.notify('interupt')
   }
 }
-

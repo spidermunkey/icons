@@ -176,7 +176,7 @@ class App extends EventEmitter {
                     }
                 }))
                 // not async
-                update_size(meta);
+                await update_size(meta);
                 return {success:true, message:'process complete', reason: faulty.length,}
             } else throw new Error('collection not found');
         } catch (error){
@@ -191,9 +191,7 @@ class App extends EventEmitter {
             console.log(updated.value)
         }
     }
-    async get_sample(n){
 
-    }
 }
  
 

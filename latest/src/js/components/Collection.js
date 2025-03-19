@@ -1,6 +1,4 @@
 import { Icon } from './Icon.js';
-import { Cursor } from '../utils/Cursor';
-import { ago } from '../utils/DateTime.js';
 import { API } from '../api.js';
 import { Color } from './Color.js'
 export class Collection {

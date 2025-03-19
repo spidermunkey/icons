@@ -928,15 +928,15 @@ export class Color {
 
 // EOF
 
-function test(){
-    const red = new Color('red', { hex: '#fff'});
-    console.log(red)
-    console.log(red.hsl.toHslString(.5))
-    console.log(Color.rgbToHex( 15, 76, 48 ))
-    console.log(toBase16(9))
-    console.log(toBase16(76))
-    console.log(toBase16(48))
-}
+// function test(){
+//     const red = new Color('red', { hex: '#fff'});
+//     console.log(red)
+//     console.log(red.hsl.toHslString(.5))
+//     console.log(Color.rgbToHex( 15, 76, 48 ))
+//     console.log(toBase16(9))
+//     console.log(toBase16(76))
+//     console.log(toBase16(48))
+// }
 
 function toBase16(base10) 
 {

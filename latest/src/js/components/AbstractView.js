@@ -1,6 +1,4 @@
-import { EventEmitterClass } from "../utils/EventEmitter";
-
-export class AbstractView extends EventEmitterClass {
+export class AbstractView extends EventEmitter {
   constructor(store) {
     super()
     this.store = store

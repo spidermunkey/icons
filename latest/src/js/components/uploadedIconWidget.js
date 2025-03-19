@@ -1,6 +1,5 @@
-import { API } from "../../../api";
-import { Task } from "../../../utils/Task";
-import { Icon } from "../../../components/Icon";
+import { API } from "../api";
+import { Icon } from "./Icon";
 export class UploadSection {
   constructor(){
     this.store = new Task(API.getUploads.bind(API,20))

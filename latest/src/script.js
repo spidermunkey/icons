@@ -1,4 +1,809 @@
 // FILE TO MINIMIZE IMPORTS
+const eventMaps = {
+  enter(event){
+    return event.keyCode == 13 || event.which == 13 || event.key == 'Enter'
+  },
+  backspace(event){
+    return event.keyCode == 8;
+  },
+  leftClick(event){
+    return event.button === 0;
+  },
+  rightClick(event){
+    return event.button === 2;
+  },
+  dblclick(event = e){
+    return event.detail === 2;
+  },
+  cosm(event,parent){
+    return event.target.closest(parent)
+  },
+  clicked(event,elementClass){
+    return event.target.closest(elementClass)
+  },
+  isNumber(event){
+    var charCode = event.which ? event.which : event.keyCode;
+    if (charCode > 31 && (charCode < 48 || charCode > 57)) return false;
+    return true;
+  },
+
+}
+
+const root = document.documentElement;
+const docStyle = root.style;
+const date = {
+  standard: undefined,
+  default: undefined,
+  universal: undefined,
+  east: undefined,
+  west: undefined,
+  central: undefined,
+  leap: false,
+  dayMap: {
+      0: 'Sunday',
+      1: 'Monday',
+      2: 'Tuesday',
+      3: 'Wednesday',
+      4: 'Thurday',
+      5: 'Friday',
+      6: 'Saturday',
+      7: null,
+  },
+  monthMap: {
+      'January': 31,
+      get 'February'(){
+          if (this.leap) return 29
+          return 28;
+      },
+      'March': 31,
+      'April': 30,
+      'May': 31,
+      'June': 30,
+      'July': 31,
+      'August': 31,
+      'September': 30,
+      'October': 31,
+      'November': 30,
+      'December': 31,
+  },
+  days: ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday',null],
+  daysABRV: ['Sun','Mon','Tue','Wed','Thu','Fri','Sat', null],
+  months: ['January','February','March','April','May','June','July','August','September','October','November','December', null],
+  monthsABRV: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Nov', 'Dec', null],
+  isLeap: (year) => {
+      return ((year % 4 == 0) && (year % 100 !=0)) || (year % 400 == 0)     
+  },
+  getLeaps: (to,from) => {
+      function countFrom(lowest,highest) {
+          let leapSince = 0;
+          for (let i = lowest; i <= highest; i++) {
+              if (date.isLeap(i))
+                  leapSince++;
+          }
+          return leapSince;
+      }
+      return to < from ? countFrom(to,from) : countFrom(from,to);
+  }
+}
+const mns = 1/1000;
+const snm = 1/60;
+const mnh = 1/60; 
+const hnd = 1/24;
+const dny = 1/365;
+const mny = 1/12;
+
+const msns = 1000;
+const msnMinute = 60000;
+const msnHour = 3600000;
+const msnDay = 86400000;
+const msnYear = msnDay * 365;
+
+
+function $(arg, context = document) {
+  const element = context.querySelector(arg);
+
+  if (!element || !(element instanceof Element)) return null;
+
+  element.listen = function (callback, listener = "click", capture = false) {
+    element.addEventListener(listener, callback, capture);
+    return element;
+  };
+
+  return element;
+}
+function $$(arg, element = document) {
+  const array = Array.from(element.querySelectorAll(arg));
+  return array;
+}
+function getRoot(element) {
+  return element.documentElement.style;
+}
+function getVar(variableName) {
+  return getComputedStyle(root).getPropertyValue(variableName);
+}
+function setVar(variableName, value) {
+  return root.style.setProperty(variableName, value);
+}
+function addClass(element, classToAdd) {
+  element.classList.add(classToAdd);
+}
+function removeClass(element, classToRemove) {
+  element.classList.remove(classToRemove);
+}
+function ago(since) {
+    const now = Date.now();
+    const then = since.getTime();
+    
+    const monthsInYear = 1/12;
+
+    const msInWeek = 604800000;
+    const msInDay = 86400000;
+    const msInHour = 3600000;
+    const msInMin = 60000;
+    const msInSec = 1000;
+    
+    const monthOf = date.months[since.getMonth()]
+
+    const daysIn = date.monthMap[monthOf];
+    const dayOf = since.getDate();
+    const days = daysIn - dayOf;
+
+    const leapSince = date.getLeaps(since.getFullYear(), new Date(now).getFullYear())
+    let msAgo = now - then;
+    let context = 'ago'
+    if (msAgo < 0) {
+        context = 'til'
+    }
+
+    msAgo = Math.abs(msAgo);
+
+    const years = msAgo / msnYear;
+    const monthsAgo = getRemainder(years);
+    const months = monthsAgo / monthsInYear;
+
+    // const weeks = monthsAgo / weeksInYear;
+
+    const weeksAgo = Math.floor(msAgo / msInWeek);
+    const daysAgo = (Math.floor(msAgo / msInDay) + leapSince);
+    const hoursAgo = Math.floor(msAgo / msInHour);
+    const minutesAgo = Math.floor(msAgo / msInMin);
+    const secondsAgo = Math.floor(msAgo / msInSec);
+
+    const ago = {
+        since: new Date(now),
+        then: new Date(then),
+
+        years: Math.floor(years),
+        months: Math.floor(months),
+        days: days,
+
+        yearsAgo: years,
+        weeksAgo: weeksAgo,
+        daysAgo: daysAgo,
+        hoursAgo: hoursAgo,
+        minutesAgo: minutesAgo,
+        secondsAgo: secondsAgo,
+
+        leaps: leapSince,
+        string: undefined,
+    };
+    
+    if (ago.yearsAgo >= 1) {
+        if (ago.months >= 1) 
+            ago.string = `${ago.years} Years, ${ago.months} Months ${context}`
+        else if (ago.months < 1 ) 
+            ago.string = `${ago.years} Years ${context}`
+    } else if (months < 12 & months >= 1) {
+        let rounded = ago.months === 1 && days > 0 ? 2 : 1
+        ago.string = `${rounded} ${rounded === 1 ? 'Month' : 'Months'} ${context}`
+    }
+    else if (ago.weeksAgo < 4 && ago.weeksAgo > 2) {
+        ago.string = `${ago.weeksAgo} Weeks ${context}`
+    }
+
+    else if (ago.daysAgo < 14 && ago.daysAgo > 2) {
+        ago.string = `${ago.daysAgo} Days ${context}`
+    }
+    else if (ago.hoursAgo <= 48 && ago.hoursAgo >= 1) {
+        if (ago.hoursAgo < 2 && ago.hoursAgo >=1) {
+            ago.string = `${ago.hoursAgo} Hour ${context}`
+        } else {
+            ago.string = `${ago.hoursAgo} Hours ${context}`
+        }
+    }
+    else if (ago.minutesAgo < 59 && ago.minutesAgo > 1) {
+        ago.string = `${ago.minutesAgo} Minutes ${context}`
+    }
+    else if (ago.secondsAgo < 60 && ago.secondsAgo > 30) {
+        ago.string = `${ago.secondsAgo} Seconds ${ago}`
+    }
+    else if (ago.secondsAgo < 30) {
+        ago.string = `Just Now`
+    }
+    else {
+        return ago;
+    }
+    ago.time = ago.string.split(' ')[0];
+    ago.suffix = ago.string.split(' ')[1];
+    ago['context'] = context;
+
+    return ago;
+}
+
+function log() {
+  console.log.apply(this, arguments);
+}
+function err() {
+  console.log.apply(this, arguments);
+}
+
+function each(argList, callback) {
+  return argList.map(callback);
+}
+
+function listenAll(elements, callback, listener = "click") {
+  each(elements, (element) => listen(element, callback, listener));
+
+  return elements;
+}
+function listen( //element passed always last argument instead of being used as this context
+  element = document,
+  callback,
+  listener = "click",
+  capture = false,
+) {
+  if (!element) {
+    console.warn('no element passed to listen  function')
+    return;
+  }
+  // let context = this;
+  element.addEventListener(
+    listener,
+    function (event) {
+      callback.apply(callback,[event, ...arguments, element]);
+    },
+    capture
+  );
+}
+function mapEvents(event){
+  const e = event;
+  return {
+    enter(event = e){
+      return event.keyCode == 13 || event.which == 13 || event.key == 'Enter'
+    },
+    backspace(event = e){
+      return event.keyCode == 8;
+    },
+    leftClick(event = e){
+      return event.button === 0;
+    },
+    rightClick(event = e){
+      return event.button === 2;
+    },
+    dblclick(event = e){
+      return event.detail === 2;
+    },
+    cosm(parent, event = e){
+      return event.target.closest(parent)
+    },
+    clicked(elementClass, event = e){
+      return event.target.closest(elementClass)
+    },
+    isNumber(event = e){
+      var charCode = event.which ? event.which : event.keyCode;
+      if (charCode > 31 && (charCode < 48 || charCode > 57)) return false;
+      return true;
+    },
+  }
+}
+function clicked(elementClass, event) {
+  return eventMaps.clicked(event,elementClass)
+}
+function cosm(parentTagName) {
+  return (event) => event.target.closest(parentTagName)
+}
+function followMouseFromEventTarget(event) {
+  const { currentTarget: target } = event;
+
+  const rect = target.getBoundingClientRect(),
+    mouseXFromTarget = e.clientX - rect.left,
+    mouseYFromTarget = e.clientY - rect.top;
+
+  return {
+    x: mouseXFromTarget,
+    y: mouseYFromTarget,
+    mouseX: e.clientX,
+    mouseY: e.clientY,
+  };
+}
+function followMouseFromCoords(coords) {
+  return function (event) {
+    const { clientX, clientY } = event;
+    const { x, y } = coords;
+
+    return {
+      x: clientX - x,
+      y: clientY - y,
+      mouseX: clientX,
+      mouseY: clientY,
+    };
+  };
+}
+function boundary(element){
+  return element.getBoundingClientRect();
+}
+
+function throttle(fn, wait = 60) {
+  var time = Date.now();
+  return function() {
+    if ((time + wait - Date.now()) < 0) {
+      fn.call(this,...arguments);
+      time = Date.now();
+    } else return;
+  }
+}
+function debounce(fn,interval = 60) {
+  var time = Date.now();
+  let timeoutId;
+  return function() {
+    clearTimeout(timeoutId)
+    timeoutId = setTimeout(() => {
+      fn.call(this,...arguments);
+      time = Date.now();
+    },interval)
+    return time
+  }
+
+}
+function nextTick(callback) {
+  return setTimeout(callback, 0);
+}
+
+function toDecimal(num) {
+  return num / 100;
+}
+function getRemainder(float) {
+  return float - Math.floor(float);
+}
+function currentTime() {
+  return new Date().toLocaleTimeString();
+}
+function toClipboard(value, message) {
+  window.navigator.clipboard.writeText(value)
+  if (message) console.log("message from clipboard", message)
+}
+function uuid() {
+  let time = Date.now().toString(36).toLocaleLowerCase();
+  // random high number
+  let randomNumber = parseInt(Math.random() * Number.MAX_SAFE_INTEGER);
+  // random high num to hex => "005EIPQUTQ64" => add 0s to make sure its 12digits
+  randomNumber = randomNumber.toString(36).slice(0, 12).padStart(12, "0").toLocaleUpperCase();
+  // coerce into a string
+  return "".concat(time, "-", randomNumber);
+}
+
+function createToggleList(elements, classList = ["active"]) {
+  // console.log('creating a toggle list with elements',elements,'toggling between the class(s)',classList)
+  function toggle(element) {
+    elements.forEach((element) => element.classList.remove(...classList));
+    element.classList.add(...classList);
+  }
+  elements.forEach((element) => element.addEventListener("click", toggle))
+  return {
+    classList,
+    elements: [...elements],
+    toggle,
+    add: function (element) {
+      this.elements.push(element);
+    },
+  };
+}
+function frag() {
+  return document.createDocumentFragment();
+}
+function div(classList = [], styleProps = {}, attrs = {}, children) {
+  const div = document.createElement("div");
+  if (classList.length > 0) div.classList.add(...classList);
+
+  if (styleProps) {
+    for (prop in styleProps) {
+      console.log(prop);
+      console.log(styleProps[prop]);
+      div.style[prop] = styleProps[prop];
+    }
+  }
+
+  if (children) {
+    children.forEach(div.appendChild);
+  }
+
+  return div;
+}
+function ul() {
+  return document.createElement("ul");
+}
+function li() {
+  return document.createElement("li");
+}
+function inp(){
+  return document.createElement('input')
+}
+function span() {
+  return document.createElement("span");
+}
+
+function capitalize(word) {
+  return word[0].toUpperCase() + word.slice(1);
+}
+function uppercase(str) {
+  return [...str].map((x) => (x = x.toUpperCase())).join("");
+}
+function lowercase(str) {
+  return [...str].map((x) => (x = x.toLowerCase())).join("");
+}
+function exclaim(str) {
+  return str + "!";
+}
+
+function first(value,n=1) {
+  return value.slice(0,n);
+}
+function last(value,n=1) {
+  return value[value.length - n];
+}
+
+function isValidHex(str){
+    // Regular expression to match a valid hexadecimal color code
+    const hexRegex = /^#?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
+    // Check if the string matches the regular expression
+    if (!hexRegex.test(str)) {
+        return false; // Not a valid hexadecimal color code
+    }
+    // Check if the string starts with '#' and remove it if present
+    if (str.charAt(0) === '#') {
+        str = str.substring(1);
+    }
+    // If the string has 3 characters, expand it to 6 characters
+    if (str.length === 3) {
+        str = str.split('').map(c => c + c).join('');
+    }
+    // Try to create a new <div> element with the color and check if it is a valid CSS color
+    const div = document.createElement('div');
+    div.style.color = '#000'; // Set the color to black (default)
+    div.style.color = '#' + str; // Set the color to the provided hexadecimal code
+    return div.style.color !== '#000'; // If the color was successfully set, it's a valid CSS color
+}
+function isValidNamedColor(str){
+  const namedColors = {
+    aliceblue: "#F0F8FF",
+    antiquewhite: "#FAEBD7",
+    aqua: "#00FFFF",
+    aquamarine: "#7FFFD4",
+    azure: "#F0FFFF",
+    beige: "#F5F5DC",
+    bisque: "#FFE4C4",
+    black: "#000000",
+    blanchedalmond: "#FFEBCD",
+    blue: "#0000FF",
+    blueviolet: "#8A2BE2",
+    brown: "#A52A2A",
+    burlywood: "#DEB887",
+    cadetblue: "#5F9EA0",
+    chartreuse: "#7FFF00",
+    chocolate: "#D2691E",
+    coral: "#FF7F50",
+    cornflowerblue: "#6495ED",
+    cornsilk: "#FFF8DC",
+    crimson: "#DC143C",
+    cyan: "#00FFFF",
+    darkblue: "#00008B",
+    darkcyan: "#008B8B",
+    darkgoldenrod: "#B8860B",
+    darkgray: "#A9A9A9",
+    darkgreen: "#006400",
+    darkkhaki: "#BDB76B",
+    darkmagenta: "#8B008B",
+    darkolivegreen: "#556B2F",
+    darkorange: "#FF8C00",
+    darkorchid: "#9932CC",
+    darkred: "#8B0000",
+    darksalmon: "#E9967A",
+    darkseagreen: "#8FBC8F",
+    darkslateblue: "#483D8B",
+    darkslategray: "#2F4F4F",
+    darkturquoise: "#00CED1",
+    darkviolet: "#9400D3",
+    deeppink: "#FF1493",
+    deepskyblue: "#00BFFF",
+    dimgray: "#696969",
+    dodgerblue: "#1E90FF",
+    firebrick: "#B22222",
+    floralwhite: "#FFFAF0",
+    forestgreen: "#228B22",
+    fuchsia: "#FF00FF",
+    gainsboro: "#DCDCDC",
+    ghostwhite: "#F8F8FF",
+    gold: "#FFD700",
+    goldenrod: "#DAA520",
+    gray: "#808080",
+    green: "#008000",
+    greenyellow: "#ADFF2F",
+    honeydew: "#F0FFF0",
+    hotpink: "#FF69B4",
+    indianred: "#CD5C5C",
+    indigo: "#4B0082",
+    ivory: "#FFFFF0",
+    khaki: "#F0E68C",
+    lavender: "#E6E6FA",
+    lavenderblush: "#FFF0F5",
+    lawngreen: "#7CFC00",
+    lemonchiffon: "#FFFACD",
+    lightblue: "#ADD8E6",
+    lightcoral: "#F08080",
+    lightcyan: "#E0FFFF",
+    lightgoldenrodyellow: "#FAFAD2",
+    lightgray: "#D3D3D3",
+    lightgreen: "#90EE90",
+    lightpink: "#FFB6C1",
+    lightsalmon: "#FFA07A",
+    lightseagreen: "#20B2AA",
+    lightskyblue: "#87CEFA",
+    lightslategray: "#778899",
+    lightsteelblue: "#B0C4DE",
+    lightyellow: "#FFFFE0",
+    lime: "#00FF00",
+    limegreen: "#32CD32",
+    linen: "#FAF0E6",
+    magenta: "#FF00FF",
+    maroon: "#800000",
+    mediumaquamarine: "#66CDAA",
+    mediumblue: "#0000CD",
+    mediumorchid: "#BA55D3",
+    mediumpurple: "#9370DB",
+    mediumseagreen: "#3CB371",
+    mediumslateblue: "#7B68EE",
+    mediumspringgreen: "#00FA9A",
+    mediumturquoise: "#48D1CC",
+    mediumvioletred: "#C71585",
+    midnightblue: "#191970",
+    mintcream: "#F5FFFA",
+    mistyrose: "#FFE4E1",
+    moccasin: "#FFE4B5",
+    navajowhite: "#FFDEAD",
+    navy: "#000080",
+    oldlace: "#FDF5E6",
+    olive: "#808000",
+    olivedrab: "#6B8E23",
+    orange: "#FFA500",
+    orangered: "#FF4500",
+    orchid: "#DA70D6",
+    palegoldenrod: "#EEE8AA",
+    palegreen: "#98FB98",
+    paleturquoise: "#AFEEEE",
+    palevioletred: "#DB7093",
+    papayawhip: "#FFEFD5",
+    peachpuff: "#FFDAB9",
+    peru: "#CD853F",
+    pink: "#FFC0CB",
+    plum: "#DDA0DD",
+    powderblue: "#B0E0E6",
+    purple: "#800080",
+    rebeccapurple: "#663399",
+    red: "#FF0000",
+    rosybrown: "#BC8F8F",
+    royalblue: "#4169E1",
+    saddlebrown: "#8B4513",
+    salmon: "#FA8072",
+    sandybrown: "#F4A460",
+    seagreen: "#2E8B57",
+    seashell: "#FFF5EE",
+    sienna: "#A0522D",
+    silver: "#C0C0C0",
+    skyblue: "#87CEEB",
+    slateblue: "#6A5ACD",
+    slategray: "#708090",
+    snow: "#FFFAFA",
+    springgreen: "#00FF7F",
+    steelblue: "#4682B4",
+    tan: "#D2B48C",
+    teal: "#008080",
+    thistle: "#D8BFD8",
+    tomato: "#FF6347",
+    turquoise: "#40E0D0",
+    violet: "#EE82EE",
+    wheat: "#F5DEB3",
+    white: "#FFFFFF",
+    whitesmoke: "#F5F5F5",
+    yellow: "#FFFF00",
+    yellowgreen: "#9ACD32"
+  };
+  return !!(namedColors[str])
+}
+
+function input(element) {
+  this.element = null;
+  if (!element){
+    this.element = document.createElement('input')
+  } else {
+    this.element = element;
+  }
+  this.check = check.bind(this,this.element);
+  this.uncheck = uncheck.bind(this,this.element);
+  this.highlight = highlightInput.bind(this,this.element);
+  this.disable = disable.bind(this,this.element);
+  this.enable = enable.bind(this,this.element);
+  this.throttle = throttleInput.bind(this,this.element);
+  this.isEmpty = () => this.element.value === 0 || this.element.value === "0" || this.element.value === "";
+  this.focus = () => this.element.select();
+  return this
+}
+function check(input) {
+  input.checked = true;
+}
+function uncheck(input) {
+  input.checked = false;
+}
+function checkAll(inputGroup) {
+  inputGroup.forEach((inp) => (inp.checked = true));
+}
+function uncheckAll(inputGroup) {
+  inputGroup.forEach((inp) => (inp.checked = false));
+}
+function focusInputOnClick(event, placholder) {
+  let input = event.target;
+  if (input.nodeName !== "INPUT") return;
+  if (placholder && typeof placholder == "string") input.value = placholder;
+
+  // console.log(placholder)
+  input.select();
+  return input;
+}
+function clearField(input) {
+  input.value = "";
+  return input;
+}
+ function clearForm(form) {
+  $$("input", form).map(clearField);
+  return form;
+}
+function allChecked(inputGroup) {
+  return inputGroup.every((inp) => inp.checked == true);
+}
+ function noneChecked(inputGroup) {
+  return inputGroup.every((inp) => inp.checked == false);
+}
+ function oneChecked(inputGroup) {
+  return inputGroup.some((inp) => inp.checked == true);
+}
+ function oneUnchecked(inputGroup) {
+  return inputGroup.some((inp) => inp.checked == false);
+}
+ function disable(submitInput) {
+  submitInput.disabled = true;
+}
+ function enable(submitInput) {
+  submitInput.disabled = '';
+}
+function highlightInput(input) {
+  input.focus();
+  input.select();
+  return input;
+}
+ function isEmptyNumberInput(input) {
+  return input.value === 0 || input.value === "0" || input.value === "";
+}
+function throttleInput(input, time) {
+  /* 
+        https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/disabled
+        The disabled attribute is supported by 
+        <button>, <fieldset>, <optgroup>, <option>, <select>, <textarea> and <input>.
+    */
+    input.disabled = true;
+    setTimeout(() => (input.disabled = false), time);
+  return;
+}
+function focusInput(input, value) {
+  if (!!value) input.value = value;
+  input.select();
+  return input;
+}
+
+
+function has(obj,property){
+  return Object.hasOwn(obj,property);
+}
+function objMerge(targetObj, mergingObj) {
+  return {
+    ...structuredClone(targetObj),
+    ...structuredClone(mergingObj),
+  };
+}
+function equal(o1,o2){
+  if (o1 === o2) 
+    return true;
+
+  if (!isObj(o1) || !isObj(o2))
+    return false;
+
+  const o1keys = keys(o1);
+  const o2keys = keys(o2);
+
+  if (o1keys.length !== o2keys.length)
+    return false;
+
+  for (const key of o1keys)
+    if (o1[key] !== o2[key]) return false;
+
+  return true;
+}
+function deepEqual(x, y, z) {
+  // https://stackoverflow.com/questions/25456013/javascript-deepequal-comparison
+  if (x === y) return true; // test primitives first
+  if (typeof x == "function" &&  y && x.toString() == y.toString()) return true; // test function definitions
+  // test objects by first type by comparing constructors
+  // then test further by comparing length of keys
+  // finally recursively compare keys until all types, keys, and primitives have been checked
+  return x && y && typeof x == "object" && x.constructor == y.constructor && (z = Object.keys(y)) && z.length == Object.keys(x).length && !z.find(v => !deepEqual(x[v], y[v]))
+}
+function isObj(obj){
+    return !(typeof obj !== 'object' || Array.isArray(obj) || obj === null )
+}
+function objMap(obj,fun){
+  return objToArray(obj).map(fun);  
+}
+function objToArray(obj){
+  let arr = []
+  for (const key in obj){
+    arr.push(obj[key])
+  }
+  return arr
+}
+function objToTuplesArray(obj){
+  let arr = []
+  for (const key in obj){
+    arr.push([key,obj[key]])
+  }
+  return arr
+}
+function objectSizeOf(obj){
+  const size = new Blob([JSON.stringify(obj)]).size;
+  return {
+    Bytes: size,
+    KB: (size / 1024).toFixed(2),
+    MB: (size / (1024 ** 2)).toFixed(2),
+    GB: (size / (1024 ** 3)).toFixed(2),
+    Formatted: formatSize(size),
+  }
+}
+function formatSize(bytes) {
+  const units = ["B", "KB", "MB", "GB", "TB"];
+  let size = bytes;
+  let unitIndex = 0;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+      size /= 1024;
+      unitIndex++;
+  }
+  return `${size.toFixed(2)} ${units[unitIndex]}`;
+}
+function objectLength(obj,ignoreList){
+  if (!objectIsFalsey(obj)){
+    const keys = ignoreList ? Object.keys(obj).filter(key => !ignoreList.some(i => i === key)) : Object.keys(obj)
+    return keys.length
+  } else {
+    return 0;
+  }
+}
+function objectIsEmpty(obj){
+    for (const prop in obj) 
+      if (Object.hasOwn(obj, prop)) 
+        return false;
+    return true;
+}
+function objectIsFalsey(obj){
+    if (!isObj(obj)) return true
+    else return objectIsEmpty(obj)
+}
+
 class Cursor {
     // Allows extends a basic array allowing easy access to the next and previous elements in a list
     // according to a pointer in memory
@@ -171,11 +976,7 @@ class Bucket {
     }
   
     push(key, value) {
-      if (!key) return `item not pushed bucket... invalid key`;
-      if (!value) return `item not pushed to bucket... invalid value`;
-      if (this.items.has(key)) return `item not pushed to bucket... duplicate key`;
-      this.items.set(key, value);
-      return "success";
+      if (!this.items.has(key)) return this.items.set(key, value);
     }
   
     pluck(key) {
@@ -203,89 +1004,14 @@ class Bucket {
       map.forEach((value, key) => this.push(key, value));
       return this;
     }
+
     compare(map) {
       return Array.from(map.keys()).filter(this.has);
     }
+
     wipe() {
       this.items = new Map();
     }
-}
-class Collection {
-  constructor() {
-    this.bucket = new Bucket();
-    this.cursor = new Cursor([]);
-    this.indexes = {};
-  }
-    get size() {
-      return this.items.size;
-    }
-    get keys() {
-      return this.bucket.keys;
-    }
-    get values() {
-      return this.bucket.values;
-    }
-    get items() {
-      return this.bucket.items;
-    }
-    use(key) {
-      return this.bucket.use(key);
-    }
-    useValue(key) {
-      return this.bucket.useValue(key);
-    }
-    add(key, value) {
-      let status = this.bucket.push(key, value);
-      if (status === "success") this.cursor.addOne(key);
-      return status;
-    }
-    spread(map) {
-      let status = this.bucket.spread(map);
-      if (status) this.cursor.spread(Array.from(map.keys()));
-      return status;
-    }
-    has(key) {
-      return this.bucket.has(key);
-    }
-    remove(key) {
-      let status = this.bucket.pluck(key);
-      if (status) this.cursor.pluck(this.items.useKeys().indexOf(key));
-    }
-    drop() {
-      this.items = new Bucket();
-      this.cursor = new Cursor([]);
-    }
-  }
-
-function signal(value) {
-  let subcriptions = new Set();
-  let subscriber = null;
-  let Signal = {
-    get value() {
-      if(subscriber) 
-        subcriptions.add(subscriber);
-      return value
-    },
-    set value(updated) {
-      console.log('setter triggered')
-      value = updated;
-      subcriptions.forEach(fn=>fn())
-    }
-  }
-  let useEffect = function(fn) {
-    console.log('setting subsciber')
-    subscriber = fn;
-    fn();
-    subscriber = null;
-  }
-  useEffect(() => console.log('effect triggered current value', Signal.value))
-  return [ useEffect, Signal ]
-}
-
-function derivedSignal(fn) {
-  const [effect,derived] = signal();
-  effect(() => derived.value = fn())
-  return derived;
 }
 class Observer {
   constructor(target) {
@@ -330,359 +1056,202 @@ class Observer {
     return this.priorities.size > 0;
   }
 }
-class EventEmitter {
-  constructor(events) {
-    this.events = events || new Map();
+class Observable {
+  constructor(targetThis, ...fns) {
+    this.observer = new Observer(targetThis);
+    if (fns)
+      fns.forEach(fn => this.observer.subscribe(fn))
   }
-  on(event, ...listeners) {
-    if (!this.events.has(event)) this.events.set(event, new Observable());
-    listeners.forEach((listener) => {
-      this.events.get(event).subscribe(listener);
-    });
+
+
+  set() {
+    this.notify();
+    console.log('observer triggered',console.log(this))
   }
-  once(event, listener) {
-    const singleton = (...args) => {
-      listener(...args);
-      this.off(event, singleton);
-    };
-    this.on(event, singleton);
+
+  subscribe(...fns) {
+    this.observer.subscribe(...fns);
+    return this;
   }
-  off(event, listener) {
-    if (!this.events.has(event)) return;
-    this.events.get(event).unsubscribe(listener);
+
+  unsubscribe(fn) {
+    this.observer.unsubscribe(fn);
+    return this;
   }
-  clear(event) {
-    if (this.events.has(event)) return;
-    this.events.set(event, new Observable());
+
+  prioritize(fn) {
+    this.observer.prioritize(fn);
+    return this;
+  }
+
+  unprioritize(fn) {
+    this.observer.unprioritize(fn);
+    return this;
+  }
+
+  notify(...values) {
+    this.observer.notify(...values);
+    return this;
+  }
+
+  get isEmpty() {
+    return this.observer.isEmpty;
+  }
+
+  get hasPriorities() {
+    return this.observer.hasPriorities;
+  }
+
+  get listeners() {
+    return this.observer.listeners;
+  }
+  get priorities() {
+    return this.observer.priorities;
+  }
+
+  static create(target) {
+    return new Observable(target);
+  }
+
+  static observe(obj) {
+    if (obj != null) {
+      Object.assign(obj, {
+        subscribe: this.subscribe.bind(obj),
+        unsubscribe: this.unsubscribe.bind(obj),
+        prioritize: this.prioritize.bind(obj),
+        unprioritize: this.unprioritize.bind(obj),
+        notify: this.notify.bind(obj),
+        subscribe: this.subscribe.bind(obj),
+        get isEmpty() {
+          return this.observer.isEmpty;
+        },
+        get hasPriorities() {
+          return this.observer.hasPriorities;
+        },
+      });
+      return obj;
+    }
+  }
+}
+class Task {
+  constructor(promiseFn,{ 
+    name = '',
+    min = 1500,
+    max = null,
+    onData = [],
+    onLoading = [],
+    onReady = [],
+    poll = null,
+  } = {}) {
+    this.name = name;
+    this.min = min;
+    this.max = max;
+    this.promise = promiseFn;
+    this.state = undefined; // [undefined || loading || ready ]
+    this.data = null;
+    this.running = false;
+    this.task = promiseFn;
+    this.emitter = new EventEmitter();
+    this.updateNeeded = true;
+    onLoading.forEach(listener => this.onload(listener))
+    onData.forEach(listener => this.ondata(listener))
+    onReady.forEach(listener => this.onready(listener))
+    if (poll) setInterval(this.run,poll)
+  }
+  getData = async (updateNeeded = this.updateNeeded) => {
+    if (updateNeeded) this.run()
+    else {
+      this.emit("ready", this.data);
+      return this.data
+    }
+  }
+  run = async (...args) => {
+    // handle minimum task interval
+    if (this.running === true) return this.data;
+    try {
+      const minimum_interval_timer = this.min ? new Promise((resolve,reject) => {setTimeout(() => resolve(true),this.min)}) : 0 ;
+      this.running = true
+      this.state = "loading";
+      this.emit("loading");
+      this.data = await this.promise(...args);
+      if (minimum_interval_timer != 0) await minimum_interval_timer;
+      this.state = "ready";
+      this.emit("ready", this.data);
+      this.updateNeeded = false;
+  } catch (error) {
+      console.trace(`error running task: ${error}`);
+      this.state = "error";
+      this.data = null;
+      this.emit("error", error);
+    } finally {
+      this.running = false;
+    }
+  }
+
+  on(event, listener) {
+    this.emitter.on(event, listener);
+    return this;
+  }
+  ondata(listener){
+    this.onready(listener)
+    if (this.data !== null)
+      listener(this.data)
+  }
+  onready(listener){
+    this.on('ready',listener)
+  }
+  onload(listener){
+    this.on('loading',listener);
+  }
+  remove(event, listener) {
+    this.emitter.off(event, listener);
+    return this;
   }
   emit(event, ...args) {
-    if (!this.events.has(event)) return;
-    this.events.get(event).notify(...args);
-  }
-  static create(object,events){
-    object.events = events || new Map();
-    object.on = this.on.bind(object);
-    object.once = this.once.bind(object);
-    object.off = this.off.bind(object);
-    object.clear = this.clear.bind(object);
-    object.emit = this.emit.bind(object);
-    return object;
-  }
-}
-class MenuList {
-  constructor(listOfNames, classList, dataset) {
-    this.element = document.createElement("ul");
-    this.element.classList.add(...classList);
-    this.items = [];
-    listOfNames.forEach((name) => this.addItem(name));
-  }
-
-  get clone() {
-    return this.element.cloneNode(true);
-  }
-
-  addItem(name) {
-    const newLink = new MenuListItem(name);
-    this.element.append(newLink.element);
-    this.items.push(newLink);
-    return newLink;
-  }
-
-  render(container) {
-    container.innerHTML = "";
-    container.append(this.element);
-  }
-
-  append(container) {
-    container.append(this.clone);
-  }
-
-  replaceItems(listOfNames) {
-    this.innerHTML = "";
-    this.items = [];
-    listOfNames.forEach(this.addItem);
-  }
-
-  updateItem(element, callback) {
-    this.items.forEach((MenuListItem) => {
-      if (MenuListItem.element == element) callback(MenuListItem);
-    });
-  }
-
-  updateItemName(element, name) {
-    this.items.forEach((MenuListItem) => {
-      if (MenuListItem.element == element) MenuListItem.name = name;
-    });
-  }
-}
-
-class MenuListItem {
-  constructor(name, classNames = [], contentClassNames = []) {
-    this.name = name;
-    this.element = document.createElement("li");
-    this.content = document.createElement("span");
-    this.element.append(this.content);
-    this.element.classList.add(...classNames);
-    this.content.classList.add(...contentClassNames);
-    this.element.dataset.tab = name;
-    this.content.textContent = name;
-  }
-
-  setName(newName) {
-    this.content.textContent = newName;
-    this.element.dataset.tab = newName;
-    this.name = newName;
-  }
-}
-
-class Modal {
-  // basic modal class that handles open / close / toggle / methods
-  // also hooks into the tabber interface to ensure only one modal of a group is open at once
-  constructor(element) {
-    this.element = element;
-    this.openTimeLine = Observable.create(this);
-    this.closeTimeLine = Observable.create(this);
-    this.togglers = new Set();
-    this.openers = new Set();
-    this.closers = new Set();
-    this.cosm = undefined;
-    this.status = "inactive";
-  }
-
-  set state({ status, event }) {
-    // console.log(status,this.status)
-    if (status == "inactive") this.close(event);
-    else if (status == "active") this.open(event);
-    else console.log("active and inactive are the only two states needed here",status);
-  }
-  get state() {
-    return this.status;
-  }
-
-  // delegates sideEffects to the onOpen observer then changes the "status"
-  open(e) {
-    this.element.classList.add('active');
-    if (!this.openTimeLine.isEmpty && this.state !== "active")
-      this.openTimeLine.notify(e);
-    this.status = "active";
-  }
-
-  // close modal
-  // change [ status ]
-  close(e) {
-    this.element.classList.remove('active');
-    if (!this.closeTimeLine.isEmpty && this.state !== "inactive")
-      this.closeTimeLine.notify(e);
-    this.status = "inactive";
-  }
-
-  // open - close modal
-  // change status
-  toggle(event) {
-    if (this.state == "inactive") this.state = { status: "active", event };
-    else if (this.state == "active") this.state = { status: "inactive", event };
-    else console.log("err something went wrong with the modal toggler");
-    return this;
-  }
-  // register DOM Element event listener that calls this toggle method
-  bindToggler(...elements) {
-    // console.dir('BINDING toggle element(s)', elements)
-    elements.forEach((element) => {
-      if (this.togglers.has(element))
-        return `${element} is already bound as a toggler`;
-      this.togglers.add(element);
-      element.addEventListener("click", (e) => this.toggle.call(this, e));
-    });
-    return this;
-  }
-  // register DOM Element event listener that calls this open method
-  bindOpener(...elements) {
-    elements.forEach((element) => {
-      // console.log(element)
-      if (this.openers.has(element))
-        return `${element} is already bound as a opener`;
-      this.openers.add(element);
-      element.addEventListener("click", (e) => this.open.call(this, e, true));
-    });
-    return this;
-  }
-  // register DOM Element event listener that calls this close method
-  bindCloser(...elements) {
-    elements.forEach((element) => {
-      // console.log(element)
-      if (this.closers.has(element))
-        return `${element} is already bound as a closer`;
-
-      this.closers.add(element);
-      element.addEventListener("click", (e) => this.close.call(this, e));
-    });
-    return this;
-  }
-  // registers a common Tab Interface between modals of a group
-  bindTabber(reference) {
-    this.Tabber = reference;
-    this.openTimeLine.prioritize(() => this.Tabber.setActive(this));
-    return this;
-  }
-  onOpen(...fns) {
-    this.openTimeLine.subscribe(...fns);
-    return this;
-  }
-  onClose(...fns) {
-    this.closeTimeLine.subscribe(...fns);
+    // console.log(event,args)
+    this.emitter.notify(event, ...args);
     return this;
   }
 }
-class DynamicModal extends Modal {
-  // adds functionality to handle a modals loader/suspense component
-  // open/close observers will prioritize async fetching/showing data
-  // comes with a render method that defines the static HTML as opposed to a basic modal with predefined HTML
-  constructor(
-    element,
-    config = {
-      type: "lazy",
-      endpoint: undefined,
-      dataHandler: undefined,
-      requestHandler: undefined,
-      responseHandler: undefined,
-      hydrationHandler: undefined,
+class EventEmitter {
+    constructor(events) {
+      this.events = events || new Map();
     }
-  ) {
-    super(element);
-    this.type = config.type || "lazy";
-    this.endpoint = config.endpoint;
-    this.suspense = `<div class="loading-container"><span class="loader"></span></div>`;
-    this.errRes = `<div>Error Fetching Resources</div>`;
-    this.handleData = config.dataHandler;
-    this.handleRequest = config.requestHandler;
-    this.handleResponse = config.responseHandler;
-    this.handleHydration = config.hydrationHandler;
-    this.ready = false;
-    this.pending = false;
-    this.hasChanged = false;
-    this.initial = true;
-    this.value = "";
-    // super
-    this.openTimeLine.prioritize(this.checkForUpdatesToRender.bind(this));
-    if (config.type === "eager") this.update();
-  }
-
-  setReady() {
-    this.pending = false;
-    this.ready = true;
-    if (this.initial) this.inital = false;
-    return;
-  }
-
-  setPending() {
-    this.pending = true;
-    this.ready = false;
-    return;
-  }
-
-  async update() {
-    this.value = this.suspense;
-    this.setPending();
-    this.renderSuspense();
-    const res = await this.handleRequest();
-    if (res) {
-      console.log(res)
-      this.renderComponent(res);
-      this.setReady();
-    } else {
-      this.renderError();
-      this.setReady();
+    on(event, ...listeners) {
+      if (!this.events.has(event)) this.events.set(event, new Observable());
+  
+      listeners.forEach((listener) => {
+        this.events.get(event).subscribe(listener);
+      });
     }
-    return this.value;
-  }
-
-  getData() {
-    if ((this.ready && !this.hasChanged) || this.pending) return this.value;
-    this.update();
-    return this.value;
-  }
-
-  notifyChange() {
-    if (this.type === "lazy") {
-      console.log("flagging change -- type lazy");
-      this.hasChanged = true;
+    once(event, listener) {
+      const singleton = (...args) => {
+        listener(...args);
+        this.off(event, singleton);
+      };
+      this.on(event, singleton);
     }
-    if (this.type === "eager") {
-      console.log("flagging change -- type eager");
-      this.update();
+    off(event, listener) {
+      if (!this.events.has(event)) return;
+      this.events.get(event).unsubscribe(listener);
     }
-  }
-
-  checkForUpdatesToRender() {
-    console.log("checking for dynamic modal updates");
-    if ((this.ready && !this.hasChanged) || this.pending) {
-      console.log("no changes detected in dynamic modal");
-      return true;
+    clear(event) {
+      if (this.events.has(event)) return;
+      this.events.set(event, new Observable());
     }
-    if (this.hasChanged) {
-      console.log("data has changed fetching changes");
-      this.update();
-      this.hasChanged = false;
-      return false;
-    } else if (this.initial) {
-      console.log("rendering initial state");
-      this.update();
-      return false;
+    notify(event, ...args) {
+      if (!this.events.has(event)) return;
+      this.events.get(event).notify(...args);
     }
-  }
-  renderSuspense() {
-    this.element.innerHTML = this.suspense;
-  }
-  renderError() {
-    this.element.innerHTML = this.errRes;
-  }
-  renderComponent(data) {
-    this.element.innerHTML = this.handleData(data);
-    if (this.handleHydration)
-      this.handleHydration(this.element);
-  }
-}
-class Tabber {
-    contructor() {
-        this.current = undefined
-        this.previous = undefined
+    static create(object,events){
+      object.events = events || new Map();
+      object.on = this.on.bind(object);
+      object.once = this.once.bind(object);
+      object.off = this.off.bind(object);
+      object.clear = this.clear.bind(object);
+      object.emit = this.emit.bind(object);
+      return object;
     }
-    setActive = (value,event) => {
-        if (this.current != value) {
-            if (this.current !== undefined) 
-                this.current.close(event)
-            this.previous = this.current;
-            this.current = value
-        }
-    }
-    closeActive = (event) => {
-        if (this.current !== undefined && this.current.state !== 'inactive') 
-            this.current.close(event);
-    }
-}
-
-class Toggler {
-  constructor(button, modal, state) {
-    this.state = state || "inactive";
-    this.modal = modal;
-    this.button = button;
-  }
-  enable() {
-    this.modal.setAttribute("active", "true");
-    this.button.classList.add("active");
-    this.state = "active";
-    return this.state;
-  }
-  disable() {
-    this.modal.setAttribute("active", "false");
-    this.button.classList.remove("active");
-    this.state = "inactive";
-    return this.state;
-  }
-  toggle() {
-    if (this.state === "active") return this.disable()
-    if (this.state === "inactive") return this.enable()
-  }
 }
 class Slider {
   constructor(
@@ -1687,652 +2256,136 @@ class scrollTrap {
   }
 }
 
-const eventMaps = {
-  enter(event){
-    return event.keyCode == 13 || event.which == 13 || event.key == 'Enter'
-  },
-  backspace(event){
-    return event.keyCode == 8;
-  },
-  leftClick(event){
-    return event.button === 0;
-  },
-  rightClick(event){
-    return event.button === 2;
-  },
-  dblclick(event = e){
-    return event.detail === 2;
-  },
-  cosm(event,parent){
-    return event.target.closest(parent)
-  },
-  clicked(event,elementClass){
-    return event.target.closest(elementClass)
-  },
-  isNumber(event){
-    var charCode = event.which ? event.which : event.keyCode;
-    if (charCode > 31 && (charCode < 48 || charCode > 57)) return false;
-    return true;
-  },
-
-}
-const root = document.documentElement;
-const docStyle = root.style;
-
-function getRoot(element) {
-  return element.documentElement.style;
-}
-
-function getVar(variableName) {
-  return getComputedStyle(root).getPropertyValue(variableName);
-}
-
-function setVar(variableName, value) {
-  return root.style.setProperty(variableName, value);
-}
-
-function addClass(element, classToAdd) {
-  element.classList.add(classToAdd);
-}
-
-function removeClass(element, classToRemove) {
-  element.classList.remove(classToRemove);
-}
-
-function $(arg, context = document) {
-  const element = context.querySelector(arg);
-
-  if (!element || !(element instanceof Element)) return null;
-
-  element.listen = function (callback, listener = "click", capture = false) {
-    element.addEventListener(listener, callback, capture);
-    return element;
-  };
-
-  return element;
-}
-
-function $$(arg, element = document) {
-  const array = Array.from(element.querySelectorAll(arg));
-  return array;
-}
-
-function log() {
-  console.log.apply(this, arguments);
-}
-
-function err() {
-  console.log.apply(this, arguments);
-}
-
-function each(argList, callback) {
-  return argList.map(callback);
-}
-
-function listenAll(elements, callback, listener = "click") {
-  each(elements, (element) => listen(element, callback, listener));
-
-  return elements;
-}
-
-function listen( //element passed always last argument instead of being used as this context
-  element = document,
-  callback,
-  listener = "click",
-  capture = false,
-) {
-  if (!element) {
-    console.warn('no element passed to listen  function')
-    return;
+class COSM extends EventEmitter {
+  constructor({selectors = [], exceptions = [], handler = null} = {}){
+    super()
+    this.selectors = selectors;
+    this.exceptions = exceptions;
+    this.handler = handler;
+    this.eventHandler = this.eventHandler.bind(this);
+    document.addEventListener('click', this.eventHandler);
   }
-  // let context = this;
-  element.addEventListener(
-    listener,
-    function (event) {
-      callback.apply(callback,[event, ...arguments, element]);
-    },
-    capture
-  );
-}
 
-function responseOk(response) {
-  // axios
-  return response.status === 200 && response.statusText === "OK";
-}
+  eventHandler(event) {
+    const clickOutsideRegistered = this.selectors.length > 0 && 
+        !this.selectors.some(query => event.target.closest(query));
 
-function throttle(fn, wait = 60) {
-  var time = Date.now();
-  return function() {
-    if ((time + wait - Date.now()) < 0) {
-      fn.call(this,...arguments);
-      time = Date.now();
-    } else return;
+    const clickedException = this.exceptions.length > 0 ?
+        this.exceptions.find(query => event.target.closest(query)) : false
+
+    if (clickOutsideRegistered || clickedException) {
+        this.handler && this.handler();
+        this.notify('cosm',event,clickedException)
+    }
+  }
+  setHandler(fun){
+    this.on('cosm',fun)
+  }
+  addSelectors(...newSelectors) {
+      this.selectors.push(...newSelectors);
+  }
+  addExceptions(...newExceptions) {
+      this.exceptions.push(...newExceptions);
+  }
+  removeSelectors(...selectors){
+      this.selectors = this.selectors.filter(query => !selectors.includes(query))
+  }
+  removeExceptions(...selectors){
+      this.exceptions = this.exceptions.filter(query => !selectors.includes(query))
+  }
+  remove() {
+      document.removeEventListener('click', this.eventListener);
   }
 }
 
-function nextTick(callback) {
-  return setTimeout(callback, 0);
-}
-
-function toDecimal(num) {
-  return num / 100;
-}
-
-function focusInput(input, value) {
-  if (!!value) input.value = value;
-  input.select();
-  return input;
-}
-
-function followMouseFromEventTarget(event) {
-  const { currentTarget: target } = event;
-
-  const rect = target.getBoundingClientRect(),
-    mouseXFromTarget = e.clientX - rect.left,
-    mouseYFromTarget = e.clientY - rect.top;
-
-  return {
-    x: mouseXFromTarget,
-    y: mouseYFromTarget,
-    mouseX: e.clientX,
-    mouseY: e.clientY,
-  };
-}
-
-function followMouseFromCoords(coords) {
-  return function (event) {
-    const { clientX, clientY } = event;
-    const { x, y } = coords;
-
-    return {
-      x: clientX - x,
-      y: clientY - y,
-      mouseX: clientX,
-      mouseY: clientY,
-    };
-  };
-}
-
-function createToggleList(elements, classList = ["active"]) {
-  // console.log('creating a toggle list with elements',elements,'toggling between the class(s)',classList)
-
-  function toggle(element) {
-    elements.forEach((element) => element.classList.remove(...classList));
-    element.classList.add(...classList);
+class ClientSideSocketServer extends EventEmitter {
+  constructor(host = 'ws://localhost:1279') {
+    this.shouldReconnect = true;
+    this.max_retry_attempts = 5;
+    this.retry_attempts = 0;
+    this.reconnecting = false;
+    this.socket = this.createWebSocket();
+    this.notifications = [];
+    this.notifier = new EventEmitter();
+    this.host = host;
+  // emitter 
   }
 
-  elements.forEach((element) => {
-    // console.log(element)
-    element.addEventListener("click", toggle);
-  });
-  return {
-    classList,
-    elements: [...elements],
-    toggle,
-    add: function (element) {
-      this.elements.push(element);
-    },
-  };
-}
+  createWebSocket() {
+    this.cancelReconnect()
 
-function frag() {
-  return document.createDocumentFragment();
-}
+    try {
+      let sock = new WebSocket(this.host);
+      sock.onopen = this.handleConnection.bind(this);
+      sock.onmessage = this.parseMessage.bind(this);
+      sock.onclose = this.handleDisconnect.bind(this);
+      sock.onerror = (err) => {
+        console.error('WebSocket error:', err);
+        this.handleDisconnect();
+      };
+      console.log('Scanner Ready For Updates');
+      return sock;
+    } catch(e) {
+      console.warn(e);
+    }
 
-function div(classList = [], styleProps = {}, attrs = {}, children) {
-  const div = document.createElement("div");
-  if (classList.length > 0) div.classList.add(...classList);
+  }
 
-  if (styleProps) {
-    for (prop in styleProps) {
-      console.log(prop);
-      console.log(styleProps[prop]);
-      div.style[prop] = styleProps[prop];
+  sendMessage(message) {
+    if (this.socket)
+      try {
+        this.socket.send(message); 
+      } catch(e){
+        console.warn('error sending message: ',e)
+      }
+  }
+
+  async parseMessage(event) {
+    try {
+      const notification = JSON.parse(event.data);
+      this.notify('message',notification)
+      console.log('incomming: ',notification);
+      switch (type){
+        case 'new entry' : console.log('new entry', data )
+        default : console.log('incomming: ',notification);
+      }
+      this.notifications.push(notification)
+      this.notifier.notify('new entry',notification);
+    } catch(e) {
+        console.error(e);
+      }
+  }
+
+  cancelReconnect() {
+    if (this.socket) {
+      this.socket.onopen = null;
+      this.socket.onmessage = null;
+      this.socket.onclose = null;
+      this.socket.onerror = null;
+      this.socket.close();
     }
   }
 
-  if (children) {
-    children.forEach(div.appendChild);
+  handleConnection() {
+    this.sendMessage('Client Connected');
+    this.reconnecting = false;
+    this.retry_attemps = 0;
   }
 
-  return div;
-}
+  handleDisconnect(event){
+    if (this.reconnecting) 
+      return;
+    this.reconnecting = true; // Set the flag to indicate the reconnection logic is running
 
-function ul() {
-  return document.createElement("ul");
-}
+    // event.wasClean 
+    //   ? console.log(`WebSocket connection closed cleanly, code=${event.code}, reason=${event.reason}`)
+    //   : console.log('WebSocket connection closed abruptly');
 
-function li() {
-  return document.createElement("li");
-}
-
-function span() {
-  return document.createElement("span");
-}
-
-function input() {
-  return document.createElement("input");
-}
-
-function appendElement(parent, child) {
-  parent.append(child);
-}
-
-function setBlank(destination) {
-  const element = document.createElement("div");
-  destination.appendChild(element);
-  return element;
-}
-
-function wipeElement(element) {
-  element.innerHTML = "";
-  return element;
-}
-
-function capitalize(word) {
-  return word[0].toUpperCase() + word.slice(1);
-}
-
-function uppercase(str) {
-  return [...str].map((x) => (x = x.toUpperCase())).join("");
-}
-
-function lowercase(str) {
-  return [...str].map((x) => (x = x.toLowerCase())).join("");
-}
-
-function exclaim(str) {
-  return str + "!";
-}
-
-function first(value) {
-  return value[0];
-}
-
-function last(value) {
-  return value[value.length - 1];
-}
-
-function isValidHex(str){
-    // Regular expression to match a valid hexadecimal color code
-    const hexRegex = /^#?([0-9A-Fa-f]{3}|[0-9A-Fa-f]{6})$/;
-    // Check if the string matches the regular expression
-    if (!hexRegex.test(str)) {
-        return false; // Not a valid hexadecimal color code
+    if (this.shouldReconnect && this.retry_attempts < this.max_retry_attempts) {
+        const timeout = Math.min(1000 * Math.pow(2, this.retry_attemps), 30000); // Exponential backoff
+        console.log(`Attempting to reconnect in ${timeout / 1000} seconds...`);
+        setTimeout(this.createWebSocket.bind(this), timeout);
+        this.retry_attempts++;
     }
-    // Check if the string starts with '#' and remove it if present
-    if (str.charAt(0) === '#') {
-        str = str.substring(1);
-    }
-    // If the string has 3 characters, expand it to 6 characters
-    if (str.length === 3) {
-        str = str.split('').map(c => c + c).join('');
-    }
-    // Try to create a new <div> element with the color and check if it is a valid CSS color
-    const div = document.createElement('div');
-    div.style.color = '#000'; // Set the color to black (default)
-    div.style.color = '#' + str; // Set the color to the provided hexadecimal code
-    return div.style.color !== '#000'; // If the color was successfully set, it's a valid CSS color
-}
-
-function isValidNamedColor(str){
-  const namedColors = {
-    aliceblue: "#F0F8FF",
-    antiquewhite: "#FAEBD7",
-    aqua: "#00FFFF",
-    aquamarine: "#7FFFD4",
-    azure: "#F0FFFF",
-    beige: "#F5F5DC",
-    bisque: "#FFE4C4",
-    black: "#000000",
-    blanchedalmond: "#FFEBCD",
-    blue: "#0000FF",
-    blueviolet: "#8A2BE2",
-    brown: "#A52A2A",
-    burlywood: "#DEB887",
-    cadetblue: "#5F9EA0",
-    chartreuse: "#7FFF00",
-    chocolate: "#D2691E",
-    coral: "#FF7F50",
-    cornflowerblue: "#6495ED",
-    cornsilk: "#FFF8DC",
-    crimson: "#DC143C",
-    cyan: "#00FFFF",
-    darkblue: "#00008B",
-    darkcyan: "#008B8B",
-    darkgoldenrod: "#B8860B",
-    darkgray: "#A9A9A9",
-    darkgreen: "#006400",
-    darkkhaki: "#BDB76B",
-    darkmagenta: "#8B008B",
-    darkolivegreen: "#556B2F",
-    darkorange: "#FF8C00",
-    darkorchid: "#9932CC",
-    darkred: "#8B0000",
-    darksalmon: "#E9967A",
-    darkseagreen: "#8FBC8F",
-    darkslateblue: "#483D8B",
-    darkslategray: "#2F4F4F",
-    darkturquoise: "#00CED1",
-    darkviolet: "#9400D3",
-    deeppink: "#FF1493",
-    deepskyblue: "#00BFFF",
-    dimgray: "#696969",
-    dodgerblue: "#1E90FF",
-    firebrick: "#B22222",
-    floralwhite: "#FFFAF0",
-    forestgreen: "#228B22",
-    fuchsia: "#FF00FF",
-    gainsboro: "#DCDCDC",
-    ghostwhite: "#F8F8FF",
-    gold: "#FFD700",
-    goldenrod: "#DAA520",
-    gray: "#808080",
-    green: "#008000",
-    greenyellow: "#ADFF2F",
-    honeydew: "#F0FFF0",
-    hotpink: "#FF69B4",
-    indianred: "#CD5C5C",
-    indigo: "#4B0082",
-    ivory: "#FFFFF0",
-    khaki: "#F0E68C",
-    lavender: "#E6E6FA",
-    lavenderblush: "#FFF0F5",
-    lawngreen: "#7CFC00",
-    lemonchiffon: "#FFFACD",
-    lightblue: "#ADD8E6",
-    lightcoral: "#F08080",
-    lightcyan: "#E0FFFF",
-    lightgoldenrodyellow: "#FAFAD2",
-    lightgray: "#D3D3D3",
-    lightgreen: "#90EE90",
-    lightpink: "#FFB6C1",
-    lightsalmon: "#FFA07A",
-    lightseagreen: "#20B2AA",
-    lightskyblue: "#87CEFA",
-    lightslategray: "#778899",
-    lightsteelblue: "#B0C4DE",
-    lightyellow: "#FFFFE0",
-    lime: "#00FF00",
-    limegreen: "#32CD32",
-    linen: "#FAF0E6",
-    magenta: "#FF00FF",
-    maroon: "#800000",
-    mediumaquamarine: "#66CDAA",
-    mediumblue: "#0000CD",
-    mediumorchid: "#BA55D3",
-    mediumpurple: "#9370DB",
-    mediumseagreen: "#3CB371",
-    mediumslateblue: "#7B68EE",
-    mediumspringgreen: "#00FA9A",
-    mediumturquoise: "#48D1CC",
-    mediumvioletred: "#C71585",
-    midnightblue: "#191970",
-    mintcream: "#F5FFFA",
-    mistyrose: "#FFE4E1",
-    moccasin: "#FFE4B5",
-    navajowhite: "#FFDEAD",
-    navy: "#000080",
-    oldlace: "#FDF5E6",
-    olive: "#808000",
-    olivedrab: "#6B8E23",
-    orange: "#FFA500",
-    orangered: "#FF4500",
-    orchid: "#DA70D6",
-    palegoldenrod: "#EEE8AA",
-    palegreen: "#98FB98",
-    paleturquoise: "#AFEEEE",
-    palevioletred: "#DB7093",
-    papayawhip: "#FFEFD5",
-    peachpuff: "#FFDAB9",
-    peru: "#CD853F",
-    pink: "#FFC0CB",
-    plum: "#DDA0DD",
-    powderblue: "#B0E0E6",
-    purple: "#800080",
-    rebeccapurple: "#663399",
-    red: "#FF0000",
-    rosybrown: "#BC8F8F",
-    royalblue: "#4169E1",
-    saddlebrown: "#8B4513",
-    salmon: "#FA8072",
-    sandybrown: "#F4A460",
-    seagreen: "#2E8B57",
-    seashell: "#FFF5EE",
-    sienna: "#A0522D",
-    silver: "#C0C0C0",
-    skyblue: "#87CEEB",
-    slateblue: "#6A5ACD",
-    slategray: "#708090",
-    snow: "#FFFAFA",
-    springgreen: "#00FF7F",
-    steelblue: "#4682B4",
-    tan: "#D2B48C",
-    teal: "#008080",
-    thistle: "#D8BFD8",
-    tomato: "#FF6347",
-    turquoise: "#40E0D0",
-    violet: "#EE82EE",
-    wheat: "#F5DEB3",
-    white: "#FFFFFF",
-    whitesmoke: "#F5F5F5",
-    yellow: "#FFFF00",
-    yellowgreen: "#9ACD32"
-  };
-  return namedColors?.str || null
-}
-
-function check(input) {
-  input.checked = true;
-}
-function uncheck(input) {
-  input.checked = false;
-}
-function checkAll(inputGroup) {
-  inputGroup.forEach((inp) => (inp.checked = true));
-}
-function uncheckAll(inputGroup) {
-  inputGroup.forEach((inp) => (inp.checked = false));
-}
-function focusInputOnClick(event, placholder) {
-  let input = event.target;
-  if (input.nodeName !== "INPUT") return;
-  if (placholder && typeof placholder == "string") input.value = placholder;
-
-  // console.log(placholder)
-  input.select();
-  return input;
-}
-function clearField(input) {
-  input.value = "";
-  return input;
-}
- function clearForm(form) {
-  $$("input", form).map(clearField);
-  return form;
-}
-function allChecked(inputGroup) {
-  return inputGroup.every((inp) => inp.checked == true);
-}
- function noneChecked(inputGroup) {
-  return inputGroup.every((inp) => inp.checked == false);
-}
- function oneChecked(inputGroup) {
-  return inputGroup.some((inp) => inp.checked == true);
-}
- function oneUnchecked(inputGroup) {
-  return inputGroup.some((inp) => inp.checked == false);
-}
- function disable(submitInput) {
-  submitInput.disabled = true;
-}
- function enable(submitInput) {
-  submitInput.disabled = '';
-}
-function highlightInput(input) {
-  input.focus();
-  input.select();
-  return input;
-}
- function isEmptyNumberInput(input) {
-  return input.value === 0 || input.value === "0" || input.value === "";
-}
-function throttleInput(input, time) {
-  /* 
-        https://developer.mozilla.org/en-US/docs/Web/HTML/Attributes/disabled
-        The disabled attribute is supported by 
-        <button>, <fieldset>, <optgroup>, <option>, <select>, <textarea> and <input>.
-    */
-    input.disabled = true;
-    setTimeout(() => (input.disabled = false), time);
-  return;
-}
-
-function debounce(fn,interval = 60) {
-    var time = Date.now();
-    let timeoutId;
-    return function() {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => {
-        fn.call(this,...arguments);
-        time = Date.now();
-      },interval)
-      return time
-    }
-
-}
-
-
-function currentTime() {
-  return new Date().toLocaleTimeString();
-}
-
-
-
-function clicked(elementClass, event) {
-  return eventMaps.clicked(event,elementClass)
-}
-
-function toClipboard(value, message) {
-  window.navigator.clipboard.writeText(value)
-  if (message) console.log("message from clipboard", message)
-}
-
-
-function uuid() {
-  let time = Date.now().toString(36).toLocaleLowerCase();
-  // random high number
-  let randomNumber = parseInt(Math.random() * Number.MAX_SAFE_INTEGER);
-  // random high num to hex => "005EIPQUTQ64" => add 0s to make sure its 12digits
-  randomNumber = randomNumber.toString(36).slice(0, 12).padStart(12, "0").toLocaleUpperCase();
-  // coerce into a string
-  return "".concat(time, "-", randomNumber);
-}
-function cosm(parentTagName) {
-  return (event) => event.target.closest(parentTagName)
-}
-
-function has(obj,property){
-  return Object.hasOwn(obj,property);
-}
-function objMerge(targetObj, mergingObj) {
-  return {
-    ...structuredClone(targetObj),
-    ...structuredClone(mergingObj),
-  };
-}
-// function objSearch(targetObj){
-//   return has(targetObj(key) && targetObj[key] === prop)
-// }
-function isObj(obj){
-    return !(typeof obj !== 'object' || Array.isArray(obj) || obj === null )
-}
-function objMap(obj,fun){
-  return objToArray(obj).map(fun);  
-}
-function objToArray(obj){
-  let arr = []
-  for (const key in obj){
-    arr.push(obj[key])
-  }
-  return arr
-}
-function objToTuplesArray(obj){
-  let arr = []
-  for (const key in obj){
-    arr.push([key,obj[key]])
-  }
-  return arr
-}
-function objectSizeOf(obj){
-  const size = new Blob([JSON.stringify(obj)]).size;
-  return {
-    Bytes: size,
-    KB: (size / 1024).toFixed(2),
-    MB: (size / (1024 ** 2)).toFixed(2),
-    GB: (size / (1024 ** 3)).toFixed(2),
-    Formatted: formatSize(size),
-  }
-}
-
-function formatSize(bytes) {
-  const units = ["B", "KB", "MB", "GB", "TB"];
-  let size = bytes;
-  let unitIndex = 0;
-  while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-  }
-  return `${size.toFixed(2)} ${units[unitIndex]}`;
-}
-
-function objectLength(obj,ignoreList){
-  if (!objectIsFalsey(obj)){
-    const keys = ignoreList ? Object.keys(obj).filter(key => !ignoreList.some(i => i === key)) : Object.keys(obj)
-    return keys.length
-  } else {
-    return 0;
-  }
-}
-function objectIsEmpty(obj){
-    for (const prop in obj) 
-      if (Object.hasOwn(obj, prop)) 
-        return false;
-    return true;
-}
-function objectIsFalsey(obj){
-    if (!isObj(obj)) return true
-    else return objectIsEmpty(obj)
-}
-
-function mapEvents(event){
-  const e = event;
-  return {
-    enter(event = e){
-      return event.keyCode == 13 || event.which == 13 || event.key == 'Enter'
-    },
-    backspace(event = e){
-      return event.keyCode == 8;
-    },
-    leftClick(event = e){
-      return event.button === 0;
-    },
-    rightClick(event = e){
-      return event.button === 2;
-    },
-    dblclick(event = e){
-      return event.detail === 2;
-    },
-    cosm(parent, event = e){
-      return event.target.closest(parent)
-    },
-    clicked(elementClass, event = e){
-      return event.target.closest(elementClass)
-    },
-    isNumber(event = e){
-      var charCode = event.which ? event.which : event.keyCode;
-      if (charCode > 31 && (charCode < 48 || charCode > 57)) return false;
-      return true;
-    },
   }
 }

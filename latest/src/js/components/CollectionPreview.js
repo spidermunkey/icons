@@ -1,7 +1,5 @@
 import { Color } from "./Color";
-import { EventEmitterClass } from "../utils/EventEmitter";
 import { Canvas } from "./Canvas";
-import { COSM } from "../utils/Cosm";
 
 const ColorState = (originalColor = '#000') => ({
   original: originalColor,
@@ -51,7 +49,7 @@ const ShapeModeHtml = () => {
   `
 }
 const InverterState = (colorsFound = ['#000']) => colorsFound.map(ColorState)
-export class CollectionPreview extends EventEmitterClass {
+export class CollectionPreview extends EventEmitter {
   constructor() {
     super()
     this.on('close',() => this.revertIconToOriginalHTML())

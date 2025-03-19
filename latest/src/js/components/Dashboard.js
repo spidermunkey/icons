@@ -1,39 +1,4 @@
-import { EventEmitter, EventEmitterClass } from "../utils/EventEmitter";
-
-class Search {
-  constructor(){
-    this.query = null;
-    this.emitter = new EventEmitter();
-  }
-
-  async handleSearch(event) {
-    const searchQuery = event.target.value;
-    this.query = searchQuery;
-    if (searchQuery === '') return
-    console.log(searchQuery,this.query)
-    const res = await axios.post(`http://localhost:${1279}/icons/all`, { query: searchQuery !== undefined ? searchQuery : this.query })
-    const { query,data } = res.data;
-    const queryIsCurrent = this.query === query || this.query === searchQuery;
-    console.log(data)
-    if (queryIsCurrent) this.emitter.emit('response',data);
-  }
-  on(){
-    this.emitter.on(...arguments)
-  }
-  once() {
-    this.emitter.once(...arguments)
-  }
-  off() {
-    this.emitter.off(...arguments)
-  }
-  clear() {
-    this.emitter.clear(...arguments)
-  }
-  emit() {
-    this.emitter.emit(...arguments)
-  }
-}
-export class DashboardElement extends EventEmitterClass {
+export class DashboardElement extends EventEmitter {
   constructor() {
     super();
     this.element = $('#DASHBOARD');

@@ -1,4 +1,3 @@
-import { EventEmitterClass } from "../utils/EventEmitter"
 const defaultSetting = {
     viewBox: [0,0,20,20],
      vbh:20, 
@@ -8,6 +7,7 @@ const defaultSetting = {
      width:'24', 
      height:'24'
 }
+
 const htmlController = {
     async copyToClipboard() {
         if(this.targetElement) {
@@ -305,7 +305,7 @@ const htmlController = {
         })
     }
 }
-export class Preview extends EventEmitterClass {
+export class Preview extends EventEmitter {
     constructor() {
         super()
         this.tabs = $$('.preview__modals--modal')

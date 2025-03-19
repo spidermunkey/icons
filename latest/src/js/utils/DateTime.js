@@ -542,7 +542,6 @@ export class DateTime {
     return float - Math.floor(float);
   }
 }
-
 const mns = 1/1000;
 const snm = 1/60;
 const mnh = 1/60; 
@@ -741,9 +740,7 @@ export function toYears(milliseconds) {
     let years = Math.floor(days / 365);
     return years;
 }
-
 // const minutesInYear = msnYear;
-
 export function ago(since) {
     const now = Date.now();
     const then = since.getTime();
@@ -843,13 +840,9 @@ export function ago(since) {
 
     return ago;
 }
-
 export function getRemainder(float) {
     return float - Math.floor(float);
 }
-
-
-
 // 333309223436
 // const testDay = new Date('2012-02-08T00:00:00')
 // const yesterday = new Date('2022-08-30T00:00:00');

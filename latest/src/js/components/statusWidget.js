@@ -1,5 +1,4 @@
-import { API } from "../../../api"
-import { Task } from "../../../utils/Task"
+import { API } from "../api"
 export class StatusWidget {
   constructor(store){
     this.store = new Task(API.getStatus.bind(API))

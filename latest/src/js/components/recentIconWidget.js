@@ -1,8 +1,6 @@
-import { API } from "../../../api";
-import { LocalCollection } from "../../../components/Collection";
-import { Task } from "../../../utils/Task";
-import { EventEmitterClass } from "../../../utils/EventEmitter";
-export class RecentDownloads extends EventEmitterClass {
+import { API } from "../api";
+import { LocalCollection } from "./Collection";
+export class RecentDownloads extends EventEmitter {
   constructor(){
     super()
     this.active = false;

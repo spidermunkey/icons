@@ -1,7 +1,5 @@
-import { EventEmitter, EventEmitterClass } from "../../utils/EventEmitter.js";
-
-export class ClientSideSocketServer extends EventEmitterClass {
-  constructor() {
+export class ClientSideSocketServer extends EventEmitter {
+  constructor(host = 'ws://localhost:1279') {
     this.shouldReconnect = true;
     this.max_retry_attempts = 5;
     this.retry_attempts = 0;
@@ -9,7 +7,7 @@ export class ClientSideSocketServer extends EventEmitterClass {
     this.socket = this.createWebSocket();
     this.notifications = [];
     this.notifier = new EventEmitter();
-
+    this.host = host;
   // emitter 
   }
 
@@ -17,7 +15,7 @@ export class ClientSideSocketServer extends EventEmitterClass {
     this.cancelReconnect()
 
     try {
-      let sock = new WebSocket('ws://localhost:1279');
+      let sock = new WebSocket(this.host);
       sock.onopen = this.handleConnection.bind(this);
       sock.onmessage = this.parseMessage.bind(this);
       sock.onclose = this.handleDisconnect.bind(this);

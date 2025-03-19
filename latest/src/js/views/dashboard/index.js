@@ -1,5 +1,3 @@
-import { Cursor } from '../../utils/Cursor.js'
-import { ago, DateTime } from '../../utils/DateTime.js'
 
 import { AbstractView } from '../../components/AbstractView.js'
 import { Preview } from './../../components/Preview.js'
@@ -7,7 +5,7 @@ import { ContextMenu } from '../../components/Context.js'
 import { DashboardElement } from '../../components/Dashboard.js'
 import { Menu } from '../../components/Menu.js'
 import { Collection, CollectionWidget, CollectionWidgetSkeleton } from '../../components/Collection.js'
-import { Settings } from './components/CollectionSettingsInterface.js'
+import { Settings } from '../../components/CollectionSettingsInterface.js'
 import { ColorPicker } from '../../components/ColorPicker.js'
 import { CollectionPreview } from '../../components/CollectionPreview.js'
 
@@ -22,7 +20,6 @@ import { CurrentCollectionWidget } from '../../components/html/CurrentCollection
 import { PreviewWidget } from '../../components/html/PreviewWidget.js'
 import { PinnedCollectionWidget } from '../../components/html/PinnedCollectionWidget.js'
 import { PocketWidget } from '../../components/html/PocketWidget.js'
-import { ScannerWidget } from '../../components/html/ScannerWidget.js'
 
 import { CollectionInterface } from '../../components/html/CollectionInterface.js'
 import { PreviewInterface } from '../../components/html/PreviewInterface.js'
@@ -83,7 +80,6 @@ export class Dashboard extends AbstractView {
     get selected() {
         return this.state.selected
     }
-
     get pocket(){
         return this.state.pocket
     }

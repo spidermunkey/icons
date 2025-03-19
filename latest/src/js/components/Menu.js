@@ -1,5 +1,4 @@
 import { API } from "../api.js";
-import { ago, DateTime } from "../utils/DateTime.js";
 export class Menu {
   constructor(){
     this.collectionsMenu = $('.collections-list')

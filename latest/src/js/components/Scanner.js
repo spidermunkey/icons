@@ -1,4 +1,3 @@
-import { EventEmitter } from "../utils/EventEmitter.js";
 import { ClientSideSocketServer } from "../var/socket_server.js";
 export class Scanner {
   constructor() {

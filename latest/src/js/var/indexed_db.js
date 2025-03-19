@@ -1,5 +1,4 @@
 export const IDB = {
-    
     async initializeDB() {
         return new Promise((resolve, reject) => {
             var request = indexedDB.open("icons", 1);
