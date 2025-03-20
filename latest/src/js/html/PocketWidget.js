@@ -1,6 +1,8 @@
-export const PocketWidget = () => {
+export const PocketWidget = async () => {
+    const data = await app.store.getPocket()
+    console.log('POCKET',data)
   return `<div class="bench-widget widget" id="bench-widget">
-  <div class="widget-header">
+    <div class="widget-header">
       <div class="widget-title"><span>pocket</span></div>
       <div class="btn-min">
                                               <!--?xml version="1.0" encoding="utf-8"?-->

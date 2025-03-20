@@ -79,7 +79,7 @@ export class Dashboard extends View {
     }
 
     async render(collectionID = 'home'){
-        $('#app').innerHTML = this.getHTML()
+        $('#app').innerHTML = await this.getHTML()
         this.notify('rendered')
         await this.hydrate()
         await this.load(collectionID)
@@ -1766,7 +1766,6 @@ export class Dashboard extends View {
         // </div>`
         // hide settings breadcrumb
         $('.breadcrumb').classList.remove('active')
-        history.pushState(null,null,window.location)
 
     }
     async renderCollection(cid) {
@@ -1793,7 +1792,6 @@ export class Dashboard extends View {
                 this.setReady()
                 this.preview.setReady()
                 this.loadPresetMenu()
-                history.pushState(null,null,window.location)
             } catch(e){
                 console.log('error rendering collection',e)
         } 
@@ -1812,7 +1810,6 @@ export class Dashboard extends View {
         $('.info-bar .current-tab').textContent = name
         if (cid !== 'search'){
             console.log('going home')
-            // history.pushState(null,null,window.location)
         }
 
     }
@@ -2083,7 +2080,7 @@ export class Dashboard extends View {
             $('.synced-collection-names').innerHTML = `${names.reduce((acc,red)=> acc + `<div class="preview-a2c-item" collection=${red}>${red}</div>`, '' )}`
     }
 
-    getHTML() {
+    async getHTML() {
     return `
             <!--          MENU AND THINGS        -->
             ${COSM()}
@@ -2100,7 +2097,7 @@ export class Dashboard extends View {
                 <div class="widget-pre widget-wrapper active">
                         ${PreviewWidget()}
                         ${CurrentCollectionWidget()}
-                        ${PocketWidget()}
+                        ${await PocketWidget()}
                         ${PinnedCollectionWidget()}
                 </div>
                 <div class="widget-main widget-wrapper ">

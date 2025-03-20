@@ -194,7 +194,7 @@ export class Collection {
       icons = icons.filter(i => subtypes.includes(i.subtype))
     }
     icons.forEach(prop => {
-       const { name , collection , markup , id , cid , isBenched } = prop
+       const { name , collection , markup , id , cid , benched } = prop
        const el = document.createElement('div');
             el.dataset.collection = collection;
             el.dataset.name = name;
@@ -202,7 +202,7 @@ export class Collection {
             el.dataset.id = id;
             el.innerHTML = markup;
             el.classList.add('svg-wrapper');
-            if (isBenched) {
+            if (benched) {
               el.classList.add('benched')
             }
        frag.append(el);
@@ -276,12 +276,11 @@ export class LocalCollection extends Collection {
 export class Pocket extends Collection {
   constructor(data){
     super(data)
-    this.countLabel = $('.bench-count')
   }
 
   updateSize(n){
     this.meta.size = n;
-    this.countLabel.textContent = this.meta.size;
+    $('.bench-count').textContent = this.meta.size;
   }
 
   iconExists({id}){
@@ -289,21 +288,29 @@ export class Pocket extends Collection {
   }
 
   toggle(icon){
-    if (this.iconExists(icon)){
+    if (!this.iconExists(icon)){
       this.add(icon)
     } else {
-      this.remove(icon.id)
+      this.remove(icon)
     }
   }
 
-  add(icon){
+  async add(icon){
     this.icons.push(icon);
     this.updateSize(++this.meta.size)
+    $(`.svg-wrapper[data-id=${icon.id}]`).classList.add('benched')
+    icon.benched = true;
+    const response = await app.store.updatePocket(icon);
+    console.log(response)
   }
 
-  remove(icon){
-    this.icons = this.icons.filter(item => item !== icon)
+  async remove(icon){
+    this.icons = this.icons.filter(item => item.id !== icon.id)
     this.updateSize(--this.meta.size)
+    $(`.svg-wrapper[data-id=${icon.id}]`).classList.remove('benched')
+    icon.benched = false;
+    const response = await app.store.updatePocket(icon);
+    console.log(response)
   }
 
 }
@@ -517,6 +524,6 @@ export class CollectionStore extends EventEmitter {
     updateNeeded = true;
   }
   getData(){
-    
+
   }
 }

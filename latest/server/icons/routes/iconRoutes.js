@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { Mongo } = require('../model.js');
+const { App } = require('../models/App.js');
+const Icon = require('../models/Collection/Icon.js')
 
 router.post('/colors/:id', async function addIconColrset(request,response){
   const payload = request.body
@@ -57,10 +59,26 @@ router.delete('/settings/:id',async function deleteIconPreset(request,response){
   response.json(result)
 })
 
-
-router.get('/:id', async function getByID (request,response) {
-  response.json(await Mongo.getIconById(request.params.id));
+router.put('/', async function updateIcon(request,response){
+  try {
+    const propsToUpdate = request.body.payload?.props;
+    const icon = request.body.payload.icon;
+    console.log(propsToUpdate,icon)
+    if (Object.keys(propsToUpdate).length === 1 && Object.hasOwn(propsToUpdate,'benched')){
+      console.log('in here foo')
+      response.json(propsToUpdate.benched
+       ? await Icon.pocket(icon)
+       : await Icon.unpocket(icon))
+    } else {
+      response.json(await App.update_icon(propsToUpdate,icon))
+    }
+  }catch (error){
+      console.log(error)
+      response.status(500).send({success:false,code:500,message:'error processing request'})
+  }
 })
+
+
 router.post('/', async function search(request,reponse) {
   const {payload} = request.body;
   const query = payload.query

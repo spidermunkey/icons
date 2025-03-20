@@ -8,8 +8,8 @@ export class Icon {
         // this.trace = props.id;
         this.vid = props.vid;
         this.cid = props.cid;
-        this.isFavorit0e = props.isFavorite;
-        this.isBenched = props.isBenched;
+        this.isFavorit0e = props.favorite;
+        this.benched = props.benched;
         this.rebased = props.rebased;
         this.type = props.type || 'default';
         this.color = props?.color || {}; 
@@ -58,8 +58,8 @@ export class Icon {
             markup: this.markup,
             rebased: this.rebased,
             collection: this.collection,
-            isFavorite: this.isFavorite,
-            isBenched: this.isBenched,
+            favorite: this.favorite,
+            benched: this.benched,
 
             type: this.type,
             color: this.color,

@@ -188,6 +188,9 @@ class App extends EventEmitter {
         }
     }
 
+    async update_icon(){
+        return {}
+    }
 }
  
 

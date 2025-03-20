@@ -2,10 +2,12 @@ const express = require('express')
 const router = express.Router()
 const { Mongo } = require('../model.js')
 const Local = require('../models/Local.js')
-
+const Collection = require('../models/Collection.js')
 const App = require('../models/App.js')
 
-
+router.get('/pocket',async function getPocketData(request,response){
+  response.json(await Collection.pocket())
+})
 router.get('/info', async function getCollectionData(request,response){
   try {
     response.json(await App.get_collection_info())
@@ -95,7 +97,6 @@ router.post('/:collectionID', async function addToCollection (request, response)
     response.status(500).send({success:false,code:500,message:'error processing request'})
   }
 })
-
 
 
 router.put('/settings/:collection', async function clearDefaultSetting(request,response){

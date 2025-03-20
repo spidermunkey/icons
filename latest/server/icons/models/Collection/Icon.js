@@ -177,20 +177,70 @@ async function destroy(props){ // <collection_type> ? 'project'
 
 async function update( props , propsToUpdate ){ // <collection_type> ? 'project'
     try {
-        
         if (!props.collection ) throw new Error('add to collection failed invalid collection id or name')
         else if (!props.cid ) throw new Error('add to collection failed.... invalid collection id')
-        else if (await getCollectionTypeById(props.cid) !== 'project') throw new Error('add to collection failed... invalid collection type')
+        else if (await getCollectionTypeById(props.cid) !== 'project' ) {
+            // can only add to pocket
+            throw new Error('add to collection failed... invalid collection type')
+        }
         
         const collection = await getCollection(props.collection);
         const updated = await collection.findOneAndUpdate(
             { id: props.id},
             { $set: config.filterProperties(propsToUpdate) });
-        return {success: updated, reason:'acknowledged', message:'process complete'}
+        const updatedIndex = (await getCollection('all')).findOneAndUpdate(
+            {id:props.id},
+            { $set: config.filterProperties(propsToUpdate) })
+
+        return {success: updated.value, reason:'acknowledged', message:'process complete'}
 
     } catch (error){
         throw error
     }
+}
+
+async function pocket(props){
+    if (!props.collection ) throw new Error('add to collection failed invalid collection id or name')
+    else if (!props.cid ) throw new Error('add to collection failed.... invalid collection id')
+    console.log('adding to pocket');
+
+        await (await getCollection('{{pocket}}')).findOneAndReplace(
+        {id:props.id},
+        { ...props },
+        {upsert:true})
+
+        const collection = await getCollection(props.collection);
+
+        const updated = await collection.findOneAndUpdate(
+            { id: props.id},
+            { $set: {benched:true}},
+            { returnDocument:'after'});
+        const updatedIndex = (await getCollection('all')).findOneAndUpdate(
+            {id:props.id},
+            { $set: {benched:true}})
+
+    return {success: updated.value, reason:'acknowledged', message:'process complete'}
+
+}
+
+async function unpocket(props){
+    console.log('removing from pocket')
+    if (!props.collection ) throw new Error('add to collection failed invalid collection id or name')
+    else if (!props.cid ) throw new Error('add to collection failed.... invalid collection id')
+    await (await getCollection('{{pocket}}')).findOneAndDelete(
+        {id:props.id},
+    )
+    const collection = await getCollection(props.collection);
+    const updated = await collection.findOneAndUpdate(
+        { id: props.id},
+        { $set: {benched:false} },
+        { returnDocument:'after' });
+    const updatedIndex = (await getCollection('all')).findOneAndUpdate(
+        {id:props.id},
+        { $set: {benched:false} })
+
+    return {success: updated.value, reason:'acknowledged', message:'process complete'}
+
 }
 
 async function addColor( props , colorset ){
@@ -320,6 +370,8 @@ module.exports = {
     add,
     destroy,
     update,
+    pocket,
+    unpocket,
 
     addColor,
     removeColor,

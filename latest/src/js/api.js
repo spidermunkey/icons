@@ -109,6 +109,16 @@ export const API = {
     },
 
 
+
+    async updatePocket(icon){
+        return this.put(`${endpoint}/all`,{props:{benched:icon.benched},icon})
+    },
+    async getPocket(){
+        return this.fetch(`${endpoint}/collections/pocket`)
+    },
+
+
+    
     async saveCollectionColorset(cid,colorset){
         return this.post(`${endpoint}/collections/colors`, {cid,colorset})
     },

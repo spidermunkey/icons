@@ -13,6 +13,13 @@ export class SvgModel extends EventEmitter {
     async search(query){
         return API.search(query)
     }
+
+    async getPocket(){
+        return API.getPocket();
+    }
+    async updatePocket(icon){
+        return API.updatePocket(icon)
+    }
     async saveCollectionColorset(cid,colorset){
         return API.saveCollectionColorset(cid,colorset)
     }

@@ -96,12 +96,21 @@
         transform: scale(2);
         transition: transform 600ms ease-in-out;
     }
-    &.benched {
+    &.benched::before {
+        content:"";
+        height: 8px;
+        width: 8px;
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        background-color: #9be8f7;
+        border-radius: 8px;
+        z-index: 100;
+    }
         // background-image: linear-gradient(180deg,#fff,#f5f5fa);
         // background-position: 0px 0px;
-        // // background-image: linear-gradient(180deg,#ffffff1c,#f5f5fa1c);
-        // // background-color: lightblue;
-    }
+        // background-image: linear-gradient(180deg,#ffffff1c,#f5f5fa1c);
+        // background-color: lightblue;
 
 }
 .search-modal .svg-wrapper {
@@ -151,20 +160,20 @@
         transition: transform 300ms ease-in-out;
 
     }
-    &.benched {
+    // &.benched {
 
-        background: linear-gradient(rgb(182, 243, 248),rgb(130, 221, 246));
-        background: #9be8f7;
-        // box-shadow: 0px 1px 8px 0px rgba(189, 234, 255, 0.23), 0px 0px 8px -1px rgba(32, 80, 93, 0.157), 0px 0px 3px -2px rgba(7, 24, 32, 0.8);
-        transition: background 300ms ease;
-        box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, 0.123), 0px 1px 3px 0px rgba(0, 0, 0, 0.127);
+    //     background: linear-gradient(rgb(182, 243, 248),rgb(130, 221, 246));
+    //     background: #9be8f7;
+    //     // box-shadow: 0px 1px 8px 0px rgba(189, 234, 255, 0.23), 0px 0px 8px -1px rgba(32, 80, 93, 0.157), 0px 0px 3px -2px rgba(7, 24, 32, 0.8);
+    //     transition: background 300ms ease;
+    //     box-shadow: 0px 3px 6px 0px rgba(0, 0, 0, 0.123), 0px 1px 3px 0px rgba(0, 0, 0, 0.127);
 
-        &:after {
-            transform: scale(1);
-        }
+    //     &:after {
+    //         transform: scale(1);
+    //     }
         
-        svg {
-            scale: 1;
-        }
-    }
+    //     svg {
+    //         scale: 1;
+    //     }
+    // }
 }

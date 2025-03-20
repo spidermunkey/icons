@@ -34,6 +34,7 @@ export class App extends EventEmitterClass {
       }
     navigateTo(url){
         history.pushState(null,null,url);
+      
         this.route(url);
     }
     
