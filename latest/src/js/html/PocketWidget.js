@@ -1,6 +1,7 @@
+import { Pocket } from "../components/Collection"
 export const PocketWidget = async () => {
-    const data = await app.store.getPocket()
-    console.log('POCKET',data)
+    const icons = await app.store.getPocket()
+    app.store.pocket = new Pocket({icons,meta:{'name':'pocket',size:icons.length}})
   return `<div class="bench-widget widget" id="bench-widget">
     <div class="widget-header">
       <div class="widget-title"><span>pocket</span></div>
@@ -22,7 +23,7 @@ export const PocketWidget = async () => {
       </div>
       <div>
           <div class="bench-preview-count">
-              <span class="bench-count">0</span>
+              <span class="bench-count">${icons.length}</span>
               <span class="divider">
                   <svg xmlns="http://www.w3.org/2000/svg" viewbox="-8 -16 42 42" height="16px" width="16px">
                   <path d="M12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg>
