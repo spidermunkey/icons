@@ -758,6 +758,16 @@ function objToArray(obj){
   }
   return arr
 }
+
+function filterObjects(objects,nestedProperty){ // get array of nested property in group of objects i.e. <name>
+  let arr = []
+  for (const object in objects){
+    if (objects[object] && objects[object][nestedProperty])
+    arr.push(objects[object][nestedProperty])
+  }
+  return arr
+}
+
 function objToTuplesArray(obj){
   let arr = []
   for (const key in obj){
@@ -1162,7 +1172,9 @@ class Task {
     if (poll) setInterval(this.run,poll)
   }
   getData = async (updateNeeded = this.updateNeeded) => {
-    if (updateNeeded) this.run()
+    if (updateNeeded) {
+      return await this.run();
+    }
     else {
       this.emit("ready", this.data);
       return this.data
@@ -1176,7 +1188,7 @@ class Task {
       this.running = true
       this.state = "loading";
       this.emit("loading");
-      this.data = await this.promise(...args);
+      this.data = await this.task(...args);
       if (minimum_interval_timer != 0) await minimum_interval_timer;
       this.state = "ready";
       this.emit("ready", this.data);
@@ -1188,6 +1200,7 @@ class Task {
       this.emit("error", error);
     } finally {
       this.running = false;
+      return this.data
     }
   }
 

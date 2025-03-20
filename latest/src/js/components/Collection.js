@@ -514,7 +514,9 @@ export class CollectionWidget extends Collection {
 }
 export class CollectionStore extends EventEmitter {
   constructor(data){
+    updateNeeded = true;
+  }
+  getData(){
     
   }
-  
 }

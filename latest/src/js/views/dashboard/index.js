@@ -4,7 +4,7 @@ import { View } from '../../view.js'
 import { Preview } from './../../components/Preview.js'
 import { ContextMenu } from '../../components/Context.js'
 import { Menu } from '../../components/Menu.js'
-import { Collection, CollectionWidget, CollectionWidgetSkeleton } from '../../components/Collection.js'
+import { Collection, CollectionWidget } from '../../components/Collection.js'
 import { ColorPicker } from '../../components/ColorPicker.js'
 import { CollectionPreview } from '../../components/CollectionPreview.js'
 
@@ -78,11 +78,11 @@ export class Dashboard extends View {
         return this.state.pocket
     }
 
-    async render(collection = 'home'){
+    async render(collectionID = 'home'){
         $('#app').innerHTML = this.getHTML()
         this.notify('rendered')
         await this.hydrate()
-        await this.load(collection)
+        await this.load(collectionID)
         return this
     }
     async hydrate(){
@@ -169,7 +169,6 @@ export class Dashboard extends View {
         $('.menu-modals').addEventListener('click',(e) => this.delegateMainMenuEvents(e))
 
         $('.home').addEventListener('click', () => this.renderCollection(this.tab ? this.tab : 'home'))
-        $('.info-bar .info-text').addEventListener('click', () => this.renderDashboardHome())
 
         $('.preview-widget').addEventListener('click',(e) => this.openPreviewFromWidget(e))
         $('.close-preview').addEventListener('click',(e) => this.closePreview(e))
@@ -212,10 +211,10 @@ export class Dashboard extends View {
         this.notify('hydrated')
         return this;
     }
-    async load(collection) {
+    async load(collectionID) {
         this.preview.close()
         if (this.tab === 'pocket') this.renderPocket()
-        else await this.renderCollection( collection ? collection : this.tab ) 
+        else await this.renderCollection( collectionID ? collectionID : this.tab ) 
         this.notify('loaded')
         return this.state
     }
@@ -1724,12 +1723,18 @@ export class Dashboard extends View {
 
     async renderDashboardHome(){
         const homePanel = $('#DASHBOARD .db-res');
-        homePanel.innerHTML = '... fetching data'
-        const collection_names = await this.store.getNames()
-        const data = await this.store.getCollectionSample(collection_names[0])
+        homePanel.innerHTML = '... fetching data';
+        const collectionInfo = await this.store.getMeta();
+        const {locals,index,projects} = collectionInfo;
+        const flattened = [
+            ...filterObjects(locals,'cid'),
+            ...filterObjects(projects,'cid'),
+            ...filterObjects(index,'cid')
+        ]
+        const data = await this.store.getCollectionSample(flattened[0])
         const firstCollection = new Collection(data)
         homePanel.innerHTML = ''
-        const widgets = collection_names
+        const widgets = flattened
             .map(async name => {
                 const widgetSkeleton = CollectionWidget.getSkeleton()
                 homePanel.appendChild(widgetSkeleton)
@@ -1749,28 +1754,27 @@ export class Dashboard extends View {
 
         this.setTab('home')
         $('.dashboard__header .panel-settings').classList.remove('active')
-        $('.collection-menu').innerHTML = `
-        <div class="menu-controls">
-            <div class="close-menu">close</div>
-        </div>
-        <div class="quick-links">
-            ${(collection_names).reduce((a,b)=> {
-                return a + `<div class="hot-link" collection=${b}>${b}</div>`
-            },'')}               
-        </div>`
+        // $('.collection-menu').innerHTML = `
+        // <div class="menu-controls">
+        //     <div class="close-menu">close</div>
+        // </div>
+        // <div class="quick-links">
+        //     ${(collection_names).reduce((a,b)=> {
+        //         return a + `<div class="hot-link" collection=${b}>${b}</div>`
+        //     },'')}               
+        // </div>`
         // hide settings breadcrumb
         $('.breadcrumb').classList.remove('active')
     }
-    async renderCollection(name) {
+    async renderCollection(cid) {
         await this.ready
         if (this.active) {
             try {
-                if ( name === 'home' || name === 'all'){
+                if ( cid === 'home' || cid === 'all'){
                     await this.renderDashboardHome()
                     return
                 } else {
-                    console.log('rendering collection...',name)
-                    const collection = await this.store.getCollection(name)
+                    const collection = await this.store.getCollection(cid)
                     console.log(collection)
                     this.state.collection = collection
                     this.preview.setCollectionPreset(collection.preset)
@@ -1780,7 +1784,7 @@ export class Dashboard extends View {
                     this.collection.render()
                     this.preview.update(this.currentIcon)
                     this.state.selected = this.currentIcon
-                    this.setTab(name)
+                    this.setTab(collection.name)
                     $('.dashboard__header .panel-settings').classList.add('active')
                 }
                 this.setReady()
@@ -1854,16 +1858,17 @@ export class Dashboard extends View {
         } 
         if (homeLink){
             let name = homeLink.getAttribute('collection');
+            let cid = homeLink.getAttribute('cid');
             if (!name) return console.warn('no collection name', homeLink);
             let panelLink = event.target.closest('.collection-summary .panel-name');
             if (panelLink){
-                let name = panelLink.getAttribute('collection');
-                await this.renderCollection(name);
+                let cid = panelLink.getAttribute('cid');
+                await this.renderCollection(cid);
                 // hide settings breadcrumb
                 $('.breadcrumb').classList.remove('active')
                 return;
             } else if (settingsWidgetLink){
-                    await this.renderCollection(name);
+                    await this.renderCollection(cid);
                     this.openCollectionSettingsMenu();
                     return;
             }
@@ -1933,7 +1938,7 @@ export class Dashboard extends View {
             return;
         }
         if (closer) this.closeCollectionMenu();
-        if(hotlink) this.renderCollection(hotlink.getAttribute('collection'))
+        if(hotlink) this.renderCollection(hotlink.getAttribute('cid'))
     }
     async delegateAddToCollectionWindowEvents(event) {
         let clicked = event.target.closest('.preview-a2c-item');
@@ -1992,9 +1997,9 @@ export class Dashboard extends View {
         }
         if (!link) return;
         this.setLoading();
-        const modalName = link.getAttribute('modal');
+        const cid = link.getAttribute('cid');
         this.menu.close();
-        await this.renderCollection(modalName);
+        await this.renderCollection(cid);
     }
     async addToCollection(collection,icon) {
         let result
@@ -2013,9 +2018,10 @@ export class Dashboard extends View {
             this.store.ready = false;
             result = await this.store.saveCollection(name, [this.state.selected] )
         } catch(e){ console.log(e) }
-        if (result.success == true) {
+        if (result.name === name) {
             console.log('collection created',result.data)
             console.log('updating menus....',result.data)
+            this.menu.render();
         }
     }
     openAddToCollectionMenu() {

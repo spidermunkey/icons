@@ -60,7 +60,6 @@ export class Menu extends EventEmitter {
     this.closeAll();
     this.current = null;
   }
-
   closeAll() {
     this.navmodals.forEach(modal => modal.classList.remove('active'));
     $$('.item-menu-window.active').forEach(tooltip => tooltip.classList.remove('active'))
@@ -83,7 +82,6 @@ export class Menu extends EventEmitter {
     this.projectMenu.innerHTML = CollectionMenu(projects);
     this.projectModal.appendChild(MenuList(projects));
   }
-  
 }
 
 function CollectionMenu(props) { // get list of names from db

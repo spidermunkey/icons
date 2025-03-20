@@ -141,20 +141,16 @@ class App extends EventEmitter {
     // should be refactored to accept cids
     async get_collection({ collection, limit, page, filters}){
         try {
-            const meta = await Meta.findByName(collection)
-            if(meta){
-                const result = await Collection.data(meta.cid,{limit,page,filters})
-                return result
-            } else throw new Error('collection not found')
+            const result = await Collection.data(collection,{limit,page,filters})
+            return result
         } catch (error){
             return {success:false,reason:error,message:'error retrieving collection'}
         }
-
     }
 
     async addToCollection({collection,icons}){
         try {
-            const meta = await Meta.findByName(collection)
+            const meta = await Meta.find(collection)
             if (meta){
                 const faulty = [];
                 const added = await Promise.all(icons.map(async props => {

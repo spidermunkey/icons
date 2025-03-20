@@ -62,10 +62,10 @@ router.delete('/:collectionID', async function dropCollection(request,response){
 
 // refactor to accept collection ids instead of names or collection type in addition to name
 // to support duplicate names (local.name, project.name)
-router.get('/:collection', async function getCollection (request, response) {
+router.get('/:collectionID', async function getCollection (request, response) {
   try {
     response.json(await App.get_collection({
-      collection: request.params.collection,
+      collection: request.params.collectionID,
       page: request.query?.page, 
       limit: request.query?.limit,
       filters: {
@@ -84,10 +84,10 @@ router.put('/:collectionID', async function editCollection(request,response){
 })
 
 
-router.post('/:collection', async function addToCollection (request, response) {
+router.post('/:collectionID', async function addToCollection (request, response) {
   try {
     response.json(await App.addToCollection({
-      collection: request.params.collection,
+      collection: request.params.collectionID,
       icons: request.body.payload.icons
     }))
   } catch(error){

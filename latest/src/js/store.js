@@ -1,11 +1,13 @@
 import { API } from './api.js';
-import { Icon } from './components/Icon.js';
 import { Collection, Pocket } from './components/Collection.js';
 export class SvgModel extends EventEmitter {
     constructor() {
         super();
         this.state = {}
-        this.pocket = new Pocket({ meta: { name: 'bench',size:0 }})
+        this.pocket = new Pocket({ meta: { name: 'bench', size:0 }})
+        this.updateNeeded = true;
+        this.info = {};
+        this.on('change',() => this.updateNeeded = true)
     }
     // commands
     async search(query){
@@ -59,6 +61,7 @@ export class SvgModel extends EventEmitter {
     async deleteCollectionPreset(cid,pid){
         return API.removeCollectionPreset(cid,pid)
     }
+
     async dropCollection(collectionId){
         return API.dropCollection(collectionId);
     }
@@ -85,9 +88,9 @@ export class SvgModel extends EventEmitter {
         return API.createCollection({cid,name,icons:renamed})
     }
     
-    async getCollectionSample(name,page=1,limit=50){
+    async getCollectionSample(cid,page=1,limit=50){
         try {
-            const result = await API.getPage(name,page,limit);
+            const result = await API.getPage(cid,page,limit);
             const {icons,meta} = result;
             return {
                 icons,
@@ -98,45 +101,38 @@ export class SvgModel extends EventEmitter {
                 currentPage: page,
             }
         } catch (error){
-            console.log('error fetching collection data',name)
+            console.log('error fetching collection data')
+            return {}
         }
 
     }
-    async getCollection(name, filters = {subtypes:[],sub_collections:[]}) {
-        const result = await API.getCollection(name,filters)
+    async getCollection(cid, filters = {subtypes:[],sub_collections:[]}) {
+        const result = await API.getCollection(cid,filters)
         const collection = new Collection(result)
         console.log(collection)
         return collection
     }
-    async getMeta() {
-        const data = await API.getCollectionData();
-        let meta = {
-            locals: data?.locals,
-            projects: data?.projects,
-            index: data?.index,
-            
-            names: [],
-            project_names:[],
-            local_names:[],
-            index_names:[],
+
+    async getMeta(){
+        let data;
+        if (this.updateNeeded) {
+            console.log('fetching')
+            data = await API.getCollectionData();
+            this.info = data;
+            this.updateNeeded = false;
+        } else {
+            console.log('memoed!')
+            data = this.info;
         }
-        for (const x in meta.locals){
-            meta.names.push(meta.locals[x].name);
-          }
-          for (const x in meta.projects){
-            meta.names.push(meta.projects[x].name);
-          }
-          for (const x in meta.index){
-            meta.names.push(meta.index[x].name);
-          }
-        return meta
+        const {locals,projects,index} = data
+        return {
+            locals,
+            projects,
+            index,
+        }
+
     }
-    async getNames() {
-        const meta = await this.getMeta();
-        console.log(meta)
-        console.log(meta.names)
-        return meta.names;
-    }
+
     async getStatus(){
         return API.getStatus();
     }

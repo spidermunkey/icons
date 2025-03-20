@@ -68,7 +68,6 @@ export const API = {
         return this.fetch(`${endpoint}/local/collections?collectionType=synced`)
     },
     async getCollectionNames(collection_type) {
-        console.log('test',collection_type)
         return this.fetch(`${endpoint}/collections/info/names?collectionType=${collection_type ? collection_type : ''}`)
     },
     async getCollection(name,filters = {subtypes:[],sub_collections:[]},useFilters=false) {
@@ -81,7 +80,7 @@ export const API = {
         return res;
     },
     async getCollectionData() {
-        return this.fetch(`${endpoint}/collections/info?type=default`)
+        return this.fetch(`${endpoint}/collections/info`)
     },
     async createCollection(collection) {
         return this.post(`${endpoint}/collections/create` ,{ props: { ...collection }})

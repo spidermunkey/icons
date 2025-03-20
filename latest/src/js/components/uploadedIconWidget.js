@@ -25,7 +25,7 @@ export class UploadSection {
         // else console.warn('skipping',i)
     })
     let widgetHTML = `
-      <div class="recent-collection" cid=${collection.cid} data-link="" href="/browse/${collection.name}">
+      <div class="recent-collection" cid=${collection.cid} data-link="" href="/browse/${collection.cid}">
         <div class="collection-info">
         <span class="name">${c.name}</span>
         <span class="divider"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -16 42 42" height="16px" width="16px">
