@@ -1,13 +1,13 @@
 import { Icon } from './Icon.js';
-import { API } from '../api.js';
 import { Color } from './Color.js'
+
 export class Collection {
   constructor(data){
     const { 
       icons = [], 
-      meta = { name:'empty', cid:'1' ,sub_collections:[] ,subtypes:[], },
-      state = {}
+      meta = { name:'empty', cid:'1' ,sub_collections:[] ,subtypes:[], }
     } = data
+
     const validIcons = []
     this.skipped = []
     this.sub_collections = []
@@ -57,9 +57,22 @@ export class Collection {
     }
     this.color = meta?.color || {}
 
-    this.state = {}
-    // console.dir(`CREATING COLLECTION FROM DATA: `, data)
   }
+  
+  find(id){
+    return (this.icons.find(icon => icon.id == id))
+  }
+  update(props){
+    console.log('updating...', this.meta.name)
+    let index = this.icons.findIndex(icon => icon.id == props.id)
+    if (index == -1) return null
+    this.icons[index] = new Icon(props)
+  }
+
+  currentIcon(){
+    return this.cursor.current;
+  }
+
   findMatchingViewbox(icons){
     // return null if all viewboxes are not the same
     let viewbox
@@ -157,65 +170,27 @@ export class Collection {
     }
     return { shapes: shapeResult, elements: elementResult}
   }
-  debugFaultyIcons(){
-    console.log(this.skipped)
-  }
-  debugCollection(id){
-    if (this.id === id) console.log(this)
-  }
-  debugIcon(id){
-    console.log(this.find(id))
-  }
-  get recentSettings() {
-    return this.meta.recent_settings
-  }
-  find(id){
-      return (this.icons.find(icon => icon.id == id))
-  }
-  Icon(id) {
-      return this.find(id)
-  }
-  update(props){
-      console.log('updating...', this.meta.name)
-      let index = this.icons.findIndex(icon => icon.id == props.id)
-      if (index == -1) return null
-      this.icons[index] = new Icon(props)
-  }
-  currentIcon(){
-      return this.cursor.current;
-  }
-  async addIcon(){
 
-  }
   render(){
     const menuDestination = $('.widget-main .collection-menu')
     const dashboardTab = $('.info-bar .current-tab')
     const infoWidget = $('.current-collection-widget .widget-content')
-    this.renderIcons()
-    dashboardTab.textContent = this.name
-    menuDestination.innerHTML = this.menuHTML()
-    infoWidget.innerHTML = this.infoHTML()
-  }
-  renderIcons(){
     const destination = $('#DASHBOARD .db-res')
+    this.renderIcons(destination)
+    dashboardTab.textContent = this.name
+    menuDestination.innerHTML = this.menu()
+    infoWidget.innerHTML = this.info()
+  }
+  renderIcons(destination){
     destination.innerHTML = `...loading ${this.name}`
     const frag = document.createDocumentFragment();
-
-    // handling sub-filters
     const {sub_collections,subtypes} = this.filters
-    const shouldFilterCollection = sub_collections.length > 0;
-    const shouldFilterSubtype = subtypes.length > 0;
     let icons = this.icons;
-    if (shouldFilterCollection){
-      console.log(`filtering for sub_collections ${sub_collections}...`)
-      console.log(sub_collections)
+    if (sub_collections.length > 0){
       icons = icons.filter(i => sub_collections.includes(i.sub_collection))
-      console.log(`found ${icons.length} icons matching sub_collection filters ${sub_collections}`)
     }
-    if (shouldFilterSubtype) {
-      console.log(`filtering for subtypes ${subtypes}....`)
+    if (subtypes.length > 0) {
       icons = icons.filter(i => subtypes.includes(i.subtype))
-      console.log(`found ${icons.length} icons matching subtype filters ${subtypes}`)
     }
     icons.forEach(prop => {
        const { name , collection , markup , id , cid , isBenched, subtype, sub_collection } = prop
@@ -233,15 +208,9 @@ export class Collection {
     })
     destination.innerHTML = ''
     destination.append(frag)
-
   }
-  renderWidget(){
 
-  }
-  renderPreview(){
-
-  }
-  infoHTML(){
+  info(){
       const getAgo = msDate => ago(msDate).string;
       let {
         collection_type,
@@ -249,7 +218,9 @@ export class Collection {
         name,
         uploaded_at = undefined,
         created_at = null,
-        updated_on = null} = this.meta;
+        updated_on = null
+      } = this.meta;
+      
       if (collection_type == 'auto') collection_type = 'default'
       let lastUpdate = 
           updated_on ? getAgo(new Date(updated_on))
@@ -267,7 +238,7 @@ export class Collection {
             <div class="btn-open">show more</div>
     `
   }
-  menuHTML(){
+  menu(){
     return `
         <div class="menu-controls">
             <div class="close-menu">close</div>
@@ -294,21 +265,24 @@ export class Collection {
 }
 
 export function CollectionWidget(data) {
-  let maxVisiblePageNum = 9;
-  let currentPage = 1;
-  let shiftLength = 36;
+
+    let maxVisiblePageNum = 9;
+    let currentPage = 1;
+    let shiftLength = 36;
 
     const pages = data.pages;
     const name = data.name;
     const icons = data.icons;
     const getPage = data.getPage;
     const cid = data.cid;
+
     const db_panel = document.createElement('div');
     const db_container = document.createElement('div');
     const panel_header = document.createElement('div');
     const panel_preview = document.createElement('div');
     const panel_footer = document.createElement('div');
     const panel_menu = document.createElement('div');
+
     db_panel.classList.add('collection-summary');
     db_container.classList.add('db-container');
     panel_header.classList.add('panel-header');
@@ -426,7 +400,7 @@ export function CollectionWidget(data) {
       }
       else if (event.target.closest('[opt="delete-collection"]')){
         console.log('deleting collection')
-        const result = await API.dropCollection(cid);
+        const result = await store.dropCollection(cid);
         if (result){
           console.log('API RESPONSE: DELETE', result)
           db_panel.remove();
@@ -475,4 +449,25 @@ export class LocalCollection extends Collection {
   constructor(data) {
     super({ meta:data, icons:data?.icons || []})
   }
+}
+
+export class Pocket extends Collection {
+  constructor(data){
+    super(data)
+
+  }
+
+  add(icon){
+    if (this.find(icon.id)) {
+      console.log('found it')
+          this.icons = this.icons.filter(icon => icon !== icon)
+          --this.meta.size;
+          $('.bench-count').textContent = this.meta.size;
+          return;
+      }
+      this.icons.push(icon)
+      ++this.meta.size;
+      $('.bench-count').textContent = this.meta.size;
+  }
+
 }

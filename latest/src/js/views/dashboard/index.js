@@ -1,11 +1,10 @@
 
-import { AbstractView } from '../../components/AbstractView.js'
+import { View } from '../../view.js'
+
 import { Preview } from './../../components/Preview.js'
 import { ContextMenu } from '../../components/Context.js'
-import { DashboardElement } from '../../components/Dashboard.js'
 import { Menu } from '../../components/Menu.js'
 import { Collection, CollectionWidget, CollectionWidgetSkeleton } from '../../components/Collection.js'
-import { Settings } from '../../components/CollectionSettingsInterface.js'
 import { ColorPicker } from '../../components/ColorPicker.js'
 import { CollectionPreview } from '../../components/CollectionPreview.js'
 
@@ -23,26 +22,10 @@ import { PocketWidget } from '../../html/PocketWidget.js'
 
 import { CollectionInterface } from '../../html/CollectionInterface.js'
 import { PreviewInterface } from '../../html/PreviewInterface.js'
-import { PocketInterface} from '../../html/PocketInterface.js'
 import { icons } from '../../html/PresetIcons.js'
-export class Dashboard extends AbstractView {
+export class Dashboard extends View {
   constructor(store) {
     super(store)
-    this.once = false
-    this.mode = 'dark'
-    this.on('rendered',() => { 
-        this.preview = new Preview()
-        this.collectionPreview = new CollectionPreview()
-        this.colorPicker = new ColorPicker({})
-        this.contextMenu = new ContextMenu()
-        this.dashboard = new DashboardElement()
-        this.menu = new Menu()
-        this.settings = new Settings()
-        this.settings.store = this.store
-        this.dashboardElement = this.dashboard.element
-        this.editor = $('#INTERFACE')
-        this.collectionSettingsWindow = $('.widget-settings.widget-wrapper')
-    })
     this.state = {
         tabName: 'home',
         group: undefined,
@@ -60,7 +43,18 @@ export class Dashboard extends AbstractView {
         searchView: {},
         preset: {},
     }
+    this.on('rendered',() => {
 
+        this.preview = new Preview()
+        this.collectionPreview = new CollectionPreview()
+        this.colorPicker = new ColorPicker({})
+        this.contextMenu = new ContextMenu()
+        this.menu = new Menu()
+
+        this.collectionSettingsWindow = $('.widget-settings.widget-wrapper')
+        this.element = $('#DASHBOARD');
+        this.panel = $('.db-res',this.element);
+    })
   }
     get collection(){
         return this.state.collection
@@ -91,14 +85,10 @@ export class Dashboard extends AbstractView {
         await this.load(collection)
         return this
     }
-    async init() {
-        if (this.once) return this
-        this.once = true
-    }
     async hydrate(){
-        this.dashboard.element.onmousedown = (e) => this.handleDashboardClick(e)
-        this.dashboard.element.oncontextmenu = (e) => this.toggleContextMenu(e)
-        this.dashboard.element.addEventListener('click',(e) => this.handleClickOutsideContext(e))
+        this.element.onmousedown = (e) => this.handleDashboardClick(e)
+        this.element.oncontextmenu = (e) => this.toggleContextMenu(e)
+        this.element.addEventListener('click',(e) => this.handleClickOutsideContext(e))
         // handle preview
         this.preview.on('viewbox changed',this.updateSavedPreset.bind(this))
         this.preview.on('icon updated',(icon,targetElement) => {
@@ -111,7 +101,7 @@ export class Dashboard extends AbstractView {
             if (this.colorPicker.fsActive)
                 this.colorPicker.closeFS()
         })
-        $$('.preview__tabber--tab').forEach(tab => {
+        $$('.preview__tabber--tab').forEach( tab => {
             tab.addEventListener('click',(e) => {
                 $$('.preview__tabber--tab').forEach(tab => tab.classList.remove('active'))
                 tab.classList.add('active')
@@ -137,14 +127,10 @@ export class Dashboard extends AbstractView {
                 this.colorPicker.close()
             }
         })
-        // save collection color settings
-        $('.collection-color-picker .like-color').addEventListener('click',() => {
-            console.log('saving color for later....',this.collectionPreview.currentHex)
-        })
+
         $('.color-settings-controller .btn-setting.save-colorset').addEventListener('click',async () => {
-            console.log('SAVING COLORSET',this.collectionPreview.colors)
-            let preview = this.collectionPreview
-            let colorset = preview.currentColorSet
+
+            let colorset = this.collectionPreview.currentColorSet
             let collection = this.state.collection
             let colorSetID = uuid()
             let colors = {
@@ -233,17 +219,24 @@ export class Dashboard extends AbstractView {
         this.notify('loaded')
         return this.state
     }
-    // preview.current icon
+
+    setLoading(){
+        this.panel.innerHTML = `loading...`
+    }
+    setReady(){
+        this.panel.classList.add('active')
+    }
+
     async copyFromWidget(){
         if (!this.preview.icon) return
         await this.preview.copyToClipboard()
     }
-    // context.current icon
     async copyCurrentIcon(e){
         if (!this.currentIcon || !this.currentIcon.markup) return
         await window.navigator.clipboard.writeText(this.currentIcon.markup)
         console.log('element copied')
     }
+
     search(){
         this.state.searchActive = true;
         const handleSearch = async (event) => {
@@ -256,7 +249,7 @@ export class Dashboard extends AbstractView {
             const { query , data } = result
             const queryIsCurrent = this.state.query === query || this.state.query === searchQuery
             if (queryIsCurrent) {
-                this.dashboard.setLoading()
+                this.setLoading()
                 const collection = new Collection({ 
                     icons: data, 
                     meta: { name: 'search' }
@@ -289,11 +282,31 @@ export class Dashboard extends AbstractView {
         $('.btn-cancel').classList.remove('active')
         this.searchActive = false
     }
-    // context
+
     togglePocketFromContext(){
         if (!this.context.icon) return;
         this.state.pocket.add((this.context.icon))
     }
+    toggleContextMenu(event) {
+        const clickedIcon = clicked('.dashboard .svg-wrapper',event)
+        let icon;
+        if (clickedIcon) icon = this.state.context.find(clickedIcon.dataset.id)
+        this.state.inspected = icon;
+       this.contextMenu.handleRightClick(event,icon)
+    }
+    openPreviewFromContext(tab){
+        hideMiniWidgets()
+        this.preview.update(this.state.context.icon)
+        this.preview.open(tab)
+       this.contextMenu.close()
+    }
+    handleClickOutsideContext(event) {
+        if (!event.target.closest('.db-context')) { 
+            event.preventDefault()
+           this.contextMenu.close()
+        }
+    }
+
     loadCollectionColors(){
         let colorDataContainer = $('.icon-color-editor .color-data');
             colorDataContainer.innerHTML = ''
@@ -406,7 +419,6 @@ export class Dashboard extends AbstractView {
                         // what design pattern / principles should have been in place for this not to happen?
                         // below code was implimented before meta properties were created
                         // how do you know and define object meta properties ahead of functionality
-                        // if at first you just want a working feature/ proof of concept?
                             continue
                         }
                         let fill = colorset[id][0]
@@ -897,6 +909,7 @@ export class Dashboard extends AbstractView {
         const preset = this.currentIcon.colors[csid];
         console.log('SAVING PRESET');
     }
+
     handleSavePreset() {
         let currentAnimation
         return (event) => {
@@ -1618,40 +1631,17 @@ export class Dashboard extends AbstractView {
         this.state.cSettingsActive = false;
     }
     async openCollectionSettingsMenu(){
-        await this.loadCollectionSettings();
         this.collectionSettingsWindow.classList.add('active')
         this.state.cSettingsActive = true
     }
-    async loadCollectionSettings(collectionName){
-        const settingsWindow = $('.settings-interface .interface-window')
-        const collection = this.collection
-        const preset = collection.meta?.preset
-        collection.meta.name
-        console.log('LOADING DEFAULT PRESET', preset)
-        console.log('LOADING COLLECTION SETTINGS',collection.settings)
-        console.log('LOADING COLLECTION COLORS',collection.colors)
-    }
-    toggleContextMenu(event) {
-        const clickedIcon = clicked('.dashboard .svg-wrapper',event)
-        let icon;
-        if (clickedIcon) icon = this.state.context.getIcon(clickedIcon.dataset.id)
-        this.state.inspected = icon;
-       this.contextMenu.handleRightClick(event,icon)
-    }
-    handleClickOutsideContext(event) {
-        if (!event.target.closest('.db-context')) { 
-            event.preventDefault()
-           this.contextMenu.close()
-        }
-    }
-    // widget preview ( sub-menu || home view )
+
+
     closeCollectionMenu(event){
         $('.interface-window.collection-menu').classList.remove('active');
         $('.widget-pre').insertBefore($('.preview-widget'),$('.current-collection-widget'));
         $('.widget-main').classList.remove('active');
         $('.widget-pre').classList.add('active');
     }
-    // widget preview ( sub-menu || home view )
     openCollectionMenu(event){
         // close preview
         this.hidePreview();
@@ -1662,12 +1652,7 @@ export class Dashboard extends AbstractView {
         $('.interface-window.preview').classList.remove('active');
 
     }
-    openPreviewFromContext(tab){
-        hideMiniWidgets()
-        this.preview.update(this.state.context.icon)
-        this.preview.open(tab)
-       this.contextMenu.close()
-    }
+
     openPreviewFromWidget(event){
         let tab = 
             event?.target.closest('.tggle.color-icon') ? 'color' :
@@ -1726,8 +1711,9 @@ export class Dashboard extends AbstractView {
         await this.ready
         this.preview.update(this.cursor.skipToPrev())
     }
+
     renderPocket() {
-        this.dashboard.setLoading()
+        this.setLoading()
         const collection = new Collection(
             {
                 meta: {name:'bench'},
@@ -1739,49 +1725,8 @@ export class Dashboard extends AbstractView {
         this.preview.update(this.currentIcon)
         this.setTab('pocket')
     }
-    async showCollectionSettings(collection){
-        let active_interface = this.currentInterface = $('.widget-wrapper.active')
-        active_interface.classList.add('settings-open')
-        active_interface.classList.remove('active')
-        $('.settings-interface').classList.add('active')
-        $('.settings-interface .interface-window').classList.add('active')
-        await this.settings.render(collection)
-        // apply settings from settings interface
-        $('.s-ctrl.btn-apply').addEventListener('click',() => {
-            console.log('applying collection settings to preview')
-            this.preview.setCollectionPreset(this.settings.currentPreset)
-        });
-        // save preset from settings interface
-        $('.s-ctrl.btn-save').addEventListener('click',async () => {
-            console.log('saving current preset')
-            const preset = this.settings.currentPreset
-            preset.preset_type = 'collection'
-            preset.for = collection.name
-            const result = await this.store.savePreset(this.settings.currentPreset)
-            console.log('PRESET SENT TO API', result)
-        });
-        $('.breadcrumb').classList.add('active')
-    }
-    hideCollectionSettings(){
-        $('.settings-interface').classList.remove('active')
-        this.currentInterface.classList.add('active')
-        this.currentInterface.classList.remove('settings-open')
-        $('.breadcrumb').classList.remove('active')
-    }
-    async generateCollectionPreviews() {
-        const pinned = this.state.pinned
-        const random = await this.store.getRandom(20,pinned)
-        const widgetElement = $('.pinned-widget .pinned-preview')
-        for (const rando of random){
-            const icon = document.createElement('div')
-            icon.innerHTML = rando.markup
-            icon.dataset.id = rando.id
-            icon.isFavorite = rando.isFavorite
-            icon.isBenched = rando.isBenched
-            icon.classList.add('pinned-icon')
-            widgetElement.appendChild(icon)
-        }
-    }
+
+
     async renderDashboardHome(){
         // should refactor for hotlinks to have cids
             // indexes [...names]
@@ -1857,7 +1802,7 @@ export class Dashboard extends AbstractView {
                     this.setTab(name)
                     $('.dashboard__header .panel-settings').classList.add('active')
                 }
-                this.dashboard.setReady()
+                this.setReady()
                 this.preview.setReady()
                 this.loadPresetMenu()
             } catch(e){
@@ -1877,10 +1822,9 @@ export class Dashboard extends AbstractView {
         $('.info-bar .current-tab').textContent = name
     }
     updateCollectionInfo(collection){
-            const getAgo = msDate => ago(new Date(msDate)).string;
-            console.log('updating collection info',collection)
+            const getAgo = msDate => ago(msDate).string;
             const {meta} = collection
-            let {collection_type,subtypes,sub_collections,size,name, uploaded_at = undefined,created_at = null, updated_on = null}  = meta;
+            let { collection_type, subtypes, sub_collections, size,name, uploaded_at = undefined, created_at = null, updated_on = null} = meta;
             let lastUpdate = 
                 updated_on ? getAgo(updated_on)
                 : created_at ? getAgo(created_at)
@@ -1951,9 +1895,10 @@ export class Dashboard extends AbstractView {
             const ctrlClick = event.ctrlKey,
                     rightClick = event.buttons === 2,
                     leftClick = event.buttons === 1;
-            if (leftClick && ctrlClick && this.state.tabName !== 'pocket') this.store.pocket.add(this.state.context.getIcon(id))
+            if (leftClick && ctrlClick && this.state.tabName !== 'pocket') this.store.pocket.add(this.state.context.find(id))
             else if (leftClick) {
-                let icon = this.currentView.Icon(id)
+                console.log(this.currentView)
+                let icon = this.currentView.find(id)
                 this.preview.update(icon)
                 this.state.selected = icon
                 this.cursor.skipToElement(icon)
@@ -2034,7 +1979,6 @@ export class Dashboard extends AbstractView {
         let target = event.target;
 
     }
-
     async delegateMainMenuEvents(event){
         const link = event.target.closest('.menu-list-item[role="tab"]') || event.target.closest('.quick-list-item');
         // const quickLink = event.target.closest('.quick-link')
@@ -2065,7 +2009,7 @@ export class Dashboard extends AbstractView {
             return;
         }
         if (!link) return;
-        this.dashboard.setLoading();
+        this.setLoading();
         const modalName = link.getAttribute('modal');
         this.menu.close();
         await this.renderCollection(modalName);
@@ -2073,7 +2017,7 @@ export class Dashboard extends AbstractView {
     async addToCollection(collection,icon) {
         let result
         if (collection && icon) result = await this.store.addToCollection({ destination: collection, icons:[icon] })
-        this.notify('icon added',{ icon,collection,result })
+        this.notify('icon added',{ icon,collection, result })
     }
     async addToNewCollection(){
         const name = $('.create-cc-form input').value;
@@ -2096,7 +2040,6 @@ export class Dashboard extends AbstractView {
         this.preview.toggleWindow('collections');
         this.loadCollectionNames();
     }
-
     async loadCreateCollectionForm(){
         let addToCollectionWindow = $('[data-role="window"][data-tab="collections"]')
 
@@ -2142,6 +2085,7 @@ export class Dashboard extends AbstractView {
         if (names.length > 0)
             $('.synced-collection-names').innerHTML = `${names.reduce((acc,red)=> acc + `<div class="preview-a2c-item" collection=${red}>${red}</div>`, '' )}`
     }
+
     getHTML() {
     return `
             <!--          MENU AND THINGS        -->

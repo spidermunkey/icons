@@ -18,12 +18,15 @@ export class App extends EventEmitterClass {
     route(url = window.location.pathname) {
         // let path = window.location.pathname;
         const {root,subpath} = this.subpath(url)
-        console.log(root,subpath)
         let target = this.routes.find(route => `/${root}` === route.path);
-        if (!target) target = this.routes[0] // home
+        if (!target) {
+          target = this.routes[0] // home
+        }
         let view = target.view;
         view.ready = this.ready;
-        if (this.activeView) this.activeView.notify('inactive')
+        if (this.activeView) {
+          this.activeView.notify('inactive')
+        }
         this.activeView = view;
         this.activeView.notify('active');
         view.render(subpath);

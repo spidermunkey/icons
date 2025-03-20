@@ -23,7 +23,11 @@ async function reset(){
 
 async function hardReset(){
     await Database.reset(); // drop all collections
-    Local.update(); // recompile from file system state
+    await Local.update(); // recompile from file system state
+}
+
+async function scan(){
+    await Local.update();
 }
 
 async function run() {
@@ -36,7 +40,6 @@ async function run() {
             if (error) console.log('error starting server:', error)
             else console.log(`icon server running on port:${PORT}`)
         });
-        
     } catch (error) {
         console.log('[[server]]',error);
     }

@@ -31,7 +31,7 @@ async function info(cid){
 async function data(cid, paginateOptions = {}){
     return {
         icons: (await icons(cid,paginateOptions)),
-        meta: (await info(cid))
+        meta: (await info(cid)),
     }
 }
 

@@ -130,9 +130,9 @@ function addClass(element, classToAdd) {
 function removeClass(element, classToRemove) {
   element.classList.remove(classToRemove);
 }
-function ago(since) {
+function ago(msDate) {
     const now = Date.now();
-    const then = since.getTime();
+    const then = new Date(msDate);
     
     const monthsInYear = 1/12;
 
@@ -142,14 +142,14 @@ function ago(since) {
     const msInMin = 60000;
     const msInSec = 1000;
     
-    const monthOf = date.months[since.getMonth()]
+    const monthOf = date.months[then.getMonth()]
 
     const daysIn = date.monthMap[monthOf];
-    const dayOf = since.getDate();
+    const dayOf = then.getDate();
     const days = daysIn - dayOf;
 
-    const leapSince = date.getLeaps(since.getFullYear(), new Date(now).getFullYear())
-    let msAgo = now - then;
+    const leapSince = date.getLeaps(then.getFullYear(), new Date(now).getFullYear())
+    let msAgo = now - then.getTime();
     let context = 'ago'
     if (msAgo < 0) {
         context = 'til'
@@ -876,7 +876,10 @@ class Cursor {
   
       return this.setPointer(index);
     }
-  
+    skipToElement(element) {
+      const index = this.items.indexOf(element);
+      if (index !== -1) this.skipToIndex(index)
+    }
     getIndexOf(index) {
       if (!this.validIndex(index)) return;
   

@@ -1,48 +1,14 @@
 import { API } from './api.js';
 import { Icon } from './components/Icon.js';
-import { Collection } from './components/Collection.js';
+import { Collection, Pocket } from './components/Collection.js';
 export class SvgModel extends EventEmitter {
     constructor() {
         super();
         this.state = {}
-        this.pocket = {
-            name: 'bench',
-            updated_on: null,
-            meta: {
-                ready: true,
-                size:0,
-            },
-            icons:[],
-            state: {},
-            getIcon(id) {
-                return (this.icons.filter(icon => icon.id == id))[0]
-            },
-            iconExists(icon){
-                return this.icons.includes(icon)
-            },
-            add(icon){
-                if (this.iconExists(icon)) {
-                    console.log('FOUND IT')
-                     this.icons = this.icons.filter(icon => icon !== icon)
-                     --this.meta.size;
-                    $('.bench-count').textContent = this.meta.size;
-                    return;
-
-                }
-                this.icons.push(icon)
-                ++this.meta.size;
-                $('.bench-count').textContent = this.meta.size;
-            }
-        }
+        this.pocket = new Pocket({ meta: { name: 'bench',size:0 }})
     }
     // commands
     async search(query){
-        // should parsed for sorting
-            // by name
-            // by created on
-            // by subtype
-            // by default
-
         return API.search(query)
     }
     async saveCollectionColorset(cid,colorset){
@@ -137,7 +103,14 @@ export class SvgModel extends EventEmitter {
                 sampleCollection.getPage =(num) => {
                     return this.getCollectionSample(meta.name,num,limit)
                 }
-                return sampleCollection
+                return {
+                    icons,
+                    meta,
+                    name:meta.name,
+                    size:meta.size,
+                    pages:Math.floor(meta.size/limit),
+                    currentPage: page
+                }
         } catch (error){
             console.log('error fetching collection data',name)
             console.log('should probably flag for cleanup')
@@ -148,6 +121,7 @@ export class SvgModel extends EventEmitter {
     async getCollection(name, filters = {subtypes:[],sub_collections:[]}) {
         const result = await API.getCollection(name,filters)
         const collection = new Collection(result)
+        console.log(collection)
         return collection
     }
     async getMeta() {
