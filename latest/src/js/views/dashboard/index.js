@@ -251,12 +251,12 @@ export class Dashboard extends View {
                 this.setLoading()
                 const collection = new Collection({ 
                     icons: data, 
-                    meta: { name: 'search' }
+                    meta: { name: 'search',cid:'search' }
                 })
                 this.state.searchView = collection
                 collection.render()
                 this.preview.update(collection.cursor.current)
-                this.setTab('search')
+                this.setTab(collection)
             }
         }
         const inputThrottler = () => {
@@ -1717,12 +1717,13 @@ export class Dashboard extends View {
         this.state.context = collection
         collection.render()
         this.preview.update(this.currentIcon)
-        this.setTab('pocket')
+        this.setTab(collection)
     }
 
 
     async renderDashboardHome(){
         const homePanel = $('#DASHBOARD .db-res');
+
         homePanel.innerHTML = '... fetching data';
         const collectionInfo = await this.store.getMeta();
         const {locals,index,projects} = collectionInfo;
@@ -1752,7 +1753,7 @@ export class Dashboard extends View {
         this.state.selected = this.currentIcon
         this.preview.update(this.currentIcon)
 
-        this.setTab('home')
+        this.setTab({name:'home',cid:'home'})
         $('.dashboard__header .panel-settings').classList.remove('active')
         // $('.collection-menu').innerHTML = `
         // <div class="menu-controls">
@@ -1765,6 +1766,8 @@ export class Dashboard extends View {
         // </div>`
         // hide settings breadcrumb
         $('.breadcrumb').classList.remove('active')
+        history.pushState(null,null,window.location)
+
     }
     async renderCollection(cid) {
         await this.ready
@@ -1784,12 +1787,13 @@ export class Dashboard extends View {
                     this.collection.render()
                     this.preview.update(this.currentIcon)
                     this.state.selected = this.currentIcon
-                    this.setTab(collection.name)
+                    this.setTab(collection)
                     $('.dashboard__header .panel-settings').classList.add('active')
                 }
                 this.setReady()
                 this.preview.setReady()
                 this.loadPresetMenu()
+                history.pushState(null,null,window.location)
             } catch(e){
                 console.log('error rendering collection',e)
         } 
@@ -1798,14 +1802,19 @@ export class Dashboard extends View {
     }
     }
 
-    setTab(name){
-        $('.dashboard__modal').setAttribute('tab',name)
-        this.state.tabName = name
-        if(name !== 'search'){
+    setTab({name,cid}){
+        $('.dashboard__modal').setAttribute('tab',cid)
+        this.state.tabName = cid
+        if(cid !== 'search'){
             $('.btn-cancel').classList.remove('active')
             $('.passive-search input').value = ''
         }
         $('.info-bar .current-tab').textContent = name
+        if (cid !== 'search'){
+            console.log('going home')
+            // history.pushState(null,null,window.location)
+        }
+
     }
     updateCollectionInfo(collection){
             const getAgo = msDate => ago(msDate).string;

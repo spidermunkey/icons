@@ -4,7 +4,7 @@ export class SvgModel extends EventEmitter {
     constructor() {
         super();
         this.state = {}
-        this.pocket = new Pocket({ meta: { name: 'bench', size:0 }})
+        this.pocket = new Pocket({ meta: { name: 'bench', size:0, cid:'pocket' }})
         this.updateNeeded = true;
         this.info = {};
         this.on('change',() => this.updateNeeded = true)

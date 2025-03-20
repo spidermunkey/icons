@@ -286,11 +286,11 @@ export class ColorPicker {
         return hex
     }
     handleReset() {
-        const setOriginStrokeOrFill = targetTypePair => {
-            const target = targetTypePair[0]
-            const type = targetTypePair[1]
-            const strProp = `${'origin' + uppercase(type)}`
-            target[type] = target[strProp]
+        const setOriginStrokeOrFill = target => {
+            const selecedType = target.selected;
+            // targetPath.selected : ['stroke','fill']
+            // target['fill'] = target['originFill']
+            selecedType.forEach(type => target[type] = target[`origin${capitalize(type)}`])
         }
         if (this.state.selected.length > 0) this.state.selected.forEach(setOriginStrokeOrFill)
         this.setCanvasIfSingleColor()

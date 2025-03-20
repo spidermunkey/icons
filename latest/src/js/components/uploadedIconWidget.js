@@ -25,13 +25,14 @@ export class UploadSection {
         // else console.warn('skipping',i)
     })
     let widgetHTML = `
-      <div class="recent-collection" cid=${collection.cid} data-link="" href="/browse/${collection.cid}">
-        <div class="collection-info">
-        <span class="name">${c.name}</span>
-        <span class="divider"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -16 42 42" height="16px" width="16px">
-        <path d="M12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg></span>
-        <span class="size">${c.size}</span>
-      </div>
+    
+        <div class="recent-collection" cid=${collection.cid} data-link="" href="/browse/${collection.cid}">
+          <div class="collection-info">
+          <span class="name">${c.name}</span>
+          <span class="divider"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -16 42 42" height="16px" width="16px">
+          <path d="M12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg></span>
+          <span class="size">${c.size}</span>
+        </div>
 
         <div class="sample">${
           icons.reduce((html,icon) => {
@@ -41,6 +42,7 @@ export class UploadSection {
             </div>`
           },'')
         }</div>
+
         <div class="control">
           <div class="loading-overlay">
             uploading collection ...

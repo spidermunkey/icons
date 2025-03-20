@@ -39,6 +39,7 @@ export class App extends EventEmitterClass {
     
     subpath(url) {
       // Example: '/path/subpath' -> 'subpath'
+      console.log(url)
       const pathname = new URL(url, window.location.origin).pathname;
       const pathSegments = pathname.split('/').filter(segment => segment.length > 0);
       const root = pathSegments[0]

@@ -436,10 +436,10 @@ function capitalize(word) {
   return word[0].toUpperCase() + word.slice(1);
 }
 function uppercase(str) {
-  return [...str].map((x) => (x = x.toUpperCase())).join("");
+  return str.split('').map((x) => (x = x.toUpperCase())).join("");
 }
 function lowercase(str) {
-  return [...str].map((x) => (x = x.toLowerCase())).join("");
+  return str.split('').map((x) => (x = x.toLowerCase())).join("");
 }
 function exclaim(str) {
   return str + "!";
