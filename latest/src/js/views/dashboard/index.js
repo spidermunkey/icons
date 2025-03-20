@@ -1714,12 +1714,7 @@ export class Dashboard extends View {
 
     renderPocket() {
         this.setLoading()
-        const collection = new Collection(
-            {
-                meta: {name:'bench'},
-                icons:this.store.pocket.icons,
-            }
-        )
+        const collection = this.store.pocket
         this.state.context = collection
         collection.render()
         this.preview.update(this.currentIcon)
@@ -1728,41 +1723,27 @@ export class Dashboard extends View {
 
 
     async renderDashboardHome(){
-        // should refactor for hotlinks to have cids
-            // indexes [...names]
-            // collections [...names]
-            // projects [...names]
-        // render collection should be refactored for greater specificity
-        // collection.render() => store.getCollection(collection.cid)
-        const frag = document.createDocumentFragment();
         const homePanel = $('#DASHBOARD .db-res');
         homePanel.innerHTML = '... fetching data'
         const collection_names = await this.store.getNames()
-        const collection = await this.store.getCollectionSample(collection_names[0])
-        // homePanel.innerHTML = '... loading home'
+        const data = await this.store.getCollectionSample(collection_names[0])
+        const firstCollection = new Collection(data)
         homePanel.innerHTML = ''
-        const widgetData = collection_names
+        const widgets = collection_names
             .map(async name => {
-                // create skeleton
-                const widgetSkeleton = CollectionWidgetSkeleton()
+                const widgetSkeleton = CollectionWidget.getSkeleton()
                 homePanel.appendChild(widgetSkeleton)
-                // fetch sample data
                 const data = (await this.store.getCollectionSample(name,1,39))
-                const widget = CollectionWidget(data);
-                widgetSkeleton.replaceWith(widget)
-                console.log(name,'inserted')
-                // insert data
-                return data;
+                const widget = new CollectionWidget(data);
+                const element = await widget.getElement();
+                widgetSkeleton.replaceWith(element)
+                return widget;
             })
         
-        // widgetData.map(CollectionWidget).forEach(widget => frag.appendChild(widget))
-        // homePanel.innerHTML = ''
-        // homePanel.appendChild(frag)
-
         this.closeCollectionSettingsMenu()
-        this.updateCollectionInfo(collection)
-        this.state.context = collection
-        this.state.collection = collection
+        firstCollection.renderInfo()
+        this.state.context = firstCollection
+        this.state.collection = firstCollection
         this.state.selected = this.currentIcon
         this.preview.update(this.currentIcon)
 
@@ -1812,6 +1793,7 @@ export class Dashboard extends View {
         console.log('try rendering from app');
     }
     }
+
     setTab(name){
         $('.dashboard__modal').setAttribute('tab',name)
         this.state.tabName = name
@@ -1895,7 +1877,7 @@ export class Dashboard extends View {
             const ctrlClick = event.ctrlKey,
                     rightClick = event.buttons === 2,
                     leftClick = event.buttons === 1;
-            if (leftClick && ctrlClick && this.state.tabName !== 'pocket') this.store.pocket.add(this.state.context.find(id))
+            if (leftClick && ctrlClick && this.state.tabName !== 'pocket') this.store.pocket.toggle(this.state.context.find(id))
             else if (leftClick) {
                 console.log(this.currentView)
                 let icon = this.currentView.find(id)

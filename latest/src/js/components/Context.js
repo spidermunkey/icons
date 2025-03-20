@@ -1,6 +1,5 @@
 export class ContextMenu {
   constructor() {
-
       this.state = 'inactive';
       this.element = $('.db-context');
       this.overlay = $('.dashboard-cosm');

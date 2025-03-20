@@ -1,6 +1,7 @@
-import { API } from "../api.js";
-export class Menu {
+export class Menu extends EventEmitter {
   constructor(){
+    super();
+
     this.collectionsMenu = $('.collections-list')
     this.collectionsModal = $('.menu-modal[type="modal"][modal="collections"]')
 
@@ -16,12 +17,14 @@ export class Menu {
     this.cosm = $('.menu-cosm')
     this.navtabs =  $$('.menu-label[role="tab"][type="nav"]')
     this.navmodals = $$('.menu-modals .menu-modal[type="modal"]')
+
     this.state = 'inactive'
     listen(this.menuTabber,this.toggle.bind(this))
     this.navtabs.forEach(tab => listen(tab, this.toggleMenu.bind(this,tab) ,'click'))
-    this.ready = this.init()
+    this.render();
     this.current = null;
   }
+  
   openMenu(tab) {
     const modal = $(`.menu-modal[modal='${tab.getAttribute('modal')}']`);
     this.closeAll();
@@ -57,41 +60,28 @@ export class Menu {
     this.closeAll();
     this.current = null;
   }
-  async getMeta() {
-    const data = await API.getCollectionData();
-    let meta = this.meta = {
-        locals: data?.locals,
-        index: data?.index,
-        projects: data?.projects,
-    }
-    return meta
-  }
+
   closeAll() {
     this.navmodals.forEach(modal => modal.classList.remove('active'));
     $$('.item-menu-window.active').forEach(tooltip => tooltip.classList.remove('active'))
   }
-  async init() {
-    this.meta = await this.getMeta();
-    let locals = [];
-    let indexed = [];
-    let projects = [];
-    for (const x in this.meta.locals){
-      locals.push(this.meta.locals[x]);
-    }
-    for (const x in this.meta.indexed){
-      indexed.push(this.meta.indexed[x]);
-    }
-    for (const x in this.meta.projects){
-      projects.push(this.meta.projects[x]);
-    }
+  async getData(){
+    const meta = await await app.store.getMeta();
+    return meta;
+  }
+  async render(){
+    const meta = await this.getData();
+
+    let locals = objToArray(meta.locals);
+    let indexed = objToArray(meta.indexed);
+    let projects = objToArray(meta.projects);
+
     this.collectionsMenu.innerHTML = CollectionMenu(locals);
     this.collectionsModal.appendChild(MenuList(locals));
     this.defaultMenu.innerHTML = CollectionMenu(indexed);
     this.defaultModal.appendChild(MenuList(indexed));
     this.projectMenu.innerHTML = CollectionMenu(projects);
     this.projectModal.appendChild(MenuList(projects));
-
-    this.ready = true;
   }
   
 }
@@ -152,6 +142,7 @@ function CollectionMenu(props) { // get list of names from db
       //   `)
       .join('')
 }
+
 function MenuList(proplist){
   const names = proplist.map(props => props.name)
   const element = document.createElement('div');
@@ -164,31 +155,4 @@ function MenuList(proplist){
   `;
   element.classList.add('quick-list')
   return element;
-}
-function CollectionMenuPreviewModal(document) {
-    const updated_at = document.updated_at,
-            size = document.size,
-            sampleElements = document.sample,
-            name = document.name,
-            menuItem = $(`.menu-list-item[modal="${name}"]`),
-            menuModal = $('.peek-modal[modal="icons"]');
-
-    menuItem.addEventListener('mouseenter', () => {
-        const modal = menuModal,
-                labels = $('.peek-modal-labels',modal),
-                prev = $('.peek-modal-icons',modal);
-        labels.innerHTML = PreviewCollectionHeader(name,size,updated_at);
-        prev.innerHTML = PreviewSampleElements(sampleElements);
-    });
-}
-
-function PreviewCollectionHeader(name,size,updated_at){
-  return `
-  <div class="peek-label-title">${name}</div>
-  <div class="peek-label count">saved icons: ${size}</div>
-  <div class="peek-label updated_on"> last updated: ${updated_at ? updated_at : 'never'}</div>
-`
-}
-function PreviewSampleElements(icons) {
-  return icons.map(value => `<div class="pk-icon">${value.markup}</div>`).join('')
 }

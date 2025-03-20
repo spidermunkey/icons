@@ -1,5 +1,6 @@
 import { Icon } from './Icon.js';
 import { Color } from './Color.js'
+import { EventEmitter } from 'events';
 
 export class Collection {
   constructor(data){
@@ -193,7 +194,7 @@ export class Collection {
       icons = icons.filter(i => subtypes.includes(i.subtype))
     }
     icons.forEach(prop => {
-       const { name , collection , markup , id , cid , isBenched, subtype, sub_collection } = prop
+       const { name , collection , markup , id , cid , isBenched } = prop
        const el = document.createElement('div');
             el.dataset.collection = collection;
             el.dataset.name = name;
@@ -238,6 +239,10 @@ export class Collection {
             <div class="btn-open">show more</div>
     `
   }
+  renderInfo(){
+    const destination = $('.current-collection-widget .widget-content')
+    destination.innerHTML = this.info();
+  }
   menu(){
     return `
         <div class="menu-controls">
@@ -263,18 +268,71 @@ export class Collection {
     `
   }
 }
+export class LocalCollection extends Collection {
+  constructor(data) {
+    super({ meta:data, icons:data?.icons || []})
+  }
+}
+export class Pocket extends Collection {
+  constructor(data){
+    super(data)
+    this.countLabel = $('.bench-count')
+  }
 
-export function CollectionWidget(data) {
+  updateSize(n){
+    this.meta.size = n;
+    this.countLabel.textContent = this.meta.size;
+  }
 
-    let maxVisiblePageNum = 9;
-    let currentPage = 1;
-    let shiftLength = 36;
+  iconExists({id}){
+    return !!(this.find(id))
+  }
 
-    const pages = data.pages;
-    const name = data.name;
-    const icons = data.icons;
-    const getPage = data.getPage;
-    const cid = data.cid;
+  toggle(icon){
+    if (this.iconExists(icon)){
+      this.add(icon)
+    } else {
+      this.remove(icon.id)
+    }
+  }
+
+  add(icon){
+    this.icons.push(icon);
+    this.updateSize(++this.meta.size)
+  }
+
+  remove(icon){
+    this.icons = this.icons.filter(item => item !== icon)
+    this.updateSize(--this.meta.size)
+  }
+
+}
+export class CollectionWidget extends Collection {
+  constructor(data){
+    super(data)
+      this.limit = 39
+      this.pages = data?.pages || Math.floor(this.size/this.limit)
+      this.currentPage = data?.currentPage || 1
+      this.pageNumbers = []
+      for (let i = 1; i <= this.pages; i++){
+        this.pageNumbers.push(i)
+      }
+  }
+
+  async getPage(n = 1){
+    const { icons, currentPage, pages } = await app.store.getCollectionSample(this.name,n,this.limit)
+    this.icons = icons;
+    this.currentPage = Number(currentPage);
+    this.pages = Number(pages);
+    return {
+      icons:this.icons,
+      currentPage: this.currentPage,
+      pages: this.pages,
+    }
+  }
+  async getElement(){
+    const name = this.name;
+    const cid = this.cid;
 
     const db_panel = document.createElement('div');
     const db_container = document.createElement('div');
@@ -297,7 +355,7 @@ export function CollectionWidget(data) {
     db_panel.appendChild(panel_footer);
 
     panel_header.innerHTML = `
-    <div class="panel-name" cid=${data.cid} collection=${name}>${name}</div>
+    <div class="panel-name" cid=${cid} collection=${name}>${name}</div>
     <div class="panel-options">
       <div class="dropdown-icon">
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m85vg8jg-01S9PHENZ0PX">
@@ -312,10 +370,6 @@ export function CollectionWidget(data) {
       </div>
     </div>
     `
-    let pageNumbers = []
-    for (let i = 1; i <= pages; i++){
-      pageNumbers.push(i)
-    }
     panel_footer.innerHTML = `
     <div class="paginator">
         <div class="page-prev page-tggler">
@@ -324,11 +378,11 @@ export function CollectionWidget(data) {
           </div>
         </div>
         <div class="page-container">
-          ${ pageNumbers.reduce((a,b) => {
+          ${ this.pageNumbers.reduce((a,b) => {
             return a + `
                 <div class="page" 
                     page= ${b} 
-                    current= ${ b === currentPage ? 'true' : ''} >
+                    current= ${ b === this.currentPage ? 'true' : ''} >
                 <div class="page-icon">
                     ${b}
                 </div>
@@ -343,131 +397,124 @@ export function CollectionWidget(data) {
           </div>
     </div>
     `
-    panel_header.addEventListener('click', handleDropdown)
-    panel_footer.addEventListener('click', handlePagination)
-    renderIcons(icons)
-    async function handlePagination(event){
-        const pageRequestButton = event.target.closest('.page')
-        const pageNext = event.target.closest('.page-next')
-        const pageLeft = event.target.closest('.page-prev')
-  
-        const handlePageRequest = async (page) => {
-          const pageData = (await getPage(page))
-          renderIcons(pageData.icons)
-          const current = $('[current="true"]',panel_footer)
-          if (current) current.setAttribute('current','');
-          $(`.page[page="${page}"]`,panel_footer).setAttribute('current','true')
-          currentPage = Number(page);
-        }
-        const handleShiftDirection = (page) => {
-          // probably should be using getBoundingClientRects for accuracy
-          const element = $('.page-container',panel_footer)
-          const boundaryNum = (page - 1) + maxVisiblePageNum;
-          const elementWidth = element.scrollWidth;
-          const windowEnd = $('.paginator',panel_footer).offsetWidth
-          const rightShift = maxVisiblePageNum - boundaryNum
-          const padding = 44;
-          const maxShiftLen = windowEnd - elementWidth - padding;
-          if((boundaryNum) >= maxVisiblePageNum && boundaryNum <= pages){
-            element.style.transform = `translateX(${shiftLength * (rightShift)}px)`
-          } else if (boundaryNum > pages){
-            console.log('pages',pages)
-            element.style.transform = `translateX(${maxShiftLen}px)`
-          } else {
-            element.style.transform = `translateX(0px)`
-          }
-        }
-        if (pageRequestButton){
-          const pageNumber = pageRequestButton.getAttribute('page')
-          await handlePageRequest(pageNumber)
-          handleShiftDirection(pageNumber)
-        } else if (pageNext){
-          let next = Number(currentPage) + 1;
-          let pageNumber = next > pages ? 1 : next
-          console.log('NEXT',pageNumber,next)
-          await handlePageRequest(pageNumber)
-          handleShiftDirection(pageNumber);
-        } else if (pageLeft){
-          let prev = currentPage - 1;
-          let pageNumber = prev < 1 ? pages : prev
-          await handlePageRequest(pageNumber)
-          handleShiftDirection(pageNumber)
-        }
-    }
-    async function handleDropdown(event){
-      if (event.target.closest('.dropdown-icon')){
-        $('.dropdown-menu',panel_header).classList.toggle('active')
-      }
-      else if (event.target.closest('[opt="delete-collection"]')){
-        console.log('deleting collection')
-        const result = await store.dropCollection(cid);
-        if (result){
-          console.log('API RESPONSE: DELETE', result)
-          db_panel.remove();
-        }
-      }
-    }
-    function renderIcons(icons){
-      panel_preview.innerHTML =''
-      icons.forEach(icon => {
-        const {name,category,markup,id,cid,isBenched} = icon
-        const el = document.createElement('div');
-            el.dataset.category = category;
-            el.dataset.name = name;
-            el.dataset.cid = cid;
-            el.dataset.id = id;
-            el.classList.add('svg-wrapper');
-            el.setAttribute('icon-type','preview')
-            el.innerHTML = markup;
-        panel_preview.appendChild(el)
-       })
-    }
-    return db_panel
-}
-
-export function CollectionWidgetSkeleton(){
-  const db_panel = document.createElement('div');
-  const db_container = document.createElement('div');
-  const panel_header = document.createElement('div');
-  const panel_preview = document.createElement('div');
-  const panel_footer = document.createElement('div');
-  const panel_menu = document.createElement('div');
-  db_panel.classList.add('collection-summary','collection-summary-skeleton');
-  db_container.classList.add('db-container');
-  panel_header.classList.add('panel-header');
-  panel_preview.classList.add('panel-preview');
-  panel_footer.classList.add('panel-footer');
-  panel_menu.classList.add('panel-menu');
-  db_panel.setAttribute('collection',name);
-  db_panel.appendChild(panel_header);
-  db_panel.appendChild(db_container);
-  db_container.appendChild(panel_preview);
-  db_panel.appendChild(panel_footer);
-  return db_panel;
-}
-export class LocalCollection extends Collection {
-  constructor(data) {
-    super({ meta:data, icons:data?.icons || []})
+    panel_header.addEventListener('click', this.handleDropdown.bind(this))
+    panel_footer.addEventListener('click', this.handlePagination.bind(this))
+    this.element = db_panel;
+    this.preview_panel = panel_preview;
+    this.renderIcons(this.icons)
+    return db_panel;
   }
-}
+  async handlePagination(event){
+    const pageRequestButton = event.target.closest('.page')
+    const pageNext = event.target.closest('.page-next')
+    const pageLeft = event.target.closest('.page-prev')
+    let pageNumberRequested;
 
-export class Pocket extends Collection {
+    if (pageRequestButton){
+      pageNumberRequested = pageRequestButton.getAttribute('page')
+    } else if (pageNext){
+      let next = Number(this.currentPage) + 1;
+      pageNumberRequested = next > this.pages ? 1 : next
+    } else if (pageLeft){
+      let prev = this.currentPage - 1;
+      pageNumberRequested = prev < 1 ? this.pages : prev
+    }
+    const {icons,page} = await handlePageRequest.call(this,pageNumberRequested)
+    this.currentPage = page
+    this.icons = icons
+    this.renderIcons(icons)
+    handleShiftDirection.call(this,page)
+
+    async function handlePageRequest(page){
+      const { icons } = (await this.getPage(page))
+      const currentPageElement = $('[current="true"]', this.element )
+      const correspondingPageElement = $(`.page[page="${page}"]`,this.element)
+      currentPageElement.setAttribute('current','')
+      correspondingPageElement.setAttribute('current','true')
+      return {
+        icons,
+        page:Number(page)
+      }
+    }
+
+    function handleShiftDirection(page){
+
+      const maxVisiblePageNum = 9;
+      const shiftLength = 36;
+
+      const element = $('.page-container',this.element)
+      const pages = this.pages;
+      const boundaryNum = (page - 1) + maxVisiblePageNum;
+      const elementWidth = element.scrollWidth;
+      const windowEnd = $('.paginator',this.element).offsetWidth
+      const rightShift = maxVisiblePageNum - boundaryNum
+      const padding = 44;
+      const maxShiftLen = windowEnd - elementWidth - padding;
+
+      if((boundaryNum) >= maxVisiblePageNum && boundaryNum <= pages){
+        element.style.transform = `translateX(${shiftLength * (rightShift)}px)`
+      } else if (boundaryNum > pages){
+        element.style.transform = `translateX(${maxShiftLen}px)`
+      } else {
+        element.style.transform = `translateX(0px)`
+      }
+    }
+  }
+  async handleDropdown(event){
+    if (event.target.closest('.dropdown-icon')){
+      $('.dropdown-menu',this.element).classList.toggle('active')
+    }
+    else if (event.target.closest('[opt="delete-collection"]')){
+      console.log('deleting collection')
+      const result = await app.store.dropCollection(this.cid)
+      if (result){
+        console.log('API RESPONSE: DELETE', result)
+        this.element.remove();
+      }
+    }
+  }
+  createIcon(props){
+    const {name,category,markup,id,cid,isBenched} = props
+    const el = document.createElement('div');
+        el.dataset.category = category;
+        el.dataset.name = name;
+        el.dataset.cid = cid;
+        el.dataset.id = id;
+        el.classList.add('svg-wrapper');
+        el.setAttribute('icon-type','preview')
+        el.innerHTML = markup;
+    return el
+  }
+  renderIcons(icons){
+    this.preview_panel.innerHTML =''
+    icons.forEach(icon => this.preview_panel.appendChild(this.createIcon(icon)))
+  }
+
+  static getSkeleton(){
+    const db_panel = document.createElement('div');
+    const db_container = document.createElement('div');
+    const panel_header = document.createElement('div');
+    const panel_preview = document.createElement('div');
+    const panel_footer = document.createElement('div');
+    const panel_menu = document.createElement('div');
+    db_panel.classList.add('collection-summary','collection-summary-skeleton');
+    db_container.classList.add('db-container');
+    panel_header.classList.add('panel-header');
+    panel_preview.classList.add('panel-preview');
+    panel_footer.classList.add('panel-footer');
+    panel_menu.classList.add('panel-menu');
+    db_panel.setAttribute('collection',name);
+    db_panel.appendChild(panel_header);
+    db_panel.appendChild(db_container);
+    db_container.appendChild(panel_preview);
+    db_panel.appendChild(panel_footer);
+    return db_panel;
+  }
+
+}
+export class CollectionStore extends EventEmitter {
   constructor(data){
-    super(data)
-
+    
   }
-
-  add(icon){
-    if (this.find(icon.id)) {
-      console.log('found it')
-          this.icons = this.icons.filter(icon => icon !== icon)
-          --this.meta.size;
-          $('.bench-count').textContent = this.meta.size;
-          return;
-      }
-      this.icons.push(icon)
-      ++this.meta.size;
-      $('.bench-count').textContent = this.meta.size;
-  }
-
+  
 }

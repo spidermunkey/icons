@@ -84,37 +84,21 @@ export class SvgModel extends EventEmitter {
         })
         return API.createCollection({cid,name,icons:renamed})
     }
+    
     async getCollectionSample(name,page=1,limit=50){
         try {
             const result = await API.getPage(name,page,limit);
-            const validIcons = []
-            console.log(result,name)
             const {icons,meta} = result;
-            icons.forEach( icon => {
-                const i = new Icon(icon);
-                if (i.isValid) validIcons.push(i)
-                // else console.warn('skipping',i)
-            })
-            const sampleCollection = new Collection({icons,meta})
-                // lazy decorator
-                sampleCollection.size = meta.size,
-                sampleCollection.pages = Math.floor(meta.size/limit),
-                sampleCollection.currentPage = page,
-                sampleCollection.getPage =(num) => {
-                    return this.getCollectionSample(meta.name,num,limit)
-                }
-                return {
-                    icons,
-                    meta,
-                    name:meta.name,
-                    size:meta.size,
-                    pages:Math.floor(meta.size/limit),
-                    currentPage: page
-                }
+            return {
+                icons,
+                meta,
+                name:meta.name,
+                size:meta.size,
+                pages:Math.floor(meta.size/limit),
+                currentPage: page,
+            }
         } catch (error){
             console.log('error fetching collection data',name)
-            console.log('should probably flag for cleanup')
-            throw new Error('error loading collection...')
         }
 
     }
@@ -130,7 +114,11 @@ export class SvgModel extends EventEmitter {
             locals: data?.locals,
             projects: data?.projects,
             index: data?.index,
+            
             names: [],
+            project_names:[],
+            local_names:[],
+            index_names:[],
         }
         for (const x in meta.locals){
             meta.names.push(meta.locals[x].name);
