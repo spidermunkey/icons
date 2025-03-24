@@ -8,6 +8,8 @@ I'm still new to all of this so if you see something that piques your interest, 
 
 ```
 changes persisted mongo db 'icons' for use with multiple workspaces
+  -- bring your own cluster
+  -- [server/.config/env.js] module.exports.CONNECTION_STRING = mongodb+srv://<username>:${encodeURIComponent('<password>')@cluster.fnp9j.mongodb.net
 
 server/icons/scanner.js parses and serves files in 
 server/icons/monitor.js watches for changes
