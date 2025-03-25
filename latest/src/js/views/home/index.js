@@ -438,7 +438,7 @@ export class Home extends EventEmitter {
                     <div class="setting setting-action btn-add-target">add</div>
                   </div>
                   <div class="app-setting">
-                    <div class="setting setting-label">Monitor Activity : </div>
+                    <div class="setting setting-label">Monitor Status : </div>
                     <div class="setting setting-value">on</div>
                     <div class="setting setting-valeu">off</div>
                   </div>
@@ -449,10 +449,10 @@ export class Home extends EventEmitter {
                     <div class="setting setting-value">none</div>
                   </div>
 
-                  <div class="app-directive">Delete All Data</div>
-                  <div class="app-directive">Delete Cloud Data</div>
+                  <div class="app-directive">Delete Downloads</div>
                   <div class="app-directive">Delete Uploads</div>
                   <div class="app-directive">Delete Projects</div>
+                  <div class="app-directive">Delete All Data</div>
                   
                 </div>
               </div>

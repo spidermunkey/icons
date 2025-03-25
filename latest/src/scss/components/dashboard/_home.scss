@@ -22,6 +22,27 @@
     .stat-widget {
       padding: 8px;
       width: 48%;
+
+      &.l-stat .stat-container {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: center;
+        padding: 8px;
+        .panel-stat {
+          align-self: flex-start;
+          margin: 8px;
+        }
+        .btn-scan {
+          @include widgetBorder();
+          padding: 8px;
+          margin-bottom: 8px;;
+          white-space: nowrap;
+          border-radius: 8px;
+          // background-color: var(--success-green);
+          background: #eee;
+        }
+      }
     }
     .panel {
       position: relative;
@@ -82,6 +103,7 @@
         &.app-settings {
           .btn-add-target {
             background: var(--success-green);
+            background: #eee;
             padding: 4px 10px;
             border-radius: 8px;
           }
@@ -99,7 +121,8 @@
             margin: 6px 4px;
             display: inline-flex;
             border: 1px solid #ccc;
-            font-size: 18px;
+            border-radius: 4px;
+            // font-size: 18px;
           }
         }
       }
