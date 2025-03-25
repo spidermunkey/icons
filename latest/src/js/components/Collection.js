@@ -327,10 +327,10 @@ export class LocalCollection extends Collection {
         let tab = submenu.getAttribute('tab')
         if (tab === 'subtypes'){
           $(`.sub-menu[tab='subcollections'] .sub-list`).classList.remove('active')
-          $(`.sub-menu[tab='subtypes'] .sub-list`).classList.add('active')
+          $(`.sub-menu[tab='subtypes'] .sub-list`).classList.toggle('active')
         } else if (tab === 'subcollections'){
           $(`.sub-menu[tab='subtypes'] .sub-list`).classList.remove('active')
-          $(`.sub-menu[tab='subcollections'] .sub-list`).classList.add('active')
+          $(`.sub-menu[tab='subcollections'] .sub-list`).classList.toggle('active')
         }
         return;
       }
