@@ -251,7 +251,6 @@ async function addColor( props , colorset ){
             { id: props.id },
             { $set: {[`colors.${colorset?.csid || uuid()}`]: configureColor(colorset)} });
         return {success: updated, reason:'acknowledged', message:'process complete'}
-
     } catch (error){
         throw error
     }

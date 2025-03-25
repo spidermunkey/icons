@@ -195,6 +195,7 @@ export class Collection {
     }
     icons.forEach(prop => {
        const { name , collection , markup , id , cid , benched } = prop
+       console.log(benched)
        const el = document.createElement('div');
             el.dataset.collection = collection;
             el.dataset.name = name;

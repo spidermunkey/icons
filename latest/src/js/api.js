@@ -6,7 +6,6 @@ export const API = {
         try {
             const res = await axios[method](url)
             res.ok = true;
-            console.log(res.code)
             return res.data
         } catch (e){
             console.warn('[error]',`[url] : ${url}`,e)
@@ -111,10 +110,13 @@ export const API = {
 
 
     async updatePocket(icon){
-        return this.put(`${endpoint}/all`,{props:{benched:icon.benched},icon})
+        return this.put(`${endpoint}/pocket`,{props:{benched:icon.benched},icon})
     },
     async getPocket(){
-        return this.fetch(`${endpoint}/collections/pocket`)
+        return this.fetch(`${endpoint}/pocket`)
+    },
+    async clearPocket(){
+        return this.delete(`${endpoint}/pocket`)
     },
 
 

@@ -8,7 +8,7 @@ export class Icon {
         // this.trace = props.id;
         this.vid = props.vid;
         this.cid = props.cid;
-        this.isFavorit0e = props.favorite;
+        this.isFavorite = props.favorite;
         this.benched = props.benched;
         this.rebased = props.rebased;
         this.type = props.type || 'default';

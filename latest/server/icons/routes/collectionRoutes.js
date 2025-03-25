@@ -5,9 +5,7 @@ const Local = require('../models/Local.js')
 const Collection = require('../models/Collection.js')
 const App = require('../models/App.js')
 
-router.get('/pocket',async function getPocketData(request,response){
-  response.json(await Collection.pocket())
-})
+
 router.get('/info', async function getCollectionData(request,response){
   try {
     response.json(await App.get_collection_info())

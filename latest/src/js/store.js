@@ -20,6 +20,9 @@ export class SvgModel extends EventEmitter {
     async updatePocket(icon){
         return API.updatePocket(icon)
     }
+    async clearPocket(){
+        return API.clearPocket();
+    }
     async saveCollectionColorset(cid,colorset){
         return API.saveCollectionColorset(cid,colorset)
     }
@@ -123,12 +126,10 @@ export class SvgModel extends EventEmitter {
     async getMeta(){
         let data;
         if (this.updateNeeded) {
-            console.log('fetching')
             data = await API.getCollectionData();
             this.info = data;
             this.updateNeeded = false;
         } else {
-            console.log('memoed!')
             data = this.info;
         }
         const {locals,projects,index} = data

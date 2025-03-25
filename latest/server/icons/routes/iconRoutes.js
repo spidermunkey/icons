@@ -63,15 +63,7 @@ router.put('/', async function updateIcon(request,response){
   try {
     const propsToUpdate = request.body.payload?.props;
     const icon = request.body.payload.icon;
-    console.log(propsToUpdate,icon)
-    if (Object.keys(propsToUpdate).length === 1 && Object.hasOwn(propsToUpdate,'benched')){
-      console.log('in here foo')
-      response.json(propsToUpdate.benched
-       ? await Icon.pocket(icon)
-       : await Icon.unpocket(icon))
-    } else {
-      response.json(await App.update_icon(propsToUpdate,icon))
-    }
+    response.json(await App.update_icon(propsToUpdate,icon))
   }catch (error){
       console.log(error)
       response.status(500).send({success:false,code:500,message:'error processing request'})

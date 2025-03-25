@@ -423,7 +423,6 @@ export class ColorPicker {
                 let stroke = colorset[pid][0]
                 let fill = colorset[pid][1]
                 if (!path) continue
-                console.log('path color applied')
                 if (stroke && stroke !== 'none') path.setAttribute('stroke',stroke)
                 if (fill && fill !== 'none') path.setAttribute('fill',fill)
             }
@@ -434,8 +433,7 @@ export class ColorPicker {
 
     }
     applyFromColorset(colorset,target = this.target){
-        console.log('colors applied', colorset)
-        console.log('colorset name....', colorset.name)
+
         this.applyColors(colorset,target)
         this.elements = [ target, ...this.state.icon.crawl(target) ]
         this.targets = this.elements.map(createElementPair.bind(this))

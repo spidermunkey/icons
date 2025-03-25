@@ -85,6 +85,7 @@ export class Dashboard extends View {
         await this.load(collectionID)
         return this
     }
+
     async hydrate(){
         this.element.onmousedown = (e) => this.handleDashboardClick(e)
         this.element.oncontextmenu = (e) => this.toggleContextMenu(e)
@@ -128,6 +129,10 @@ export class Dashboard extends View {
             }
         })
 
+        $('.bench-widget .tggle.clear-icon').addEventListener('click',async () => {
+            const response = await this.store.clearPocket();
+            console.log(response)
+        })
         $('.color-settings-controller .btn-setting.save-colorset').addEventListener('click',async () => {
 
             let colorset = this.collectionPreview.currentColorSet
@@ -1777,7 +1782,6 @@ export class Dashboard extends View {
                     return
                 } else {
                     const collection = await this.store.getCollection(cid)
-                    console.log(collection)
                     this.state.collection = collection
                     this.preview.setCollectionPreset(collection.preset)
                     this.colorPicker.setCollectionColor(collection.color)

@@ -3,6 +3,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const { uuid } = require('../utils/uuid.js');
 const { print } = require('../utils/print.js');
+
 const targetDirectory = "C:/Users/justi/dev/data/icons";
 
 const monitor = {
@@ -26,6 +27,7 @@ const monitor = {
       return;
     }
   },
+
   async watch(target = this.watchFolder, config = this.watchConfig) {
       console.log('inititalizing watcher...')
       if (!this.watcher)
@@ -39,11 +41,13 @@ const monitor = {
           console.log('already watching for file system changes')
         }
   },
+
   async compileEntry(filepath){
     let progress = (this.count / this.approxCount) * 100
     print(`[[ progress ]]... ${Math.floor(progress)}% .......`)
     return;
   },
+
   async onSingleEntry(filepath) {
     if (path.extname(filepath) !== '.svg')
       return;
@@ -54,6 +58,7 @@ const monitor = {
     }
     if (this.onUpdateNeeded) this.onUpdateNeeded(filepath)
   },
+
   async createEntry(filepath){
     const collection = getBranch(filepath)[0];
     const subtypeDirectories = ['duotone','bold','fill','light','regular','solid','outlined','outline','thin','medium','bulk','curved','light-outline','two-tone','broken'];
@@ -118,6 +123,7 @@ const monitor = {
       }
     }
   },
+
   cleanupAndExit() {
       print('Exiting...')
       process.exit(0); // Exit the process
