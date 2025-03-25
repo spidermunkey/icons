@@ -84,6 +84,7 @@ const date = {
       return to < from ? countFrom(to,from) : countFrom(from,to);
   }
 }
+
 const mns = 1/1000;
 const snm = 1/60;
 const mnh = 1/60; 
@@ -96,7 +97,6 @@ const msnMinute = 60000;
 const msnHour = 3600000;
 const msnDay = 86400000;
 const msnYear = msnDay * 365;
-
 
 function $(arg, context = document) {
   const element = context.querySelector(arg);

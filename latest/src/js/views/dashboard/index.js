@@ -248,6 +248,11 @@ export class Dashboard extends View {
             this.state.query = searchQuery
             if (searchQuery === '') return this.cancelSearch()
             $('.btn-cancel').classList.add('active')
+            if (this.collection){
+                // testing local search
+                console.log('local results')
+                console.log(this.collection.search(searchQuery))
+            }
             const currentQuery = searchQuery ? searchQuery : this.state.query
             const result = await this.store.search(currentQuery)
             const { query , data } = result

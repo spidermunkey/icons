@@ -141,6 +141,12 @@ class App extends EventEmitter {
     // should be refactored to accept cids
     async get_collection({ collection, limit, page, filters}){
         try {
+            console.log(collection)
+            // refactor to find index
+            if (collection === 'all'){
+                const result = await Collection.all()
+                return result;
+            }
             const result = await Collection.data(collection,{limit,page,filters})
             return result
         } catch (error){

@@ -35,6 +35,12 @@ async function data(cid, paginateOptions = {}){
     }
 }
 
+async function all(){
+    return {
+        icons: await (await Database.icons()).collection('all').find().toArray()
+    }
+}
+
 async function search(cid,{query, limit, page }){
     const validQuery = typeof query === 'string' && query.trim().length > 0
     if (validQuery){
@@ -162,6 +168,7 @@ function paginate(limit,filter,page = 1){
 }
 
 module.exports = {
+    all,
     find,
     findByName,
     size,

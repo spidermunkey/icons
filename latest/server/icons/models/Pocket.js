@@ -18,6 +18,14 @@ async function remove(icon){
     return await Icon.unpocket(icon)
 }
 
+async function add(collection_id){
+
+}
+
+async function create(collection_name){
+    
+}
+
 module.exports = {
     find,
     add,

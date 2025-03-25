@@ -8,7 +8,9 @@ export class Home extends EventEmitter {
     this.store = store
     this.appStatus = new StatusWidget(store);
     this.localCollections = new RecentDownloads()
-    this.localCollections.on('preview', (collection) => this.renderPreview(collection))
+    this.localCollections.on('preview', (collection) => {
+      collection.render();
+    })
     this.localCollections.on('upload',(collection,element)=> this.handleUpload(collection,element))
     this.uploadedCollections = new UploadSection()
     this.uploadingQue = new Set()
@@ -70,6 +72,7 @@ export class Home extends EventEmitter {
           this.renderUploadedCollections()
         }
     })
+
   }
 
   renderPreview(collection){
@@ -78,72 +81,69 @@ export class Home extends EventEmitter {
     $('.collection-preview').classList.add('active');
     $('.collection-preview').innerHTML = `
     <div class="modal-ctrl">
-    <div class="icon">
-    </div>
-    <div class="txt back">close</div>
+      <div class="icon"></div>
+      <div class="txt back">close</div>
     </div>
     <div class="cp-modal">
-
       <div class="col-1 control-column">
         <div class="meta-row">
+
           <div class="info-column">
-              <div class="c-data">
+                  <div class="c-data">
+                    <div class="prop name">
+                    <div class="nxt tggle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+                    <div class="prv tggle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg></div>
+                        <span class="c-prop c-name">${collection.name}</span>
+                    </div>
+                    <div class="block">
+                      <div class="prop size">
+                        <span class="c-prop c-size">total icons : ${collection.size}</span>
+                      </div>
+                      <div class="prop date">
+                        <span class="c-prop c-date">updated : ${(ago(new Date(collection.created_at))).string}</span>
+                      </div>
+                    </div>
+                    <div class="ctrl">upload</div>
+                    <div class="ctrl">ignore</div>
+                    <div class="ctrl">settings</div>
+                  </div>
 
-              
-                <div class="prop name">
-                <div class="nxt tggle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
-                <div class="prv tggle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg></div>
-                    <span class="c-prop c-name">${collection.name}</span>
-                </div>
-                <div class="block">
-                  <div class="prop size">
-                    <span class="c-prop c-size">total icons : ${collection.size}</span>
-                  </div>
-                  <div class="prop date">
-                    <span class="c-prop c-date">updated : ${(ago(new Date(collection.created_at))).string}</span>
-                  </div>
-                </div>
-                <div class="ctrl">upload</div>
-                <div class="ctrl">ignore</div>
-                <div class="ctrl">settings</div>
-              </div>
+                  <div class="c-settings">
+                    <div class="title-header">Collection Settings</div>
+                    <div class="pallete">
+                      <span class="setting-label">pallete</span>
+                      <span class="box"></span>
+                      <span class="box"></span>
+                      <span class="box"></span>
+                      <span class="box"></span>
+                      <span class="box"></span>
+                      <span class="box"></span>
+                      <span class="box"></span>
+                    </div>
+                    <div class="row position">
+                      <div class="viewbox">
+                        <span class="setting-label">viewbox</span><span class="setting vb">none</span>
+                      </div>
+                      <div class="x">
+                        <span class="setting-label">x</span><span class="setting">none</span>
+                      </div>
+                      <div class="y">
+                        <span class="setting-label width">y</span><span class="setting">none</span>
+                      </div>
+                    </div>
 
-              <div class="c-settings">
-              <div class="title-header">Collection Settings</div>
-                <div class="pallete">
-                  <span class="setting-label">pallete</span>
-                  <span class="box"></span>
-                  <span class="box"></span>
-                  <span class="box"></span>
-                  <span class="box"></span>
-                  <span class="box"></span>
-                  <span class="box"></span>
-                  <span class="box"></span>
-                </div>
+                    <div class="row dimensions">
+                      <div class="height">
+                        <span class="setting-label">height</span><span class="setting">none</span>
+                      </div>
+                      <div class="width">
+                        <span class="setting-label width">width</span><span class="setting">none</span>
+                      </div>
+                    </div>
+                  </div>
 
-                
-                <div class="row position">
-                  <div class="viewbox">
-                    <span class="setting-label">viewbox</span><span class="setting vb">none</span>
-                  </div>
-                  <div class="x">
-                    <span class="setting-label">x</span><span class="setting">none</span>
-                  </div>
-                  <div class="y">
-                    <span class="setting-label width">y</span><span class="setting">none</span>
-                  </div>
-                </div>
-
-                <div class="row dimensions">
-                  <div class="height">
-                    <span class="setting-label">height</span><span class="setting">none</span>
-                  </div>
-                  <div class="width">
-                    <span class="setting-label width">width</span><span class="setting">none</span>
-                  </div>
-                </div>
-              </div>
             </div>
+
             <div class="sub-collections">
               <div class="title-header">Filters</div>
               <div class="title-header">Sub Collections</div>
@@ -172,11 +172,11 @@ export class Home extends EventEmitter {
       </div>
     </div>
       `
-
       $('.collection-preview .modal-ctrl').onclick = () => {
         $('.db-res').classList.add('active');
         $('.collection-preview').classList.remove('active');
       }
+
   }
   async handleUpload(collection,element){
     console.log(element,'upload triggered')

@@ -63,6 +63,11 @@ export class Collection {
   find(id){
     return (this.icons.find(icon => icon.id == id))
   }
+  search(name){
+    const escaped = name.replace(/[.*+?^=!:${}()|\[\]\/\\]/g, '\\$&');
+    const regex = new RegExp(escaped, 'i');
+    return this.icons.filter(({name}) => regex.test(name))
+  }
   update(props){
     console.log('updating...', this.meta.name)
     let index = this.icons.findIndex(icon => icon.id == props.id)
@@ -272,6 +277,214 @@ export class Collection {
 export class LocalCollection extends Collection {
   constructor(data) {
     super({ meta:data, icons:data?.icons || []})
+  }
+
+  hydrate(){
+    $('.collection-preview .modal-ctrl').onclick = () => {
+      $('.db-res').classList.add('active');
+      $('.collection-preview').classList.remove('active');
+    }
+    $('.collection-preview .sub-collections').onclick = (event) => {
+      const submenu = event.target.closest('.title-header');
+      const filterLink = event.target.closest('.filter-link');
+      const showAll = event.target.closest('.sc-name.all');
+      if (showAll){
+        this.filters = {
+          subtypes:[],
+          sub_collections:[]
+        }
+        $$('.filter-link').forEach(link => link.classList.remove('active'))
+        this.renderIcons()
+      }
+      if (filterLink){
+        let filter = filterLink.getAttribute('filter');
+        let filter_type = filterLink.getAttribute('ftype');
+        let filters = this.filters;
+        if (filter_type === 'st'){
+          if (subtype_filters.includes(filter)){
+            this.filters.subtypes = subtype_filters.filter(f => f != filter)
+            filterLink.classList.remove('active')
+          } else {
+              this.filters.subtypes.push(filter)
+              filterLink.classList.add('active')
+          } 
+        } else if (filter_type === 'sc'){
+          let subcollection_filters = filters.sub_collections;
+          if (subcollection_filters.includes(filter)){
+              this.filters.sub_collections = subcollection_filters.filter(f => f != filter)
+              filterLink.classList.remove('active')
+          } else {
+              this.filters.sub_collections.push(filter)
+              filterLink.classList.add('active')
+          }
+        }
+        console.log('filters pushed',filters)
+        this.renderIcons();
+        return
+      }
+      if (submenu){
+        let tab = submenu.getAttribute('tab')
+        if (tab === 'subtypes'){
+          $(`.sub-menu[tab='subcollections'] .sub-list`).classList.remove('active')
+          $(`.sub-menu[tab='subtypes'] .sub-list`).classList.add('active')
+        } else if (tab === 'subcollections'){
+          $(`.sub-menu[tab='subtypes'] .sub-list`).classList.remove('active')
+          $(`.sub-menu[tab='subcollections'] .sub-list`).classList.add('active')
+        }
+        return;
+      }
+    }
+  }
+  render(){
+    $('.db-res').classList.remove('active');
+    const destination = $('.collection-preview');
+    $('.collection-preview').classList.add('active');
+    destination.innerHTML = `
+    <div class="modal-ctrl">
+      <div class="icon"></div>
+      <div class="txt back">close</div>
+    </div>
+
+    <div class="cp-modal local-preview-modal">
+      <div class="col-1 control-column">
+
+        <div class="meta-row">
+          <div class="info-column">
+            ${this.info()}
+            ${this.settings()}
+          </div>
+          ${this.menu()}
+        </div>
+
+        <div class="control-row">
+          <div class="icon-preview">
+          </div>
+        </div>
+
+      </div>
+
+        <div class="preview-column">
+          ${this.preview()}
+        </div>
+      </div>
+    </div>
+    `
+    this.hydrate();
+  }
+  renderIcons(){
+    $('.preview-column').innerHTML = this.preview();
+  }
+  info(){
+    return `
+    <div class="c-data">
+      <div class="prop name">
+        <div class="nxt tggle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-right"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+        <div class="prv tggle"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-chevron-left"><polyline points="15 18 9 12 15 6"></polyline></svg></div>
+          <span class="c-prop c-name">${this.name}</span>
+      </div>
+      <div class="block">
+        <div class="prop size">
+          <span class="c-prop c-size">total icons : ${this.size}</span>
+        </div>
+        <div class="prop date">
+          <span class="c-prop c-date">updated : ${(ago(new Date(this.created_at))).string}</span>
+        </div>
+      </div>
+      <div class="ctrl">upload</div>
+      <div class="ctrl">ignore</div>
+    </div>
+    `
+  }
+  settings(){
+    return `
+      <div class="c-settings local-settings">
+
+        <div class="title-header">Collection Settings</div>
+        <div class="pallete">
+          <span class="setting-label">pallete</span>
+          <span class="box"></span>
+          <span class="box"></span>
+          <span class="box"></span>
+          <span class="box"></span>
+          <span class="box"></span>
+          <span class="box"></span>
+          <span class="box"></span>
+        </div>
+
+        <div class="row position">
+          <div class="viewbox">
+            <span class="setting-label">viewbox</span><span class="setting vb">none</span>
+          </div>
+          <div class="x">
+            <span class="setting-label">x</span><span class="setting">none</span>
+          </div>
+          <div class="y">
+            <span class="setting-label width">y</span><span class="setting">none</span>
+          </div>
+        </div>
+
+        <div class="row dimensions">
+          <div class="height">
+            <span class="setting-label">height</span><span class="setting">none</span>
+          </div>
+          <div class="width">
+            <span class="setting-label width">width</span><span class="setting">none</span>
+          </div>
+        </div>
+
+      </div>
+    `
+  }
+  preview(){
+    let icons = this.icons;
+    const {sub_collections,subtypes} = this.filters;
+    if (sub_collections.length > 0){
+      icons = icons.filter(({sub_collection}) => sub_collections.includes(sub_collection))
+    }
+    if (subtypes.length > 0){
+      icons = icons.filter(i => subtypes.includes(i.subtype))
+    }
+    return `
+      <div class="preview-icons">${icons.reduce((acc,red)=> {
+        acc += `<div class="preview-icon">${red.markup}</div>`;
+        return acc;
+      },'')}</div>
+    </div>
+    `
+  }
+  menu(){
+    const count_subtype = subtype => 
+      this.icons.reduce(
+        (count,icon) => icon.subtype === subtype ? ++count : count
+      ,0)
+    const count_subcollection = subcollection => 
+      this.icons.reduce(
+        (count,icon) => icon.sub_collection === subcollection ? ++ count : count
+      ,0)
+    return `
+    <div class="sub-collections">
+      <div class="title-header">Filters </div>
+      <div class="sub-menu" tab='subcollections'>
+        <div class="title-header" tab='subcollections'>Sub Collections <span class="list-count">${this.sub_collections?.length || 0}</span></div>
+        <div class="sub-list active">
+          ${!this.sub_collections || this.sub_collections.length === 0 ? 'none' : this.sub_collections?.reduce((acc,red)=>{
+            acc += `<div class="filter-link sc-name" filter="${red}" ftype='sc'>${red} <span class="sl-count">${count_subcollection(red)}</span></div>`
+            return acc
+          },'<div class="sc-name all">All</div>')}
+      </div>
+      <div class="sub-menu" tab='subtypes'>
+          <div class="title-header" tab='subtypes'>Sub Types <span class="list-count">${this.subtypes?.length || 0}</span></div>
+          <div class="sub-list">
+            ${!this.subtypes || this.subtypes.length === 0 ? 'none' : this.subtypes?.reduce((acc,red)=>{
+              acc += `<div class="filter-link st-name" filter="${red}" ftype='st'>${red} <span class="sl-count">${count_subtype(red)}</span></div>`
+              return acc
+            },'<div class="st-name all">All</div>')}
+          </div>
+      </div>
+
+      </div>
+    </div>
+    `
   }
 }
 export class Pocket extends Collection {

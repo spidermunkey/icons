@@ -469,7 +469,11 @@
   border-right: 0;
 
   .sub-list {
+    display: none;
     padding: 8px;
+    &.active{
+      display: block;
+    }
   }
   .sc-name {
     margin: 4px 0px;
@@ -477,6 +481,9 @@
     opacity: .87;
     &:hover{
       opacity: 1;
+    }
+    &.active {
+      background: #eee;
     }
   }
 }

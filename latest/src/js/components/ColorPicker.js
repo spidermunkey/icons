@@ -28,7 +28,6 @@ export class ColorPicker {
             },
             set color(val) {
                 this._color = val
-                console.trace('setting state.color',val)
             }
 
         }
@@ -83,7 +82,6 @@ export class ColorPicker {
     }
     applyColor(colorset){
         this.applyColors(colorset)
-        console.log('colors applied',this)
     }
     getTarget(pid) {
         return this.targets.find(target => target.pid === pid)
@@ -298,10 +296,8 @@ export class ColorPicker {
     }
     handleUndo() {
         this.state.selected.forEach(index => {
-            console.log(this.state.selected[0].currentFill,this.state.selected[0].previousFill)
             let type = index.selected
             index.undo(type)
-            console.log(this.state.selected[0].currentFill,this.state.selected[0].previousFill)
         })
         this.setCanvasIfSingleColor()
         this.updateColor()
@@ -368,16 +364,13 @@ export class ColorPicker {
     }
     updateElements(hex) {
         const setStrokeOrFill = target => {
-            console.log(target)
             target.selected.forEach(stype => target[stype] = hex)
         }
-        console.log('PROPS TO UPDATE???',this.state.selected)
         if (this.state.selected.length > 0) this.state.selected.forEach(setStrokeOrFill)
         this.updateColor();
         return hex;
     }
     updateFillGroup(hex){
-        console.log('updating group fill',hex,this.targets)
         this.targets.forEach(target => {
             if (target.tag !== 'svg'){
                 target['fill'] = hex
@@ -385,7 +378,6 @@ export class ColorPicker {
         })
     }
     updateStrokeGroup(hex){ 
-        console.log('updating group stroke',hex,this.targets)
         this.targets.forEach(target => {
             if (target.tag !== 'svg'){
                 target['stroke'] = hex
@@ -408,7 +400,6 @@ export class ColorPicker {
     applyColors(colorset, target = this.target){
         // THIS FUNCTION COULD PROBABLY BE APPLIED IN CREATE ELEMENT PAIR FUNCTION
         if (colorset.colorset_type === 'global'){
-            console.log('applying global colorset',colorset)
             const elements = this.state.icon.crawl(target);
             let {fill,stroke} = colorset.shapes
             elements.forEach(element => {
@@ -417,7 +408,6 @@ export class ColorPicker {
             })
         }
         else if (colorset.colorset_type === 'variable') {
-            console.log('applying variabl colorset', colorset)
             for (const pid in colorset){
                 let path = target.querySelector(`[pid="${pid}"]`)
                 let stroke = colorset[pid][0]
@@ -465,7 +455,6 @@ export class ColorPicker {
     update(icon,target){
         // if (this.state.icon) this.state.icon.colors.temp = this.iconColors
         let colorset;
-        console.log(icon.colors,icon)
         let defaultColors = icon.color
         let useCollectionDefault = !objectIsEmpty(this.currentColorset) && this.currentColorset && this.currentColorset.colorset_type === 'global'
         if (useCollectionDefault){
@@ -524,7 +513,6 @@ function createElementPair(element) {
                     this.displayElement.setAttribute('stroke','none')
                     this.editorElement.strokeIcon.style.setProperty('--background','transparent')
                     this.editorElement.strokeIcon.setAttribute('color','')
-                    console.log(this.editorElement.strokeIcon)
                     this.editorElement.strokeIcon.classList.remove('hasCol')
                 } else {
                     if (first(hex) !== '#')
@@ -624,9 +612,6 @@ function createElementPair(element) {
                 if (targetType === 'stroke' || targetType === 'fill') {
                     let str = `previous${capitalize(targetType)}`
                     let strProp = `current${capitalize(targetType)}`
-                    console.log(targetType, typeof targetType)
-                    console.log(targetType[0].toUpperCase(), targetType.slice(1))
-                    console.log(capitalize(targetType))
                     let cursor = this[str];
                     const prevState = cursor.skipToPrev()
                     this.update(targetType,prevState)
