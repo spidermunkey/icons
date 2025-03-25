@@ -8,26 +8,40 @@ export class Home extends EventEmitter {
     this.store = store
     this.appStatus = new StatusWidget(store);
     this.localCollections = new RecentDownloads();
+    this.state = {
+      collections: [],
+      collection:null,
+      query:'',
+    }
     this.localCollections.on('preview', (collection) => {
+      this.state.collection = collection;
+      this.cancelSearch();
       collection.render();
-      this.collections.skipToElement(collection)
+      this.state.collections.skipToElement(collection)
       const next = () => {
-        this.collections.skipToNext().render();
+        const current = this.state.collections.skipToNext()
+        this.state.collection = current;
+        this.cancelSearch();
+        current.render();
         $('.c-data .nxt.tggle').onclick = next;
         $('.c-data .prv.tggle').onclick = prev;
       }
       const prev = () => {
-        console.log('PREV')
-        this.collections.skipToPrev().render();
+        const current = this.state.collections.skipToPrev()
+        this.state.collection = current;
+        this.cancelSearch();
+        current.render();
         $('.c-data .nxt.tggle').onclick = next;
         $('.c-data .prv.tggle').onclick = prev;
       }
       $('.c-data .nxt.tggle').onclick = () => next();
       $('.c-data .prv.tggle').onclick = () => prev();
+      // close
+      $('.collection-preview .modal-ctrl').addEventListener('click',() => this.state.collection = null)
     })
     this.localCollections.on('upload',(collection,element)=> this.handleUpload(collection,element))
     this.localCollections.on('data',(collections) => {
-      this.collections = new Cursor(collections)
+      this.state.collections = new Cursor(collections)
     })
     this.uploadedCollections = new UploadSection()
     this.uploadingQue = new Set()
@@ -37,7 +51,6 @@ export class Home extends EventEmitter {
       this.uploadedCollections.active = false;
       this.active = false;
     })
-    this.hydrate()
   }
 
   async render(){
@@ -46,9 +59,22 @@ export class Home extends EventEmitter {
     this.localCollections.render($('.col-2.recent-activity'));
     this.appStatus.render($('.info-panels'))
     $('.db-res').classList.add('active');
+    this.hydrate()
+
   }
 
   async hydrate() {
+    $('.search.passive-search').addEventListener('input',this.search())
+    // $('.search.passive-search input').addEventListener('blur',(e) => {
+    //   // if (!e.target.value || e.target.value == '')
+    //     this.searchReset()
+    // })
+    $('.search.passive-search input').addEventListener('focus', (e) => {
+      if (e.target.value && e.target.value !== '')
+        this.handleSearch(e)
+    })
+    $('.btn-cancel').addEventListener('click',() => this.searchReset())
+
     $('#app').addEventListener('click',async (e) => {
       if (!this.active){
         return;
@@ -91,7 +117,48 @@ export class Home extends EventEmitter {
     })
 
   }
+  handleSearch = (event) => {
+    const query = event.target.value;
+    console.log('searching....',query)
+    this.state.query = query;
+    if (query === '') {
+      this.searchReset();
+      return;
+    }
+    $('.btn-cancel').classList.add('active');
+    if (this.state?.collection){
 
+      const activeCollection = this.state.collection;
+      console.log('searching in....',activeCollection)
+      activeCollection.filters.query = query;
+      activeCollection.renderIcons()
+    }
+  }
+  search(){
+    const inputThrottler = () => {
+      let timeoutId;
+      return (event) => {
+        this.state.query = event.target.value
+        clearTimeout(timeoutId)
+        timeoutId = setTimeout( this.handleSearch.bind(this,event), 400)
+      }
+    }
+    return inputThrottler();
+  }
+  cancelSearch(){
+    $('.passive-search input').value = ''
+    $('.btn-cancel').classList.remove('active')
+    if (this?.state?.collection){
+      this.state.collection.filters.query = ''
+    }
+  }
+  searchReset(){
+    this.cancelSearch();
+    if (this.state.collection){
+      this.state.collection.filters.query = ''
+      this.state.collection.renderIcons();
+    }
+  }
   renderPreview(collection){
     const icons = collection.icons
     $('.db-res').classList.remove('active');
@@ -278,6 +345,17 @@ export class Home extends EventEmitter {
                 </div>
                 <input class="active" type="text" placeholder="Search">
             </div>
+            <div class="filter filter-modal">
+            <div class="btn-cancel">
+                <span class="icon">
+                    <svg width="24px" height="24px" viewBox="4 5 16 15" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m4lw6ve6-01IHH09U9UOO">
+                        <path d="M8.46447 15.5355L15.5355 8.46446" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" pid="m4lw6ve6-01JPIXJRA2BQ" fill="null"></path>
+                        <path d="M8.46447 8.46447L15.5355 15.5355" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" pid="m4lw6ve6-00079WQ8XYP0" fill="null"></path>
+                    </svg>
+                </span>
+                <span class="label">cancel search</span>
+            </div>
+        </div>
           </div>
         </div>
         <div class="dashboard__modal">

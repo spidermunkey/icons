@@ -33,6 +33,7 @@ export class Collection {
     this.filters = {
       sub_collections:[],
       subtypes:[],
+      query:'',
     }
     this.meta = meta
     this.name = meta.name
@@ -63,10 +64,10 @@ export class Collection {
   find(id){
     return (this.icons.find(icon => icon.id == id))
   }
-  search(name){
+  search(name, icons = this.icons){
     const escaped = name.replace(/[.*+?^=!:${}()|\[\]\/\\]/g, '\\$&');
     const regex = new RegExp(escaped, 'i');
-    return this.icons.filter(({name}) => regex.test(name))
+    return icons.filter(({name}) => regex.test(name))
   }
   update(props){
     console.log('updating...', this.meta.name)
@@ -280,10 +281,10 @@ export class LocalCollection extends Collection {
   }
 
   hydrate(){
-    $('.collection-preview .modal-ctrl').onclick = () => {
+    $('.collection-preview .modal-ctrl').addEventListener('click',() => {
       $('.db-res').classList.add('active');
       $('.collection-preview').classList.remove('active');
-    }
+    })
     $('.collection-preview .sub-collections').onclick = (event) => {
       const submenu = event.target.closest('.title-header');
       const filterLink = event.target.closest('.filter-link');
@@ -371,8 +372,15 @@ export class LocalCollection extends Collection {
     `
     this.hydrate();
   }
-  renderIcons(){
-    $('.preview-column').innerHTML = this.preview();
+  close() {
+    
+  }
+  renderIcons(icons){
+    $('.preview-column').innerHTML = this.preview(icons);
+  }
+  search(query){
+    const icons = super.search(query);
+    this.renderIcons(icons)
   }
   info(){
     return `
@@ -435,14 +443,18 @@ export class LocalCollection extends Collection {
       </div>
     `
   }
-  preview(){
-    let icons = this.icons;
-    const {sub_collections,subtypes} = this.filters;
+  preview(icons = this.icons){
+    const {sub_collections,subtypes,query} = this.filters;
     if (sub_collections.length > 0){
       icons = icons.filter(({sub_collection}) => sub_collections.includes(sub_collection))
     }
     if (subtypes.length > 0){
       icons = icons.filter(i => subtypes.includes(i.subtype))
+    }
+    if (query && query !== ''){
+      console.log(query)
+      icons = super.search(query,icons)
+      console.log(icons)
     }
     return `
       <div class="preview-icons">${icons.reduce((acc,red)=> {

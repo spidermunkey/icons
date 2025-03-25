@@ -30,7 +30,7 @@ export const DashboardHeader = () =>
                         </div>
                         <input class="active" type="text" placeholder="Search">
                     </div>
-                                    <div class="filter filter-modal">
+                    <div class="filter filter-modal">
                         <div class="btn-cancel">
                             <span class="icon">
                                 <svg width="24px" height="24px" viewBox="4 5 16 15" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m4lw6ve6-01IHH09U9UOO">
