@@ -8,7 +8,7 @@ const {
   fileSystemMap,
   fileSystemDB,
   ignoreList,
-} = require('./local/fsconfig.js')
+} = require('./local/fsconfig.js');
 
 module.exports.Scanner = {
   target: targetDirectory,
@@ -65,7 +65,7 @@ module.exports.Scanner = {
     for (const file in prevState)
       if (!currState.hasOwnProperty(file)) removed.push(file);
   
-    return {added,removed,changed}
+    return { added, removed, changed }
   },
 
   async update(){
@@ -73,8 +73,8 @@ module.exports.Scanner = {
     this.overwrite(await this.scan())
   },
 
-  async scan(){
-    return this.compile_object_store(await this.create_file_map())
+  async scan(directory){
+    return this.compile_object_store(await this.create_file_map(directory))
   },
 
   async compile_object_store(file_map){

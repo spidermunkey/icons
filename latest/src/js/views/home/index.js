@@ -69,11 +69,20 @@ export class Home extends EventEmitter {
     //   // if (!e.target.value || e.target.value == '')
     //     this.searchReset()
     // })
-    $('.search.passive-search input').addEventListener('focus', (e) => {
-      if (e.target.value && e.target.value !== '')
-        this.handleSearch(e)
-    })
+    // $('.search.passive-search input').addEventListener('focus', (e) => {
+    //   if (e.target.value && e.target.value !== '')
+    //     this.handleSearch(e)
+    // })
     $('.btn-cancel').addEventListener('click',() => this.searchReset())
+    $$('.control-panels .control-tab .tab').forEach(tabber => {
+      const tab = tabber.getAttribute('tab');
+      tabber.addEventListener('click',(event) => {
+        $$('.control-panels .control-tab .tab').forEach(tabber => tabber.classList.remove('active'))
+        $$('.control-panels .control-panel .panel').forEach(panel => panel.classList.remove('active'))
+        tabber.classList.add('active')
+        $(`.control-panels .control-panel .panel[panel=${tab}]`).classList.add('active')
+      })
+    })
 
     $('#app').addEventListener('click',async (e) => {
       if (!this.active){
@@ -413,9 +422,19 @@ export class Home extends EventEmitter {
 
             <div class="control-panels">
               <div class="control-tab">
-                  <span class="tab active">Messages</span>
-                  <span class="tab">Settings</span>
+                  <span class="tab active" tab="messages">Messages</span>
+                  <span class="tab" tab="settings">Settings</span>
               </div>
+              <div class="control-panel">
+                <div class="panel active" panel="messages">
+                  <div class="message">Not yet configured</div>
+                </div>
+                <div class="panel" panel="settings">
+              
+                </div>
+              </div>
+
+
 
             </div>
           </div>

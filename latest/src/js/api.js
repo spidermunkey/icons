@@ -2,6 +2,7 @@ import axios from "axios";
 const PORT = 1279;
 const endpoint = `http://localhost:${PORT}/icons`;
 export const API = {
+    
     async fetch(url,method = 'get'){
         try {
             const res = await axios[method](url)
