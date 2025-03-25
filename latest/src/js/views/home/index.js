@@ -7,11 +7,28 @@ export class Home extends EventEmitter {
     super()
     this.store = store
     this.appStatus = new StatusWidget(store);
-    this.localCollections = new RecentDownloads()
+    this.localCollections = new RecentDownloads();
     this.localCollections.on('preview', (collection) => {
       collection.render();
+      this.collections.skipToElement(collection)
+      const next = () => {
+        this.collections.skipToNext().render();
+        $('.c-data .nxt.tggle').onclick = next;
+        $('.c-data .prv.tggle').onclick = prev;
+      }
+      const prev = () => {
+        console.log('PREV')
+        this.collections.skipToPrev().render();
+        $('.c-data .nxt.tggle').onclick = next;
+        $('.c-data .prv.tggle').onclick = prev;
+      }
+      $('.c-data .nxt.tggle').onclick = () => next();
+      $('.c-data .prv.tggle').onclick = () => prev();
     })
     this.localCollections.on('upload',(collection,element)=> this.handleUpload(collection,element))
+    this.localCollections.on('data',(collections) => {
+      this.collections = new Cursor(collections)
+    })
     this.uploadedCollections = new UploadSection()
     this.uploadingQue = new Set()
     this.on('active',() => this.active = true)

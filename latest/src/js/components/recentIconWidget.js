@@ -57,14 +57,15 @@ export class RecentDownloads extends EventEmitter {
   }
   parseData(collections){
     if (this.active) {
-      let sorted = collections.sort((a,b) => a.synced - b.synced)
+      let sorted = collections
+        .sort((a,b) => a.synced - b.synced)
+        .map(collection => new LocalCollection(collection))
       $('.test-area').innerHTML = '';
-      for (const cname in collections){
-        const collection = new LocalCollection(collections[cname])
+      sorted.forEach(collection => {
         $('.test-area').appendChild(this.createWidget(collection))
-      }
+      })
+      this.notify('data',sorted)
     }
-    
   }
   render(destination){
     destination.innerHTML = this.getHTML();
