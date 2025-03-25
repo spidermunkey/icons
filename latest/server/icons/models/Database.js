@@ -3,6 +3,7 @@ const {CONNECTION_STRING} = require('../../.config/env')
 const {print} = require('../../utils/print.js')
 
 class Database {
+    
     constructor() {
         this.uri = CONNECTION_STRING;
         this.client = null;
@@ -43,12 +44,14 @@ class Database {
     icons() {
         return this.getDB('icons')
     }
+
     async reset(){
         const collectionNames = (await (await this.icons()).listCollections().toArray()).map(collection => collection.name)
         const dropped = collectionNames.map(async name => {
             (await this.icons()).collection(name).drop();
         })
     }
+
     async stat(){
         try {
             console.log('checking mongodb stats....')

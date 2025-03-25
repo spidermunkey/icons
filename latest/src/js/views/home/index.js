@@ -422,15 +422,38 @@ export class Home extends EventEmitter {
 
             <div class="control-panels">
               <div class="control-tab">
-                  <span class="tab active" tab="messages">Messages</span>
-                  <span class="tab" tab="settings">Settings</span>
+                  <span class="tab" tab="messages">Messages</span>
+                  <span class="tab active" tab="settings">Settings</span>
               </div>
               <div class="control-panel">
-                <div class="panel active" panel="messages">
+
+                <div class="panel server-messages" panel="messages">
                   <div class="message">Not yet configured</div>
                 </div>
-                <div class="panel" panel="settings">
               
+                <div class="panel app-settings active" panel="settings">
+                  <div class="app-setting">
+                    <div class="setting setting-label">Target Directories:</div>
+                    <div class="setting setting-value">< default path ></div>
+                    <div class="setting setting-action btn-add-target">add</div>
+                  </div>
+                  <div class="app-setting">
+                    <div class="setting setting-label">Monitor Activity : </div>
+                    <div class="setting setting-value">on</div>
+                    <div class="setting setting-valeu">off</div>
+                  </div>
+                  <div class="app-setting">
+                    <div class="setting setting-label">Monitor Paths : </div>
+                    <div class="setting setting-value">all < targets > | </div>
+                    <div class="setting setting-value">select < targets > | </div>
+                    <div class="setting setting-value">none</div>
+                  </div>
+
+                  <div class="app-directive">Delete All Data</div>
+                  <div class="app-directive">Delete Cloud Data</div>
+                  <div class="app-directive">Delete Uploads</div>
+                  <div class="app-directive">Delete Projects</div>
+                  
                 </div>
               </div>
 
