@@ -478,7 +478,7 @@ export class LocalCollection extends Collection {
       <div class="title-header">Filters </div>
       <div class="sub-menu" tab='subcollections'>
         <div class="title-header" tab='subcollections'>Sub Collections <span class="list-count">${this.sub_collections?.length || 0}</span></div>
-        <div class="sub-list active">
+        <div class="sub-list">
           ${!this.sub_collections || this.sub_collections.length === 0 ? 'none' : this.sub_collections?.reduce((acc,red)=>{
             acc += `<div class="filter-link sc-name" filter="${red}" ftype='sc'>${red} <span class="sl-count">${count_subcollection(red)}</span></div>`
             return acc
@@ -486,7 +486,7 @@ export class LocalCollection extends Collection {
       </div>
       <div class="sub-menu" tab='subtypes'>
           <div class="title-header" tab='subtypes'>Sub Types <span class="list-count">${this.subtypes?.length || 0}</span></div>
-          <div class="sub-list">
+          <div class="sub-list active">
             ${!this.subtypes || this.subtypes.length === 0 ? 'none' : this.subtypes?.reduce((acc,red)=>{
               acc += `<div class="filter-link st-name" filter="${red}" ftype='st'>${red} <span class="sl-count">${count_subtype(red)}</span></div>`
               return acc

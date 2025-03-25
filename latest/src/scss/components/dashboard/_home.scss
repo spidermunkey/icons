@@ -12,6 +12,7 @@
     display: flex;
     overflow: hidden;
     height: 100%;
+    
     .col {
       width: 50%;
       display: flex;
@@ -551,11 +552,19 @@
     &.active{
       display: block;
     }
+
   }
   .sc-name {
-    margin: 4px 0px;
+    margin: 10px 0px;
     cursor: pointer;
     opacity: .87;
+    .sl-count {
+      background: #ddd;
+      padding: 4px;
+      font-size: 14px;
+      opacity: .8;
+      border-radius: 8px;
+    }
     &:hover{
       opacity: 1;
     }

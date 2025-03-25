@@ -1,6 +1,6 @@
 @mixin show {
   opacity: 1;
-  pointer-events: all;
+  pointer-events: inherit;
   visibility: visible;
 }
 
