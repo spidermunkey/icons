@@ -17,10 +17,6 @@ async function size(cid){
     return (await find(cid)).countDocuments();
 }
 
-async function pocket(){
-    return (await Database.icons()).collection('{{pocket}}').find().toArray();
-}
-
 async function icons(cid, {limit,filter,page = 1}){
     const {query,options} = paginate(limit,filter,page)
     return (await find(cid))
@@ -177,7 +173,5 @@ module.exports = {
     sync,
     unsync,
     destroy,
-
-    pocket
 
 }

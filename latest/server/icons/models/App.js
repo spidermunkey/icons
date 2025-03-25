@@ -188,11 +188,7 @@ class App extends EventEmitter {
         }
     }
 
-    async update_icon(){
-        return {}
-    }
 }
  
-
 const instance = new App();
 module.exports = instance

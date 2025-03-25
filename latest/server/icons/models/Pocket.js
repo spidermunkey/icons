@@ -7,7 +7,7 @@ async function find(){
 }
 
 async function clear(){
-    return (await Database.icons()).collection('{{pocket}}').drop();
+    return (await find()).forEach(icon => remove(icon))
 }
 
 async function add(icon){
