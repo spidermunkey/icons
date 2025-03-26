@@ -37,7 +37,7 @@ export class Home extends EventEmitter {
       $('.c-data .nxt.tggle').onclick = () => next();
       $('.c-data .prv.tggle').onclick = () => prev();
       // close
-      $('.collection-preview .modal-ctrl').addEventListener('click',() => this.state.collection = null)
+      $('.local-preview .modal-ctrl').addEventListener('click',() => this.state.collection = null)
     })
     this.localCollections.on('upload',(collection,element)=> this.handleUpload(collection,element))
     this.localCollections.on('data',(collections) => {
