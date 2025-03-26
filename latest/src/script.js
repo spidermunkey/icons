@@ -1486,19 +1486,24 @@ class MouseTrackingSlider {
     }
   track = (event) => {
     let controller = new AbortController();
+    const handleMouseUp = (event) => {
+      controller.abort();
+      console.log('aborted',controller)
+      this.initialPosition_x = null;
+      this.initialPosition_y = null;
+      event.stopImmediatePropagation();
+      if ( this.onMouseUp ) this.onMouseUp({event, x: Number(this.xPos), y: Number(this.yPos)});
+      document.removeEventListener('mousemove',this.handleDrag,{signal:controller.signal},true)
+      document.removeEventListener('mouseup',handleMouseUp)
+    }
     if (event.button !== 0) return;
     if (event.detail === 2) return this.onDoubleClick(event);
     if (!this.initialPosition_x) this.initialPosition_x = event.pageX;
     if (!this.initialPosition_y) this.initialPosition_y = event.pageY;
     this.handleClick(event)
     document.addEventListener("mousemove", this.handleDrag, { signal: controller.signal },true);
-    document.addEventListener("mouseup", () => {
-      controller.abort();
-      this.initialPosition_x = null;
-      this.initialPosition_y = null;
-      event.stopImmediatePropagation();
-      if ( this.onMouseUp ) this.onMouseUp({event, x: Number(this.xPos), y: Number(this.yPos)});
-    });
+    document.addEventListener("mouseup", handleMouseUp);
+
   }
   handleClick = (event) => {
     let xZeroed = event.clientX - this.initialPosition_x;

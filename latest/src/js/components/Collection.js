@@ -1,6 +1,5 @@
 import { Icon } from './Icon.js';
 import { Color } from './Color.js'
-import { EventEmitter } from 'events';
 
 export class Collection {
   constructor(data){
@@ -48,10 +47,10 @@ export class Collection {
     this.created_at = meta.created_at
     this.synced = meta.synced
     this.presets = meta?.presets || {}
-    this.presets.original = this.presets.original ? this.presets.original : this.findMatchingViewbox(validIcons)
+    this.presets.original = this.findMatchingViewbox(validIcons)
     this.preset = meta?.preset || {}
     this.colors = meta?.colors || {}
-    this.colors.original = this.colors.original ? this.colors.original : {
+    this.colors.original = meta?.colors?.original ? meta?.colors?.original : {
       csid:'original',
       colorset_type:'global',
       name: 'original',
@@ -141,28 +140,39 @@ export class Collection {
       }
       const parseFill = (colorSet) => {
         for(const id in colorSet){
-          let iconFill = normalize(colorSet[id][1])
-          let tagName = colorSet[id][2]
-          if (iconFill != undefined || iconFill != false) {
-            if (tagName === 'svg') parsed.elements.fill.add(iconFill)
-            else parsed.shapes.fill.add(iconFill)
-          } else console.warn('something wrong with this hex', this.colorSet[id][1])
+          // quick patch...
+          // ignore meta properties
+          const metaProperties = ['csid','colorset_type','name'];
+          if (!metaProperties.includes(id)) {
+            let iconFill = normalize(colorSet[id][1])
+            let tagName = colorSet[id][2]
+            if (iconFill != undefined || iconFill != false) {
+              if (tagName === 'svg') parsed.elements.fill.add(iconFill)
+              else parsed.shapes.fill.add(iconFill)
+            } else console.warn('something wrong with this hex', this.name)
+          }
         }
       }
       const parseStroke = (colorSet) => {
         for(const id in colorSet){
-          if (colorSet[id][0] == null) continue
-          let iconStroke = normalize(colorSet[id][0])
-          let tagName = colorSet[id][2]
-          if (iconStroke != undefined || iconStroke != false) {
-            if (tagName === 'svg') parsed.elements.stroke.add(iconStroke)
-            else parsed.shapes.stroke.add(iconStroke)
-          } else console.warn('something wrong with this hex', this.colorSet[id][0])
+          // quick patch...
+          // ignore meta properties
+          const metaProperties = ['csid','colorset_type','name'];
+          if (!metaProperties.includes(id)) {
+            if (colorSet[id][0] == null) continue
+            let iconStroke = normalize(colorSet[id][0])
+            let tagName = colorSet[id][2]
+            if (iconStroke != undefined || iconStroke != false) {
+              if (tagName === 'svg') parsed.elements.stroke.add(iconStroke)
+              else parsed.shapes.stroke.add(iconStroke)
+            } else console.warn('something wrong with this hex', this.name)
+          }
         }
       }
       parseFill(colorSet)
       parseStroke(colorSet)
     }
+    // must return actual values to use inverter
     let elementResult = {
       fill: parsed.elements.matchingFill ? parsed.elements.fill.values().toArray()[0] : null,
       stroke: parsed.elements.matchingStroke ? parsed.elements.stroke.values().toArray()[0] : null,
@@ -278,8 +288,8 @@ export class Collection {
 export class LocalCollection extends Collection {
   constructor(data) {
     super({ meta:data, icons:data?.icons || []})
-  }
 
+  }
   hydrate(){
     $('.local-preview .modal-ctrl').addEventListener('click',() => {
       $('.db-res').classList.add('active');
@@ -408,17 +418,6 @@ export class LocalCollection extends Collection {
       <div class="c-settings local-settings">
 
         <div class="title-header">Collection Settings</div>
-        <div class="pallete">
-          <span class="setting-label">pallete</span>
-          <span class="setting color-setting default-fill">
-            <span class="fill-label">Fill</span>
-            <div class="fill-value box"></div>
-          </span>
-          <span class="setting color-setting default-stroke">
-            <span class="stroke-label">Stroke</span>
-            <div class="stroke-value box"></div>
-          </span>
-        </div>
 
         <div class="row position">
           <div class="viewbox">
@@ -440,8 +439,41 @@ export class LocalCollection extends Collection {
             <span class="setting-label width">width</span><span class="setting">none</span>
           </div>
         </div>
+        <div class="color-modal">
+
+          <div class="row pallete color-selectors">
+            <span class="setting-label">pallete</span>
+            <span class="setting color-setting default-fill" mode='fill'>
+              <span class="fill-label">Fill</span>
+              <div class="fill-value box"></div>
+            </span>
+            <span class="setting color-setting default-stroke" mode='stroke'>
+              <span class="stroke-label">Stroke</span>
+              <div class="stroke-value box"></div>
+            </span>
+          </div>
+          
+          <div class="color-editor">
+            <div class="canvas-wrapper">
+              <div class="cp-canvas">
+                <div class="canvas"><div class="canvas-pointer cp-canvas--pointer"></div></div>
+                <div class="hue-bar input-bar slider-track"><div class="hue-thumb input-thumb slider-handle"></div></div>
+              </div>
+              <div class="cp-preview"></div>
+              <div class="cp-input"><input type="text" placeholder="#inputhex"></div>
+            </div>
+            <div class="canvas-actions">
+              <div class="c-action action-undo">undo</div>
+              <div class="c-action action-redo">redo</div>
+              <div class="c-action action-reset">reset</div>
+            </div>
+          </div>
+
+        </div>
 
       </div>
+
+
     `
   }
   preview(icons = this.icons){
@@ -459,7 +491,7 @@ export class LocalCollection extends Collection {
     }
     return `
       <div class="preview-icons">${icons.reduce((acc,red)=> {
-        acc += `<div class="preview-icon">${red.markup}</div>`;
+        acc += `<div class="preview-icon" id=${red.id}>${red.markup}</div>`;
         return acc;
       },'')}</div>
     </div>
@@ -743,14 +775,5 @@ export class CollectionWidget extends Collection {
     db_container.appendChild(panel_preview);
     db_panel.appendChild(panel_footer);
     return db_panel;
-  }
-
-}
-export class CollectionStore extends EventEmitter {
-  constructor(data){
-    updateNeeded = true;
-  }
-  getData(){
-
   }
 }

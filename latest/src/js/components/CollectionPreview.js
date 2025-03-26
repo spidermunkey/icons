@@ -119,7 +119,7 @@ export class CollectionPreview extends EventEmitter {
     }, 'vertical' )
 
     this.canvas = new Canvas({
-      canvas: $('.canvas',this.element),
+      canvas: $('.settings-interface .canvas',this.element),
       pointer: $('.canvas-pointer',this.element),
       hueBar: this.hueSlider,
       state: this.state,
@@ -143,7 +143,8 @@ export class CollectionPreview extends EventEmitter {
           console.log(this.viewbox)
           this.setIconViewboxHTML(this.viewbox)
       }
-  }
+    }
+
     const handleHeightWidthInput = (dimension) => {
       return (event) => {
           let value = Number(event.target.value);
@@ -276,7 +277,7 @@ export class CollectionPreview extends EventEmitter {
     this.iconElements.forEach(element => callback(element))
   }
   getIcon(id){
-    return this.icons.filter(id => icon.id !== id)
+    return this.icons.filter(icon => icon.id !== id)
   }
   eachIcon(callback){
     this.icons.forEach(icon => callback(icon))
@@ -342,8 +343,8 @@ export class CollectionPreview extends EventEmitter {
     this.updateColorState(hex)
     this.colorInput.value = hex
     this.colorInput.classList.remove('invalid')
-    const shapeFillReflector = $('.shape-reflector[reflector="fill"]'),
-          shapeStrokeReflector = $('.shape-reflector[reflector="stroke"]'),
+    const shapeFillReflector = $('.reflector[sval="fill"]'),
+          shapeStrokeReflector = $('.reflector[sval="stroke"]'),
           shapeFill = this.mode.shapes.fill.currentColor,
           shapeStroke = this.mode.shapes.stroke.currentColor
           shapeFillReflector.style.backgroundColor = shapeFill

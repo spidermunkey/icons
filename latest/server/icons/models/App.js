@@ -80,8 +80,8 @@ class App extends EventEmitter {
     async sync_collection(collection){
         // allows duplicate names... must be distinguished by collection_type
         try {
-            const { cid,colors, presets, icons } = collection;
-            console.log('syncing local collection')
+            const { cid, colors, presets, icons } = collection;
+            console.log('syncing local collection',colors)
             const props = Local.getCollectionById(cid);
                     // applying default settings from ui
                     props.colors = colors

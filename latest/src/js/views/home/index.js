@@ -2,6 +2,7 @@ import { RecentDownloads } from "../../components/recentIconWidget.js";
 import { UploadSection } from "../../components/uploadedIconWidget.js";
 import { StatusWidget } from "../../components/statusWidget.js";
 import { API } from "../../api.js";
+import { ColorSettingsInterface } from "./SettingsInterface.js";
 export class Home extends EventEmitter {
   constructor(store) {
     super()
@@ -14,30 +15,27 @@ export class Home extends EventEmitter {
       query:'',
     }
     this.localCollections.on('preview', (collection) => {
-      this.state.collection = collection;
-      this.cancelSearch();
-      collection.render();
-      this.state.collections.skipToElement(collection)
+      const render = (collection) => {
+        this.state.collection = collection;
+        this.cancelSearch();
+        collection.render();
+        $('.c-data .nxt.tggle').onclick = () => next();
+        $('.c-data .prv.tggle').onclick = () => prev();
+        // close
+        $('.local-preview .modal-ctrl').addEventListener('click',() => this.state.collection = null)
+      this.colorSettingsInterface = new ColorSettingsInterface()
+      this.colorSettingsInterface.update(collection)
+      }
       const next = () => {
         const current = this.state.collections.skipToNext()
-        this.state.collection = current;
-        this.cancelSearch();
-        current.render();
-        $('.c-data .nxt.tggle').onclick = next;
-        $('.c-data .prv.tggle').onclick = prev;
+        render(current)
       }
       const prev = () => {
         const current = this.state.collections.skipToPrev()
-        this.state.collection = current;
-        this.cancelSearch();
-        current.render();
-        $('.c-data .nxt.tggle').onclick = next;
-        $('.c-data .prv.tggle').onclick = prev;
+        render(current)
       }
-      $('.c-data .nxt.tggle').onclick = () => next();
-      $('.c-data .prv.tggle').onclick = () => prev();
-      // close
-      $('.local-preview .modal-ctrl').addEventListener('click',() => this.state.collection = null)
+      render(collection);
+      this.state.collections.skipToElement(collection)
     })
     this.localCollections.on('upload',(collection,element)=> this.handleUpload(collection,element))
     this.localCollections.on('data',(collections) => {
