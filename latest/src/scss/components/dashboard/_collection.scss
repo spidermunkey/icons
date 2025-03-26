@@ -1,7 +1,6 @@
 // collection preview
 .collection-summary {
     border: 1px solid rgba(20, 20, 20, 0.05);
-    //   border: 1px solid #1414140d;
     border-radius: 12px;
     box-shadow: 0px 1px 3px 0px rgba(128, 128, 128, 0.092), -1px 0px 3px 0px rgba(128, 128, 128, 0.0392);
     margin: 40px;
@@ -44,7 +43,6 @@
             position: absolute;
             top: 100%;
             right: 0;
-            // width: 100px;
             border-radius: 8px;
             background-color: white;
             border: 1px solid #cccccce2;
@@ -156,12 +154,10 @@
         }
     }
     .db-container {
-        // height: 120px;
         display: flex;
         justify-content: space-between;
         flex-wrap: wrap;
         max-width: 100%;
-        // margin: 24px 0;
         margin-top: 12px;
     }
     .panel-preview{

@@ -15,10 +15,8 @@
         transform: translateY(-30px);
         border-bottom-left-radius: 6px;
         transition: 200ms ease;
-        
         animation-duration: 200ms;
         animation-name: notify;
-        
         @keyframes notify {
             50% {
                 transform: translateY(20px);
@@ -28,7 +26,6 @@
             }
         }
     }
-  
     .notification.success {
         background-color:var(--success-green)
     }

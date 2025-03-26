@@ -13,32 +13,31 @@
     margin: 10px 0;
     border: 1px solid rgba(20, 20, 20, 0.05);
     border-radius: 10px;
-}
-.preview-group .label {
-    margin: 0 0 10px 10px;
-    font-size: 20px;
-    transition: opacity 300ms ease-in-out;
-    color: rgba(20, 20, 20, 0.743);
+    .label {
+        margin: 0 0 10px 10px;
+        font-size: 20px;
+        transition: opacity 300ms ease-in-out;
+        color: rgba(20, 20, 20, 0.743);
+    }
+    .preview-components {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 10px 0;
+        position: relative;
 
+        .pb-component {
+            margin-left: 10px;
+            z-index: 2;
+        }
+    }
 }
-.preview-group .preview-components {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 10px 0;
-    position: relative;
-}
-.preview-group .preview-components .pb-component {
-    margin-left: 10px;
-    z-index: 2;
-}
-  
+
 .comp {
     display: flex;
     justify-content: center;
     align-items: center;
 }
-  
 .logo--xs svg {
     height: 14px;
     width: 14px;

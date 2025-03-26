@@ -40,7 +40,6 @@
             margin-bottom: 8px;;
             white-space: nowrap;
             border-radius: 8px;
-            // background-color: var(--success-green);
             background: #eee;
           }
         }
@@ -89,7 +88,6 @@
         }
         .panel {
           @include hide();
-          // border: 1px solid red;
           padding-top: 18px;
           position: absolute;
           top: 0;
@@ -123,7 +121,6 @@
               display: inline-flex;
               border: 1px solid #ccc;
               border-radius: 4px;
-              // font-size: 18px;
             }
           }
         }
@@ -160,10 +157,8 @@
           cursor: pointer;
           border: 1px solid rgba(132, 132, 132, 0.1);
           box-shadow: 0px 1px 3px 0px rgba(128, 128, 128, 0.092), -1px 0px 3px 0px rgba(128, 128, 128, 0.0392);
-                    // inset -1px 0px 3px 0px rgba(128, 128, 128, 0.02), inset -1px 0px 3px 0px rgba(128, 128, 128, 0.01392);
           box-shadow:  0px 0px 7px -4px rgba(27,31,35, 0.012),
             0px 0px 0px 0px rgba(27,31,35, 0.025),
-            // 0 2px 10px -4px rgba(27,31,35,.0128),
             inset -2px 0px 1px 1px rgba(171, 171, 171, 0.012), inset -1px 0px 2px 0px rgba(189, 189, 189, 0.01),
             0px 1px 4px 0px rgba(27,31,35,.0125);
         }
@@ -181,7 +176,6 @@
     .recent-downloads,
     .recent-uploads {
       height: 500px;
-      // overflow: scroll;
       .title-header {
         transform: translateX(32px);
         color: $font-clr-light;
@@ -209,7 +203,6 @@
     .status-widget {
         font-family: Arial, Helvetica, sans-serif;
         text-transform: capitalize;
-        // border: 1px solid #ccc;
         padding: 1.2rem;
         line-height: 1.56;
         .label {
@@ -248,9 +241,6 @@
         position: relative;
         overflow-y: scroll;
         height: 100%;
-        // & > div:hover .recent-collection {
-        //   transform: translate(4a0px,-4px)
-        // }
         .sync-widget {
           position: relative;
           transition: 200ms ease;
@@ -283,8 +273,6 @@
               transform: translateY(0);
             }
           }
-      
-          // border: 1px solid blue;
         }
         .recent-collection {
           position: relative;
@@ -383,7 +371,6 @@
                 color: rgb(133, 49, 49);
               }
             }
-            // border: 1px solid red;
           }
           .sample {
             display: flex;

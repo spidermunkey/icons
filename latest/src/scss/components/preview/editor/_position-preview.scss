@@ -1,8 +1,5 @@
 .preview__modals--modal.position {
-    //   border: 1px solid #1414140d;
       border-radius: 10px;
-
-
 }
 .settings-modal .preset-header .current-preset {
     margin-right: 8px;
@@ -46,11 +43,9 @@
         }
         align-items: center;
         padding: 2px;
-        // border: inherit;
     }
   }
 .position__inputs {
-    // border: 1px solid $border-super-light;
     margin-top: 14px;
     padding: 4px 8px;
     border-radius: 10px;
@@ -60,30 +55,24 @@
     }
 }
 .input-group .inputs {
-//   border: 1px solid #1414140d;
     border-radius: 10px;
 }
 .input-header {
     color: #505050ae;
     width: 100%;
-//   margin: 4px 0;
     margin-right: 4px;
     font-size: 14px;
     margin-left: 18px;
-//   scale: .9;
-//   transform: translateX(-4px) scale(.9);
 }
 .dimension__inputs {
 display: flex;
 flex-wrap: wrap;
 justify-content: center;
-// padding: 6px;
 .input-field.height,
 .input-field.width {
     display: flex;
     align-items: center;
     padding: 4px 16px;
-    // width: 50%;
     margin: 8px;
     .label {
         width: 40px;
@@ -96,37 +85,31 @@ justify-content: center;
         padding: 6px;
     }
 }
-
 }
 .viewbox .input-field {
     margin-right: 20px;
     margin-bottom: 10px;
     max-width: 50%;
-
     &:last-of-type {
         margin-right: 0;
     }
     .label {
         user-select: none;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            cursor: pointer;
-            font-size: 14px;
-            width: 16px;
-            padding: 0.5rem 1.25rem;
-        //   border-radius: 8px;
-            margin-right: 4px;
-            border-right: 1px solid  rgba(20, 20, 20, 0.0727);
-    color: #1414148a;
-
-        //   box-shadow: 0 0 2px 1px rgba(20, 20, 20, 0.0727);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        font-size: 14px;
+        width: 16px;
+        padding: 0.5rem 1.25rem;
+        margin-right: 4px;
+        border-right: 1px solid  rgba(20, 20, 20, 0.0727);
+        color: #1414148a;
         .input {
             display: flex;
             justify-content: flex-start;
             align-items: center;
-    color: #1414148a;
-
+            color: #1414148a;
         }
         &:hover {
             cursor: ew-resize;
@@ -139,10 +122,8 @@ justify-content: center;
     flex: 1;
     color: #505050de;
     color: #1414148a;
-
     border: 1px solid rgba(20, 20, 20, 0.05);
     border-radius: 8px;
-//   padding: 6px;
     font-size: 14px;
     font-family: Arial, Helvetica, sans-serif;
     .input {
@@ -171,7 +152,6 @@ justify-content: center;
         color: #505050ae;
         width: 100%;
         margin-left: 24px;
-    //   font-size: 12px;
     }
     .input-field {
         position: relative;
@@ -195,7 +175,6 @@ justify-content: center;
         }
         .slider {
             // SHRINKS EVEN WITH ???
-            
             width: 100%;
             flex: 1;
             cursor: pointer;
@@ -242,16 +221,12 @@ justify-content: center;
         outline: 0;
         border: 0;
         padding-left: 12px;
-        color: rgba(51, 51, 51, 0.687);
-    color: #1414148a;
-
+        color: #1414148a;
         letter-spacing: 0.075em;
         border-radius: 4px;
-
         &::placeholder {
             color: rgba(80, 80, 80, 0.67);
         }
-
         &:focus {
             background-color: rgba(204, 204, 204, 0.433);
         }

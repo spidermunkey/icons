@@ -281,11 +281,11 @@ export class LocalCollection extends Collection {
   }
 
   hydrate(){
-    $('.collection-preview .modal-ctrl').addEventListener('click',() => {
+    $('.local-preview .modal-ctrl').addEventListener('click',() => {
       $('.db-res').classList.add('active');
-      $('.collection-preview').classList.remove('active');
+      $('.local-preview').classList.remove('active');
     })
-    $('.collection-preview .sub-collections').onclick = (event) => {
+    $('.local-preview .sub-collections').onclick = (event) => {
       const submenu = event.target.closest('.title-header');
       const filterLink = event.target.closest('.filter-link');
       const showAll = event.target.closest('.sc-name.all');
@@ -338,8 +338,8 @@ export class LocalCollection extends Collection {
   }
   render(){
     $('.db-res').classList.remove('active');
-    const destination = $('.collection-preview');
-    $('.collection-preview').classList.add('active');
+    const destination = $('.local-preview');
+    $('.local-preview').classList.add('active');
     destination.innerHTML = `
     <div class="modal-ctrl">
       <div class="icon"></div>

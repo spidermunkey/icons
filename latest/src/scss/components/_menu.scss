@@ -89,8 +89,6 @@
             width: 100%;
             padding-bottom: 24px;
             padding-top: 8px;
-            // transition: transform 120ms ease 300ms;
-            // opacity: 0;
         }
     }
 }
@@ -98,10 +96,8 @@
 .menu-modals {
     height: 400px;
     width: 400px;
-    // border: 1px solid red;
     margin-top: 120px;
     margin-left: 40px;
-  
 }
   // separation / transform container scroll
 .menu-modal {
@@ -170,8 +166,6 @@
     border-bottom-right-radius: 20%;
     border-radius: 32px;
     opacity: 0;
-    // transition: transform 200ms ease, color 300ms ease, opacity 80ms ease;
-  
 }
   // menu item
 .menu-list-item {
@@ -262,12 +256,10 @@
         }
       }
       &:hover{
-        // box-shadow: 0px 2px 4px -1px rgba(0, 0, 0, 0.079);
         .btn-menu {
           background: #f7f7f71e;
           border: 1px solid #80808051;
         }
-        // background: linear-gradient(-65deg,#ffffff27,rgba(3, 3, 3, 0.29));
       }
       svg {
         fill: $slate;
@@ -277,10 +269,8 @@
       display: flex;
       flex-wrap: wrap;
       align-content: center;
-      // align-items: center;
       row-gap: 8px;
       height: 100px;
-      // width: 200px;
       padding: 8px 20px;
       margin-right: 20px;
           svg {
@@ -313,21 +303,15 @@
 .menu-cosm {
     height: 100%;
     width: 100%;
-  
-    // background: transparent;
     position: absolute;
     top: 0;
     left: 0;
     z-index: 10000;
-  
     background-color: white;
     background: linear-gradient(180deg,rgba(255, 255, 255, 0.703),transparent);
     pointer-events: none;
-  
-    // @include hide();
     opacity: 0;
     transition: opacity 400ms ease;
-    
     &.active {
       @include show();
       transition: opacity 300ms ease;
@@ -346,7 +330,6 @@
       content: "";
       position: absolute;
       pointer-events: none;
-      // inset: -100%;
       inset: 0;
       z-index: 2;
       background: linear-gradient(90deg,rgba(255, 255, 255, 0.697),transparent);
@@ -364,7 +347,6 @@
           transform: translateX(-25%) translateY(-5%) scale(2);
   
         }
-        
       };
     }
     &::before {

@@ -369,7 +369,7 @@ export class Home extends EventEmitter {
         </div>
         <div class="dashboard__modal">
           <div class="cosm search-cosm"></div>
-          <div class="collection-preview"></div>
+          <div class="local-preview"></div>
           <div class="db-res">
           <div class="col">
             <div class="info-panels">
