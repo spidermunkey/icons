@@ -1,25 +1,7 @@
-@import 'colors.scss';
-@import 'mixins.scss';
-@import 'shadows.scss';
-@import 'zindex.scss';
-
-$transition-default: 200ms cubic-bezier(1,0,0,1);
-$transition-1: 200ms ease;
-// flex-boxes
-.row {
-  display: flex;
-}
-.column {
-  display: flex;
-  flex-direction: column;
-}
-.flex-center {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-}
-
-.cosm {
-  
-}
+@import 'colors';
+@import 'mixins';
+@import 'shadows';
+@import 'zindex';
+@import 'transitions';
+@import 'utility';
+@import 'borders';

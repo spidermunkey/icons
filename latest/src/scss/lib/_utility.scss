@@ -1,0 +1,25 @@
+.row {
+    display: flex;
+    flex-direction: row;
+  }
+  
+.column {
+    display: flex;
+    flex-direction: column;
+}
+
+.flex-center {
+    align-items: center;
+    justify-content: center;
+}
+
+.flex-start {
+    align-items: start;
+    justify-content: start;
+}
+
+.cosm {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+}

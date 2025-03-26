@@ -327,7 +327,7 @@ export class Home extends EventEmitter {
     this.uploadedCollections.render($('.col-2.recent-activity'))
   }
   async getHTML() {
-    return `<div class="dashboard" location="home">
+    return `<div class="home" location="home">
       <div class="dashboard__header">
         <div class="info-bar">Home</div>
         <div class="tool-bar">
@@ -368,7 +368,7 @@ export class Home extends EventEmitter {
           </div>
         </div>
         <div class="dashboard__modal">
-          <div class="search-cosm"></div>
+          <div class="cosm search-cosm"></div>
           <div class="collection-preview"></div>
           <div class="db-res">
           <div class="col">

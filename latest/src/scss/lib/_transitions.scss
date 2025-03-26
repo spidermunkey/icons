@@ -1,0 +1,10 @@
+:root {
+    --t1: 200ms cubic-bezier(1,0,0,1);
+    --t200: 200ms ease;
+    --t250: 250ms ease;
+    --t300: 300ms ease;
+    --t350: 350ms ease;
+}
+
+$transition-default: 200ms cubic-bezier(1,0,0,1);
+$transition-1: 200ms ease;

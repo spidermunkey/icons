@@ -1,6 +1,6 @@
-@import './component-preview.scss';
-@import './color-picker.scss';
-@import './position-preview.scss';
+@import 'component-preview';
+@import 'color-picker';
+@import 'position-preview';
 
 .preview {
   position: relative;

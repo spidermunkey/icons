@@ -1,10 +1,12 @@
-@import './menu/main.scss';
 @import './home/main.scss';
 @import './dashboard/main.scss';
 @import './preview/main.scss';
-@import './search/main.scss';
-@import './contextmenu/main.scss';
-@import './createcollection/main.scss';
-@import './loaders/default-loader.scss';
 
-@import 'icon'
+@import 'icon';
+
+@import 'interface';
+@import 'menu';
+
+@import 'search';
+@import 'loaders';
+@import 'context';

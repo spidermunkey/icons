@@ -410,13 +410,14 @@ export class LocalCollection extends Collection {
         <div class="title-header">Collection Settings</div>
         <div class="pallete">
           <span class="setting-label">pallete</span>
-          <span class="box"></span>
-          <span class="box"></span>
-          <span class="box"></span>
-          <span class="box"></span>
-          <span class="box"></span>
-          <span class="box"></span>
-          <span class="box"></span>
+          <span class="setting color-setting default-fill">
+            <span class="fill-label">Fill</span>
+            <div class="fill-value box"></div>
+          </span>
+          <span class="setting color-setting default-stroke">
+            <span class="stroke-label">Stroke</span>
+            <div class="stroke-value box"></div>
+          </span>
         </div>
 
         <div class="row position">
