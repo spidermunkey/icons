@@ -50,14 +50,15 @@ export class Collection {
     this.presets.original = this.findMatchingViewbox(validIcons)
     this.preset = meta?.preset || {}
     this.colors = meta?.colors || {}
-    this.colors.original = meta?.colors?.original ? meta?.colors?.original : {
+    this.colors.original = {
       csid:'original',
       colorset_type:'global',
       name: 'original',
       ...this.findMatchingColors(validIcons)
     }
-    this.color = meta?.color || {}
 
+    this.color = meta?.color || {}
+    console.log(this.colors.default)
   }
   
   find(id){
@@ -145,8 +146,12 @@ export class Collection {
           const metaProperties = ['csid','colorset_type','name'];
           if (!metaProperties.includes(id)) {
             let iconFill = normalize(colorSet[id][1])
+            if (iconFill == false) {
+              console.log(false,iconFill)
+              continue
+            }
             let tagName = colorSet[id][2]
-            if (iconFill != undefined || iconFill != false) {
+            if (iconFill != undefined) {
               if (tagName === 'svg') parsed.elements.fill.add(iconFill)
               else parsed.shapes.fill.add(iconFill)
             } else console.warn('something wrong with this hex', this.name)
@@ -161,8 +166,12 @@ export class Collection {
           if (!metaProperties.includes(id)) {
             if (colorSet[id][0] == null) continue
             let iconStroke = normalize(colorSet[id][0])
+            if (iconStroke == false){
+              console.log(false,iconFill)
+              continue
+            } 
             let tagName = colorSet[id][2]
-            if (iconStroke != undefined || iconStroke != false) {
+            if (iconStroke != undefined) {
               if (tagName === 'svg') parsed.elements.stroke.add(iconStroke)
               else parsed.shapes.stroke.add(iconStroke)
             } else console.warn('something wrong with this hex', this.name)
@@ -185,6 +194,7 @@ export class Collection {
       matchingFill: parsed.shapes.matchingFill,
       matchingStroke: parsed.shapes.matchingStroke
     }
+    console.log(shapeResult)
     return { shapes: shapeResult, elements: elementResult}
   }
 

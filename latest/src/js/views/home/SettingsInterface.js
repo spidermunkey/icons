@@ -1,3 +1,4 @@
+import { EventEmitter } from "events";
 import { Canvas } from "../../components/Canvas";
 
 const StatefulColor = (originalColor = '#000') => ({
@@ -18,7 +19,6 @@ export class ColorSettingsInterface extends EventEmitter {
     this.undoElement = $('.c-action.action-undo',this.element);
     this.redoElement = $('.c-action.action-redo',this.element);
     this.resetElement = $('.c-action.action-reset',this.element);
-    console.log(this.resetElement);
     this.fillSelector = $('.default-fill',this.element);
     this.strokeSelector = $('.default-stroke',this.element);
     this.fillReflector = $('.box',this.fillSelector)
@@ -32,6 +32,17 @@ export class ColorSettingsInterface extends EventEmitter {
       selected:'fill',
       stroke: StatefulColor(),
       fill: StatefulColor(),
+      get current_colorset(){
+        return {
+          csid:'default',
+          colorset_type:'global',
+          name: 'default',
+          shapes: {
+            fill:this.stroke,
+            stroke:this.fill,
+          }
+        }
+      }
     };
 
     this.huebar = new Slider(this.huebarElement,{
@@ -113,17 +124,20 @@ export class ColorSettingsInterface extends EventEmitter {
     if (this.state.selected === 'fill'){
       this.updateFillSelector(hex)
       this.updateAllShapes(hex,'fill')
-      this.collection.colors.original.shapes.fill = hex;
+      this.state.fill.currentColor = hex
+      this.state.fill.history.addOneAndSkipTo(hex)
     }
     else if (this.state.selected === 'stroke'){
       this.updateStrokeSelector(hex)
       this.updateAllShapes(hex,'stroke')
-      this.collection.colors.original.shapes.stroke = hex;
+      this.state.stroke.currentColor = hex
+      this.state.stroke.history.addOneAndSkipTo(hex)
     }
 
   }
   handleColorChange(){
-    console.log(this.collection.colors.original)
+    console.log(this.state.current_colorset,this.collection.colors['default']);
+    this.collection.colors['default'] = this.state.current_colorset
   }
 
   updateFillSelector(hex){
@@ -132,6 +146,7 @@ export class ColorSettingsInterface extends EventEmitter {
       console.warn('must properly handle color if (null || none)')
       this.fillSelector.classList.add('invalid')
     } else {
+      console.log('fill reflector',hex)
       this.fillSelector.classList.remove('invalid')
       this.fillReflector.style.setProperty('background',hex)
     }
@@ -142,7 +157,7 @@ export class ColorSettingsInterface extends EventEmitter {
         console.warn('must properly handle color if (null || none)')
         this.strokeSelector.classList.add('invalid')
       } else {
-        console.log('reflector',hex)
+        console.log('stroke reflector',hex)
         this.strokeSelector.classList.remove('invalid')
         this.strokeReflector.style.setProperty('background',hex)
     }
@@ -156,7 +171,7 @@ export class ColorSettingsInterface extends EventEmitter {
     const currentFill = fill.currentColor;
     const currentStroke = stroke.currentColor;
     this.updateFillSelector(currentFill);
-    this.updateStrokeSelector(currentFill);
+    this.updateStrokeSelector(currentStroke);
   }
 
   update(collection){
@@ -165,11 +180,34 @@ export class ColorSettingsInterface extends EventEmitter {
     const {original} = collection.colors;
     const {fill,stroke} = original.shapes;
     this.state = {
-      selected:'fill',
+      selected: this.state.selected,
       stroke: StatefulColor(stroke),
       fill: StatefulColor(fill),
+      get current_colorset(){
+        return {
+          csid:'default',
+          colorset_type:'global',
+          name: 'default',
+          elements: {
+            // no change yet
+            fill:original.elements.fill,
+            stroke: original.elements.stroke,
+          },
+          shapes: {
+            fill:this.fill.currentColor,
+            stroke:this.stroke.currentColor,
+          }
+        }
+      }
     };
     this.handleState(this.state)
-    console.log(fill,stroke)
+    console.log(fill,stroke,collection.colors.original)
   }
+}
+
+export class ViewboxSettingsInterface extends EventEmitter {
+  constructor(){
+    super()
+  }
+
 }
