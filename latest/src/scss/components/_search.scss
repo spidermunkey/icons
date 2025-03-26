@@ -14,9 +14,8 @@
         opacity: 1;
     }
   }
+
 .passive-search {
-    z-index: 10000;
-    transition: transform 350ms ease;
     position: relative;
     z-index: 1000;
     display: none;
@@ -24,9 +23,8 @@
     border-radius: 12px;
     padding: 6px 0px;
     width: 200px;
-    // box-shadow: -2px 0px 4px 0px rgba(128, 128, 128, 0.092), -2px 0px 4px 0px rgba(128, 128, 128, 0.0392);
     border: 1px solid rgba(128, 128, 128, 0.1771);
-    transition: box-shadow 200ms ease, color 400ms ease;
+    transition: box-shadow 200ms ease, color 400ms ease, transform 350ms ease;
     svg path{
             fill: rgba(20, 20, 21, .37);
             stroke: rgba(20, 20, 21, .37);
