@@ -2,7 +2,7 @@ import { RecentDownloads } from "../../components/recentIconWidget.js";
 import { UploadSection } from "../../components/uploadedIconWidget.js";
 import { StatusWidget } from "../../components/statusWidget.js";
 import { API } from "../../api.js";
-import { ColorSettingsInterface } from "./SettingsInterface.js";
+import { ColorSettingsInterface, ViewboxSettingsInterface } from "./SettingsInterface.js";
 export class Home extends EventEmitter {
   constructor(store) {
     super()
@@ -25,6 +25,8 @@ export class Home extends EventEmitter {
         $('.local-preview .modal-ctrl').addEventListener('click',() => this.state.collection = null)
       this.colorSettingsInterface = new ColorSettingsInterface()
       this.colorSettingsInterface.update(collection)
+      this.viewboxSettingInterface = new ViewboxSettingsInterface()
+      this.viewboxSettingInterface.update(collection)
       }
       const next = () => {
         const current = this.state.collections.skipToNext()
@@ -281,12 +283,13 @@ export class Home extends EventEmitter {
       $('.loading-overlay',element).classList.add('active')
       try {
         this.uploadingQue.add(id);
+        console.log(collection.presets)
         const stat = await API.requestSync({
           cid:collection.cid,
           color:collection.color,
           colors:collection.colors,
           preset: collection.preset,
-          presets:collection.presests,
+          presets:collection.presets,
           icons: collection.icons,
         });
         if (stat.success){

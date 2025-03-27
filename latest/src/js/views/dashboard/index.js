@@ -1095,8 +1095,8 @@ export class Dashboard extends View {
         const meta = collection.meta
         const currentIcon = this.currentIcon
         const collectionID = meta.cid
-        const iconSettings = currentIcon?.settings
-        const collectionSettings = collection?.settings
+        const iconSettings = currentIcon?.presets
+        const collectionSettings = collection?.presets
         let recentSettings = {}
         if (collection?.recentSettings && Array.isArray(collection.recentSettings))
             collection.recentSettings.forEach(setting => recentSettings[setting.pid] = setting)
@@ -1189,7 +1189,7 @@ export class Dashboard extends View {
                     </div>
                 </div>
                 <div class="preset-val p-name"><span class="p-label name-label">name: </span> <span class="p-val name-val">${setting?.name ? setting.name : 'untitled' }</span></div>
-                <div class="preset-val p-viewbox"><span class="p-label vb-label">viewbox: </span><span class="p-val vb-val">${setting?.viewbox ? setting.viewbox : 'none'}</span></div>
+                <div class="preset-val p-viewbox"><span class="p-label vb-label">viewbox: </span><span class="p-val vb-val">${setting?.viewbox ? setting.viewbox.join(' ') : 'none'}</span></div>
                 <div class="preset-val p-height"><span class="p-label height-label">height: </span> <span class="p-val height-val">${setting?.height ? setting.height : 'none'}</span></div>
                 <div class="preset-val p-width"><span class="p-label width-label">width: </span><span class="p-val width-val">${setting?.width ? setting.width : 'none'}</span></div>
                 `
@@ -1241,7 +1241,7 @@ export class Dashboard extends View {
                     </div>
                 </div>
                 <div class="preset-val p-name"><span class="p-label name-label">name: </span> <span class="p-val name-val">${setting?.name ? setting.name : 'untitled' }</span></div>
-                <div class="preset-val p-viewbox"><span class="p-label vb-label">viewbox: </span><span class="p-val vb-val">${setting?.viewbox ? setting.viewbox : 'none'}</span></div>
+                <div class="preset-val p-viewbox"><span class="p-label vb-label">viewbox: </span><span class="p-val vb-val">${setting?.viewbox ? setting.viewbox.join(' ') : 'none'}</span></div>
                 <div class="preset-val p-height"><span class="p-label height-label">height: </span> <span class="p-val height-val">${setting?.height ? setting.height : 'none'}</span></div>
                 <div class="preset-val p-width"><span class="p-label width-label">width: </span><span class="p-val width-val">${setting?.width ? setting.width : 'none'}</span></div>
                 `
@@ -1621,7 +1621,7 @@ export class Dashboard extends View {
         
         let frozenSettings = ['original','setting','preset']
         if (!objectIsFalsey(iconSettings)) createPresetWrapper(iconSettings,iconSettingsTab,'icon')
-        if (!objectIsFalsey(this.currentView.settings)) createPresetWrapper(collectionSettings,collectionSettingsTab,'collection')
+        if (!objectIsFalsey(this.currentView.presets)) createPresetWrapper(collectionSettings,collectionSettingsTab,'collection')
         if (!objectIsFalsey(recentSettings)) createPresetWrapper(recentSettings,recentSettingsTab,'recent')
         $('.settings-editor .preset-option[tab="icons"] .preset-count').textContent = objectLength(iconSettings,frozenSettings)
         $('.settings-editor .preset-option[tab="collections"] .preset-count').textContent = objectLength(collectionSettings,frozenSettings)
@@ -1794,6 +1794,7 @@ export class Dashboard extends View {
                     this.state.context = collection
                     this.collection.render()
                     this.preview.update(this.currentIcon)
+                    console.log(collection.presets)
                     this.state.selected = this.currentIcon
                     this.setTab(collection)
                     $('.dashboard__header .panel-settings').classList.add('active')

@@ -224,6 +224,42 @@
         padding-left: 8px;
       }
     }
+    .dimensions,
+    .position {
+      .setting input {
+        display: inline-flex;
+        outline: none;
+        border: 1px solid transparent;
+        &.invalid {
+          border: 1px solid red;
+        }
+      }
+    }
+    .dimensions .setting input {
+      width: 100%;
+    }
+    .viewbox {
+      display: flex;
+    }
+    .position .setting {
+      padding: 0px 4px;
+      display: flex;
+      width: fit-content;
+      input {
+      width: 24px;
+      color: #ccc;
+
+      &:hover,
+      &:active,
+      &:focus {
+        border: 1px solid #ccc;
+        color: #222;
+      }
+      &.invalid {
+        border: 1px solid red;
+      }
+    }
+  }
 
     .setting-label{
       display: inline-block;

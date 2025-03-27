@@ -208,6 +208,96 @@ export class ColorSettingsInterface extends EventEmitter {
 export class ViewboxSettingsInterface extends EventEmitter {
   constructor(){
     super()
+    this.element = $('.local-preview');
+    this.vbxInput = $('.vb-setting input[vbVal="vbx"]',this.element);
+    this.vbyInput = $('.vb-setting input[vbVal="vby"]',this.element);
+    this.vbwInput = $('.vb-setting input[vbVal="vbw"]',this.element);
+    this.vbhInput = $('.vb-setting input[vbVal="vbh"]',this.element);
+    this.heightInput = $('.dim-setting.height-input input',this.element);
+    this.widthInput = $('.dim-setting.width-input input',this.element);
+    
+    this.state = {
+
+        viewbox: [0,0,20,20],
+        vbh:20, 
+        vbw:20, 
+        vby:0, 
+        vbx:0, 
+        width:'24', 
+        height:'24',
+        get viewBox(){
+          return [this.vbx,this.vby,this.vbw,this.vbh].map(i => Number(i))
+        }
+    }
+
+    const isValid = event => !isNaN(Number(event.target.value)) && event.target.value !== ''
+    const checkInputValid = (input) => {
+      return (event) => {
+        if (isValid(event)){
+          input.classList.remove('invalid')
+        } else {
+          input.classList.add('invalid')
+        }
+      }
+    };
+    const handleInput = (propName) => {
+      return (event) => {
+        if (isValid(event)){
+          const value = event.target.value
+          this.state[propName] = Number(value);
+          const {vbx,vby,vbw,vbh} = this.state;
+          const viewbox = [vbx,vby,vbw,vbh].map(i => Number(i))
+          this.collection.presets['default'] = {
+            ...this.state,
+            viewbox,
+          }
+          console.log(this.collection.presets)
+        }
+      }
+    }
+    [
+      this.heightInput,
+      this.widthInput,
+      this.vbhInput,
+      this.vbwInput,
+      this.vbyInput,
+      this.vbxInput,
+    ].forEach(input => {
+      input.addEventListener('input',checkInputValid(input))
+    })
+    this.heightInput.addEventListener('input',handleInput(this.heightInput,'height'))
+    this.widthInput.addEventListener('input',handleInput(this.widthInput,'width'))
+    this.vbxInput.addEventListener('input',handleInput('vbx'))
+    this.vbyInput.addEventListener('input',handleInput('vby'))
+    this.vbwInput.addEventListener('input',handleInput('vbw'))
+    this.vbhInput.addEventListener('input',handleInput('vbh'))
+
+  }
+
+  update(collection){
+    const {original} = collection.presets
+    let {vbx,vby,vbw,vbh,width,height} = original;
+    if (!width || width === '') width = 20;
+    if (!height || height === '') height = 20;
+    this.vbhInput.value = vbh;
+    this.vbwInput.value = vbw;
+    this.vbyInput.value = vby;
+    this.vbxInput.value = vbx;
+    this.heightInput.value = height;
+    this.widthInput.value = width;
+    this.collection = collection
+
+    this.state = {
+      name:'default',
+      pid:'default',
+      vbh, 
+      vbw, 
+      vby, 
+      vbx, 
+      height,
+      width, 
+      viewbox:[vbx,vby,vbw,vbh].map(i => Number(i))
+      }
   }
 
 }

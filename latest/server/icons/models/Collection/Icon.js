@@ -55,7 +55,7 @@ function configurePreset(props){
         name: props?.name || 'untitled',
         // can be collection or icon preset,
         pid: props?.pid || uuid(),
-        viewbox: props?.viewbox || '',
+        viewbox: props?.viewbox || [],
         vbx: props?.vbx || 0,
         vby: props?.vby || 0,
         vbw: props?.vbw || 24,

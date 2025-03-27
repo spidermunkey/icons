@@ -58,7 +58,7 @@ export class Collection {
     }
 
     this.color = meta?.color || {}
-    console.log(this.colors.default)
+    this.state = {}
   }
   
   find(id){
@@ -84,6 +84,15 @@ export class Collection {
     // return null if all viewboxes are not the same
     let viewbox
     let original
+    let defaultSetting = {
+      viewbox: [0,0,20,20],
+      vbh:20, 
+      vbw:20, 
+      vby:0, 
+      vbx:0, 
+      width:'24', 
+      height:'24'
+    }
     for (let i = 0; i < icons.length; i++){
       let icon = icons[i]
       let og = icon.presets.original.viewbox
@@ -94,11 +103,23 @@ export class Collection {
         continue
       }
       if (originalViewbox !== viewbox) {
-        original = this.defaultSetting;
+        original = defaultSetting
         return original
       } 
     }
-    return original
+    if (original 
+      && !objectIsEmpty(original) 
+      && viewbox 
+      && viewbox != '' 
+      && viewbox.split(' ').length === 4){
+        // setting default height for original value
+        original.height = original?.height && original.height !== '' ? original.height : 20
+        original.width = original?.width && original.width !== '' ? original.width : 20
+        return original
+      }
+    else {
+      return defaultSetting
+    }
   }
   findMatchingColors(icons){
     let parsed = {
@@ -429,26 +450,28 @@ export class LocalCollection extends Collection {
 
         <div class="title-header">Collection Settings</div>
 
-        <div class="row position">
-          <div class="viewbox">
-            <span class="setting-label">viewbox</span><span class="setting vb">none</span>
+        <div class="row dimensions">
+          <div class="height">
+            <span class="setting-label">height</span><span class="dim-setting height-input setting"><input type="text" placeholder"none"/></span>
           </div>
-          <div class="x">
-            <span class="setting-label">x</span><span class="setting">none</span>
-          </div>
-          <div class="y">
-            <span class="setting-label width">y</span><span class="setting">none</span>
+          <div class="width">
+            <span class="setting-label width">width</span><span class="dim-setting width-input setting"><input type="text" placeholder"none"/></span>
           </div>
         </div>
 
-        <div class="row dimensions">
-          <div class="height">
-            <span class="setting-label">height</span><span class="setting">none</span>
-          </div>
-          <div class="width">
-            <span class="setting-label width">width</span><span class="setting">none</span>
+        <div class="row position">
+          <div class="viewbox">
+            <span class="setting-label">viewbox</span>
+            <span class="vb-setting setting vb">
+              <input class="vb-inp" vbVal="vbx" type="text" placeholder"vbx" value=0>
+              <input class="vb-inp" vbVal="vby" type="text" placeholder"vby" value=0>
+              <input class="vb-inp" vbVal="vbw" type="text" placeholder"vbw" value=20>
+              <input class="vb-inp" vbVal="vbh" type="text" placeholder"vbh" value=20>
+            </span>
           </div>
         </div>
+
+
         <div class="color-modal">
 
           <div class="row pallete color-selectors">
