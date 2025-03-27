@@ -27,8 +27,6 @@ server/icons/monitor.js watches for changes
 
 **set up wrapper that logs back to the messages ui**
 
-**define collection settings on upload**
-
 **polish and publish prototype (motion/animations)**
 
 **use file api to add target directory from user interface**
