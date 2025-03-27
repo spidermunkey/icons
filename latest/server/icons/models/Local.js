@@ -1,5 +1,6 @@
+const { EventEmitter } = require('ws');
 const { Scanner } = require('../scanner.js');
-
+const userConfig = require('../local/fsconfig.js');
 
 module.exports = {
     ready: false,
@@ -9,21 +10,18 @@ module.exports = {
     updating: false,
     loading: false,
     db: null,
+    config:userConfig,
+    events: new EventEmitter(),
 
-    readDB(){
-      if (this.db !== null){
-        return this.db
-      }
-      console.log('reading local database file...')
-      return this.scanner.read()
-    },
+
     async init(updateNeeded = false) {
-        // poorly handles case where init is called while loading db.
         if (updateNeeded) await this.update();
-        else if (this.ready && !this.updating) return this;
-        else if (this.db !== null) return this.db;
-        else this.loadDB();
-        return this;
+        if (this.ready && !this.updating && this.db !== null) {
+          return this.db;
+        }
+        else {
+          return await this.loadDB()
+        }
     },
     async save() {
       console.log('saving all changes to local db')
@@ -34,6 +32,13 @@ module.exports = {
     async reset() {
       this.update_each({ignored: false, synced: false})
       return this.db;
+    },
+    readDB(){
+      if (this.db !== null){
+        return this.db
+      }
+      console.log('reading local database file...')
+      return this.scanner.read()
     },
     async loadDB(){
       if (!this.loading){
@@ -60,11 +65,17 @@ module.exports = {
         this.updating = true;
         await this.scanner.update();
         await this.loadDB();
+        this.ready = true;
+        this.updating = false;
         return this.db;
       } else {
         console.log('update process already started')
       }
 
+    },
+
+    async addTarget(pathname){
+      return await this.scanner.addTarget(pathname)
     },
     count(){
       const db = this.readDB();
@@ -73,7 +84,6 @@ module.exports = {
         count++;
       return count;
     },
-
     get_collection(collection_name){ // { icons | name | meta }
       const db = this.readDB();
       return db.collections[collection_name]

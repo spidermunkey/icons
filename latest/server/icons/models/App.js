@@ -1,33 +1,17 @@
 const EventEmitter = require("events");
 
-const Local = require('./Local.js')
+const Local = require('./Local.js');
 const Database = require('./Database.js');
 const Meta = require('./Collection/Meta.js');
 const Collection = require('./Collection.js');
 const Icon = require('./Collection/Icon.js');
 const { uuid } = require('../../utils/uuid.js');
-const { print } = require('../../utils/print.js')
+const { print } = require('../../utils/print.js');
 
 class App extends EventEmitter {
-
     constructor(){
         super()
-
-        this.collectionNames = {
-
-        }
-
-        this.collectionInfo = {
-
-        }
-
-        this.state = {
-
-        }
-
         this.local = Local.init()
-        this.database = Database
-
     }
 
     async collection_id_exists(cid){
@@ -195,6 +179,6 @@ class App extends EventEmitter {
     }
 
 }
- 
+
 const instance = new App();
 module.exports = instance

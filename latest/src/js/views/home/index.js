@@ -74,6 +74,12 @@ export class Home extends EventEmitter {
     //     this.handleSearch(e)
     // })
     $('.btn-cancel').addEventListener('click',() => this.searchReset())
+    $('.btn-add-target').addEventListener('click',async () => {
+      const value = $('#targetPath').value;
+      console.log('adding target',value)
+      const response = await API.addUserTarget(value.replace(/\\/g,'/').replace(/["']/g,''))
+      console.log(response)
+    })
     $$('.control-panels .control-tab .tab').forEach(tabber => {
       const tab = tabber.getAttribute('tab');
       tabber.addEventListener('click',(event) => {
@@ -435,7 +441,7 @@ export class Home extends EventEmitter {
                 <div class="panel app-settings active" panel="settings">
                   <div class="app-setting">
                     <div class="setting setting-label">Target Directories:</div>
-                    <div class="setting setting-value">< default path ></div>
+                    <div class="setting setting-value"><input type="text" name="targetPath" id="targetPath"></div>
                     <div class="setting setting-action btn-add-target">add</div>
                   </div>
                   <div class="app-setting">

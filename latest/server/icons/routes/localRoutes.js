@@ -3,6 +3,8 @@ const router = express.Router();
 const Local = require('../models/Local.js')
 const {Mongo} = require('../model.js');
 const Database = require('../models/Database.js')
+const path = require('path')
+const fs = require('fs')
 
 router.get('/collections', async function getLocalDownloads(request,response){
   const collection_type = request.query.collectionType;
@@ -46,4 +48,13 @@ router.get('/status', async function getLocalStatus(request,response) {
   response.json(status)
 })
 
+router.post('/add', async function addUserTarget(request,response){
+  const targetFile = path.join(__dirname,'..','local/fstargets.json');
+  const pathname = decodeURIComponent(request.body.payload.path)
+  console.log(pathname)
+  console.log(decodeURIComponent(pathname))
+  const test = await Local.addTarget(pathname);
+  console.log(test)
+  response.json( test )
+})
 module.exports = router;

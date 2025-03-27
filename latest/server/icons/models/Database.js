@@ -11,6 +11,7 @@ class Database {
         this.connection = false;
         this.connections = 0;
         this.meta_alias = '{{meta}}';
+        this.user_alias = '{{user}}';
     }
 
     async getDB(name){
@@ -37,6 +38,15 @@ class Database {
             return (await this.getDB('icons')).collection(this.meta_alias);
         } catch(error){
             console.error('error retrieving icon meta data...',error)
+            throw(error)
+        }
+    }
+
+    async user(){
+        try {
+            return (await this.getDB('icons')).collection(this.user_alias);
+        } catch(error){
+            console.error('error retrieving user data',error)
             throw(error)
         }
     }

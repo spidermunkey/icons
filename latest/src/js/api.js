@@ -50,6 +50,9 @@ export const API = {
     async requestIgnore(data){
         return this.post(`${endpoint}/collections/ignore`, {  cid: data.cid } )
     },
+    async addUserTarget(path){
+        return this.post(`${endpoint}/local/add`, {path:encodeURI(path)})
+    },
     async getConnection(){
         return this.ping('google.com')
     },

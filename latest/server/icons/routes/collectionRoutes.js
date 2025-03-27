@@ -4,7 +4,6 @@ const { Mongo } = require('../model.js')
 const Local = require('../models/Local.js')
 const App = require('../models/App.js')
 
-
 router.get('/info', async function getCollectionData(request,response){
   try {
     response.json(await App.get_collection_info())
@@ -82,7 +81,6 @@ router.put('/:collectionID', async function editCollection(request,response){
   
 })
 
-
 router.post('/:collectionID', async function addToCollection (request, response) {
   try {
     response.json(await App.addToCollection({
@@ -94,7 +92,6 @@ router.post('/:collectionID', async function addToCollection (request, response)
     response.status(500).send({success:false,code:500,message:'error processing request'})
   }
 })
-
 
 router.put('/settings/:collection', async function clearDefaultSetting(request,response){
   const collection = request.params.collection
