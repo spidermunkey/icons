@@ -61,16 +61,22 @@ module.exports.Scanner = {
   },
 
   readTargets(targetFile = this.userTargets){
-    if (fs.existsSync(targetFile)) {
-      try {
-        const targets = JSON.parse(fs.readFileSync(targetFile))
-        return new Set(targets);
-      } catch (err) {
-        console.error('Error parsing user targets:', err);
-        return [];
+    try {
+      if (fs.existsSync(targetFile)) {
+        try {
+          const targets = JSON.parse(fs.readFileSync(targetFile));
+          const validTargets = targets.filter(fs.existsSync);
+          return new Set(validTargets);
+        } catch (err) {
+          console.error('Error parsing user targets:', err);
+          return [];
+        }
       }
+      return [];
+    } catch (error){
+      console.log('error reading target list',error)
     }
-    return [];
+
   },
   async addTarget(pathname){
     const targets = this.readTargets();
@@ -85,10 +91,6 @@ module.exports.Scanner = {
   async ignoreTarget(path){
     this._targets.delete(path);
     return await this.compare();
-  },
-
-  async updateTargets(){
-
   },
 
   async compare(){
