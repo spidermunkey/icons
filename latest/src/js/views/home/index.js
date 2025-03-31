@@ -54,13 +54,12 @@ export class Home extends EventEmitter {
   }
 
   async render(){
-    $('#app').innerHTML = ''
+    $('#app').innerHTML = '';
     $('#app').innerHTML = await this.getHTML();
     this.localCollections.render($('.col-2.recent-activity'));
-    this.appStatus.render($('.info-panels'))
+    this.appStatus.render($('.info-panels'));
     $('.db-res').classList.add('active');
-    this.hydrate()
-
+    this.hydrate();
   }
 
   async hydrate() {
@@ -80,6 +79,9 @@ export class Home extends EventEmitter {
       const response = await API.addUserTarget(value.replace(/\\/g,'/').replace(/["']/g,''))
       console.log(response)
     })
+    $('.btn-view-targets').addEventListener('click',() => {
+      $('.settings-overlay').classList.toggle('active');
+    })
     $$('.control-panels .control-tab .tab').forEach(tabber => {
       const tab = tabber.getAttribute('tab');
       tabber.addEventListener('click',(event) => {
@@ -89,7 +91,6 @@ export class Home extends EventEmitter {
         $(`.control-panels .control-panel .panel[panel=${tab}]`).classList.add('active')
       })
     })
-
     $('#app').addEventListener('click',async (e) => {
       if (!this.active){
         return;
@@ -443,6 +444,12 @@ export class Home extends EventEmitter {
                     <div class="setting setting-label">Target Directories:</div>
                     <div class="setting setting-value"><input type="text" name="targetPath" id="targetPath"></div>
                     <div class="setting setting-action btn-add-target">add</div>
+                    <div class="setting setting-action btn-view-targets">view</div>
+                    <div class="settings-overlay target-list">
+                      <div class="file-targets">
+
+                      </div>
+                    </div>
                   </div>
                   <div class="app-setting">
                     <div class="setting setting-label">Monitor Status : </div>

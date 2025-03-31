@@ -10,6 +10,12 @@
   visibility: hidden;
 }
 
+@mixin modal {
+  @include hide();
+  &.active {
+    @include show();
+  }
+}
 @mixin cosm {
   position: absolute;
   height: 100%;

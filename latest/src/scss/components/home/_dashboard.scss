@@ -100,11 +100,13 @@
           }
   
           &.app-settings {
-            .btn-add-target {
-              background: var(--success-green);
+            .btn-add-target,
+            .btn-view-targets {
               background: #eee;
               padding: 4px 10px;
               border-radius: 8px;
+              cursor: pointer;
+              user-select: none;
             }
   
             .app-setting {
@@ -409,6 +411,25 @@
           background: linear-gradient(to right,rgba(224, 255, 224, 0.2), rgba(228, 255, 228,.2));
       }
       
+    .panel {
+      position: relative;
+    }
+    .settings-overlay {
+      background: white;
+      border: 1px solid red;
+      position: absolute;
+      top: 60px;
+      height: 200px;
+      width: 100%;
+      @include modal();
+
+      overflow: hidden;
+      .file-targets {
+        height: 100%;
+        width: 100%;
+        overflow-y: scroll;
+      }
+    }
 }
   
 
