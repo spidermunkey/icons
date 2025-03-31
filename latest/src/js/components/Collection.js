@@ -168,7 +168,6 @@ export class Collection {
           if (!metaProperties.includes(id)) {
             let iconFill = normalize(colorSet[id][1])
             if (iconFill == false) {
-              console.log(false,iconFill)
               continue
             }
             let tagName = colorSet[id][2]
@@ -215,7 +214,6 @@ export class Collection {
       matchingFill: parsed.shapes.matchingFill,
       matchingStroke: parsed.shapes.matchingStroke
     }
-    console.log(shapeResult)
     return { shapes: shapeResult, elements: elementResult}
   }
 

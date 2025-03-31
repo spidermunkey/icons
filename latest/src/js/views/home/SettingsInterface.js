@@ -201,7 +201,6 @@ export class ColorSettingsInterface extends EventEmitter {
       }
     };
     this.handleState(this.state)
-    console.log(fill,stroke,collection.colors.original)
   }
 }
 

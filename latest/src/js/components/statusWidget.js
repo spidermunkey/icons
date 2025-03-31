@@ -15,7 +15,8 @@ export class StatusWidget {
     this.updateAll(data)
   }
   updateAll(data){
-    const {local_size,local_collections,last_change,db_status,local_status,connection} = data;
+    const {local_size,local_collections,last_change,db_status,local_status,connection,targets} = data;
+    console.log(targets)
     $('.db-stat .stat').innerHTML = `${db_status}${db_status === 'online'
       ? '<span class="divider stat-sym isSync"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -16 42 42" height="16px" width="16px"><path d="M12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg></span>'
       : '<span class="divider stat-sym"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -16 42 42" height="16px" width="16px"><path d="M12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg></span>'
@@ -31,6 +32,20 @@ export class StatusWidget {
       ? '<span class="divider stat-sym isSync"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -16 42 42" height="16px" width="16px"><path d="M12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg></span>'
       : '<span class="divider stat-sym"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -16 42 42" height="16px" width="16px"><path d="M12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg></span>'
     }`
+    $('.panel .settings-overlay .file-targets').innerHTML = `${targets.reduce((accumulator,reducer) => {
+      const html = accumulator + `
+      <div class="file-target">
+        <div class="file-handle">
+          ${reducer} 
+        </div>
+        <div class="ft-controls">
+          <span class="btn-ft btn-scan-target">scan</span>
+          <span class="btn-ft btn-watch-target">watch</span>
+          <span class="btn-ft btn-delete-target">delete</span>
+        </div>
+      </div>`
+      return html
+    },'')}`
   }
   render(destination){
     destination.innerHTML = this.getHTML()
