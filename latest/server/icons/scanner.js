@@ -71,6 +71,10 @@ module.exports.Scanner = {
           console.error('Error parsing user targets:', err);
           return [];
         }
+      } else {
+        // create default target file
+        const defaultTarget = "C:/Users/justi/dev/data/icons"
+        fs.writeFileSync(path.join(__dirname,'local/fstargets.json'),JSON.stringify(defaultTarget? [`${defaultTarget}`]:[]))
       }
       return [];
     } catch (error){
