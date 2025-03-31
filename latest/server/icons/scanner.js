@@ -19,7 +19,7 @@ module.exports.Scanner = {
   stats:{},
 
   get targets(){
-    return Array.from(this.readTargets().values())
+    return Array.from(this.readTargets())
     // return Array.from(this._targets.values());
   },
   async stat() {
@@ -35,7 +35,8 @@ module.exports.Scanner = {
         changed, 
         size, 
         count, 
-        updateNeeded, 
+        updateNeeded,
+        targets: this.readTargets(),
         lastChange: lastChange.string, 
         lastChangeMs:last_sync_date
       }
@@ -66,7 +67,7 @@ module.exports.Scanner = {
         try {
           const targets = JSON.parse(fs.readFileSync(targetFile));
           const validTargets = targets.filter(fs.existsSync);
-          return new Set(validTargets);
+          return validTargets
         } catch (err) {
           console.error('Error parsing user targets:', err);
           return [];
@@ -75,20 +76,26 @@ module.exports.Scanner = {
         // create default target file
         const defaultTarget = "C:/Users/justi/dev/data/icons"
         fs.writeFileSync(path.join(__dirname,'local/fstargets.json'),JSON.stringify(defaultTarget? [`${defaultTarget}`]:[]))
+        return [];
       }
-      return [];
     } catch (error){
       console.log('error reading target list',error)
     }
 
   },
   async addTarget(pathname){
-    const targets = this.readTargets();
-    const normalized = pathname.replace(/\\/g, '/');
-    targets.add(normalized);
-    const arr = Array.from(targets.values());
-    fs.writeFileSync(this.userTargets,JSON.stringify(arr));
-    console.log('added target', this.readTargets())
+
+    if (fs.existsSync(pathname)){
+      // filter duplicates
+      const targets = new Set(this.readTargets());
+      const normalized = pathname.replace(/\\/g, '/');
+      targets.add(normalized);
+      const arr = Array.from(targets);
+      fs.writeFileSync(this.userTargets,JSON.stringify(arr));
+      console.log('added target', this.readTargets())
+    } else {
+      console.log('target not found')
+    }
     return await this.compare()
   },
 

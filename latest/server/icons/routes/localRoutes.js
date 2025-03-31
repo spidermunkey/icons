@@ -17,7 +17,7 @@ router.get('/collections', async function getLocalDownloads(request,response){
 
 router.get('/status', async function getLocalStatus(request,response) {
   const local_status = await Local.get_status();
-  const mongo_stat = (await Database.ping())
+  const mongo_stat = (await Database.ping());
   // const mongo_stat = true;
   const ready  = Local.ready && mongo_stat
   const localOnly = Local.ready && !mongo_stat
@@ -38,6 +38,7 @@ router.get('/status', async function getLocalStatus(request,response) {
     added: local_status.added?.length || null,
     changed: local_status.changed?.length || null,
     removed: local_status.removed?.length || null,
+    targets: local_status?.targets || [],
     code,
     message,
   }
