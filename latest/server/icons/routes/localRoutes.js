@@ -49,4 +49,11 @@ router.post('/add', async function addUserTarget(request,response){
   const test = await Local.addTarget(pathname);
   response.json( test )
 })
+
+router.get('/scan', async function scanUserTarget(request,response){
+  const pathname = decodeURIComponent(request.body.payload.path)
+  // const tester = decodeURIComponent("C:\\Users\\justi\\dev\\data\\tester")
+  const test = await Local.addRepository(pathname);
+  response.json( test )
+})
 module.exports = router;

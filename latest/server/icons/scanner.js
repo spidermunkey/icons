@@ -49,6 +49,10 @@ module.exports.Scanner = {
     return JSON.parse(fs.readFileSync(this.fsmap))
   },
 
+  overwrite_map(file_map){
+    fs.writeFileSync( this.fsmap, JSON.stringify(file_map) );
+  },
+  // map all current targets
   async update_map(){
     fs.writeFileSync( this.fsmap, JSON.stringify(await this.create_flat_map(this.targets)))
   },
@@ -57,7 +61,25 @@ module.exports.Scanner = {
     fs.writeFileSync( this.fsdb , JSON.stringify(store) )
   },
 
-  ignore(name){
+  async add_repository(targets = []){
+    const normalize = pathname => pathname.replace(/\\/g, '/')
+    const filtered = targets.map(normalize).filter(fs.existsSync)
+    console.log(filtered,targets)
+    if (filtered.length > 0) {
+      const added_state = await this.create_flat_map(filtered);
+      const prev_state = this.read_map();
+      const current_state = {
+        ...prev_state,
+        ...added_state
+      }
+      console.log(added_state)
+      console.log('overwritting current map')
+      this.overwrite_map(current_state)
+      console.log('overwriting current db')
+      this.overwrite(await this.compile_targets(this.read_map()))
+      console.log('process complete')
+    } else console.log('no action taken')
+
   },
 
   readTargets(targetFile = this.userTargets){
@@ -121,26 +143,20 @@ module.exports.Scanner = {
     return { added:added.length, removed:removed.length, changed:changed.length }
   },
 
+  // sync all current targets
   async update(){
     console.log('overwriting current database...')
     await this.update_map();
-    this.overwrite(await this.compile_repository(await this.read_map()));
+    console.log('map updated to reflect current targets')
+    this.overwrite(await this.compile_targets(this.read_map()));
   },
 
-  async compile_targets(){
-
-  },
-
-  async compile_target(file_map){
-    console.log('building object store')
-
-  },
-
-  async compile_repository(file_map){
+  async compile_targets(file_map){
     console.log('building local object store')
     const local = {
       collection_names: [],
       collections: {},
+      repositories: {},
     };
     let progress = 0
     let files = Object.keys(file_map)
@@ -150,17 +166,16 @@ module.exports.Scanner = {
         const {repository,repository_id,collection,collection_id} = file_map[file]
         const entry = await this.parseFile(file,repository);
         const {subtype,sub_collection} = entry;
-
-        const collection_exists = local.collections.hasOwnProperty(collection)
+        const collection_exists = local.collections.hasOwnProperty(collection_id)
         const hasSubtype = subtype != undefined;
         const hasSubCollection = sub_collection != undefined;
 
+        // create new collection if none yet then push icons
         if (!collection_exists) {
-          local.collections[collection] = {
+          local.collections[collection_id] = {
             name: collection,
             cid: collection_id,
             rid: repository_id,
-
             subtypes: [],
             sub_collections: [],
             collection_type: 'local',
@@ -177,7 +192,12 @@ module.exports.Scanner = {
           local.collection_names.push(collection)
         }
 
-        let _collection = local.collections[collection];
+        // saving repository [name,id] for better crud ops
+        // should probably be saved to a file for faster retrieval
+        // trusting that uuid() is truly unique
+        local.repositories[repository] = repository_id
+
+        let _collection = local.collections[collection_id];
         
         if (hasSubCollection && !_collection.sub_collections.includes(sub_collection))
           _collection.sub_collections.push(sub_collection)
@@ -190,13 +210,11 @@ module.exports.Scanner = {
       }
     }
     console.log('local object store ready');
-    console.log(local.collection_names)
     return local;
   },
 
   async create_flat_map(directories = this.targets){
     return (await Promise.all(directories.map(this.mapDirectory))).reduce((acc,red) => {
-      // flatten into one map
       return {
         ...acc,
         ...red,
@@ -208,7 +226,7 @@ module.exports.Scanner = {
   },
 
   async parseDirectory(directory){
-    return await this.compile_repository(await this.mapDirectory(directory));
+    return await this.compile_targets(await this.mapDirectory(directory));
   },
   
   async parseFile(filepath,repository){
@@ -320,7 +338,7 @@ module.exports.Scanner = {
               let collection_id;
               // assigning collection_id's early
               if (collectionMemo.has(collection)){
-                collection_id = collectionMemo.collection
+                collection_id = collectionMemo.get(collection)
               } else {
                 collection_id = uuid();
                 collectionMemo.set(collection,collection_id)
@@ -331,7 +349,6 @@ module.exports.Scanner = {
                 collection_id,
                 repository,
                 repository_id,
-
                 synced:stats.mtimeMs
             }
           }

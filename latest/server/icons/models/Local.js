@@ -68,6 +68,7 @@ module.exports = {
         await this.loadDB();
         this.ready = true;
         this.updating = false;
+        console.log(this.db)
         return this.db;
       } else {
         console.log('update process already started')
@@ -78,6 +79,10 @@ module.exports = {
     async addTarget(pathname){
       return await this.scanner.addTarget(pathname)
     },
+
+    async addRepository(pathname){
+      await this.scanner.add_repository([pathname])
+    },
     
     count(){
       const db = this.readDB();
@@ -87,9 +92,9 @@ module.exports = {
       return count;
     },
 
-    get_collection(collection_name){ // { icons | name | meta }
+    get_collection(collection_id){ // { icons | name | meta }
       const db = this.readDB();
-      return db.collections[collection_name]
+      return db.collections[collection_id]
     },
     get_collections(){
       const db = this.readDB();
@@ -104,20 +109,20 @@ module.exports = {
     get_synced_collections(){
       const db = this.readDB();
       let collections = [];
-      for (const name in db.collections){
-        let collection = db.collections[name];
+      for (const cid in db.collections){
+        let collection = db.collections[cid];
         if (!collection.ignored && collection.synced)
           collections.push(collection)
       }
       return collections
     },
-    getCollectionById(cid){
+    getCollectionById(collection_id){
       console.log('finding local collection')
       const db = this.readDB();
       let found = null;
-      for (const collection_name in db.collections){
-        let collection = db.collections[collection_name]
-        if (collection.cid === cid) {
+      for (const cid in db.collections){
+        let collection = db.collections[cid]
+        if (collection.cid === collection_id) {
           return collection;
         }
       }
@@ -151,10 +156,10 @@ module.exports = {
     },
     async update_each(props){
       const db = this.readDB();
-      for (const collection_name in db.collections){
-        let collection = db.collections[collection_name]
-        console.log(`updating local collection...: ${{name:collection_name,...props}} `);
-        db.collections[collection_name] = {
+      for (const cid in db.collections){
+        let collection = db.collections[cid]
+        console.log(`updating local collection...: ${{name:collection.name,...props}} `);
+        db.collections[cid] = {
           ...collection,
           ...props
         }
@@ -163,22 +168,18 @@ module.exports = {
     },
     async update_collection(id,props){
       const db = this.readDB()
-      let found = null;
-      let name;
-      for (const collection_name in db.collections){
-        if (db.collections[collection_name]?.cid === id) {
-          found = db.collections[collection_name];
-          name = collection_name;
+      for (const cid in db.collections){
+        if (db.collections[cid]?.cid === id) {
+          let collection = db.collections[cid];
+          db.collections[cid] = {
+            ...collection,
+            ...props
+          }
+          console.log('updating collection',collection.name,'with', props)
           break;
         }
       }
-        if (found){
-          console.log('updating collection',name,'with', props)
-          db.collections[name] = {
-            ...found,
-            ...props
-          }
-          await this.save();
-      }
+
+      await this.save();
     },
 }
