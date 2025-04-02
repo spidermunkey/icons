@@ -34,8 +34,9 @@ async function run() {
     try {
         process.on('uncaughtException',(error) => console.log('[[ process ]]', error ))
         console.log('local db ready');
-        // await reset();
+        // await hardReset();
         await Database.connect();
+        // console.log(Local.getCollectionById('m8yh5muq-00M8LWCPPESZ').name)
         app.listen(PORT, (error) => {
             if (error) console.log('error starting server:', error)
             else console.log(`icon server running on port:${PORT}`)

@@ -5,10 +5,8 @@ const {from} = require('../utils/Date.js');
 const {print} = require('../utils/print.js');
 
 const {
-  targetDirectories,
   fileSystemMap,
   fileSystemDB,
-  ignoreList,
 } = require('./local/fsconfig.js');
 
 module.exports.Scanner = {
@@ -22,6 +20,7 @@ module.exports.Scanner = {
     return Array.from(this.readTargets())
     // return Array.from(this._targets.values());
   },
+
   async stat() {
       let count = await this.count()
       const last_sync_date = new Date(fs.statSync(fileSystemMap).mtimeMs).getTime()
@@ -50,8 +49,8 @@ module.exports.Scanner = {
     return JSON.parse(fs.readFileSync(this.fsmap))
   },
 
-  update_map(){
-    fs.writeFileSync( this.fsmap, JSON.stringify(this.create_file_map(this.targets)))
+  async update_map(){
+    fs.writeFileSync( this.fsmap, JSON.stringify(await this.create_flat_map(this.targets)))
   },
 
   overwrite(store){
@@ -83,6 +82,7 @@ module.exports.Scanner = {
     }
 
   },
+
   async addTarget(pathname){
 
     if (fs.existsSync(pathname)){
@@ -94,7 +94,7 @@ module.exports.Scanner = {
       fs.writeFileSync(this.userTargets,JSON.stringify(arr));
       console.log('added target', this.readTargets())
     } else {
-      console.log('target not found')
+      console.log('target not found',pathname)
     }
     return await this.compare()
   },
@@ -107,7 +107,7 @@ module.exports.Scanner = {
   async compare(){
     console.log('comparing changes...')
     const prevState = this.read_map();
-    const currState = await this.create_file_map();
+    const currState = await this.create_flat_map();
     const added = [];
     const removed = [];
     const changed = [];
@@ -118,22 +118,20 @@ module.exports.Scanner = {
     
     for (const file in prevState)
       if (!currState.hasOwnProperty(file) && path.extname(file) === '.svg') removed.push(file);
-  
     return { added:added.length, removed:removed.length, changed:changed.length }
   },
 
   async update(){
     console.log('overwriting current database...')
-    this.overwrite(await this.scan())
+    await this.update_map();
+    this.overwrite(await this.compile_repository(await this.read_map()));
   },
 
   async scan(directories){
-    return this.compile_object_store(await this.create_file_map(directories))
+    return this.compile_repository(await this.create_flat_map(directories))
   },
 
-  async compile_object_store(file_map){
-    // needs refactoring to store objects as [cid]:{collection}
-    // for to match shape of remote db
+  async compile_repository(file_map){
     console.log('building local object store')
     const local = {
       collection_names: [],
@@ -144,12 +142,12 @@ module.exports.Scanner = {
     for (const file of files){
       print(`processing file [${++progress}/${files.length}]`)
       if (path.extname(file) === '.svg'){
-        const entry = await this.parse(file);
-        const {collection,subtype,sub_collection,id} = entry;
+        const repository = file_map[file]['repository']
+        const entry = await this.parseFile(file,repository);
+        const {collection,subtype,sub_collection} = entry;
         const collection_exists = local.collections.hasOwnProperty(collection)
         const hasSubtype = subtype != undefined;
         const hasSubCollection = sub_collection != undefined;
-  
         if (!collection_exists) {
           local.collections[collection] = {
             name: collection,
@@ -169,47 +167,43 @@ module.exports.Scanner = {
           }
           local.collection_names.push(collection)
         }
-  
+
         let _collection = local.collections[collection];
         
         if (hasSubCollection && !_collection.sub_collections.includes(sub_collection))
           _collection.sub_collections.push(sub_collection)
         if (hasSubtype && !_collection.subtypes.includes(subtype)) 
           _collection.subtypes.push(subtype)
-  
-        entry.cid = _collection.cid;
+
+        entry.cid = _collection.cid
         _collection.icons.push(entry);
         _collection.size++;
-  
       }
     }
     console.log('local object store ready');
+    console.log(local.collection_names)
     return local;
   },
 
-  async create_file_map(directories = this.targets){
-    const state = {};
-    await Promise.all(directories.map(readDirRecursive))
-    async function readDirRecursive(directory){
-      const items = await fs.promises.readdir(directory, {withFileTypes: true});
-      for (const item of items) {
-            const itemPath = path.join(directory, item.name);
-            if (item.isDirectory())
-              await readDirRecursive(itemPath)
-            else if (item.isFile() && path.extname(itemPath) === '.svg') {
-              const stats = await fs.promises.stat(itemPath);
-              state[itemPath] = stats.mtimeMs;
-            }
-      }
-    }
-    return state;
+  async create_flat_map(directories = this.targets){
+    return (await Promise.all(directories.map(this.mapDirectory))).reduce((acc,red) => {
+      // flatten into one map
+      return {
+        ...acc,
+        ...red,
+      }},{})
   },
 
-  async update_file_map(){
-    
+  async count(directories = this.targets){
+      return (await Promise.all(directories.map(this.countDirectory))).reduce((acc,red) => acc + red,0);
   },
 
-  async parse(filepath){
+  async parseDirectory(directory){
+    return await this.compile_repository(await this.mapDirectory(directory));
+  },
+  
+  async parseFile(filepath,repository){
+    const rootDir = repository
     const collection = getBranch(filepath)[0];
     const subtypeDirectories = ['duotone','bold','fill','light','regular','solid','outlined','outline','thin','medium','bulk','curved','light-outline','two-tone','broken'];
     const name = path.parse(filepath).name;
@@ -239,9 +233,11 @@ module.exports.Scanner = {
       ignored: false,
     }
   
-    function getBranch(branchPath, branchStart = path.normalize(targetDirectory)) {
+    function getBranch(branchPath, branchStart = path.normalize(rootDir)) {
+      const location = path.normalize(branchPath)
+      const rootDir = path.normalize(branchStart)
       const folders = filename => filename.split(/[\\/]/);
-      return folders(branchPath.split(branchStart)[1]).filter(pathname => pathname != "")
+      return folders(location.split(rootDir)[1]).filter(pathname => pathname != "")
     }
     function getSubCollection(dirname) {
       let branch = getBranch(dirname);
@@ -292,24 +288,44 @@ module.exports.Scanner = {
     }
   },
 
-  async count(directories = this.targets){
-      let count = 0;
-      let extension = '.svg'
-      await Promise.all(directories.map(countDirRecursive))
-      async function countDirRecursive(directory) {
-        const items = await fs.promises.readdir(directory, {withFileTypes: true});
-        for (const item of items){
-          // ignoring dot files
-          if (item.name.startsWith('.'))
-            continue
-          let itemPath = path.join(directory, item.name);
-          if (item.isDirectory()) {
-            await countDirRecursive(itemPath);
-          } else if (item.isFile() && path.extname(item.name) === extension) {
-            count++;
+  async mapDirectory(directory){
+    const state = {};
+    const repository = directory
+    await readDirRecursive(directory)
+    async function readDirRecursive(directory){
+      const items = await fs.promises.readdir(directory, {withFileTypes: true});
+      for (const item of items) {
+            const itemPath = path.join(directory, item.name);
+            if (item.isDirectory())
+              await readDirRecursive(itemPath)
+            else if (item.isFile() && path.extname(itemPath) === '.svg') {
+              const stats = await fs.promises.stat(itemPath);
+              state[itemPath] = {
+                repository,
+                synced:stats.mtimeMs
+            }
           }
+      }
+    }
+    return state;
+  },
+
+  async countDirectory(directory){
+    let count = 0;
+    await countDirRecursive(directory)
+    async function countDirRecursive(directory){
+      const items = await fs.promises.readdir(directory, {withFileTypes: true});
+      for (const item of items){
+        if (item.name.startsWith('.'))
+          continue
+        if (item.isDirectory()) {
+          await countDirRecursive( path.join(directory, item.name) );
+        } else if (item.isFile() && path.extname(item.name) === '.svg') {
+          count++;
         }
       }
-      return count;
-  },
+    }
+    return count
+  }
+  
 };

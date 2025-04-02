@@ -13,7 +13,6 @@ module.exports = {
     config:userConfig,
     events: new EventEmitter(),
 
-
     async init(updateNeeded = false) {
         if (updateNeeded) await this.update();
         if (this.ready && !this.updating && this.db !== null) {
@@ -53,11 +52,13 @@ module.exports = {
       }
       return this.db
     },
+
     async get_status(){
       console.log('scanning for local database statistics...')
         this.last_stat = Date.now()
         return this.scanner.stat()
     },
+
     async update(){
       if (!this.updating) {
         console.log('update triggered... this may take a moment');
@@ -77,6 +78,7 @@ module.exports = {
     async addTarget(pathname){
       return await this.scanner.addTarget(pathname)
     },
+    
     count(){
       const db = this.readDB();
       let count = 0;
@@ -84,6 +86,7 @@ module.exports = {
         count++;
       return count;
     },
+
     get_collection(collection_name){ // { icons | name | meta }
       const db = this.readDB();
       return db.collections[collection_name]

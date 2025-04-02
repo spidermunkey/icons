@@ -25,7 +25,6 @@ router.get('/status', async function getLocalStatus(request,response) {
   const offline = !ready && !localOnly && !onlineOnly
   const message = ready ? 'ready' : localOnly ? 'local only' : onlineOnly ? 'online only' : 'server fault'
   const code = Local.ready && mongo_stat ? 100 : Local.ready && !mongo_stat ?  200 : mongo_stat && !Local.ready ? 300 : 400
-  
   const status = {
     db_status: mongo_stat ? 'online' : 'offline',
     local_status: Local.ready ? 'online' : 'offline',

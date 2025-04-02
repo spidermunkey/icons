@@ -45,3 +45,9 @@ I have some ideas, first I need to finish defining the roles of a collection int
 
   After spending some time on the server, reoganizing and refactoring for a more modular design. It appears that a simpler approach to managing this application would be to allowing components to fetch their own data from the api...
   instead of forcing index.js to manage all of the relationships with the api/store, instead index.js can just create the components and listen in only when needed.
+
+
+4/1/25
+  I've been avoiding deep comparison of the svg objects for fear of it taking to long, and also fear of userdata
+  I've been afraid that this project is reaching it's limits and I will have to learn something else for the sake of creating a desktop app and learning how to secure the application from potential users. Both of which may require learning a new languange and rebuilding the entire project from zero. daunting.
+  Also how the heck do you share something like this? what's the process of installing things.
