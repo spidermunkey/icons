@@ -29,8 +29,6 @@ server/icons/monitor.js watches for changes
 
 **polish and publish prototype (motion/animations)**
 
-**use file api to add target directory from user interface**
-
 **create new user flow**
 
 **setup guest flow for demo with default icon set**
