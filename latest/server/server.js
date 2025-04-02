@@ -34,7 +34,7 @@ async function run() {
     try {
         process.on('uncaughtException',(error) => console.log('[[ process ]]', error ))
         console.log('local db ready');
-        // await hardReset();
+        await hardReset();
         await Database.connect();
         // console.log(Local.getCollectionById('m8yh5muq-00M8LWCPPESZ').name)
         app.listen(PORT, (error) => {

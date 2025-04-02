@@ -127,8 +127,13 @@ module.exports.Scanner = {
     this.overwrite(await this.compile_repository(await this.read_map()));
   },
 
-  async scan(directories){
-    return this.compile_repository(await this.create_flat_map(directories))
+  async compile_targets(){
+
+  },
+
+  async compile_target(file_map){
+    console.log('building object store')
+
   },
 
   async compile_repository(file_map){
@@ -142,16 +147,20 @@ module.exports.Scanner = {
     for (const file of files){
       print(`processing file [${++progress}/${files.length}]`)
       if (path.extname(file) === '.svg'){
-        const repository = file_map[file]['repository']
+        const {repository,repository_id,collection,collection_id} = file_map[file]
         const entry = await this.parseFile(file,repository);
-        const {collection,subtype,sub_collection} = entry;
+        const {subtype,sub_collection} = entry;
+
         const collection_exists = local.collections.hasOwnProperty(collection)
         const hasSubtype = subtype != undefined;
         const hasSubCollection = sub_collection != undefined;
+
         if (!collection_exists) {
           local.collections[collection] = {
             name: collection,
-            cid: uuid(),
+            cid: collection_id,
+            rid: repository_id,
+
             subtypes: [],
             sub_collections: [],
             collection_type: 'local',
@@ -291,6 +300,14 @@ module.exports.Scanner = {
   async mapDirectory(directory){
     const state = {};
     const repository = directory
+    const repository_id = uuid();
+    const collectionMemo = new Map();
+    function getBranch(branchPath, branchStart = path.normalize(repository)) {
+      const location = path.normalize(branchPath)
+      const rootDir = path.normalize(branchStart)
+      const folders = filename => filename.split(/[\\/]/);
+      return folders(location.split(rootDir)[1]).filter(pathname => pathname != "")
+    }
     await readDirRecursive(directory)
     async function readDirRecursive(directory){
       const items = await fs.promises.readdir(directory, {withFileTypes: true});
@@ -299,9 +316,22 @@ module.exports.Scanner = {
             if (item.isDirectory())
               await readDirRecursive(itemPath)
             else if (item.isFile() && path.extname(itemPath) === '.svg') {
+              const collection = getBranch(itemPath)[0]
+              let collection_id;
+              // assigning collection_id's early
+              if (collectionMemo.has(collection)){
+                collection_id = collectionMemo.collection
+              } else {
+                collection_id = uuid();
+                collectionMemo.set(collection,collection_id)
+              }
               const stats = await fs.promises.stat(itemPath);
               state[itemPath] = {
+                collection,
+                collection_id,
                 repository,
+                repository_id,
+
                 synced:stats.mtimeMs
             }
           }

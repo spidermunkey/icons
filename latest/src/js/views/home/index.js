@@ -39,7 +39,7 @@ export class Home extends EventEmitter {
       render(collection);
       this.state.collections.skipToElement(collection)
     })
-    this.localCollections.on('upload',(collection,element)=> this.handleUpload(collection,element))
+    this.localCollections.on('upload',(collection,element) => this.handleUpload(collection,element))
     this.localCollections.on('data',(collections) => {
       this.state.collections = new Cursor(collections)
     })
@@ -63,7 +63,7 @@ export class Home extends EventEmitter {
   }
 
   async hydrate() {
-    $('.search.passive-search').addEventListener('input',this.search())
+    $('.search.passive-search').addEventListener('inputs',this.search())
     // $('.search.passive-search input').addEventListener('blur',(e) => {
     //   // if (!e.target.value || e.target.value == '')
     //     this.searchReset()
