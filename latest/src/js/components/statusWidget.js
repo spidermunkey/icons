@@ -34,7 +34,7 @@ export class StatusWidget {
     }`
     $('.panel .settings-overlay .file-targets').innerHTML = `${targets.reduce((accumulator,reducer) => {
       const html = accumulator + `
-      <div class="file-target">
+      <div class="file-target" fs-target=${reducer}>
         <div class="file-handle">
           ${reducer} 
         </div>

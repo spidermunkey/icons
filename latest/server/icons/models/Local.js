@@ -77,11 +77,18 @@ module.exports = {
     },
 
     async addTarget(pathname){
-      return await this.scanner.addTarget(pathname)
+      await this.scanner.addTarget(pathname)
+      this.db = await this.scanner.read()
     },
 
-    async addRepository(pathname){
-      await this.scanner.add_repository([pathname])
+    async updateRepository(pathname){
+      await this.scanner.updateTarget([pathname])
+      this.db = await this.scanner.read()
+    },
+
+    async deleteRepository(pathname){
+      await this.scanner.removeTarget(pathname)
+      this.db = await this.scanner.read()
     },
     
     count(){

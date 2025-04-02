@@ -60,26 +60,25 @@ module.exports.Scanner = {
   overwrite(store){
     fs.writeFileSync( this.fsdb , JSON.stringify(store) )
   },
+  
 
-  async add_repository(targets = []){
+
+  async delete_repository(targets = []){
     const normalize = pathname => pathname.replace(/\\/g, '/')
     const filtered = targets.map(normalize).filter(fs.existsSync)
     console.log(filtered,targets)
     if (filtered.length > 0) {
-      const added_state = await this.create_flat_map(filtered);
       const prev_state = this.read_map();
-      const current_state = {
-        ...prev_state,
-        ...added_state
+      const current_state = {}
+      for (const pathname in prev_state){
+        let file_data = prev_state[pathname];
+        if (!filtered.includes(file_data.repository))
+          current_state[pathname] = file_data
       }
-      console.log(added_state)
-      console.log('overwritting current map')
       this.overwrite_map(current_state)
-      console.log('overwriting current db')
-      this.overwrite(await this.compile_targets(this.read_map()))
-      console.log('process complete')
-    } else console.log('no action taken')
-
+      this.overwrite(await this.compile_targets(current_state))
+      // remove target
+    }
   },
 
   readTargets(targetFile = this.userTargets){
@@ -106,7 +105,6 @@ module.exports.Scanner = {
   },
 
   async addTarget(pathname){
-
     if (fs.existsSync(pathname)){
       // filter duplicates
       const targets = new Set(this.readTargets());
@@ -115,10 +113,45 @@ module.exports.Scanner = {
       const arr = Array.from(targets);
       fs.writeFileSync(this.userTargets,JSON.stringify(arr));
       console.log('added target', this.readTargets())
+      await this.update()
     } else {
       console.log('target not found',pathname)
     }
     return await this.compare()
+  },
+
+  async removeTarget(pathname){
+    const targets = new Set(this.readTargets());
+    const length = targets.size
+    console.log(pathname)
+    const normalized = pathname.replace(/\\/g, '/');
+    targets.delete(normalized);
+    const arr = Array.from(targets);
+    fs.writeFileSync(this.userTargets,JSON.stringify(arr));
+    if (length !== arr.length)
+      await this.update()
+    else console.log('no action taken')
+    return await this.compare()
+  },
+
+  async updateTarget(targets = []){
+    const normalize = pathname => pathname.replace(/\\/g, '/')
+    const filtered = targets.map(normalize).filter(fs.existsSync)
+    console.log(filtered,targets)
+    if (filtered.length > 0) {
+      const added_state = await this.create_flat_map(filtered);
+      const prev_state = this.read_map();
+      const current_state = {
+        ...prev_state,
+        ...added_state
+      }
+      console.log(added_state)
+      console.log('overwritting current map')
+      this.overwrite_map(current_state)
+      console.log('overwriting current db')
+      this.overwrite(await this.compile_targets(current_state))
+      console.log('process complete')
+    } else console.log('no action taken')
   },
 
   async ignoreTarget(path){
@@ -320,6 +353,7 @@ module.exports.Scanner = {
     const repository = directory
     const repository_id = uuid();
     const collectionMemo = new Map();
+    console.log('mapping directory...', directory)
     function getBranch(branchPath, branchStart = path.normalize(repository)) {
       const location = path.normalize(branchPath)
       const rootDir = path.normalize(branchStart)

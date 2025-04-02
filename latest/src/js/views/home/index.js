@@ -91,6 +91,23 @@ export class Home extends EventEmitter {
         $(`.control-panels .control-panel .panel[panel=${tab}]`).classList.add('active')
       })
     })
+    $('.settings-overlay').addEventListener('click',async event => {
+      const file_target = event.target.closest('.file-target')
+      if (file_target){
+        const scan = event.target.closest('.btn-scan-target')
+        const del = event.target.closest('.btn-delete-target')
+        const handle = file_target.getAttribute('fs-target')
+        if (scan){
+          const response = await API.scanUserTarget(handle)
+          console.log(response)
+        } else if (del){
+          console.log('deletings', handle)
+          const response = await API.deleteUserTarget(handle)
+          console.log(response)
+        }
+      }
+
+    })
     $('#app').addEventListener('click',async (e) => {
       if (!this.active){
         return;

@@ -51,7 +51,13 @@ export const API = {
         return this.post(`${endpoint}/collections/ignore`, {  cid: data.cid } )
     },
     async addUserTarget(path){
-        return this.post(`${endpoint}/local/add`, {path:encodeURI(path)})
+        return this.post(`${endpoint}/local/sync`, {path:encodeURI(path)})
+    },
+    async scanUserTarget(path){
+        return this.put(`${endpoint}/local/sync`, {path:encodeURI(path)})
+    },
+    async deleteUserTarget(path){
+        return this.delete(`${endpoint}/local/sync?path=${encodeURI(path)}`)
     },
     async getConnection(){
         return this.ping('google.com')
