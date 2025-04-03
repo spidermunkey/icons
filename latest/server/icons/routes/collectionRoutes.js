@@ -77,11 +77,11 @@ router.get('/:collectionID', async function getCollection (request, response) {
   }
 })
 
-router.put('/:collectionID', async function editCollection(request,response){
+router.put('/edit/:collectionID', async function editCollection(request,response){
   
 })
 
-router.post('/:collectionID', async function addToCollection (request, response) {
+router.post('/add/:collectionID', async function addToCollection (request, response) {
   try {
     response.json(await App.addToCollection({
       collection: request.params.collectionID,
@@ -126,6 +126,7 @@ router.post('/colors', async function add_collection_colorset(request,response) 
   const { payload } = request.body
   // needs better sanitization
   const {cid,colorset} = payload
+  console.log(cid,colorset)
   console.log('ADDING COLORSET', colorset )
   const result = await Mongo.add_collection_colorset(cid,colorset);
   response.json(result);
@@ -138,6 +139,7 @@ router.put('/colors/:collection', async function clear_default_color(request,res
 router.delete('/colors', async function removeCollectionColorset(request,response){
   let cid = decodeURIComponent(request.query.cid);
   let csid = decodeURIComponent(request.query.csid);
+  console.log(cid,csid)
   const result = await Mongo.delete_collection_color(cid,csid);
   response.json(result);
 })

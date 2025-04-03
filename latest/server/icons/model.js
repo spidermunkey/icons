@@ -42,6 +42,7 @@ const mongo_db = {
 
     async add_collection_colorset( cid, colorset ){
         const {icons} = await this.connect();
+        console.log(cid,colorset)
         const meta = icons.collection('{{meta}}');
         const metaDoc = await meta.findOneAndUpdate(
             {docname:this.meta_doc_alias,cid:cid},
