@@ -183,7 +183,6 @@ export const SettingsInterface = () => {
           </div>
         
           <div class="color-settings-controller">
-            <div class="btn-setting apply-default-colorset">Apply Collection Default</div>
             <div class="btn-setting preview-colorset">Apply Collection Preview</div>
             <div class="btn-setting save-colorset">Save As New Colorset</div>
           </div>

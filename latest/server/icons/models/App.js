@@ -5,6 +5,7 @@ const Database = require('./Database.js');
 const Meta = require('./Collection/Meta.js');
 const Collection = require('./Collection.js');
 const Icon = require('./Collection/Icon.js');
+const Color = require('./Collection/Color.js')
 const { uuid } = require('../../utils/uuid.js');
 const { print } = require('../../utils/print.js');
 
@@ -179,6 +180,19 @@ class App extends EventEmitter {
         }
     }
 
+    async addCollectionColor(cid,props){
+        return (await Color.add(cid,props)).value
+    }
+
+    async deleteCollectionColor(cid,csid){
+        return (await Color.destroy(cid,csid)).value
+    }
+    async setDefaultCollectionColor(cid,colorset){
+        return (await Color.setDefault(cid,colorset))?.value
+    }
+    async clearDefaultCollectionColor(cid){
+        return (await Color.clearDefault(cid))?.value
+    }
 }
 
 const instance = new App();

@@ -122,26 +122,47 @@ router.put('/settings', async function applySettingDefault(request,response){
     const result = await Mongo.set_collectionDefault_setting(collection,preset)
     response.json(result)
 })
+
 router.post('/colors', async function add_collection_colorset(request,response) {
   const { payload } = request.body
   // needs better sanitization
   const {cid,colorset} = payload
   console.log(cid,colorset)
   console.log('ADDING COLORSET', colorset )
-  const result = await Mongo.add_collection_colorset(cid,colorset);
+  const result = await App.addCollectionColor(cid,colorset)
   response.json(result);
 })
-router.put('/colors/:collection', async function clear_default_color(request,response){
-  const collection = request.params.collection;
-  const result = await Mongo.clear_collectionDefault_color(collection);
-  response.json(result)
-})
+
+
 router.delete('/colors', async function removeCollectionColorset(request,response){
   let cid = decodeURIComponent(request.query.cid);
   let csid = decodeURIComponent(request.query.csid);
   console.log(cid,csid)
-  const result = await Mongo.delete_collection_color(cid,csid);
+  const result = await App.deleteCollectionColor(cid,csid)
   response.json(result);
+})
+
+router.put('/colors/default', async function setDefaultColor(request,response){
+  const {cid,colorset} = request.body.payload
+  console.log(cid,colorset)
+  const result = await App.setDefaultCollectionColor(cid,colorset)
+  console.log('resy',result)
+  response.json(result)
+})
+
+router.delete('/colors/default/:collection',async function clearDefaultColor(request,response){
+  const cid = request.params.collection;
+  console.log(cid)
+  const result = await App.clearDefaultCollectionColor(cid)
+  console.log('resy',result);
+  response.json(result)
+})
+
+router.put('/colors/edit/:collection', async function edit_collection_color(request,response){
+  const cid = request.params.collection;
+  const color = request.payload.color;
+  const result = await App.editColor(cid,color)
+  response.json(result)
 })
 
 module.exports = router

@@ -133,17 +133,19 @@ export class Dashboard extends View {
             const response = await this.store.clearPocket();
             console.log(response)
         })
+
         $('.color-settings-controller .btn-setting.save-colorset').addEventListener('click',async () => {
 
             let colorset = this.collectionPreview.currentColorSet
             let collection = this.state.collection
             let colorSetID = uuid()
             let colors = {
-                csid:colorSetID,
+                csid: colorset.csid ? colorset.csid : colorSetID,
                 name: 'untitled',
                 colorset_type: 'global',
                 ...colorset,
             }
+
             console.log('saving colorset to collection....')
             const response = await this.store.saveCollectionColorset(collection.meta.cid,colors)
             console.log('SAVE ACTION RESPONSE....',response)
@@ -603,7 +605,7 @@ export class Dashboard extends View {
                     }
                 }
                 const toggleCollectionDefaultSetting = async () => {
-                    if (preset.preset_type !== 'global'){
+                    if (preset.colorset_type !== 'global'){
                         console.warn('can only add global colorsets to collections')
                         notify($('.toast.settingError',element))
                         return;
@@ -611,18 +613,17 @@ export class Dashboard extends View {
                     const isCollectionDefault = this.collection.meta?.color?.csid === preset.csid
                     console.log('TOGGLING COLLECTION DEFAULT', isCollectionDefault,this.collection.meta)
                     if (isCollectionDefault){
-                        const updated = await this.store.clearCollectionDefaultColor(collection)
+                        const updated = await this.store.clearCollectionDefaultColor(this.collection.cid)
                         const updateSuccess = updated.cid === meta.cid
                         if (updateSuccess){
-                            this.collection.meta.color = {}
+                            this.collection.meta.color = updated.color
                             console.log('default successfully cleared',updated)
                         } else {
                             console.error('something went wrong applying collection default')
                         }
                     } else {
-                        // const updated = await this.store.setCollectionDefault(collection,preset)
-                        // const updateSuccess = updated.cid === meta.cid
-                        const updateSuccess = true;
+                        const updated = await this.store.setDefaultCollectionColor(this.collection.cid,preset)
+                        const updateSuccess = updated.cid === meta.cid
                         if (updateSuccess){
                             this.collection.meta.color = preset;
                             console.log('default applied', updated)
@@ -636,17 +637,18 @@ export class Dashboard extends View {
 
                 }
                 const updateCollectionIsDefaultIcon = () => {
-                    const defaultPid = this.collection.meta?.color?.csid
+                    const defaultColor = this.collection.meta?.color;
+                    const defaultCsid = defaultColor.csid;
                     const csid = preset.csid
-                    const isCollectionDefault = defaultPid = csid
-                    const iPreviewElement = $(`.preset-preview-element[csid=${csid}] .pre-opt.collectionDefault`,iconColorsTab)
-                    const cPreviewElement = $(`.preset-preview-element[csid=${csid}] .pre-opt.collectionDefault`,collectionColorsTab)
+                    const isCollectionDefault = defaultCsid === csid
+                    const iPreviewElement = $(`.colorset[csid=${csid}] .pre-opt.collectionDefault`,iconColorsTab)
+                    const cPreviewElement = $(`.colorset[csid=${csid}] .pre-opt.collectionDefault`,collectionColorsTab)
                     const updatedHTML = `<div class="pre-opt opt-acd collectionDefault">
                         <div active="${isCollectionDefault ? true : false}" class="icon">${ isCollectionDefault ? removeCollectionDefaultIcon : saveAsCollectionDefaultIcon  }</div>
                         <div class="tool-tip">${ isCollectionDefault ? 'ignore as collection default' : 'set as collection default' }</div>
                     </div>`
                     console.log(csid,isCollectionDefault,cPreviewElement)
-                    const activeButtons = $$('.pre-opt.collectionDefault .icon[active="true"]')
+                    const activeButtons = $$('.colorset .pre-opt.collectionDefault .icon')
                     console.log(activeButtons)
                     activeButtons.forEach(btn => {
                         btn.setAttribute('active',false);
@@ -854,7 +856,7 @@ export class Dashboard extends View {
                         console.warn(' invalid preset type...')
                     } else {
                         console.log('adding preset to collection...')
-                        // addCollectionPreset()
+                        addCollectionPreset()
                     }
                 }
                 else if (toggleCollectionDefault) {
@@ -862,10 +864,8 @@ export class Dashboard extends View {
                     if (preset.colorset_type !== 'global') {
                         console.warn('cannot add preset to collection...')
                         console.warn(' invalid preset type...')
-                    } else if (preset.colorset_type === 'variable') {
-                        console.log('adding preset to collection...')
-                        // toggleCollectionDefaultSetting()
                     } else {
+                        toggleCollectionDefaultSetting()
                         console.warn('preset type not supported')
                     }
                 }

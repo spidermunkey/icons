@@ -23,7 +23,7 @@ const config = {
 function configure(props){
     return {
         csid: props?.csid || uuid(),
-        colorset_type: 'global',
+        colorset_type: props?.colorset_type || 'global',
         name: props?.name || 'untitled',
         elements: props?.elements || {},
         shapes: props?.shapes || {},
@@ -58,7 +58,11 @@ async function destroy(cid,csid){
     try {
         const data = await meta(cid);
         const colorIsDefault = data && data?.color && data.color?.csid === csid;
-        
+        const restricted = ['original'];
+        if (restricted.includes(csid)){
+            console.warn('deleting original preset not allowed')
+            return {}
+        }
         return await (await connect()).findOneAndUpdate(
             { cid: cid },
             {
@@ -115,13 +119,16 @@ async function setDefault(cid,colorset){
 }
 
 async function clearDefault(cid){
+    const meta = await connect();
+    const document = await meta.findOne({cid:cid})
+    const original = document.colors?.original;
     try {
-        (await connect()).findOneAndUpdate(
+        return (await connect()).findOneAndUpdate(
             { cid: cid,
              },
             { 
                 $set: {
-                    color: {},
+                    color: original,
                     updated_on: Date.now(),
                 }
             },
