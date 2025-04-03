@@ -23,29 +23,6 @@ changes persisted mongo db 'icons' for use with multiple workspaces
 
 `cd ./latest/server; npm start`
 
-
-## TODO
-
-**set up wrapper that logs back to the messages ui**
-
-**polish and publish prototype (motion/animations)**
-
-**create new user flow**
-
-**setup guest flow for demo with default icon set**
-
-**create landing page**
-
-## GOALS
-
-**Create A Version With Electron**
-
-**Web Facing UI To Safely Drag and Drop Icon Sets**
-
-**Collaboration with Designers to feature new Icon Sets**
-
-**Collaboration with teams to share collections**
-
 ## SIDENOTE
 if your reading this. I have no idea what i'm doing, i just know it works on my machine... venture futher if you dare.
 
