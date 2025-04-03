@@ -77,7 +77,10 @@ module.exports = {
     async addTarget(pathname){
       try {
         const time = Date.now();
-        await this.scanner.addTarget(pathname)
+        const targets = await this.scanner.addTarget(pathname)
+        if (!targets) {
+          return false;
+        }
         this.db = await this.scanner.read()
         const added = {};
         // return new collections
@@ -102,7 +105,8 @@ module.exports = {
         for (const id in this.db.collections){
           if (this.db.collections[id].synced) synced.set(id,this.db.collections[id].synced)
         }
-        await this.scanner.updateTarget([pathname])
+        const updated = await this.scanner.updateTarget([pathname])
+        if (!updated) return false;
         this.db = await this.scanner.read()
         const added = {};
         // return new collections
@@ -121,9 +125,17 @@ module.exports = {
     },
 
     async deleteRepository(pathname){
-      await this.scanner.removeTarget(pathname)
-      this.db = await this.scanner.read()
-      return this.db.collections;
+      try {
+        const targets = await this.scanner.removeTarget(pathname)
+        if (!targets){
+          return false;
+        }
+        this.db = await this.scanner.read()
+        return this.db.collections;
+      } catch (error){
+          console.log(error)
+          return false;
+        }
     },
     
     count(){

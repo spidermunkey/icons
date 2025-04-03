@@ -116,6 +116,7 @@ module.exports.Scanner = {
       await this.update()
     } else {
       console.log('target not found',pathname)
+      return false;
     }
     return await this.compare()
   },
@@ -129,7 +130,10 @@ module.exports.Scanner = {
     fs.writeFileSync(this.userTargets,JSON.stringify(arr));
     if (length !== arr.length)
       await this.update()
-    else console.log('no action taken')
+    else {
+      console.log('no action taken')
+      return false;
+    }
     return await this.compare()
   },
 
@@ -150,7 +154,10 @@ module.exports.Scanner = {
       console.log('overwriting current db')
       this.overwrite(await this.compile_targets(current_state))
       console.log('process complete')
-    } else console.log('no action taken')
+    } else {
+      console.log('no action taken');
+      return false;
+    }
   },
 
   async ignoreTarget(path){

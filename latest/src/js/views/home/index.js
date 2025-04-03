@@ -87,7 +87,30 @@ export class Home extends EventEmitter {
 
     $('.btn-add-target').addEventListener('click',async () => {
       const value = $('#targetPath').value;
-      const result = this.animateScan(API.addUserTarget.bind(API,value.replace(/\\/g,'/').replace(/["']/g,'')))
+      const response = await this.animateScan(API.addUserTarget.bind(API,value.trim().replace(/\\/g,'/').replace(/["']/g,'')))
+      if (response.success ){
+        // create new target list element
+
+          const new_target = document.createElement('div');
+          new_target.classList.add('file-target')
+          new_target.setAttribute('fs-target',value)
+          new_target.innerHTML = `
+            <div class="file-handle">
+              ${value} 
+            </div>
+            <div class="ft-controls">
+              <span class="btn-ft btn-scan-target">scan</span>
+              <span class="btn-ft btn-watch-target">watch</span>
+              <span class="btn-ft btn-delete-target">delete</span>
+          </div>`
+          $('.file-targets').appendChild(new_target)
+          if(!objectIsFalsey(response.result)){
+            const collections = [...Object.values(response.result)]
+            this.localCollections.parseData(collections);
+            this.notify('data',collections)
+          }
+          console.log('process complete!')
+      }
     });
 
     $('.btn-view-targets').addEventListener('click',() => $('.settings-overlay').classList.toggle('active'));
@@ -106,14 +129,41 @@ export class Home extends EventEmitter {
       if (file_target){
         const scan = event.target.closest('.btn-scan-target')
         const del = event.target.closest('.btn-delete-target')
-        const handle = file_target.getAttribute('fs-target')
+        const handle = file_target.getAttribute('fs-target').trim()
         if (scan){
-          const response = this.animateScan(await API.scanUserTarget.bind(API,handle))
+          const response = await this.animateScan(API.scanUserTarget.bind(API,handle))
+          // update current view;
           console.log(response)
+          if (response.success){
+            if(!objectIsFalsey(response.result)) {
+              const collections = [...Object.values(response.result)]
+              this.localCollections.parseData(collections);
+              await this.appStatus.store.getData();
+              this.notify('data',collections);
+            }
+            console.log('process complete')
+          } else {
+            console.warn('error parsing recent scan',response)
+          }
         } else if (del){
           console.log('deletings', handle)
-          const response = await API.deleteUserTarget(handle)
+          const response = await this.animateScan(API.deleteUserTarget.bind(API,handle))
+          // update view
           console.log(response)
+          if (response.success){
+            const collections = [...Object.values(response.result)]
+            this.localCollections.parseData(collections);
+            await this.appStatus.store.getData();
+            this.notify('data',collections)
+            const target = $(`.file-target[fs-target="${handle}"]`);
+            if (target){
+              console.log(target)
+              target.remove();
+            }
+            console.log('process complete!')
+          } else {
+            console.warn('error parsing recent scan',response)
+          }
         }
       }
     });
