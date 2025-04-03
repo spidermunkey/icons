@@ -94,11 +94,11 @@ export const API = {
     async createCollection(collection) {
         return this.post(`${endpoint}/collections/create` ,{ props: { ...collection }})
     },
-    async addToCollection(name,icons) {
-        return this.post( `${endpoint}/collections/${name}`, { icons:[...icons] } )
+    async addToCollection(id,icons) {
+        return this.post( `${endpoint}/collections/add/${id}`, { icons:[...icons] } )
     },
     async dropCollection(id) {
-        return axios.delete(`${endpoint}/collections/${id}`);
+        return axios.delete(`${endpoint}/collections/del/${id}`);
     },
     async getIcon(id){
         return this.fetch(`${endpoint}/all/${id}`)
