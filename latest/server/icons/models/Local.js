@@ -1,6 +1,5 @@
 const { EventEmitter } = require('ws');
 const { Scanner } = require('../scanner.js');
-const userConfig = require('../local/fsconfig.js');
 
 module.exports = {
     ready: false,
@@ -10,7 +9,6 @@ module.exports = {
     updating: false,
     loading: false,
     db: null,
-    config:userConfig,
     events: new EventEmitter(),
 
     async init(updateNeeded = false) {

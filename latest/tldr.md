@@ -51,3 +51,27 @@ I have some ideas, first I need to finish defining the roles of a collection int
   I've been avoiding deep comparison of the svg objects for fear of it taking to long, and also fear of userdata
   I've been afraid that this project is reaching it's limits and I will have to learn something else for the sake of creating a desktop app and learning how to secure the application from potential users. Both of which may require learning a new languange and rebuilding the entire project from zero. daunting.
   Also how the heck do you share something like this? what's the process of installing things.
+
+4/3/25
+
+  TODO
+
+--set up wrapper that logs back to the messages ui
+
+--polish and publish prototype (motion/animations)--
+
+--create new user flow--
+
+--setup guest flow for demo with default icon set--
+
+--create landing page--
+
+ GOALS
+
+--Create A Version With Electron--
+
+--Web Facing UI To Safely Drag and Drop Icon Sets--
+
+--Collaboration with Designers to feature new Icon Sets--
+
+--Collaboration with teams to share collections--
