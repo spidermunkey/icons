@@ -115,6 +115,154 @@
               .setting {
                 margin: 8px 4px;
               }
+              .setting-value {
+                position: relative;
+              }
+              &.target-setting {
+                position: relative;
+                .input-container {
+                  position: relative;
+                  overflow: hidden;
+                  border-radius: 4px;
+                  z-index: 2;
+                } 
+                .bloom,
+                .bloom-2 {
+                  position: absolute;
+                  bottom: 6px;
+                  height: 1px;
+                  z-index: 1;
+                }
+                .bloom {
+                  bottom: 6px;
+                  width: 100%;
+                  background-color: greenyellow;
+                  box-shadow: 0 0 20px 3px rgb(127, 197, 21);
+                }
+                .bloom-2 {
+                  bottom: 12px;
+                  left: 0;
+                  width: 50%;
+                  background-color: limegreen;
+                  box-shadow: 0 0 20px 3px rgb(0, 255, 21);
+                  animation: scan 350ms linear infinite running alternate;
+                  transform-origin: center;
+                  @keyframes scan {
+                    0% {
+                      transform: translateX(90%)
+                    }
+                    100% {
+                      transform: translateX(0%)
+                    }
+                  }
+
+                }
+                .progress-indicator {
+                  position: absolute;
+                  inset:-1000px;
+                  background-color: var(--green);
+                  border-radius: 4px;
+                  background:conic-gradient(#39d239e4,#0ae80a5f,var(--success-green),lime);
+                  animation: rotate 1500ms ease infinite paused both;
+                  transform-origin: center;
+                  @keyframes rotate {
+                    0% {
+                      transform: rotate(360deg)
+                    }
+                    100% {
+                      transform: rotate(0deg)
+                    }
+                  }
+                  &::after {
+                    position: absolute;
+                    inset: 0;
+                    content:"";
+                    backdrop-filter: blur(10px);
+                    background: rgba(255, 255, 255, 0.647);
+                    border-radius: inherit;
+                  }
+                  &::before {
+
+                  }
+                }
+
+                .setting-controls {
+                  position: relative;
+                  display: flex;
+                  width: fit-content;
+                }
+                .psuedo {
+                  background: white;
+                  position: absolute;
+                  inset: 0;
+                  @include hide();
+
+                  &.scanning {
+                    @include show();
+                    .notify-scanning {
+                      @include show();
+                      animation-play-state: running;
+                    }
+                  }
+                }
+                .setting-notification {
+                  position: absolute;
+                  left: 0;
+                  inset: 0;
+                  border-radius: 4px;
+                  background-color: white;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  @include hide();
+                  &.active {
+                    @include show();
+                  }
+                  
+                  &.notify-scanning {
+                    border: 1px solid rgba(0, 255, 0, 0.219);
+                    letter-spacing: 0.035em;
+                    color: transparent;
+                    background-image: linear-gradient(to right ,white,lime,var(--success-green));
+                    background-size: cover;
+                    background-position: 0 0;
+                    background-clip: text;
+                    z-index: 2;
+                    animation: textHighlight 2000ms linear infinite paused both; /* Animate the background */
+                  
+                    @keyframes textHighlight {
+                      0% {
+                        background-position: 0 0; /* Start from the left */
+                      }
+                      50% {
+                        background-position: 100px 0; /* Move to the right */
+                      }
+                      100% {
+                        background-position: 0 0; /* Return to the left */
+                      }
+                    }
+                  }
+                }
+              }
+              .target-input {
+                position: relative;
+                border: 1px solid #ccccccb2;
+                border: 2px solid transparent;
+                margin: 1px;
+                border-radius: 4px;
+                padding: 4px;
+                outline: none;
+                color: #444;
+                background: white;
+                // background: transparent;
+                &:focus {
+                  // border: 1px solid #ccc;
+                }
+
+                &.scanning{
+                  border: 1px solid transparent
+                }
+              }
             }
   
             .app-directive {

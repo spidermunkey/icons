@@ -426,11 +426,27 @@ export class Home extends EventEmitter {
                 </div>
               
                 <div class="panel app-settings active" panel="settings">
-                  <div class="app-setting">
+                  <div class="app-setting target-setting">
                     <div class="setting setting-label">Target Directories:</div>
-                    <div class="setting setting-value"><input type="text" name="targetPath" id="targetPath"></div>
-                    <div class="setting setting-action btn-add-target">add</div>
-                    <div class="setting setting-action btn-view-targets">view</div>
+                    <div class="setting setting-value">
+                      <div class="input-container">
+                        <div class="progress-indicator"></div>
+                        <input type="text" name="targetPath" id="targetPath" class="target-input">
+                      </div>
+                      <div class="bloom"></div>
+                      <div class="bloom-2"></div>
+                    </div>  
+                    <div class="setting-controls">
+                      <div class="setting setting-action btn-add-target">add</div>
+                      <div class="setting setting-action btn-view-targets">view</div>
+                      <div class="psuedo">
+                        <div class="setting setting-notification notify-scanning">scanning</div>
+                        <div class="setting setting-notification notify-success">complete</div>
+                        <div class="setting setting-notification notify-error">error</div>
+                      </div>
+
+                    </div>
+
                     <div class="settings-overlay target-list">
                       <div class="file-targets">
 
