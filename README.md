@@ -9,17 +9,11 @@ I'm still new to all of this so if you see something that piques your interest, 
 ```
 changes persisted mongo db 'icons' for use with multiple workspaces
   -- bring your own cluster
-  -- [server/.env.js] {
-    MONGO_USER=<yourMongoUser>
-    MONGO_PASSWORD=<yourMongoPassword>
-    MONGO_CLUSTER=<yourCluster>
-    // example: CONNECTION_STRING = mongodb+srv://<username>:${encodeURIComponent(<password>)@cluster<cluster>.fnp9j.mongodb.net
-  }
-   
-
-server/icons/scanner.js parses and serves files in 
-server/icons/monitor.js watches for changes
-  -- server/icons/local/fsconfig.js [target directory]
+  -- [server/.env.js]
+    > MONGO_USER=<yourMongoUser>
+    > MONGO_PASSWORD=<yourMongoPassword>
+    > MONGO_CLUSTER=<yourCluster>
+    >> CONNECTION_STRING = mongodb+srv://<MONGO_USER>:${encodeURIComponent(<MONGO_PASSWORD>)}@cluster<MONGO_CLUSER>.fnp9j.mongodb.net
 
 ```
 
