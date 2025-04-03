@@ -49,7 +49,7 @@ router.post('/ignore', async function ignore_collection(request,response){
   }
 })
 
-router.delete('/:collectionID', async function dropCollection(request,response){
+router.delete('/del/:collectionID', async function dropCollection(request,response){
   try {
     response.json(App.drop_collection(request.params.collectionID))
   } catch (error) {

@@ -703,10 +703,9 @@ export class Dashboard extends View {
                     }
                 }
                 const removeCollectionPreset = async () => {
-                    // const updated = await this.store.deleteCollectionPreset( collectionID , csid);
-                    // console.log('COLLECTION PRESET SAVED',updated)
-                    // const updateSuccess = updated.cid === collectionID && updated.settings[csid] == undefined;
-                    const updateSuccess = true
+                    const updated = await this.store.deleteCollectionColor( collectionID , csid);
+                    console.log('COLLECTION PRESET DELETED',updated)
+                    const updateSuccess = updated.cid === collectionID && updated.colors[csid] == undefined;
                     console.log('UPDATE STATUS',updateSuccess)
                     if (updateSuccess){
                         const existingPresetIcon = $(`.preset-preview-element[csid=${csid}]`,collectionColorsTab)
@@ -875,7 +874,7 @@ export class Dashboard extends View {
                     if (preset.colorset_type === 'global'){
                         console.log('searching for preset in collection...')
                         console.log(collection)
-                        // removeCollectionPreset()
+                        removeCollectionPreset()
                     } else if (preset.colorset_type === 'variable'){
                         console.log('deleting icon preset....')
                         // deleteIconPreset()
