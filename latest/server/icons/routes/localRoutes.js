@@ -14,7 +14,7 @@ router.get('/collections', async function getLocalDownloads(request,response){
     response.json(Local.get_collections())
   }
 })
-
+router.delete('/projects',() => {})
 router.get('/status', async function getLocalStatus(request,response) {
   const local_status = await Local.get_status();
   const mongo_stat = (await Database.ping());
