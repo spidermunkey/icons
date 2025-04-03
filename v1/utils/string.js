@@ -1,1 +1,0 @@
-const toUpper = (string) => string[0].toUpperCase() + string.substring(1);
