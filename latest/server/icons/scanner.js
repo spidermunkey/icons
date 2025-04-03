@@ -195,7 +195,7 @@ module.exports.Scanner = {
     for (const file of files){
       print(`processing file [${++progress}/${files.length}]`)
       if (path.extname(file) === '.svg'){
-        const {repository,repository_id,collection,collection_id} = file_map[file]
+        const {repository,repository_id,collection,collection_id,created_at} = file_map[file]
         const entry = await this.parseFile(file,repository);
         const {subtype,sub_collection} = entry;
         const collection_exists = local.collections.hasOwnProperty(collection_id)
@@ -219,7 +219,7 @@ module.exports.Scanner = {
             color: {},
             presets:{},
             preset:{},
-            created_at: Date.now(),
+            created_at,
           }
           local.collection_names.push(collection)
         }
@@ -381,7 +381,7 @@ module.exports.Scanner = {
                 collection_id,
                 repository,
                 repository_id,
-                synced:stats.mtimeMs
+                created_at:stats.mtimeMs
             }
           }
       }

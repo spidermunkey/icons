@@ -95,15 +95,23 @@ module.exports = {
 
     async updateRepository(pathname){
       try {
-        const time = Date.now();
+        // remember current keys
+        const keys = Object.keys(this.db.collections);
+        const synced = new Map();
+        // remember synced collections
+        for (const id in this.db.collections){
+          if (this.db.collections[id].synced) synced.set(id,this.db.collections[id].synced)
+        }
         await this.scanner.updateTarget([pathname])
         this.db = await this.scanner.read()
         const added = {};
         // return new collections
         for (const id in this.db.collections){
-          if (this.db.collections[id]?.created_at > time)
+          if (!keys.includes(id))
             added[id] = this.db.collections[id]
         }
+        // re-sync collections
+        Array.from(synced.keys()).forEach(id => this.update_collection(id,{synced:synced.get(id)}))
         return added;
       }
       catch(error){
