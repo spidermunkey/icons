@@ -3,7 +3,7 @@ this is pet project for managing svg files inside of a web ui.
 
 changes persisted mongo db 'icons' for use with multiple workspaces
 
-## bring your own cluster
+## Bring Your Own Cluster
 
 > server/.env.js
 
