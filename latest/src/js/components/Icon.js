@@ -276,6 +276,7 @@ export class Icon {
                     csid:'original',
                     colorset_type: 'variable',
                     name: 'original',
+                    paths: {},
                 },
             }
             /*
@@ -341,7 +342,7 @@ export class Icon {
                 const stroke = child.getAttribute('stroke') || 'none'
                 const fill = child.getAttribute('fill') || 'none'
 
-                this.colors.original[id] = [stroke,fill,tagname]
+                this.colors.original.paths[id] = [stroke,fill,tagname]
                 return child
             })
         }

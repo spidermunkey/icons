@@ -23,8 +23,13 @@ export class SvgModel extends EventEmitter {
     async clearPocket(){
         return API.clearPocket();
     }
+
+
     async saveCollectionColorset(cid,colorset){
         return API.saveCollectionColorset(cid,colorset)
+    }
+    async editCollectionColor(cid,colorset){
+        return API.editCollectionColor(cid,color)
     }
     async saveIconColorset(cid,colorset){
         return API.saveIconColorset(cid,colorset)
@@ -35,7 +40,7 @@ export class SvgModel extends EventEmitter {
     async setDefaultIconColor(id,collection,csid){
         return API.setDefaultIconColor(id,collection,csid)
     }
-    async applyDefaultCollectionColorset(cid,colorset){
+    async setDefaultCollectionColor(cid,colorset){
         return API.setDefaultCollectionColor(cid,colorset);
     }
     async clearCollectionDefaultColor(collection){
@@ -44,6 +49,8 @@ export class SvgModel extends EventEmitter {
     async deleteCollectionColor(cid,csid){
         return API.removeCollectionColor(cid,csid)
     }
+
+
     async saveIconPreset(id,collection,setting){
         return API.saveIconPreset(id,collection,setting);
     }

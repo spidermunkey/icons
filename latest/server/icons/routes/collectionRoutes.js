@@ -49,7 +49,7 @@ router.post('/ignore', async function ignore_collection(request,response){
   }
 })
 
-router.delete('/:collectionID', async function dropCollection(request,response){
+router.delete('/del/:collectionID', async function dropCollection(request,response){
   try {
     response.json(App.drop_collection(request.params.collectionID))
   } catch (error) {
@@ -77,11 +77,11 @@ router.get('/:collectionID', async function getCollection (request, response) {
   }
 })
 
-router.put('/:collectionID', async function editCollection(request,response){
+router.put('/edit/:collectionID', async function editCollection(request,response){
   
 })
 
-router.post('/:collectionID', async function addToCollection (request, response) {
+router.post('/add/:collectionID', async function addToCollection (request, response) {
   try {
     response.json(await App.addToCollection({
       collection: request.params.collectionID,
@@ -122,24 +122,47 @@ router.put('/settings', async function applySettingDefault(request,response){
     const result = await Mongo.set_collectionDefault_setting(collection,preset)
     response.json(result)
 })
+
 router.post('/colors', async function add_collection_colorset(request,response) {
   const { payload } = request.body
   // needs better sanitization
   const {cid,colorset} = payload
+  console.log(cid,colorset)
   console.log('ADDING COLORSET', colorset )
-  const result = await Mongo.add_collection_colorset(cid,colorset);
+  const result = await App.addCollectionColor(cid,colorset)
   response.json(result);
 })
-router.put('/colors/:collection', async function clear_default_color(request,response){
-  const collection = request.params.collection;
-  const result = await Mongo.clear_collectionDefault_color(collection);
-  response.json(result)
-})
+
+
 router.delete('/colors', async function removeCollectionColorset(request,response){
   let cid = decodeURIComponent(request.query.cid);
   let csid = decodeURIComponent(request.query.csid);
-  const result = await Mongo.delete_collection_color(cid,csid);
+  console.log(cid,csid)
+  const result = await App.deleteCollectionColor(cid,csid)
   response.json(result);
+})
+
+router.put('/colors/default', async function setDefaultColor(request,response){
+  const {cid,colorset} = request.body.payload
+  console.log(cid,colorset)
+  const result = await App.setDefaultCollectionColor(cid,colorset)
+  console.log('resy',result)
+  response.json(result)
+})
+
+router.delete('/colors/default/:collection',async function clearDefaultColor(request,response){
+  const cid = request.params.collection;
+  console.log(cid)
+  const result = await App.clearDefaultCollectionColor(cid)
+  console.log('resy',result);
+  response.json(result)
+})
+
+router.put('/colors/edit/:collection', async function edit_collection_color(request,response){
+  const cid = request.params.collection;
+  const color = request.payload.color;
+  const result = await App.editColor(cid,color)
+  response.json(result)
 })
 
 module.exports = router

@@ -94,11 +94,11 @@ export const API = {
     async createCollection(collection) {
         return this.post(`${endpoint}/collections/create` ,{ props: { ...collection }})
     },
-    async addToCollection(name,icons) {
-        return this.post( `${endpoint}/collections/${name}`, { icons:[...icons] } )
+    async addToCollection(id,icons) {
+        return this.post( `${endpoint}/collections/add/${id}`, { icons:[...icons] } )
     },
     async dropCollection(id) {
-        return axios.delete(`${endpoint}/collections/${id}`);
+        return axios.delete(`${endpoint}/collections/del/${id}`);
     },
     async getIcon(id){
         return this.fetch(`${endpoint}/all/${id}`)
@@ -140,15 +140,16 @@ export const API = {
     async deleteIconColor(id,collection,csid){
         return this.delete(`${endpoint}/all/colors/${id}?csid=${enco}`)
     },
-    async setDefaultCollectionColor(collection,colorset){
-        return this.put(`${endpoint}/collections/colors`,{collection,colorset})
+    async setDefaultCollectionColor(cid,colorset){
+        return this.put(`${endpoint}/collections/colors/default`,{cid,colorset})
+    },
+    async clearCollectionDefaultColor(id){
+        return this.delete(`${endpoint}/collections/colors/default/${id}`)
     },
     async setDefaultIconColor(id,collection,csid){
         return this.put(`${endpoint}/all/colors/${id}`,{id,collection,csid})
     },
-    async clearCollectionDefaultColor(collection){
-        return this.put(`${endpoint}/collections/colors/${collection}`)
-    },
+
     async clearDefaultColor(id,collection){
         return this.put(`${endpoint}/all/colors/${id}`,{id,collection,csid:0})
     },

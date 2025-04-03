@@ -98,7 +98,7 @@
           height: 143px;
           width: 304px;
         }
-        .preset-element-toast{
+        .preset-element-toast {
           position: absolute;
           z-index: 1000;
           overflow: hidden;
@@ -241,7 +241,9 @@
           margin-top: 0;
         }
     }
-  
+    .save-colorset-modal {
+      top:0;
+    }
     [data-role="interface"] {
       position: absolute;
       top: 25px;

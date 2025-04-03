@@ -19,6 +19,9 @@ export const PreviewInterface = () => {
             <!-- MODAL WRAPPER / Color -->
             <div class="preview__modals--modal modals__modal color" data-role="tab" data-tab="color">
                 ${ColorInterface()}
+                <div class="save-colorset-modal">
+                    <div class="current-colorset"></div>
+                </div>
             </div>
             <!-- MODAL WRAPPER / Position -->
             <div class="preview__modals--modal modals__modal position" data-role="tab" data-tab="position">
@@ -31,7 +34,6 @@ export const PreviewInterface = () => {
         </div>
         <div class="save-preset-modal">
             <div class="current-preset"></div>
-
         </div>
         <!-- Color Settings -->
         <div class="color-editor cp-fs icon-color-editor" data-role="interface">
@@ -54,7 +56,6 @@ export const PreviewInterface = () => {
                     ...loading recent color presets
                 </div>
             </div>
-
         </div>
         <!-- Bench Preview -->
         <!-- Settings -->

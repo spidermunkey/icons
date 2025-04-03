@@ -1,8 +1,9 @@
 import { Canvas } from "./Canvas.js";
 import { Color } from './Color.js';
 
-export class ColorPicker {
+export class ColorPicker extends EventEmitter {
     constructor({handleUpdate}) {
+        super();
         this.selected = []
         this.elements = []
         this.targets = []
@@ -40,7 +41,7 @@ export class ColorPicker {
         this.hueSlider = new Slider($('.color-picker .hue-bar'), {
             onMouseMove: this.updateCurrentHue.bind(this),
             onMouseDown: this.updateCurrentHue.bind(this),
-            // onMouseUp: self.updateColor.bind(self)
+            onMouseUp: () => this.notify('colorchange')
         }, 'vertical' )
 
         this.canvas = new Canvas({
@@ -58,6 +59,9 @@ export class ColorPicker {
                     const hex = color.hex
                     this.updateAll(hex)
                     this.state.currentValue = hex
+                },
+                mouseUp: color => {
+                    this.notify('colorchange',color)
                 }
             }
         })
@@ -144,6 +148,9 @@ export class ColorPicker {
             $('.cp-fs').classList.remove('active')
             this.fsActive = false
         }
+        const saveColorModal = $('.save-colorset-modal')
+        if (saveColorModal.classList.contains('active'))
+            saveColorModal.classList.remove('active')
     }
     close(){
         $('.color-picker').classList.remove('active')
@@ -152,6 +159,7 @@ export class ColorPicker {
             $('.cp-fs').classList.remove('active')
             this.fsActive = false
         }
+
     }
     toggle(){
         if (this.active) this.close()
@@ -161,6 +169,10 @@ export class ColorPicker {
         this.close();
         $('.cp-fs').classList.add('active')
         this.fsActive = true
+        const saveColorModal = $('.save-colorset-modal')
+        if (saveColorModal.classList.contains('active'))
+            saveColorModal.classList.remove('active')
+            
     }
     closeFS(){
         $('.cp-fs').classList.remove('active')
@@ -178,6 +190,8 @@ export class ColorPicker {
         $('.cp-header .cp-close').addEventListener('click', () => this.close())
         $('.updater .btn-reset').addEventListener('click',() => this.handleReset())
         $('.pv-updater .btn-reset').addEventListener('click',() => this.handleReset())
+        $('.hex-input .canvas-undo').addEventListener('click',() => this.handleUndo())
+        $('.hex-input .canvas-redo').addEventListener('click',() => this.handleRedo())
         this.previewInput.addEventListener('input',(e) => this.handleInput(e.target.value))
         this.hexInput.addEventListener('input',(e) => this.handleInput(e.target.value))
         $('.updater .btn-update').addEventListener('click', () => {
@@ -408,10 +422,10 @@ export class ColorPicker {
             })
         }
         else if (colorset.colorset_type === 'variable') {
-            for (const pid in colorset){
+            for (const pid in colorset.paths){
                 let path = target.querySelector(`[pid="${pid}"]`)
-                let stroke = colorset[pid][0]
-                let fill = colorset[pid][1]
+                let stroke = colorset.paths[pid][0]
+                let fill = colorset.paths[pid][1]
                 if (!path) continue
                 if (stroke && stroke !== 'none') path.setAttribute('stroke',stroke)
                 if (fill && fill !== 'none') path.setAttribute('fill',fill)

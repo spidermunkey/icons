@@ -1,4 +1,4 @@
-
+import { Color } from '../../components/Color.js'
 import { View } from '../../view.js'
 
 import { Preview } from './../../components/Preview.js'
@@ -42,6 +42,7 @@ export class Dashboard extends View {
         query: '',
         searchView: {},
         preset: {},
+        colorset:{},
     }
     this.on('rendered',() => {
 
@@ -90,11 +91,18 @@ export class Dashboard extends View {
         this.element.onmousedown = (e) => this.handleDashboardClick(e)
         this.element.oncontextmenu = (e) => this.toggleContextMenu(e)
         this.element.addEventListener('click',(e) => this.handleClickOutsideContext(e))
+        // handle colorstate
+        this.colorPicker.on('colorchange',color => {
+            this.state.colorset.name = 'untitled'
+            console.log('colorchange', this.colorPicker.iconColors)
+            this.updateSavedColorset(this.colorPicker.iconColors)
+        })
         // handle preview
         this.preview.on('viewbox changed',this.updateSavedPreset.bind(this))
         this.preview.on('icon updated',(icon,targetElement) => {
             this.state.preset.name = 'untitled'
             this.colorPicker.update(icon,targetElement)
+            this.updateSavedColorset()
         })
         this.preview.on('close',() => {
             if (this.colorPicker.active)
@@ -120,30 +128,32 @@ export class Dashboard extends View {
                 && !event.target.closest('.preset-header .current-preset')
             );
             const cosmColorPicker = (this.colorPicker.active || this.colorPicker.fsActive) && !event.target.closest('.preview__modals--modal.color') && !event.target.closest('.color-editor')
-            
             if (cosmSettings) {
                 this.preview.closeSettings()
             }
             if (cosmColorPicker){
                 this.colorPicker.close()
             }
+
         })
 
         $('.bench-widget .tggle.clear-icon').addEventListener('click',async () => {
             const response = await this.store.clearPocket();
             console.log(response)
         })
+
         $('.color-settings-controller .btn-setting.save-colorset').addEventListener('click',async () => {
 
             let colorset = this.collectionPreview.currentColorSet
             let collection = this.state.collection
             let colorSetID = uuid()
             let colors = {
-                csid:colorSetID,
+                csid: colorset.csid ? colorset.csid : colorSetID,
                 name: 'untitled',
                 colorset_type: 'global',
                 ...colorset,
             }
+
             console.log('saving colorset to collection....')
             const response = await this.store.saveCollectionColorset(collection.meta.cid,colors)
             console.log('SAVE ACTION RESPONSE....',response)
@@ -152,6 +162,23 @@ export class Dashboard extends View {
                 [colorSetID]: colors
             }
         })
+
+        // save icon colorset [variable]
+        $('.pv-updater .btn-save').addEventListener('click',() => {
+
+            console.log(this.colorPicker.iconColors)
+            const current = this.colorPicker.iconColors;
+            const colorset = {
+                name: 'untitled',
+                colorset_type:'variable',
+                csid: uuid(),
+                ...current
+            }
+            
+
+            // this.store.saveIconColors(cid,colorset)
+        })
+
         // icons settings menu
         const settingsTabs = $$('.settings-tab')
         const settingsModals = $$('.settings-interface .settings-modal')
@@ -192,10 +219,10 @@ export class Dashboard extends View {
         $('.icon-label.open-colors').addEventListener('click',() => this.toggleColorEditor())
         $('.save-preset-modal').addEventListener('click', this.handleSavePreset() )
         $('.save-preset.action').addEventListener('click', async () => {
-            await this.ready
+            await this.ready;
             const showSavePopup = () => savePresetModal.classList.toggle('active')
-            const savePresetModal = $('.save-preset-modal')
-            showSavePopup()
+            const savePresetModal = $('.save-preset-modal');
+            showSavePopup();
         })
         $('.preset-option.icon').addEventListener('click',() => {
             // show icon presets
@@ -203,6 +230,16 @@ export class Dashboard extends View {
         $('.preset-option.collection').addEventListener('click',() =>{
             // show current collection presets
         })
+
+        $('.pv-updater .btn-save').addEventListener('click',async () => {
+            await this.ready;
+            const showSavePopup = () => saveColorModal.classList.toggle('active');
+            const saveColorModal = $('.save-colorset-modal')
+            showSavePopup();
+            this.colorPicker.close();
+            this.colorPicker.closeFS();
+        })
+        
         $('.btn-create-collection').addEventListener('click',() => this.loadCreateCollectionForm())
         $('.db-context .btn.copy').addEventListener('click',(e) => this.copyCurrentIcon(e))
         $('.db-context .btn.pocket').addEventListener('click',() => this.togglePocketFromContext())
@@ -421,17 +458,11 @@ export class Dashboard extends View {
 
                 if (preset_type === 'variable') {
                 
-                    for (const id in colorset){
-                        if (!Array.isArray(colorset[id])){
-                        // do you refactor all places where the preset is created and used
-                        // or do you just write a buggy patch like this
-                        // what design pattern / principles should have been in place for this not to happen?
-                        // below code was implimented before meta properties were created
-                        // how do you know and define object meta properties ahead of functionality
-                            continue
-                        }
-                        let fill = colorset[id][0]
-                        let stroke = colorset[id][1]
+                    for (const id in colorset.paths){
+                        const color = colorset.paths[id]
+
+                        let fill = color[0]
+                        let stroke = color[1]
                         console.log(fill,stroke)
                         if (fill && fill !== 'none')
                             inverterSet.add(fill)
@@ -603,7 +634,7 @@ export class Dashboard extends View {
                     }
                 }
                 const toggleCollectionDefaultSetting = async () => {
-                    if (preset.preset_type !== 'global'){
+                    if (preset.colorset_type !== 'global'){
                         console.warn('can only add global colorsets to collections')
                         notify($('.toast.settingError',element))
                         return;
@@ -611,18 +642,17 @@ export class Dashboard extends View {
                     const isCollectionDefault = this.collection.meta?.color?.csid === preset.csid
                     console.log('TOGGLING COLLECTION DEFAULT', isCollectionDefault,this.collection.meta)
                     if (isCollectionDefault){
-                        const updated = await this.store.clearCollectionDefaultColor(collection)
+                        const updated = await this.store.clearCollectionDefaultColor(this.collection.cid)
                         const updateSuccess = updated.cid === meta.cid
                         if (updateSuccess){
-                            this.collection.meta.color = {}
+                            this.collection.meta.color = updated.color
                             console.log('default successfully cleared',updated)
                         } else {
                             console.error('something went wrong applying collection default')
                         }
                     } else {
-                        // const updated = await this.store.setCollectionDefault(collection,preset)
-                        // const updateSuccess = updated.cid === meta.cid
-                        const updateSuccess = true;
+                        const updated = await this.store.setDefaultCollectionColor(this.collection.cid,preset)
+                        const updateSuccess = updated.cid === meta.cid
                         if (updateSuccess){
                             this.collection.meta.color = preset;
                             console.log('default applied', updated)
@@ -636,17 +666,18 @@ export class Dashboard extends View {
 
                 }
                 const updateCollectionIsDefaultIcon = () => {
-                    const defaultPid = this.collection.meta?.color?.csid
+                    const defaultColor = this.collection.meta?.color;
+                    const defaultCsid = defaultColor.csid;
                     const csid = preset.csid
-                    const isCollectionDefault = defaultPid = csid
-                    const iPreviewElement = $(`.preset-preview-element[csid=${csid}] .pre-opt.collectionDefault`,iconColorsTab)
-                    const cPreviewElement = $(`.preset-preview-element[csid=${csid}] .pre-opt.collectionDefault`,collectionColorsTab)
+                    const isCollectionDefault = defaultCsid === csid
+                    const iPreviewElement = $(`.colorset[csid=${csid}] .pre-opt.collectionDefault`,iconColorsTab)
+                    const cPreviewElement = $(`.colorset[csid=${csid}] .pre-opt.collectionDefault`,collectionColorsTab)
                     const updatedHTML = `<div class="pre-opt opt-acd collectionDefault">
                         <div active="${isCollectionDefault ? true : false}" class="icon">${ isCollectionDefault ? removeCollectionDefaultIcon : saveAsCollectionDefaultIcon  }</div>
                         <div class="tool-tip">${ isCollectionDefault ? 'ignore as collection default' : 'set as collection default' }</div>
                     </div>`
                     console.log(csid,isCollectionDefault,cPreviewElement)
-                    const activeButtons = $$('.pre-opt.collectionDefault .icon[active="true"]')
+                    const activeButtons = $$('.colorset .pre-opt.collectionDefault .icon')
                     console.log(activeButtons)
                     activeButtons.forEach(btn => {
                         btn.setAttribute('active',false);
@@ -703,10 +734,9 @@ export class Dashboard extends View {
                     }
                 }
                 const removeCollectionPreset = async () => {
-                    // const updated = await this.store.deleteCollectionPreset( collectionID , csid);
-                    // console.log('COLLECTION PRESET SAVED',updated)
-                    // const updateSuccess = updated.cid === collectionID && updated.settings[csid] == undefined;
-                    const updateSuccess = true
+                    const updated = await this.store.deleteCollectionColor( collectionID , csid);
+                    console.log('COLLECTION PRESET DELETED',updated)
+                    const updateSuccess = updated.cid === collectionID && updated.colors[csid] == undefined;
                     console.log('UPDATE STATUS',updateSuccess)
                     if (updateSuccess){
                         const existingPresetIcon = $(`.preset-preview-element[csid=${csid}]`,collectionColorsTab)
@@ -721,7 +751,7 @@ export class Dashboard extends View {
                 }
                 const previewCollection = async () => {
                     console.log('here')
-                    this.colorPicker.setCollectionColor(preset)
+                    // this.colorPicker.setCollectionColor(preset)
                     this.colorPicker.applyColors(preset)
                     notify($('.toast.previewCollection',element))
                 }
@@ -855,7 +885,7 @@ export class Dashboard extends View {
                         console.warn(' invalid preset type...')
                     } else {
                         console.log('adding preset to collection...')
-                        // addCollectionPreset()
+                        addCollectionPreset()
                     }
                 }
                 else if (toggleCollectionDefault) {
@@ -863,10 +893,8 @@ export class Dashboard extends View {
                     if (preset.colorset_type !== 'global') {
                         console.warn('cannot add preset to collection...')
                         console.warn(' invalid preset type...')
-                    } else if (preset.colorset_type === 'variable') {
-                        console.log('adding preset to collection...')
-                        // toggleCollectionDefaultSetting()
                     } else {
+                        toggleCollectionDefaultSetting()
                         console.warn('preset type not supported')
                     }
                 }
@@ -875,7 +903,7 @@ export class Dashboard extends View {
                     if (preset.colorset_type === 'global'){
                         console.log('searching for preset in collection...')
                         console.log(collection)
-                        // removeCollectionPreset()
+                        removeCollectionPreset()
                     } else if (preset.colorset_type === 'variable'){
                         console.log('deleting icon preset....')
                         // deleteIconPreset()
@@ -1019,6 +1047,115 @@ export class Dashboard extends View {
             ...details
         }
         return setting;
+    }
+    handleCurrentColor(){
+        let details = {
+            name: this.state.colorset.name,
+            csid: this.state.colorset?.csid || uuid(),
+            created_at: Date.now(),
+        }
+        let data = this.colorPicker.iconColors;
+        let setting = {
+            ...details,
+            paths: {
+                ...data
+            }
+        }
+        return setting;
+    }
+    updateSavedColorset(){
+        const colorset = this.handleCurrentColor();
+        const currentColorsetElement = $('.save-colorset-modal .current-colorset')
+        const createColorsetElement = setting => {
+            const element = document.createElement('div');
+            const element_id = setting?.csid ? setting?.csid : null;
+            if (!element_id) return;
+            element.setAttribute('pid', element_id)
+            element.innerHTML = `
+            <div class="colorset-preview-element">
+            <div class="colorset-element-toast">
+                <div class="toast success defaultSet"> default setting applied </div>
+                <div class="toast failure settingError"> error setting colorset </div>
+                <div class="toast clear defaultCleared"> default setting removed </div>
+                <div class="toast delete removeCollectionSetting"> collection setting removed </div>
+                <div class="toast success iconSetting">icon setting saved</div>
+                <div class="toast success collectionSetting"> collection setting saved</div>
+                <div class="toast info previewCollection">collection preview applied</div>
+            </div>
+          
+            <div class="colorset-val p-name"><span class="p-label name-label">name: </span> <span class="p-val name-val">${setting?.name ? setting.name : 'untitled' }</span><span class="edit-name-icon"><svg width="24px" height="24px" viewBox="-3 -3 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m6a6n1eq-00GH4PNFFBN9">
+            <path fill-rule="evenodd" clip-rule="evenodd" d="M21.4549 5.41575C21.6471 5.70687 21.615 6.10248 21.3588 6.35876L12.1664 15.5511C12.0721 15.6454 11.9545 15.7128 11.8256 15.7465L7.99716 16.7465C7.87229 16.7791 7.74358 16.7784 7.62265 16.7476C7.49408 16.7149 7.37431 16.6482 7.27729 16.5511C7.08902 16.3629 7.01468 16.0889 7.08197 15.8313L8.08197 12.0028C8.11144 11.89 8.16673 11.7786 8.24322 11.6912L17.4697 2.46967C17.5504 2.38891 17.6477 2.32846 17.7536 2.29163C17.8321 2.26432 17.9153 2.25 18 2.25C18.1989 2.25 18.3897 2.32902 18.5303 2.46967L21.3588 5.2981C21.3954 5.33471 21.4274 5.37416 21.4549 5.41575ZM19.7678 5.82843L18 4.06066L9.48184 12.5788L8.85685 14.9716L11.2496 14.3466L19.7678 5.82843Z" fill="black" pid="m6a6n1eq-00UB44AV8TI7" stroke="null"></path>
+            <path d="M19.6414 17.1603C19.9148 14.8227 20.0018 12.4688 19.9023 10.1208C19.8976 10.0084 19.9399 9.89898 20.0194 9.81942L21.0027 8.83609C21.1236 8.71519 21.3302 8.79194 21.3415 8.96254C21.5265 11.7522 21.4563 14.5545 21.1312 17.3346C20.8946 19.3571 19.2703 20.9421 17.2583 21.167C13.7917 21.5544 10.2083 21.5544 6.74177 21.167C4.72971 20.9421 3.10538 19.3571 2.86883 17.3346C2.45429 13.7903 2.45429 10.2097 2.86883 6.66543C3.10538 4.6429 4.72971 3.05789 6.74177 2.83301C9.37152 2.5391 12.0685 2.46815 14.7306 2.62016C14.9022 2.62996 14.9804 2.83757 14.8589 2.95909L13.8664 3.95165C13.7877 4.03034 13.6798 4.07261 13.5685 4.06885C11.3421 3.99376 9.10055 4.07872 6.90838 4.32373C5.57827 4.47239 4.51278 5.522 4.35867 6.83968C3.95767 10.2682 3.95767 13.7318 4.35867 17.1603C4.51278 18.478 5.57827 19.5276 6.90838 19.6763C10.2642 20.0513 13.7358 20.0513 17.0916 19.6763C18.4218 19.5276 19.4872 18.478 19.6414 17.1603Z" fill="black" pid="m6a6n1eq-005VNPO0IXRL" stroke="null"></path>
+            </svg></span></div>
+
+            <div class="color-paths">
+            
+            </div>
+            <div class="save-options">
+                <div class="save-opt save-icon">save as icon colorset</div>
+                <div class="save-opt save-collection">save as collection colorset</div>
+            </div>
+            `
+            return element
+        }
+        currentColorsetElement.innerHTML = createColorsetElement(colorset).outerHTML
+        objToTuplesArray(colorset.paths).forEach(path => {
+            const id = path[0];
+            const stroke = path[1][0]
+            const fill = path[1][1]
+            const noneAttrIcon = `
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="24px" height="24px" viewBox="0 0 64 64" enable-background="new 0 0 64 64" xml:space="preserve">
+                <path fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" d="M53.919,10.08c12.108,12.106,12.108,31.733,0,43.84
+                    c-12.105,12.107-31.732,12.107-43.838,0c-12.108-12.106-12.108-31.733,0-43.84C22.187-2.027,41.813-2.027,53.919,10.08z"></path>
+                <line fill="none" stroke="#000000" stroke-width="2" stroke-miterlimit="10" x1="10.08" y1="10.08" x2="53.92" y2="53.92"></line>
+            </svg>`
+            const noColorIcon = `
+            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 50 50" enable-background="new 0 0 50 50" xml:space="preserve" height="40px" width="40px">
+                <path d="M40,23.99H10c-0.552,0-1,0.447-1,1s0.448,1,1,1h30c0.552,0,1-0.447,1-1S40.552,23.99,40,23.99z"></path>
+            </svg>`
+            const element = document.createElement('div')
+            element.classList.add('color-path')
+            const strokeContainer = document.createElement('div')
+            const strokeElement = document.createElement('div')
+            const strokeLabel = document.createElement('div')
+            strokeLabel.textContent = 'stroke : '
+            strokeContainer.classList.add('stroke-container','cp-container')
+            strokeElement.classList.add('cp-stroke','cp-element')
+            strokeLabel.classList.add('cp-label','cp-element')
+            const fillContainer = document.createElement('div')
+            const fillElement = document.createElement('div')
+            const fillLabel = document.createElement('div')
+            fillLabel.textContent = 'fill :'
+            fillContainer.classList.add('fill-container','cp-container')
+            fillElement.classList.add('cp-fill','cp-element')
+            fillLabel.classList.add('cp-label','cp-element')
+            element.appendChild(strokeContainer)
+            element.appendChild(fillContainer)
+            strokeContainer.appendChild(strokeLabel)
+            strokeContainer.appendChild(strokeElement)
+            fillContainer.appendChild(fillLabel)
+            fillContainer.appendChild(fillElement)
+            
+            if (stroke === 'none'){
+                strokeElement.innerHTML = noneAttrIcon;
+            }
+            else if (Color.isValidHex(stroke)){
+                strokeElement.style.setProperty('background',stroke)
+            } else {
+                strokeElement.innerHTML = noColorIcon;
+            }
+            if (fill === 'none'){
+                fillElement.innerHTML = noneAttrIcon;
+            }
+            else if (Color.isValidHex(fill)){
+                fillElement.style.setProperty('background',fill)
+            }else {
+                fillElement.innerHTML = noColorIcon
+            }
+            $('.color-paths',currentColorsetElement).appendChild(element)
+        })
+        return colorset
+
     }
     updateSavedPreset(){
         const setting = this.handleCurrentSetting()
