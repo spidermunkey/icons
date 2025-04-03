@@ -1,6 +1,7 @@
 const { MongoClient } = require('mongodb')
-const {CONNECTION_STRING} = require('../../.config/env')
 const {print} = require('../../utils/print.js')
+
+const CONNECTION_STRING = `mongodb+srv://${process.env.MONGO_USER}:${encodeURIComponent(process.env.MONGO_PASSWORD)}@cluster${process.env.MONGO_CLUSTER}.fnp9j.mongodb.net/?retryWrites=true&w=majority`
 
 class Database {
     
