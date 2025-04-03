@@ -145,7 +145,7 @@ export class Collection {
     }
     for (let i = 0; i < icons.length; i++){
       let icon = icons[i];
-      let colorSet = icon.colors.original;
+      let colorSet = icon.colors.original.paths;
       const normalize = (hex)=> {
         if (hex === 'none') {
           return hex

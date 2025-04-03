@@ -21,13 +21,23 @@ const config = {
 
 // doesn't validate if colorset_type is really global but it should
 function configure(props){
-    return {
-        csid: props?.csid || uuid(),
-        colorset_type: props?.colorset_type || 'global',
-        name: props?.name || 'untitled',
-        elements: props?.elements || {},
-        shapes: props?.shapes || {},
+    if (props?.colorset_type=='global'){
+        return {
+            csid: props?.csid || uuid(),
+            colorset_type: 'global',
+            name: props?.name || 'untitled',
+            elements: props?.elements || {},
+            shapes: props?.shapes || {},
+        }
+    } else {
+        return {
+            ...props,
+            csid: props?.csid || uuid(),
+            colorset_type: 'variable',
+            name: props?.name || 'untitled',
+        }
     }
+
 }
 
 async function connect(){
