@@ -8,9 +8,9 @@ bring your own cluster
 
 `
 
- MONGO_USER=<yourMongoUser>
- MONGO_PASSWORD=<yourMongoPassword>
- MONGO_CLUSTER=<yourCluster>
+ MONGO_USER=yourMongoUser
+ MONGO_PASSWORD=yourMongoPassword
+ MONGO_CLUSTER=yourCluster
 
 `
 
