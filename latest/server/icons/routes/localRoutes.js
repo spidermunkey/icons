@@ -46,23 +46,23 @@ router.get('/status', async function getLocalStatus(request,response) {
 
 router.post('/sync', async function addUserTarget(request,response){
   const pathname = decodeURIComponent(request.body.payload.path)
-  const test = await Local.addTarget(pathname);
-  response.json( test )
+  const added = await Local.addTarget(pathname);
+  response.json( { success: added != false, result:added })
 })
 
 router.put('/sync', async function scanUserTarget(request,response){
   const pathname = decodeURIComponent(request.body.payload.path)
   // const tester = decodeURIComponent("C:\\Users\\justi\\dev\\data\\tester")
-  const test = await Local.updateRepository(pathname);
-  response.json( test )
+  const added = await Local.updateRepository(pathname);
+  response.json( { success: added != false, result:added })
 })
 
 router.delete('/sync', async function destroyUserTarget(request,response){
   const pathname = decodeURIComponent(request.query.path)
   console.log(request.query)
   // const tester = decodeURIComponent("C:\\Users\\justi\\dev\\data\\tester")
-  const test = await Local.deleteRepository(pathname);
-  response.json( test )
+  const state = await Local.deleteRepository(pathname);
+  response.json( {success: state != false, result: state } )
 })
 router.get('/sync', async function fetchUserTarget(request,response){
   const pathname = decodeURIComponent(request.body.payload.path)

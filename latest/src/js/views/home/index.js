@@ -57,6 +57,29 @@ export class Home extends EventEmitter {
     this.hydrate();
   }
 
+  async animateScan(cb){
+    let minTimer = null;
+    const targetContainter = $('.target-setting')
+    targetContainter.classList.add('scanning');
+    const processComplete = new Promise((resolve,reject)=>{
+      setTimeout(async () => {
+        minTimer = true;
+        const response = await cb();
+        console.log('scan stat!',response)
+        if (response.success){
+          targetContainter.classList.add('complete')
+        } else {
+          targetContainter.classList.add('error')
+        }
+        setTimeout(() => {
+          response.success ? targetContainter.classList.remove('complete') : targetContainter.classList.remove('error')
+          targetContainter.classList.remove('scanning')
+          resolve(response)
+        },300)
+      },500)
+    })
+    return processComplete
+  }
   async hydrate() {
     $('.search.passive-search').addEventListener('inputs',this.search());
 
@@ -64,7 +87,7 @@ export class Home extends EventEmitter {
 
     $('.btn-add-target').addEventListener('click',async () => {
       const value = $('#targetPath').value;
-      const response = await API.addUserTarget(value.replace(/\\/g,'/').replace(/["']/g,''))
+      const result = this.animateScan(API.addUserTarget.bind(API,value.replace(/\\/g,'/').replace(/["']/g,'')))
     });
 
     $('.btn-view-targets').addEventListener('click',() => $('.settings-overlay').classList.toggle('active'));
@@ -85,7 +108,7 @@ export class Home extends EventEmitter {
         const del = event.target.closest('.btn-delete-target')
         const handle = file_target.getAttribute('fs-target')
         if (scan){
-          const response = await API.scanUserTarget(handle)
+          const response = this.animateScan(await API.scanUserTarget.bind(API,handle))
           console.log(response)
         } else if (del){
           console.log('deletings', handle)

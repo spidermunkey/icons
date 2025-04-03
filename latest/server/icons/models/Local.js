@@ -75,18 +75,47 @@ module.exports = {
     },
 
     async addTarget(pathname){
-      await this.scanner.addTarget(pathname)
-      this.db = await this.scanner.read()
+      try {
+        const time = Date.now();
+        await this.scanner.addTarget(pathname)
+        this.db = await this.scanner.read()
+        const added = {};
+        // return new collections
+        for (const id in this.db.collections){
+          if (this.db.collections[id]?.created_at > time)
+            added[id] = this.db.collections[id]
+        }
+        return added;
+      }
+      catch(error){
+        console.log(error)
+        return false;
+      }
     },
 
     async updateRepository(pathname){
-      await this.scanner.updateTarget([pathname])
-      this.db = await this.scanner.read()
+      try {
+        const time = Date.now();
+        await this.scanner.updateTarget([pathname])
+        this.db = await this.scanner.read()
+        const added = {};
+        // return new collections
+        for (const id in this.db.collections){
+          if (this.db.collections[id]?.created_at > time)
+            added[id] = this.db.collections[id]
+        }
+        return added;
+      }
+      catch(error){
+        console.log(error)
+        return false;
+      }
     },
 
     async deleteRepository(pathname){
       await this.scanner.removeTarget(pathname)
       this.db = await this.scanner.read()
+      return this.db.collections;
     },
     
     count(){

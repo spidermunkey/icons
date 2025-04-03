@@ -120,6 +120,58 @@
               }
               &.target-setting {
                 position: relative;
+                &.scanning {
+                  .target-input {
+                    border: 1px solid transparent;
+                  }
+                  .bloom {
+                    background-color: greenyellow;
+                    box-shadow: 0 0 20px 3px rgb(127, 197, 21);
+                  }
+                  .progress-indicator {
+                    background:conic-gradient(#39d239e4,#0ae80a5f,var(--success-green),lime);
+                    animation: rotate 1500ms ease infinite paused both;
+                    transform-origin: center;
+                    @keyframes rotate {
+                      0% {
+                        transform: rotate(360deg)
+                      }
+                      100% {
+                        transform: rotate(0deg)
+                      }
+                    }
+                    &::after {
+                      position: absolute;
+                      inset: 0;
+                      content:"";
+                      backdrop-filter: blur(10px);
+                      background: rgba(255, 255, 255, 0.647);
+                      border-radius: inherit;
+                    }
+                  }
+                  .bloom-2 {
+                    background-color: limegreen;
+                    box-shadow: 0 0 20px 3px rgb(0, 255, 21);
+                    animation: scan 350ms linear infinite running alternate;
+                    transform-origin: center;
+                    @keyframes scan {
+                      0% {
+                        transform: translateX(90%)
+                      }
+                      100% {
+                        transform: translateX(0%)
+                      }
+                    }
+                  }
+                  .psuedo {
+                    @include show();
+                    .notify-scanning {
+                      @include show();
+                      animation-play-state: running;
+                    }
+                  }
+                  
+                }
                 .input-container {
                   position: relative;
                   overflow: hidden;
@@ -136,54 +188,17 @@
                 .bloom {
                   bottom: 6px;
                   width: 100%;
-                  background-color: greenyellow;
-                  box-shadow: 0 0 20px 3px rgb(127, 197, 21);
                 }
                 .bloom-2 {
                   bottom: 12px;
                   left: 0;
                   width: 50%;
-                  background-color: limegreen;
-                  box-shadow: 0 0 20px 3px rgb(0, 255, 21);
-                  animation: scan 350ms linear infinite running alternate;
-                  transform-origin: center;
-                  @keyframes scan {
-                    0% {
-                      transform: translateX(90%)
-                    }
-                    100% {
-                      transform: translateX(0%)
-                    }
-                  }
-
                 }
                 .progress-indicator {
                   position: absolute;
                   inset:-1000px;
-                  background-color: var(--green);
+                  // background-color: #ccccccb2;
                   border-radius: 4px;
-                  background:conic-gradient(#39d239e4,#0ae80a5f,var(--success-green),lime);
-                  animation: rotate 1500ms ease infinite paused both;
-                  transform-origin: center;
-                  @keyframes rotate {
-                    0% {
-                      transform: rotate(360deg)
-                    }
-                    100% {
-                      transform: rotate(0deg)
-                    }
-                  }
-                  &::after {
-                    position: absolute;
-                    inset: 0;
-                    content:"";
-                    backdrop-filter: blur(10px);
-                    background: rgba(255, 255, 255, 0.647);
-                    border-radius: inherit;
-                  }
-                  &::before {
-
-                  }
                 }
 
                 .setting-controls {
@@ -196,14 +211,6 @@
                   position: absolute;
                   inset: 0;
                   @include hide();
-
-                  &.scanning {
-                    @include show();
-                    .notify-scanning {
-                      @include show();
-                      animation-play-state: running;
-                    }
-                  }
                 }
                 .setting-notification {
                   position: absolute;
@@ -247,7 +254,7 @@
               .target-input {
                 position: relative;
                 border: 1px solid #ccccccb2;
-                border: 2px solid transparent;
+                // border: 2px solid transparent;
                 margin: 1px;
                 border-radius: 4px;
                 padding: 4px;
@@ -256,7 +263,7 @@
                 background: white;
                 // background: transparent;
                 &:focus {
-                  // border: 1px solid #ccc;
+                  border: 1px solid #ccc;
                 }
 
                 &.scanning{
@@ -566,10 +573,11 @@
       background: white;
       // border: 1px solid red;
       position: absolute;
-      top: 60px;
-      min-height: 200px;
-      max-height: 100%;
+      top: 100%;
+      height: 400px;
+      // max-height: 100%;
       width: 100%;
+      z-index: 100;
       @include modal();
 
       overflow: hidden;
