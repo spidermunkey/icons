@@ -4,6 +4,7 @@ import { StatusWidget } from "../../components/statusWidget.js";
 import { API } from "../../api.js";
 import { ColorSettingsInterface, ViewboxSettingsInterface } from "./SettingsInterface.js";
 
+const handlepath = path => path.trim().replace(/\\/g,'/').replace(/["']/g,'')
 export class Home extends EventEmitter {
   constructor(store) {
     super();
@@ -87,10 +88,9 @@ export class Home extends EventEmitter {
 
     $('.btn-add-target').addEventListener('click',async () => {
       const value = $('#targetPath').value;
-      const response = await this.animateScan(API.addUserTarget.bind(API,value.trim().replace(/\\/g,'/').replace(/["']/g,'')))
+      const response = await this.animateScan(API.addUserTarget.bind(API,handlepath(value)))
       if (response.success ){
         // create new target list element
-
           const new_target = document.createElement('div');
           new_target.classList.add('file-target')
           new_target.setAttribute('fs-target',value)
@@ -129,7 +129,7 @@ export class Home extends EventEmitter {
       if (file_target){
         const scan = event.target.closest('.btn-scan-target')
         const del = event.target.closest('.btn-delete-target')
-        const handle = file_target.getAttribute('fs-target').trim()
+        const handle = handlepath(file_target.getAttribute('fs-target'))
         if (scan){
           const response = await this.animateScan(API.scanUserTarget.bind(API,handle))
           // update current view;

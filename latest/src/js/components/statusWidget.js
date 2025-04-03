@@ -1,4 +1,6 @@
 import { API } from "../api"
+const handlepath = path => path.trim().replace(/\\/g,'/').replace(/["']/g,'')
+
 export class StatusWidget {
   constructor(store){
     this.store = new Task(API.getStatus.bind(API))
@@ -34,9 +36,9 @@ export class StatusWidget {
     }`
     $('.panel .settings-overlay .file-targets').innerHTML = `${targets.reduce((accumulator,reducer) => {
       const html = accumulator + `
-      <div class="file-target" fs-target=${reducer}>
+      <div class="file-target" fs-target=${handlepath(reducer)}>
         <div class="file-handle">
-          ${reducer} 
+          ${handlepath(reducer)} 
         </div>
         <div class="ft-controls">
           <span class="btn-ft btn-scan-target">scan</span>

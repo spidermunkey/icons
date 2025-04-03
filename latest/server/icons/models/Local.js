@@ -85,7 +85,7 @@ module.exports = {
         const added = {};
         // return new collections
         for (const id in this.db.collections){
-          if (this.db.collections[id]?.created_at > time)
+          if (this.db.collections[id]?.created_at < time)
             added[id] = this.db.collections[id]
         }
         return added;
