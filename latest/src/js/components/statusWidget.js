@@ -74,7 +74,7 @@ export class StatusWidget {
                     <span class="label">Last Sync: </span>
                     <span class="stat">...Loading</span>
                   </div>
-                  <div class="btn-scan">Scan Target Directories</div>
+                  <div class="btn-scan">Sync Local Updates</div>
                 </div>
               </div>
               <div class="t-stat stat-widget icon-data-widget">

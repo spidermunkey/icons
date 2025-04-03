@@ -526,19 +526,7 @@ export class Home extends EventEmitter {
                       </div>
                     </div>
                   </div>
-                  <div class="app-setting">
-                    <div class="setting setting-label">Monitor Status : </div>
-                    <div class="setting setting-value">on</div>
-                    <div class="setting setting-valeu">off</div>
-                  </div>
-                  <div class="app-setting">
-                    <div class="setting setting-label">Monitor Paths : </div>
-                    <div class="setting setting-value">all < targets > | </div>
-                    <div class="setting setting-value">select < targets > | </div>
-                    <div class="setting setting-value">none</div>
-                  </div>
 
-                  <div class="app-directive">Delete Downloads</div>
                   <div class="app-directive">Delete Uploads</div>
                   <div class="app-directive">Delete Projects</div>
                   <div class="app-directive">Delete All Data</div>

@@ -30,6 +30,7 @@ module.exports = {
       this.update_each({ignored: false, synced: false})
       return this.db;
     },
+    
     readDB(){
       if (this.db !== null){
         return this.db

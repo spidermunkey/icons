@@ -1,5 +1,7 @@
 import { API } from "../api";
 import { LocalCollection } from "./Collection";
+const handlepath = path => path.trim().replace(/\\/g,'/').replace(/["']/g,'')
+
 export class RecentDownloads extends EventEmitter {
   constructor(){
     super()
