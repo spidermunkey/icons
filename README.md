@@ -1,17 +1,22 @@
 # Welcome!
 this is pet project for managing svg files inside of a web ui.
 
-**changes persisted mongo db 'icons' for use with multiple workspaces**
-##bring your own cluster
-`server/.env.js`
-> MONGO_USER=<yourMongoUser>
-> MONGO_PASSWORD=<yourMongoPassword>
-> MONGO_CLUSTER=<yourCluster>
->> CONNECTION_STRING = mongodb+srv://<MONGO_USER>:${encodeURIComponent(<MONGO_PASSWORD>)}@cluster<MONGO_CLUSER>.fnp9j.mongodb.net
+changes persisted mongo db 'icons' for use with multiple workspaces**
+bring your own cluster
 
-`cd ./latest`; `npm run windows`
+  > server/.env.js
 
-`cd ./latest/server`; `npm start`
+`
+
+ MONGO_USER=<yourMongoUser>
+ MONGO_PASSWORD=<yourMongoPassword>
+ MONGO_CLUSTER=<yourCluster>
+
+`
+
+`cd ./latest; npm run windows`
+
+`cd ./latest/server; npm start`
 
 >localhost:2222
 
