@@ -4,9 +4,8 @@ this is pet project for managing svg files inside of a web ui.
 changes persisted mongo db 'icons' for use with multiple workspaces**
 bring your own cluster
 
-  > server/.env.js
+    server/.env.js
 
-`
 
     MONGO_USER=yourMongoUser
 
@@ -14,7 +13,6 @@ bring your own cluster
  
     MONGO_CLUSTER=yourCluster
 
-`
 
 `cd ./latest; npm run windows`
 
