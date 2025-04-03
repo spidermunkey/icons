@@ -29,7 +29,7 @@ if your reading this. I have no idea what i'm doing, i just know it works on my 
 # FEATURES
 
 ### Preview and Upload Local Collections
-![home](https://github.com/user-attachments/assets/e1fd9e9c-f8e7-4e7f-8db2-e3c55c8c6f07)
+![home](https://github.com/user-attachments/assets/c0d8d129-95ff-4fc8-a253-faa0f2730059)
 
 ![upload_dashboard](https://github.com/user-attachments/assets/f53c5adb-0944-4831-acc1-23d9a441146b)
 
