@@ -1,10 +1,11 @@
 # Welcome!
 this is pet project for managing svg files inside of a web ui.
 
-changes persisted mongo db 'icons' for use with multiple workspaces**
-bring your own cluster
+changes persisted mongo db 'icons' for use with multiple workspaces
 
-    server/.env.js
+## bring your own cluster
+
+> server/.env.js
 
 
     MONGO_USER=yourMongoUser
@@ -13,12 +14,15 @@ bring your own cluster
  
     MONGO_CLUSTER=yourCluster
 
+## Start Local Server
+
+> localhost:2222
+
 
 `cd ./latest; npm run windows`
 
 `cd ./latest/server; npm start`
 
->localhost:2222
 
 ## TODO
 
