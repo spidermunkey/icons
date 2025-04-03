@@ -1747,6 +1747,7 @@ export class Dashboard extends View {
         homePanel.innerHTML = ''
         const widgets = flattened
             .map(async name => {
+                console.log(name)
                 const widgetSkeleton = CollectionWidget.getSkeleton()
                 homePanel.appendChild(widgetSkeleton)
                 const data = (await this.store.getCollectionSample(name,1,39))

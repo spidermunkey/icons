@@ -5,11 +5,11 @@ const StatefulColor = (originalColor = '#000') => ({
   original: originalColor,
   currentColor: originalColor, 
   history: new Cursor([originalColor]),
-})
+});
 
 export class ColorSettingsInterface extends EventEmitter {
   constructor(){
-    super()
+    super();
 
     this.element = $('.local-settings');
     this.canvasContainer = $('.color-editor',this.element);
@@ -21,8 +21,8 @@ export class ColorSettingsInterface extends EventEmitter {
     this.resetElement = $('.c-action.action-reset',this.element);
     this.fillSelector = $('.default-fill',this.element);
     this.strokeSelector = $('.default-stroke',this.element);
-    this.fillReflector = $('.box',this.fillSelector)
-    this.strokeReflector = $('.box',this.strokeSelector)
+    this.fillReflector = $('.box',this.fillSelector);
+    this.strokeReflector = $('.box',this.strokeSelector);
 
     this.canvasElement = $('.canvas',this.element);
     this.canvasPointer = $('.canvas-pointer',this.element);
@@ -68,8 +68,8 @@ export class ColorSettingsInterface extends EventEmitter {
     this.resetElement.addEventListener('click',() => this.resetAction());
     
     [this.fillSelector,this.strokeSelector].forEach(selector => {
-      $('.box',selector).addEventListener('click', () => this.toggleColorPicker())
-      selector.addEventListener('click',() => this.handleModeChange(selector.getAttribute('mode')))
+      $('.box',selector).addEventListener('click', () => this.toggleColorPicker());
+      selector.addEventListener('click',() => this.handleModeChange(selector.getAttribute('mode')));
     });
     
     this.colorInput.addEventListener('input',(event) => this.handleInput(event));
@@ -81,29 +81,28 @@ export class ColorSettingsInterface extends EventEmitter {
   }
 
   eachIcon(callback){
-    this.collection.icons.forEach(icon => callback(icon))
+    this.collection.icons.forEach(icon => callback(icon));
   }
   getElement({id}){
-    return $(`.preview-column .preview-icon[id=${id}] svg`)
+    return $(`.preview-column .preview-icon[id=${id}] svg`);
   }
   updateAllShapes(hex,attr = 'fill'){
     this.eachIcon(icon => {
-        icon.crawl(this.getElement(icon)).forEach(child => child.tagName !== 'svg' ? child.setAttribute(attr,hex) : '' )
+        icon.crawl(this.getElement(icon)).forEach(child => child.tagName !== 'svg' ? child.setAttribute(attr,hex) : '' );
   })
 }
   handleModeChange(selectorType){
     if (selectorType === 'fill'){
-      this.state.selected = 'fill'
-      this.canvasContainer.classList.add('filler')
-      this.canvasContainer.classList.remove('stroker')
+      this.state.selected = 'fill';
+      this.canvasContainer.classList.add('filler');
+      this.canvasContainer.classList.remove('stroker');
 
     }
     else if (selectorType === 'stroke'){
-      this.state.selected = 'stroke'
-      this.canvasContainer.classList.add('stroker')
-      this.canvasContainer.classList.remove('filler')
+      this.state.selected = 'stroke';
+      this.canvasContainer.classList.add('stroker');
+      this.canvasContainer.classList.remove('filler');
     }
-    console.log('mode updated',selectorType)
   }
   hideColorPicker(){
     this.canvasContainer.classList.remove('active');
@@ -122,33 +121,31 @@ export class ColorSettingsInterface extends EventEmitter {
   updateCurrentHue(){}
   updateSelected(hex){
     if (this.state.selected === 'fill'){
-      this.updateFillSelector(hex)
-      this.updateAllShapes(hex,'fill')
-      this.state.fill.currentColor = hex
-      this.state.fill.history.addOneAndSkipTo(hex)
+      this.updateFillSelector(hex);
+      this.updateAllShapes(hex,'fill');
+      this.state.fill.currentColor = hex;
+      this.state.fill.history.addOneAndSkipTo(hex);
     }
     else if (this.state.selected === 'stroke'){
-      this.updateStrokeSelector(hex)
-      this.updateAllShapes(hex,'stroke')
-      this.state.stroke.currentColor = hex
-      this.state.stroke.history.addOneAndSkipTo(hex)
+      this.updateStrokeSelector(hex);
+      this.updateAllShapes(hex,'stroke');
+      this.state.stroke.currentColor = hex;
+      this.state.stroke.history.addOneAndSkipTo(hex);
     }
 
   }
   handleColorChange(){
-    console.log(this.state.current_colorset,this.collection.colors['default']);
-    this.collection.colors['default'] = this.state.current_colorset
+    this.collection.colors['default'] = this.state.current_colorset;
   }
 
   updateFillSelector(hex){
     if (hex === null || hex === 'none'){
       // handle null || none
-      console.warn('must properly handle color if (null || none)')
-      this.fillSelector.classList.add('invalid')
+      console.warn('must properly handle color if (null || none)');
+      this.fillSelector.classList.add('invalid');
     } else {
-      console.log('fill reflector',hex)
-      this.fillSelector.classList.remove('invalid')
-      this.fillReflector.style.setProperty('background',hex)
+      this.fillSelector.classList.remove('invalid');
+      this.fillReflector.style.setProperty('background',hex);
     }
   }
   updateStrokeSelector(hex){
@@ -157,7 +154,6 @@ export class ColorSettingsInterface extends EventEmitter {
         console.warn('must properly handle color if (null || none)')
         this.strokeSelector.classList.add('invalid')
       } else {
-        console.log('stroke reflector',hex)
         this.strokeSelector.classList.remove('invalid')
         this.strokeReflector.style.setProperty('background',hex)
     }
@@ -175,7 +171,6 @@ export class ColorSettingsInterface extends EventEmitter {
   }
 
   update(collection){
-    console.log(collection.colors.original);
     this.collection = collection;
     const {original} = collection.colors;
     const {fill,stroke} = original.shapes;
@@ -189,7 +184,6 @@ export class ColorSettingsInterface extends EventEmitter {
           colorset_type:'global',
           name: 'default',
           elements: {
-            // no change yet
             fill:original.elements.fill,
             stroke: original.elements.stroke,
           },
@@ -229,28 +223,27 @@ export class ViewboxSettingsInterface extends EventEmitter {
         }
     }
 
-    const isValid = event => !isNaN(Number(event.target.value)) && event.target.value !== ''
+    const isValid = event => !isNaN(Number(event.target.value)) && event.target.value !== '';
     const checkInputValid = (input) => {
       return (event) => {
         if (isValid(event)){
-          input.classList.remove('invalid')
+          input.classList.remove('invalid');
         } else {
-          input.classList.add('invalid')
+          input.classList.add('invalid');
         }
       }
     };
     const handleInput = (propName) => {
       return (event) => {
-        if (isValid(event)){
-          const value = event.target.value
+        if (isValid(event)) {
+          const value = event.target.value;
           this.state[propName] = Number(value);
           const {vbx,vby,vbw,vbh} = this.state;
-          const viewbox = [vbx,vby,vbw,vbh].map(i => Number(i))
+          const viewbox = [vbx,vby,vbw,vbh].map(i => Number(i));
           this.collection.presets['default'] = {
             ...this.state,
             viewbox,
           }
-          console.log(this.collection.presets)
         }
       }
     }
@@ -261,20 +254,20 @@ export class ViewboxSettingsInterface extends EventEmitter {
       this.vbwInput,
       this.vbyInput,
       this.vbxInput,
-    ].forEach(input => {
-      input.addEventListener('input',checkInputValid(input))
-    })
-    this.heightInput.addEventListener('input',handleInput(this.heightInput,'height'))
-    this.widthInput.addEventListener('input',handleInput(this.widthInput,'width'))
-    this.vbxInput.addEventListener('input',handleInput('vbx'))
-    this.vbyInput.addEventListener('input',handleInput('vby'))
-    this.vbwInput.addEventListener('input',handleInput('vbw'))
-    this.vbhInput.addEventListener('input',handleInput('vbh'))
+    ].forEach(input => input.addEventListener('input',checkInputValid(input)));
+
+    this.heightInput.addEventListener('input',handleInput(this.heightInput,'height'));
+    this.widthInput.addEventListener('input',handleInput(this.widthInput,'width'));
+    this.vbxInput.addEventListener('input',handleInput('vbx'));
+    this.vbyInput.addEventListener('input',handleInput('vby'));
+    this.vbwInput.addEventListener('input',handleInput('vbw'));
+    this.vbhInput.addEventListener('input',handleInput('vbh'));
 
   }
 
-  update(collection){
-    const {original} = collection.presets
+  update(collection) {
+
+    const {original} = collection.presets;
     let {vbx,vby,vbw,vbh,width,height} = original;
     if (!width || width === '') width = 20;
     if (!height || height === '') height = 20;
@@ -284,7 +277,7 @@ export class ViewboxSettingsInterface extends EventEmitter {
     this.vbxInput.value = vbx;
     this.heightInput.value = height;
     this.widthInput.value = width;
-    this.collection = collection
+    this.collection = collection;
 
     this.state = {
       name:'default',

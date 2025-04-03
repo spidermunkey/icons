@@ -3,17 +3,21 @@ import { UploadSection } from "../../components/uploadedIconWidget.js";
 import { StatusWidget } from "../../components/statusWidget.js";
 import { API } from "../../api.js";
 import { ColorSettingsInterface, ViewboxSettingsInterface } from "./SettingsInterface.js";
+
 export class Home extends EventEmitter {
   constructor(store) {
-    super()
-    this.store = store
+    super();
+    this.store = app.store;
     this.appStatus = new StatusWidget(store);
     this.localCollections = new RecentDownloads();
+    this.uploadedCollections = new UploadSection();
+    this.uploadingQue = new Set();
     this.state = {
-      collections: [],
+      collections: new Cursor([]),
       collection:null,
       query:'',
-    }
+    };
+    
     this.localCollections.on('preview', (collection) => {
       const render = (collection) => {
         this.state.collection = collection;
@@ -22,35 +26,26 @@ export class Home extends EventEmitter {
         $('.c-data .nxt.tggle').onclick = () => next();
         $('.c-data .prv.tggle').onclick = () => prev();
         // close
-        $('.local-preview .modal-ctrl').addEventListener('click',() => this.state.collection = null)
-      this.colorSettingsInterface = new ColorSettingsInterface()
-      this.colorSettingsInterface.update(collection)
-      this.viewboxSettingInterface = new ViewboxSettingsInterface()
-      this.viewboxSettingInterface.update(collection)
-      }
-      const next = () => {
-        const current = this.state.collections.skipToNext()
-        render(current)
-      }
-      const prev = () => {
-        const current = this.state.collections.skipToPrev()
-        render(current)
-      }
+        $('.local-preview .modal-ctrl').addEventListener('click', () => this.state.collection = null );
+        this.colorSettingsInterface = new ColorSettingsInterface();
+        this.colorSettingsInterface.update(collection);
+        this.viewboxSettingInterface = new ViewboxSettingsInterface();
+        this.viewboxSettingInterface.update(collection);
+      };
+      const next = () => render(this.state.collections.skipToNext());
+      const prev = () => render(this.state.collections.skipToPrev());
       render(collection);
-      this.state.collections.skipToElement(collection)
-    })
-    this.localCollections.on('upload',(collection,element) => this.handleUpload(collection,element))
-    this.localCollections.on('data',(collections) => {
-      this.state.collections = new Cursor(collections)
-    })
-    this.uploadedCollections = new UploadSection()
-    this.uploadingQue = new Set()
-    this.on('active',() => this.active = true)
+      this.state.collections.skipToElement(collection);
+    });
+    this.localCollections.on('upload',(collection,element) => this.handleUpload(collection,element));
+    this.localCollections.on('data',(collections) => this.state.collections = new Cursor(collections));
+
+    this.on('active',() => this.active = true);
     this.on('inactive',() => {
       this.localCollections.active = false;
       this.uploadedCollections.active = false;
       this.active = false;
-    })
+    });
   }
 
   async render(){
@@ -63,35 +58,27 @@ export class Home extends EventEmitter {
   }
 
   async hydrate() {
-    $('.search.passive-search').addEventListener('inputs',this.search())
-    // $('.search.passive-search input').addEventListener('blur',(e) => {
-    //   // if (!e.target.value || e.target.value == '')
-    //     this.searchReset()
-    // })
-    // $('.search.passive-search input').addEventListener('focus', (e) => {
-    //   if (e.target.value && e.target.value !== '')
-    //     this.handleSearch(e)
-    // })
-    $('.btn-cancel').addEventListener('click',() => this.searchReset())
+    $('.search.passive-search').addEventListener('inputs',this.search());
+
+    $('.btn-cancel').addEventListener('click',() => this.searchReset());
+
     $('.btn-add-target').addEventListener('click',async () => {
       const value = $('#targetPath').value;
-      console.log('adding target',value)
       const response = await API.addUserTarget(value.replace(/\\/g,'/').replace(/["']/g,''))
-      console.log(response)
-    })
-    $('.btn-view-targets').addEventListener('click',() => {
-      $('.settings-overlay').classList.toggle('active');
-    })
-    $$('.control-panels .control-tab .tab').forEach(tabber => {
+    });
+
+    $('.btn-view-targets').addEventListener('click',() => $('.settings-overlay').classList.toggle('active'));
+
+    $$('.control-panels .control-tab .tab').forEach( tabber => {
       const tab = tabber.getAttribute('tab');
-      tabber.addEventListener('click',(event) => {
+      tabber.addEventListener('click', () => {
         $$('.control-panels .control-tab .tab').forEach(tabber => tabber.classList.remove('active'))
         $$('.control-panels .control-panel .panel').forEach(panel => panel.classList.remove('active'))
         tabber.classList.add('active')
         $(`.control-panels .control-panel .panel[panel=${tab}]`).classList.add('active')
       })
-    })
-    $('.settings-overlay').addEventListener('click',async event => {
+    });
+    $('.settings-overlay').addEventListener('click', async event => {
       const file_target = event.target.closest('.file-target')
       if (file_target){
         const scan = event.target.closest('.btn-scan-target')
@@ -106,27 +93,20 @@ export class Home extends EventEmitter {
           console.log(response)
         }
       }
+    });
 
-    })
-    $('#app').addEventListener('click',async (e) => {
+    $('#app').addEventListener('click', async (e) => {
       if (!this.active){
         return;
       }
         // handle upload
         let collectionPreview = e.target.closest('.collection-info');
-        let upload = e.target.closest('.recent-collection .option-accept');
         let ignore = e.target.closest('.recent-collection .option-ignore');
         let drop = e.target.closest('.recent-collection .opt-remove');
-        let view = e.target.closest('.opt.opt-view')
+        let view = e.target.closest('.opt.opt-view');
         let downloadsTab = e.target.closest('.rt-downloads');
         let uploadedTab = e.target.closest('.rt-uploads');
-        if (upload){
-          // let collection = e.target.closest('.recent-collection')
-          // console.trace('uploading collection',collection)
-          // let id = $('.collection-info',collection).getAttribute('cid');
-          // this.handleUpload(id,collection)
-        }
-        else if (ignore) {
+         if (ignore) {
           let collection = e.target.closest('.recent-collection');
           console.log('ignoring collection',collection);
           let id = collection.getAttribute('cid');
@@ -137,22 +117,18 @@ export class Home extends EventEmitter {
           let id = collection.getAttribute('cid');
           console.warn('droping collection',id)
           this.handleDrop(id,collection)
-        } else if (view){
-          console.log(app)
-        }
-        
+        } 
         // handle tabs 
         else if (downloadsTab){
-          this.renderLocalCollections()
+          this.renderLocalCollections();
         } else if (uploadedTab){
-          this.renderUploadedCollections()
+          this.renderUploadedCollections();
         }
-    })
-
+    });
   }
+
   handleSearch = (event) => {
     const query = event.target.value;
-    console.log('searching....',query)
     this.state.query = query;
     if (query === '') {
       this.searchReset();
@@ -160,7 +136,6 @@ export class Home extends EventEmitter {
     }
     $('.btn-cancel').classList.add('active');
     if (this.state?.collection){
-
       const activeCollection = this.state.collection;
       console.log('searching in....',activeCollection)
       activeCollection.filters.query = query;
@@ -171,29 +146,29 @@ export class Home extends EventEmitter {
     const inputThrottler = () => {
       let timeoutId;
       return (event) => {
-        this.state.query = event.target.value
-        clearTimeout(timeoutId)
-        timeoutId = setTimeout( this.handleSearch.bind(this,event), 400)
+        this.state.query = event.target.value;
+        clearTimeout(timeoutId);
+        timeoutId = setTimeout( this.handleSearch.bind(this,event), 400);
       }
     }
     return inputThrottler();
   }
   cancelSearch(){
-    $('.passive-search input').value = ''
-    $('.btn-cancel').classList.remove('active')
+    $('.passive-search input').value = '';
+    $('.btn-cancel').classList.remove('active');
     if (this?.state?.collection){
-      this.state.collection.filters.query = ''
+      this.state.collection.filters.query = '';
     }
   }
   searchReset(){
     this.cancelSearch();
     if (this.state.collection){
-      this.state.collection.filters.query = ''
+      this.state.collection.filters.query = '';
       this.state.collection.renderIcons();
     }
   }
   renderPreview(collection){
-    const icons = collection.icons
+    const icons = collection.icons;
     $('.db-res').classList.remove('active');
     $('.collection-preview').classList.add('active');
     $('.collection-preview').innerHTML = `
@@ -289,25 +264,23 @@ export class Home extends EventEmitter {
       </div>
     </div>
       `
-      $('.collection-preview .modal-ctrl').onclick = () => {
-        $('.db-res').classList.add('active');
-        $('.collection-preview').classList.remove('active');
-      }
-
+    $('.collection-preview .modal-ctrl').onclick = () => {
+      $('.db-res').classList.add('active');
+      $('.collection-preview').classList.remove('active');
+    }
   }
   async handleUpload(collection,element){
     console.log(element,'upload triggered')
     console.log('uploading...',collection)
     const id = collection.id;
       if (this.uploadingQue.has(id)){
-        console.warn('upload already in process',id)
+        console.warn('upload already in process',id);
         return;
       }
       // animate here
-      $('.loading-overlay',element).classList.add('active')
+      $('.loading-overlay',element).classList.add('active');
       try {
         this.uploadingQue.add(id);
-        console.log(collection.presets)
         const stat = await API.requestSync({
           cid:collection.cid,
           color:collection.color,
@@ -319,37 +292,33 @@ export class Home extends EventEmitter {
         if (stat.success){
           console.log('COLLECTION SYNCED',stat);
           this.uploadingQue.delete(id);
-          $('.loading-overlay',element).classList.remove('active')
-          $('.sync-success',element).classList.add('active')
+          $('.loading-overlay',element).classList.remove('active');
+          $('.sync-success',element).classList.add('active');
           setTimeout(() => {
-            element.classList.add('destroy')
-            setTimeout(() => {
-              element.remove()
-            },200)
-          },1500)
+            element.classList.add('destroy');
+            setTimeout(() => element.remove(),200);
+          },1500);
         }
 
       } catch(e){
-        console.log('error uploading collection')
+        console.log('error uploading collection');
       }
-
   }
   async handleDrop(id,element){
-      // console.log(id)
       const result = await this.store.dropCollection(id);
       if (result.success){
-        console.log('collection dropped!')
-        $('.isSyncedContainer',element).remove()
-        $('.isSyncedControl').outerHTML = '<div class="opt option-accept">Upload</div><div class="opt option-ignore">Ignore</div>'
+        console.log('collection dropped!');
+        $('.isSyncedContainer',element).remove();
+        $('.isSyncedControl').outerHTML = '<div class="opt option-accept">Upload</div><div class="opt option-ignore">Ignore</div>';
       }
   }
   renderLocalCollections(){
     this.uploadedCollections.active = false;
-    this.localCollections.render($('.col-2.recent-activity'))
+    this.localCollections.render($('.col-2.recent-activity'));
   }
   renderUploadedCollections(){
     this.localCollections.active = false;
-    this.uploadedCollections.render($('.col-2.recent-activity'))
+    this.uploadedCollections.render($('.col-2.recent-activity'));
   }
   async getHTML() {
     return `<div class="home" location="home">

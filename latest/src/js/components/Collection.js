@@ -1,6 +1,5 @@
 import { Icon } from './Icon.js';
 import { Color } from './Color.js'
-
 export class Collection {
   constructor(data){
     const { 
@@ -8,57 +7,57 @@ export class Collection {
       meta = { name:'empty', cid:'1' ,sub_collections:[] ,subtypes:[], }
     } = data
 
-    const validIcons = []
-    this.skipped = []
-    this.sub_collections = []
-    this.subtypes = []
+    const validIcons = [];
+    this.skipped = [];
+    this.sub_collections = [];
+    this.subtypes = [];
     icons.forEach( icon => {
         const i = new Icon(icon);
         // quick patch
         // fixing issue with bad data from the server
-        const sub_collections = this.sub_collections
-        const subtypes = this.subtypes
-        const sub_collection = icon.sub_collection
-        const subtype = icons.subtype
+        const sub_collections = this.sub_collections;
+        const subtypes = this.subtypes;
+        const sub_collection = icon.sub_collection;
+        const subtype = icons.subtype;
         if (i.isValid) {
-          validIcons.push(i)
-          if (sub_collection && !sub_collections.includes(sub_collection)) 
-            sub_collections.push(sub_collection)
+          validIcons.push(i);
+          if (sub_collection && !sub_collections.includes(sub_collection))
+            sub_collections.push(sub_collection);
           if (subtype && !subtypes.includes(subtype)) 
-            subtypes.push(subtype)
+            subtypes.push(subtype);
         }
-        else this.skipped.push(i)
+        else this.skipped.push(i);
     })
     this.filters = {
       sub_collections:[],
       subtypes:[],
       query:'',
     }
-    this.meta = meta
-    this.name = meta.name
-    this.cid = meta.cid
-    this.icons = validIcons
-    this.sample = icons.slice(0,20)
-    this.cursor = new Cursor(validIcons)
-    this.ready = true
+    this.meta = meta;
+    this.name = meta.name;
+    this.cid = meta.cid;
+    this.icons = validIcons;
+    this.sample = icons.slice(0,20);
+    this.cursor = new Cursor(validIcons);
+    this.ready = true;
 
-    this.collection_type = meta.collection_type
-    this.size = meta.size
-    this.created_at = meta.created_at
-    this.synced = meta.synced
-    this.presets = meta?.presets || {}
-    this.presets.original = this.findMatchingViewbox(validIcons)
-    this.preset = meta?.preset || {}
-    this.colors = meta?.colors || {}
+    this.collection_type = meta.collection_type;
+    this.size = meta.size;
+    this.created_at = meta.created_at;
+    this.synced = meta.synced;
+    this.presets = meta?.presets || {};
+    this.presets.original = this.findMatchingViewbox(validIcons);
+    this.preset = meta?.preset || {};
+    this.colors = meta?.colors || {};
     this.colors.original = {
       csid:'original',
       colorset_type:'global',
       name: 'original',
       ...this.findMatchingColors(validIcons)
-    }
+    };
 
-    this.color = meta?.color || {}
-    this.state = {}
+    this.color = meta?.color || {};
+    this.state = {};
   }
   
   find(id){
@@ -70,10 +69,10 @@ export class Collection {
     return icons.filter(({name}) => regex.test(name))
   }
   update(props){
-    console.log('updating...', this.meta.name)
-    let index = this.icons.findIndex(icon => icon.id == props.id)
+    console.log('updating...', this.meta.name);
+    let index = this.icons.findIndex(icon => icon.id == props.id);
     if (index == -1) return null
-    this.icons[index] = new Icon(props)
+    this.icons[index] = new Icon(props);
   }
 
   currentIcon(){
@@ -82,8 +81,8 @@ export class Collection {
 
   findMatchingViewbox(icons){
     // return null if all viewboxes are not the same
-    let viewbox
-    let original
+    let viewbox;
+    let original;
     let defaultSetting = {
       viewbox: [0,0,20,20],
       vbh:20, 
@@ -92,7 +91,7 @@ export class Collection {
       vbx:0, 
       width:'24', 
       height:'24'
-    }
+    };
     for (let i = 0; i < icons.length; i++){
       let icon = icons[i]
       let og = icon.presets.original.viewbox
@@ -198,8 +197,8 @@ export class Collection {
           }
         }
       }
-      parseFill(colorSet)
-      parseStroke(colorSet)
+      parseFill(colorSet);
+      parseStroke(colorSet);
     }
     // must return actual values to use inverter
     let elementResult = {
@@ -218,29 +217,29 @@ export class Collection {
   }
 
   render(){
-    const menuDestination = $('.widget-main .collection-menu')
-    const dashboardTab = $('.info-bar .current-tab')
-    const infoWidget = $('.current-collection-widget .widget-content')
-    const destination = $('#DASHBOARD .db-res')
-    this.renderIcons(destination)
-    dashboardTab.textContent = this.name
-    menuDestination.innerHTML = this.menu()
-    infoWidget.innerHTML = this.info()
+    const menuDestination = $('.widget-main .collection-menu');
+    const dashboardTab = $('.info-bar .current-tab');
+    const infoWidget = $('.current-collection-widget .widget-content');
+    const destination = $('#DASHBOARD .db-res');
+    this.renderIcons(destination);
+    dashboardTab.textContent = this.name;
+    menuDestination.innerHTML = this.menu();
+    infoWidget.innerHTML = this.info();
   }
-  renderIcons(destination){
+  renderIcons(destination = $('#DASHBOARD .db-res')){
     destination.innerHTML = `...loading ${this.name}`
     const frag = document.createDocumentFragment();
-    const {sub_collections,subtypes} = this.filters
+    const {sub_collections,subtypes} = this.filters;
     let icons = this.icons;
     if (sub_collections.length > 0){
-      icons = icons.filter(i => sub_collections.includes(i.sub_collection))
+      icons = icons.filter(i => sub_collections.includes(i.sub_collection));
     }
     if (subtypes.length > 0) {
-      icons = icons.filter(i => subtypes.includes(i.subtype))
+      icons = icons.filter(i => subtypes.includes(i.subtype));
     }
     icons.forEach(prop => {
-       const { name , collection , markup , id , cid , benched } = prop
-       console.log(benched)
+       const { name , collection , markup , id , cid , benched } = prop;
+       console.log(benched);
        const el = document.createElement('div');
             el.dataset.collection = collection;
             el.dataset.name = name;
@@ -249,12 +248,12 @@ export class Collection {
             el.innerHTML = markup;
             el.classList.add('svg-wrapper');
             if (benched) {
-              el.classList.add('benched')
+              el.classList.add('benched');
             }
        frag.append(el);
     })
-    destination.innerHTML = ''
-    destination.append(frag)
+    destination.innerHTML = '';
+    destination.append(frag);
   }
 
   info(){
@@ -268,7 +267,7 @@ export class Collection {
         updated_on = null
       } = this.meta;
       
-      if (collection_type == 'auto') collection_type = 'default'
+      if (collection_type == 'auto') collection_type = 'default';
       let lastUpdate = 
           updated_on ? getAgo(new Date(updated_on))
           : uploaded_at ? getAgo(new Date(uploaded_at))
@@ -286,7 +285,7 @@ export class Collection {
     `
   }
   renderInfo(){
-    const destination = $('.current-collection-widget .widget-content')
+    const destination = $('.current-collection-widget .widget-content');
     destination.innerHTML = this.info();
   }
   menu(){
@@ -607,17 +606,17 @@ export class Pocket extends Collection {
 export class CollectionWidget extends Collection {
   constructor(data){
     super(data)
-      this.limit = 39
-      this.pages = data?.pages || Math.floor(this.size/this.limit)
-      this.currentPage = data?.currentPage || 1
-      this.pageNumbers = []
+      this.limit = 39;
+      this.pages = data?.pages || Math.floor(this.size/this.limit);
+      this.currentPage = data?.currentPage || 1;
+      this.pageNumbers = [];
       for (let i = 1; i <= this.pages; i++){
-        this.pageNumbers.push(i)
+        this.pageNumbers.push(i);
       }
   }
 
   async getPage(n = 1){
-    const { icons, currentPage, pages } = await app.store.getCollectionSample(this.name,n,this.limit)
+    const { icons, currentPage, pages } = await app.store.getCollectionSample(this.cid,n,this.limit);
     this.icons = icons;
     this.currentPage = Number(currentPage);
     this.pages = Number(pages);
@@ -694,40 +693,41 @@ export class CollectionWidget extends Collection {
           </div>
     </div>
     `
-    panel_header.addEventListener('click', this.handleDropdown.bind(this))
-    panel_footer.addEventListener('click', this.handlePagination.bind(this))
+    panel_header.addEventListener('click', this.handleDropdown.bind(this));
+    panel_footer.addEventListener('click', this.handlePagination.bind(this));
     this.element = db_panel;
     this.preview_panel = panel_preview;
-    this.renderIcons(this.icons)
+    this.renderIcons(this.icons);
     return db_panel;
   }
   async handlePagination(event){
-    const pageRequestButton = event.target.closest('.page')
-    const pageNext = event.target.closest('.page-next')
-    const pageLeft = event.target.closest('.page-prev')
+    const pageRequestButton = event.target.closest('.page');
+    const pageNext = event.target.closest('.page-next');
+    const pageLeft = event.target.closest('.page-prev');
     let pageNumberRequested;
 
     if (pageRequestButton){
-      pageNumberRequested = pageRequestButton.getAttribute('page')
+      pageNumberRequested = pageRequestButton.getAttribute('page');
     } else if (pageNext){
       let next = Number(this.currentPage) + 1;
-      pageNumberRequested = next > this.pages ? 1 : next
+      pageNumberRequested = next > this.pages ? 1 : next;
     } else if (pageLeft){
       let prev = this.currentPage - 1;
-      pageNumberRequested = prev < 1 ? this.pages : prev
+      pageNumberRequested = prev < 1 ? this.pages : prev;
     }
-    const {icons,page} = await handlePageRequest.call(this,pageNumberRequested)
-    this.currentPage = page
-    this.icons = icons
-    this.renderIcons(icons)
-    handleShiftDirection.call(this,page)
+    
+    const {icons,page} = await handlePageRequest.call(this,pageNumberRequested);
+    this.currentPage = page;
+    this.icons = icons;
+    this.renderIcons(icons);
+    handleShiftDirection.call(this,page);
 
     async function handlePageRequest(page){
-      const { icons } = (await this.getPage(page))
-      const currentPageElement = $('[current="true"]', this.element )
-      const correspondingPageElement = $(`.page[page="${page}"]`,this.element)
-      currentPageElement.setAttribute('current','')
-      correspondingPageElement.setAttribute('current','true')
+      const { icons } = (await this.getPage(page));
+      const currentPageElement = $('[current="true"]', this.element );
+      const correspondingPageElement = $(`.page[page="${page}"]`,this.element);
+      currentPageElement.setAttribute('current','');
+      correspondingPageElement.setAttribute('current','true');
       return {
         icons,
         page:Number(page)
@@ -759,32 +759,33 @@ export class CollectionWidget extends Collection {
   }
   async handleDropdown(event){
     if (event.target.closest('.dropdown-icon')){
-      $('.dropdown-menu',this.element).classList.toggle('active')
+      $('.dropdown-menu',this.element).classList.toggle('active');
     }
     else if (event.target.closest('[opt="delete-collection"]')){
-      console.log('deleting collection')
-      const result = await app.store.dropCollection(this.cid)
+      console.log('deleting collection');
+      const result = await app.store.dropCollection(this.cid);
       if (result){
-        console.log('API RESPONSE: DELETE', result)
+        console.log('API RESPONSE: DELETE', result);
         this.element.remove();
       }
     }
   }
   createIcon(props){
-    const {name,category,markup,id,cid,isBenched} = props
+    const {name,category,markup,id,cid,isBenched} = props;
     const el = document.createElement('div');
         el.dataset.category = category;
         el.dataset.name = name;
         el.dataset.cid = cid;
         el.dataset.id = id;
         el.classList.add('svg-wrapper');
-        el.setAttribute('icon-type','preview')
+        el.setAttribute('icon-type','preview');
         el.innerHTML = markup;
     return el
   }
+
   renderIcons(icons){
-    this.preview_panel.innerHTML =''
-    icons.forEach(icon => this.preview_panel.appendChild(this.createIcon(icon)))
+    this.preview_panel.innerHTML ='';
+    icons.forEach(icon => this.preview_panel.appendChild(this.createIcon(icon)));
   }
 
   static getSkeleton(){
@@ -800,7 +801,7 @@ export class CollectionWidget extends Collection {
     panel_preview.classList.add('panel-preview');
     panel_footer.classList.add('panel-footer');
     panel_menu.classList.add('panel-menu');
-    db_panel.setAttribute('collection',name);
+    // db_panel.setAttribute('collection',this.name);
     db_panel.appendChild(panel_header);
     db_panel.appendChild(db_container);
     db_container.appendChild(panel_preview);

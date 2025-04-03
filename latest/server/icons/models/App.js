@@ -134,6 +134,7 @@ class App extends EventEmitter {
             const result = await Collection.data(collection,{limit,page,filters})
             return result
         } catch (error){
+            console.log(error)
             return {success:false,reason:error,message:'error retrieving collection'}
         }
     }

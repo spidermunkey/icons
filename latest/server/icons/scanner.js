@@ -123,7 +123,6 @@ module.exports.Scanner = {
   async removeTarget(pathname){
     const targets = new Set(this.readTargets());
     const length = targets.size
-    console.log(pathname)
     const normalized = pathname.replace(/\\/g, '/');
     targets.delete(normalized);
     const arr = Array.from(targets);
@@ -353,7 +352,6 @@ module.exports.Scanner = {
     const repository = directory
     const repository_id = uuid();
     const collectionMemo = new Map();
-    console.log('mapping directory...', directory)
     function getBranch(branchPath, branchStart = path.normalize(repository)) {
       const location = path.normalize(branchPath)
       const rootDir = path.normalize(branchStart)

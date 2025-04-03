@@ -100,8 +100,10 @@ export class SvgModel extends EventEmitter {
     
     async getCollectionSample(cid,page=1,limit=50){
         try {
+            console.trace(cid)
             const result = await API.getPage(cid,page,limit);
             const {icons,meta} = result;
+            console.log(result)
             return {
                 icons,
                 meta,
@@ -111,7 +113,7 @@ export class SvgModel extends EventEmitter {
                 currentPage: page,
             }
         } catch (error){
-            console.log('error fetching collection data')
+            console.log('error fetching collection data',error)
             return {}
         }
 
