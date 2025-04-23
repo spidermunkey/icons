@@ -8,7 +8,6 @@ set icons/local/fsconfig.js -- targetDirectory
 run Local.init(<true>) 
     // update needed flag --true
     to scan folder with icon directories
-
 [todo] [
     -- auto create fsmap.json | fsdb.json on update
     -- auto sync local to remote on update/scan

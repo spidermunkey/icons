@@ -14,6 +14,6 @@ router.use('/local', localRoutes )
 router.use('/all', iconRoutes )
 
 router.get('/', (request,response) => response.json('hello from icon api'))
-router.get((request,response) => response.status(404))
+router.get('*',(request,response) => response.status(404).send('Not Found'))
 
 module.exports = router;

@@ -1,7 +1,7 @@
 const fs = require('fs-extra');
 const path = require('path');
 const { uuid } = require('../utils/uuid.js');
-const {from} = require('../utils/Date.js');
+const { from } = require('../utils/Date.js');
 const {print} = require('../utils/print.js');
 
 const {
@@ -18,13 +18,12 @@ module.exports.Scanner = {
 
   get targets(){
     return Array.from(this.readTargets())
-    // return Array.from(this._targets.values());
   },
 
   async stat() {
       let count = await this.count()
       const last_sync_date = new Date(fs.statSync(fileSystemMap).mtimeMs).getTime()
-      const lastChange = from(new Date(fs.statSync(fileSystemMap).mtimeMs))
+      const lastChange = from(new Date(fs.statSync(fileSystemMap).mtimeMs)).string
       const { added , removed , changed } = await this.compare()
       const updateNeeded = [added,removed,changed].some(len => len > 0)
       const size = `${Math.floor(fs.statSync(fileSystemDB).size / 1000)} kb`
@@ -36,7 +35,7 @@ module.exports.Scanner = {
         count, 
         updateNeeded,
         targets: this.readTargets(),
-        lastChange: lastChange.string, 
+        lastChange: lastChange, 
         lastChangeMs:last_sync_date
       }
   },
@@ -54,7 +53,7 @@ module.exports.Scanner = {
   },
   // map all current targets
   async update_map(){
-    fs.writeFileSync( this.fsmap, JSON.stringify(await this.create_flat_map(this.targets)))
+    fs.writeFileSync( this.fsmap, JSON.stringify( await this.create_flat_map(this.targets) ))
   },
 
   overwrite(store){

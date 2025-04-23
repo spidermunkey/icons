@@ -5,7 +5,7 @@ const Database = require('./Database.js');
 const Meta = require('./Collection/Meta.js');
 const Collection = require('./Collection.js');
 const Icon = require('./Collection/Icon.js');
-const Color = require('./Collection/Color.js')
+const Color = require('./Collection/Color.js');
 const { uuid } = require('../../utils/uuid.js');
 const { print } = require('../../utils/print.js');
 

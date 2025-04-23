@@ -2102,6 +2102,7 @@ export class Dashboard extends View {
         if (clicked){
             let icon = this.selected;
             let collection = event.target.getAttribute('collection');
+            console.log('adding icon to')
             await this.addToCollection(collection,icon);
         } else if (close){
             console.log('closing')
@@ -2222,10 +2223,19 @@ export class Dashboard extends View {
                 ...loading collections
             </div>
         `
-        const names = await this.store.getCollectionNames('projects');
-        console.log('NAMES',names)
-        if (names.length > 0)
-            $('.synced-collection-names').innerHTML = `${names.reduce((acc,red)=> acc + `<div class="preview-a2c-item" collection=${red}>${red}</div>`, '' )}`
+        const {projects} = await this.store.getMeta();
+        console.log('PROJECTS',projects)
+        if (!objectIsFalsey(projects) && !objectIsEmpty(projects) ){
+            let data = Object.entries(projects)
+            console.log('DAT',data)
+            $('.synced-collection-names').innerHTML = `${data.reduce((acc,red)=> {
+                const id = red[0];
+                const name = red[1].name
+                console.log(id,name)
+                 return acc + `<div class="preview-a2c-item" collection=${id}>${name}</div>`},'' 
+                )}`
+
+        }
     }
 
     async getHTML() {

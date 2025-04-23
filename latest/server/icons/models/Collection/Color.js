@@ -1,4 +1,4 @@
-const Database = require('../Database.js')
+const Database = require('../Database.js');
 const {uuid} = require('../../../utils/uuid.js');
 const { objectIsEmpty } = require('../../../utils/objectIsEmpty.js');
 

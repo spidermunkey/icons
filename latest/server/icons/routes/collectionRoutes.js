@@ -98,9 +98,11 @@ router.put('/settings/:collection', async function clearDefaultSetting(request,r
   const result = await Mongo.clear_collectionDefault_setting(collection)
   response.json(result)
 })
+
 router.get('/settings/:collection', async function getCollectionSettings(request,response){
   
 })
+
 router.post('/settings',async function addCollectionSetting(request,response){
   const { payload } = request.body;
   // needs better sanitization
@@ -109,12 +111,14 @@ router.post('/settings',async function addCollectionSetting(request,response){
   const result = await Mongo.add_collection_preset(cid,setting);
   response.json(result);
 })
+
 router.delete('/settings',async function deleteCollectionSetting(request,response){
   let cid = decodeURIComponent(request.query.cid)
   let pid = decodeURIComponent(request.query.pid)
   const result = await Mongo.delete_collection_preset(cid,pid)
   response.json(result);
 })
+
 router.put('/settings', async function applySettingDefault(request,response){
     const { payload } = request.body
     // needs better sanitization
