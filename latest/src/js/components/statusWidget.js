@@ -3,6 +3,8 @@ const handlepath = path => path.trim().replace(/\\/g,'/').replace(/["']/g,'')
 
 export class StatusWidget {
   constructor(store){
+    window.addEventListener('online',this.updateOnline)
+    window.addEventListener('offline',this.updateOffline)
     this.store = new Task(API.getStatus.bind(API))
     this.store.ondata((data) => {
       this.parseData.call(this,data)
@@ -53,6 +55,15 @@ export class StatusWidget {
     destination.innerHTML = this.getHTML()
     this.store.getData();
   }
+  updateOnline(){
+    console.log('heere yeeee')
+    $('.conn-stat .stat').innerHTML = 'online' + '<span class="divider stat-sym isSync"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -16 42 42" height="16px" width="16px"><path d="M12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg></span>'
+  }
+  updateOffline(){
+    console.log('heere yeeee')
+    $('.conn-stat .stat').innerHTML = 'offline' + '<span class="divider stat-sym"><svg xmlns="http://www.w3.org/2000/svg" viewBox="-8 -16 42 42" height="16px" width="16px"><path d="M12 18a6 6 0 100-12 6 6 0 000 12z"></path></svg></span>'
+  }
+  updateOffline(){}
   getHTML(){
     return `
     <div class="m-stat stat-widget local-status-widget">
