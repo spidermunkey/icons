@@ -268,6 +268,12 @@ export class Icon {
         if (!icon.getAttribute('viewBox')) {
             icon.setAttribute('viewBox','0 0 24 24');
         }
+        if (!icon.getAttribute('height')) {
+            icon.setAttribute('height',24)
+        }
+        if (!icon.getAttribute('width')) {
+            icon.setAttribute('width',24)
+        }
         this.children = [icon,...Icon.crawl(icon)]
         if (objectIsFalsey(props.colors)){
             // create marked version for colors

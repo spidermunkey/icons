@@ -392,19 +392,23 @@ export class Preview extends EventEmitter {
         return this.targetElement.getAttribute('height');
     }
     set height(number) {
-        this.targetElement.setAttribute('height',`${number}px`);
-        if (this.icon) this.icon.height = number
-        this.currentHeight = number
-        this.svgHeightInput.value = number
+        if(number) {
+            this.targetElement.setAttribute('height',`${number}px`);
+            if (this.icon) this.icon.height = number
+            this.currentHeight = number
+            this.svgHeightInput.value = number
+        }
     }
     get width() {
         return this.targetElement.getAttribute('width');
     }
     set width(number) {
-        this.targetElement.setAttribute('width',`${number}px`)
-        if (this.icon) this.icon.width = number
-        this.currentWidth = number
-        this.svgWidthInput.value = number
+        if (number){
+            this.targetElement.setAttribute('width',`${number}px`)
+            if (this.icon) this.icon.width = number
+            this.currentWidth = number
+            this.svgWidthInput.value = number
+        }
     }
 
     resetViewBoxScale(currentViewBox){
