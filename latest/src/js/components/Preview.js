@@ -23,6 +23,32 @@ const htmlController = {
             })
         }
     },
+    async copyReactComponent() {
+            const text = `export const ${sanitizeToVariableName(this.icon.name)} = () => (${this.targetElement.outerHTML}) `
+            await window.navigator.clipboard.writeText(text);
+            const notificationElement = $('#INTERFACE .notification-copy.success')
+            notificationElement.animate([
+                { transform: "translateY(-30px)"},
+                { transform: "translateY(0)", offset: 0.03},
+                { transform: "translateY(0)", offset:0.9},
+                { transform: "translateY(-30px)",easing: "ease-out",offset: 1}
+            ],{
+                duration: 3500,
+            })
+            function sanitizeToVariableName(str) {
+                // Replace unacceptable characters (e.g., - . space) and camelCase them
+                const camelCased = str.replace(/[^a-zA-Z0-9_$]+(.)?/g, (_, next) =>
+                    next ? next.toUpperCase() : ''
+                );
+
+                // If the first character is invalid for a variable name, prefix with _
+                if (!/^[a-zA-Z_$]/.test(camelCased)) {
+                    return '_' + camelCased;
+                }
+
+                return camelCased;
+            }
+    },
     updateNameField(string) {
         this.nameField.textContent = string;
         this.miniPreviewElementName.textContent = string;
@@ -283,7 +309,7 @@ const htmlController = {
             else this.display.style.border = ''
         }
         this.btnCopy.onclick = () => this.copyToClipboard()
-
+        this.btnReact.onclick = () => this.copyReactComponent()
         $('.preview-settings').addEventListener('click', () => this.toggleSettings());
         $('.preset-header .current-preset').addEventListener('click', () => this.toggleSettings());
         const rto = $('.revert-to-original',this.element)
@@ -320,7 +346,8 @@ export class Preview extends EventEmitter {
         this.btnCopy = $('.btn-copy')
         this.btnBorder = $('.btn-border')
         this.btnFavorite = $('.btn-favit')
-
+        this.btnReact = $('.btn-react')
+        this.btnPocket = $('.btn-bench')
         this.vbxInput = $('.input-field.x .input')
         this.vbyInput = $('.input-field.y .input')
         this.vbhInput = $('.input-field.h .input')
