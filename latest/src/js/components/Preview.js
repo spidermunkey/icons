@@ -24,30 +24,30 @@ const htmlController = {
         }
     },
     async copyReactComponent() {
-            const text = `export const ${sanitizeToVariableName(this.icon.name)} = () => (${this.targetElement.outerHTML}) `
-            await window.navigator.clipboard.writeText(text);
-            const notificationElement = $('#INTERFACE .notification-copy.success')
-            notificationElement.animate([
-                { transform: "translateY(-30px)"},
-                { transform: "translateY(0)", offset: 0.03},
-                { transform: "translateY(0)", offset:0.9},
-                { transform: "translateY(-30px)",easing: "ease-out",offset: 1}
-            ],{
-                duration: 3500,
-            })
-            function sanitizeToVariableName(str) {
-                // Replace unacceptable characters (e.g., - . space) and camelCase them
-                const camelCased = str.replace(/[^a-zA-Z0-9_$]+(.)?/g, (_, next) =>
-                    next ? next.toUpperCase() : ''
-                );
+        const text = `export const ${sanitizeToVariableName(this.icon.name)} = () => (${this.targetElement.outerHTML}) `
+        await window.navigator.clipboard.writeText(text);
+        const notificationElement = $('#INTERFACE .notification-copy.success')
+        notificationElement.animate([
+            { transform: "translateY(-30px)"},
+            { transform: "translateY(0)", offset: 0.03},
+            { transform: "translateY(0)", offset:0.9},
+            { transform: "translateY(-30px)",easing: "ease-out",offset: 1}
+        ],{
+            duration: 3500,
+        })
+        function sanitizeToVariableName(str) {
+            // Replace unacceptable characters (e.g., - . space) and camelCase them
+            const camelCased = str.replace(/[^a-zA-Z0-9_$]+(.)?/g, (_, next) =>
+                next ? next.toUpperCase() : ''
+            );
 
-                // If the first character is invalid for a variable name, prefix with _
-                if (!/^[a-zA-Z_$]/.test(camelCased)) {
-                    return '_' + camelCased;
-                }
-
-                return camelCased;
+            // If the first character is invalid for a variable name, prefix with _
+            if (!/^[a-zA-Z_$]/.test(camelCased)) {
+                return '_' + camelCased;
             }
+
+            return camelCased;
+        }
     },
     updateNameField(string) {
         this.nameField.textContent = string;

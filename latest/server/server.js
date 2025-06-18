@@ -35,7 +35,7 @@ async function scan(){
 
 async function run() {
     try {
-        process.on('uncaughtException',(error) => console.log('[[ process ]]', error ))
+        process.on('uncaughtException',(error) => console.log('[[ process ]]', error ));
         console.log('local db ready');
         // await hardReset();
         await Database.connect();
