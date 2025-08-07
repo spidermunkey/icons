@@ -3,7 +3,6 @@ const {print} = require('../../utils/print.js')
 const CONNECTION_STRING = `mongodb+srv://${process.env.MONGO_USER}:${encodeURIComponent(process.env.MONGO_PASSWORD)}@cluster${process.env.MONGO_CLUSTER}.fnp9j.mongodb.net/?retryWrites=true&w=majority`
 
 class Database {
-    
     constructor() {
         this.uri = CONNECTION_STRING;
         this.client = null;

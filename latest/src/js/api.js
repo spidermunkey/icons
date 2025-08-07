@@ -1,5 +1,5 @@
 import axios from "axios";
-const PORT = 1279;
+const PORT = 1280;
 const endpoint = `http://localhost:${PORT}/icons`;
 export const API = {
     
@@ -10,8 +10,7 @@ export const API = {
             return res.data
         } catch (e){
             console.warn('[error]',`[url] : ${url}`,e)
-            res.ok = false;
-            return res
+            return e
         }
     },
     async post(url,payload,log = false){
