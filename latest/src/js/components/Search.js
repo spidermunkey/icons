@@ -112,8 +112,9 @@ export class Search {
 
             this.open();
             this.query = e.target.value;
-            clearTimeout(timeoutId);
             this.showResults(e.target.value);
+
+            clearTimeout(timeoutId);
             // if (this.query == "") this.showHistory()
             // else this.showResults()
 
