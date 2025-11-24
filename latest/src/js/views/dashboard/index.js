@@ -1232,11 +1232,13 @@ export class Dashboard extends View {
         const meta = collection.meta
         const currentIcon = this.currentIcon
         const collectionID = meta.cid
-        const iconSettings = currentIcon?.presets
+        const iconSettings = currentIcon?.settings
         const collectionSettings = collection?.presets
+        console.log(currentIcon.settings)
         let recentSettings = {}
         if (collection?.recentSettings && Array.isArray(collection.recentSettings))
             collection.recentSettings.forEach(setting => recentSettings[setting.pid] = setting)
+        console.log(recentSettings)
         let currentAnimation
         const presetIsDefaultIcon = '<svg width="24px" height="24px" viewBox="-4 -4 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m4lgxgw9-0265D74VQICG"><path d="M10.5 16C10.5 15.1716 11.1716 14.5 12 14.5C12.8284 14.5 13.5 15.1716 13.5 16C13.5 16.8284 12.8284 17.5 12 17.5C11.1716 17.5 10.5 16.8284 10.5 16Z" fill="black" pid="m4lgxgw9-00NA2554UM3C" stroke="null"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M9.81049 4.00497C10.0428 3.91246 10.2852 3.8475 10.5327 3.81144C12.006 3.59678 13.4327 4.42661 13.9745 5.81335L14.0495 6.00537C14.1424 6.2433 14.2087 6.4908 14.2472 6.74334L14.4638 8.16565L15.9467 7.9398L15.7301 6.51749C15.675 6.15544 15.5799 5.80062 15.4466 5.45951L15.3716 5.26749C14.5758 3.23066 12.4804 2.01182 10.3165 2.32712C9.95295 2.38008 9.59691 2.47548 9.25563 2.61137C7.22397 3.42026 6.01867 5.52354 6.34793 7.68538L6.37897 7.88919C6.43411 8.25123 6.52918 8.60605 6.66245 8.94716L7.3166 10.6215L6.93512 10.6519C5.85239 10.7384 4.96829 11.5523 4.79277 12.6242C4.4267 14.8598 4.4267 17.1401 4.79277 19.3758C4.96829 20.4477 5.85239 21.2616 6.93512 21.348L8.43125 21.4675C10.8066 21.6571 13.1934 21.6571 15.5687 21.4675L17.0649 21.348C18.1476 21.2616 19.0317 20.4477 19.2072 19.3758C19.5733 17.1401 19.5733 14.8598 19.2072 12.6242C19.0317 11.5523 18.1476 10.7384 17.0649 10.6519L15.5687 10.5325C13.3426 10.3548 11.1065 10.3436 8.87916 10.499L8.0596 8.4013C7.96665 8.16337 7.90033 7.91587 7.86187 7.66334L7.83083 7.45953C7.60666 5.98768 8.42727 4.55569 9.81049 4.00497ZM15.4494 12.0277C13.1534 11.8445 10.8466 11.8445 8.55062 12.0277L7.05449 12.1472C6.65956 12.1787 6.33708 12.4756 6.27306 12.8666C5.93327 14.9417 5.93327 17.0583 6.27306 19.1334C6.33708 19.5244 6.65956 19.8213 7.05449 19.8528L8.55062 19.9722C10.8465 20.1555 13.1534 20.1555 15.4494 19.9722L16.9455 19.8528C17.3404 19.8213 17.6629 19.5244 17.7269 19.1334C18.0667 17.0583 18.0667 14.9417 17.7269 12.8666C17.6629 12.4756 17.3404 12.1787 16.9455 12.1472L15.4494 12.0277Z" fill="black" pid="m4lgxgw9-01EYDRNJVEAJ" stroke="null"></path></svg>'
         const presetNotDefaultIcon = '<svg width="24px" height="24px" viewBox="-4 -4 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" pid="m4lgxgw6-003EWOTOIWH9"><path d="M10.5 16C10.5 15.1716 11.1716 14.5 12 14.5C12.8284 14.5 13.5 15.1716 13.5 16C13.5 16.8284 12.8284 17.5 12 17.5C11.1716 17.5 10.5 16.8284 10.5 16Z" fill="black" pid="m4lgxgw6-02FPUN3FPP0X" stroke="null"></path><path fill-rule="evenodd" clip-rule="evenodd" d="M7.62165 10.5971L7.30621 7.75816C7.26577 7.39418 7.26577 7.02684 7.30621 6.66286L7.32898 6.45796C7.57046 4.28457 9.27907 2.56492 11.4509 2.30941C11.8157 2.26649 12.1843 2.26649 12.5491 2.30941C14.7209 2.56492 16.4295 4.28458 16.671 6.45797L16.6937 6.66286C16.7342 7.02684 16.7342 7.39418 16.6937 7.75815L16.3783 10.5971L17.0649 10.6519C18.1476 10.7384 19.0317 11.5523 19.2073 12.6242C19.5733 14.8598 19.5733 17.1401 19.2073 19.3758C19.0317 20.4477 18.1476 21.2616 17.0649 21.348L15.5688 21.4675C13.1934 21.6571 10.8067 21.6571 8.43128 21.4675L6.93515 21.348C5.85242 21.2616 4.96832 20.4477 4.7928 19.3758C4.42673 17.1401 4.42673 14.8598 4.7928 12.6242C4.96832 11.5523 5.85242 10.7384 6.93515 10.6519L7.62165 10.5971ZM11.6261 3.79914C11.8745 3.76992 12.1255 3.76992 12.3738 3.79914C13.8525 3.97309 15.0157 5.1439 15.1802 6.62361L15.2029 6.82851C15.2311 7.08239 15.2311 7.33862 15.2029 7.59251L14.8818 10.483C12.9626 10.3594 11.0374 10.3594 9.1182 10.483L8.79704 7.59251C8.76883 7.33862 8.76883 7.08239 8.79704 6.82851L8.8198 6.62361C8.98422 5.1439 10.1475 3.97309 11.6261 3.79914ZM15.4494 12.0277C13.1535 11.8445 10.8466 11.8445 8.55065 12.0277L7.05452 12.1472C6.65959 12.1787 6.33711 12.4756 6.27309 12.8666C5.9333 14.9417 5.9333 17.0583 6.27309 19.1334C6.33711 19.5244 6.65959 19.8213 7.05452 19.8528L8.55065 19.9722C10.8466 20.1555 13.1535 20.1555 15.4494 19.9722L16.9455 19.8528C17.3405 19.8213 17.6629 19.5244 17.727 19.1334C18.0668 17.0583 18.0668 14.9417 17.727 12.8666C17.6629 12.4756 17.3405 12.1787 16.9455 12.1472L15.4494 12.0277Z" fill="black" pid="m4lgxgw6-002BR93QMXFL" stroke="null"></path></svg>'
@@ -1272,6 +1274,7 @@ export class Dashboard extends View {
         }))
         currentTab.classList.add('active')
         $(`.settings-editor .preset-option[tab=${tab}]`).classList.add('active')
+
         const createPresetWrapper = (settings,destination,type) => {
             const createPresetElement = (setting) => {
                 const element = document.createElement('div');
@@ -1279,9 +1282,14 @@ export class Dashboard extends View {
                 const isIconDefault = currentIcon?.preset?.pid == setting.pid
                 const isCollectionDefault = meta?.preset?.pid == setting.pid
                 const collectionSettingExists = !objectIsEmpty(collectionSettings) && Object.hasOwn(collectionSettings,setting.pid)
+                // const parseViewbox = (setting) => {
+// const collectionSettingExists = !objectIsEmpty(collectionSettings) && Object.hasOwn(collectionSettings,setting.pid)
+                // const parse
+                // }
                 element.classList.add('preset-preview-element')
                 if (!element_id) return
                 element.setAttribute('pid', element_id)
+                console.log(setting)
                 element.innerHTML = ` 
                 <div class="preset-element-toast">
                     <div class="toast success defaultSet"> default setting applied </div>
@@ -1326,7 +1334,7 @@ export class Dashboard extends View {
                     </div>
                 </div>
                 <div class="preset-val p-name"><span class="p-label name-label">name: </span> <span class="p-val name-val">${setting?.name ? setting.name : 'untitled' }</span></div>
-                <div class="preset-val p-viewbox"><span class="p-label vb-label">viewbox: </span><span class="p-val vb-val">${setting?.viewbox ? setting.viewbox.join(' ') : 'none'}</span></div>
+                <div class="preset-val p-viewbox"><span class="p-label vb-label">viewbox: </span><span class="p-val vb-val">${setting?.viewbox && Array.isArray(setting.viewbox) ? setting.viewbox.join(' ') : setting?.viewbox && typeof setting.viewbox === 'string' ? setting.viewbox : 'none'}</span></div>
                 <div class="preset-val p-height"><span class="p-label height-label">height: </span> <span class="p-val height-val">${setting?.height ? setting.height : 'none'}</span></div>
                 <div class="preset-val p-width"><span class="p-label width-label">width: </span><span class="p-val width-val">${setting?.width ? setting.width : 'none'}</span></div>
                 `

@@ -19,6 +19,7 @@ export class Icon {
         this.sub_collection = props.sub_collection;
         this.subtype = props.subtype;
         this.preset = props?.preset || null;
+        this.settings = props?.settings || {};
         this.usePreset = props?.preset && props.usePreset == true ? props.usePreset : false;
         this.element = this.createWrapper(props);
         this.presets = {
@@ -75,6 +76,7 @@ export class Icon {
             preset: this.preset,
             usePreset: this.usePreset,
             presets: this.presets,
+            settings: this.settings
         }
     }
     get html() {

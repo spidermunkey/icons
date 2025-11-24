@@ -94,8 +94,8 @@ export class Collection {
     };
     for (let i = 0; i < icons.length; i++){
       let icon = icons[i]
-      let og = icon.presets.original.viewbox
-      let originalViewbox = og.join(' ')
+      let og = icon.presets.original.viewbox;
+      let originalViewbox = Array.isArray(og) ? og.join(' ') : og;
       original = icon.presets.original;
       if (i === 0) {
         viewbox = originalViewbox

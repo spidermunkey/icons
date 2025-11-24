@@ -188,6 +188,9 @@ const mongo_db = {
         return updated.value
     },
     async add_icon_preset(id,collection,setting) {
+        if (setting.viewbox && typeof setting.viewbox === string && setting.viewbox != ''){
+            setting.viewbox = setting.viewbox.split();
+        }
         const { icons } = await this.connect();
         const coll = icons.collection(collection);
         const original = await coll.findOne({id: id});
@@ -201,6 +204,8 @@ const mongo_db = {
         { id: id },
         { $set: { [`settings.${pid}`]: setting }})
         await this.add_recent_preset(collection,setting)
+        console.log(icon.value)
+        console.log('dunzo')
         return icon.value;
     },
     async delete_icon_preset(id,collection,pid){

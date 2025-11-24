@@ -523,5 +523,4 @@ export class Preview extends EventEmitter {
         if (rotation) this.rotationSlider.setDegrees(rotation)
         this.notify('icon updated',icon,this.targetElement)
     }
-
 }

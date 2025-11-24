@@ -1,5 +1,5 @@
 import axios from "axios";
-const PORT = 1280;
+const PORT = 1279;
 const endpoint = `http://localhost:${PORT}/icons`;
 export const API = {
     

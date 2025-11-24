@@ -887,7 +887,7 @@ class Cursor {
     }
     skipToElement(element) {
       const index = this.items.indexOf(element);
-      if (index !== -1) this.skipToIndex(index)
+      if (index !== -1) return this.skipToIndex(index)
     }
     getIndexOf(index) {
       if (!this.validIndex(index)) return;
