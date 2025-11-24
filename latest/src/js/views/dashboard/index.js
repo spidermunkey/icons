@@ -1233,7 +1233,7 @@ export class Dashboard extends View {
         const currentIcon = this.currentIcon
         const collectionID = meta.cid
         const iconSettings = currentIcon?.settings
-        const collectionSettings = collection?.presets
+        const collectionSettings = collection.meta?.settings
         console.log(currentIcon.settings)
         let recentSettings = {}
         if (collection?.recentSettings && Array.isArray(collection.recentSettings))
@@ -1386,7 +1386,7 @@ export class Dashboard extends View {
                     </div>
                 </div>
                 <div class="preset-val p-name"><span class="p-label name-label">name: </span> <span class="p-val name-val">${setting?.name ? setting.name : 'untitled' }</span></div>
-                <div class="preset-val p-viewbox"><span class="p-label vb-label">viewbox: </span><span class="p-val vb-val">${setting?.viewbox ? setting.viewbox.join(' c') : 'none'}</span></div>
+                <div class="preset-val p-viewbox"><span class="p-label vb-label">viewbox: </span><span class="p-val vb-val">${setting?.viewbox && Array.isArray(setting.viewbox) ? setting.viewbox.join(' ') : setting?.viewbox && typeof setting.viewbox === 'string' ? setting.viewbox : 'none'}</span></div>
                 <div class="preset-val p-height"><span class="p-label height-label">height: </span> <span class="p-val height-val">${setting?.height ? setting.height : 'none'}</span></div>
                 <div class="preset-val p-width"><span class="p-label width-label">width: </span><span class="p-val width-val">${setting?.width ? setting.width : 'none'}</span></div>
                 `
